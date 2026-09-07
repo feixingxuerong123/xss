@@ -1,0 +1,59 @@
+{
+  "tool": "XSSentinel",
+  "timestamp": "2026-09-01 22:48:39",
+  "total_cases": 10,
+  "total_time_s": 91.94,
+  "tp": 5,
+  "fp": 0,
+  "tn": 5,
+  "fn": 0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "fpr": 0.0,
+  "f1": 1.0,
+  "errors": 0,
+  "by_context": {
+    "html_element": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 6
+    },
+    "html_attribute_dq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "html_attribute_sq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "script_string_dq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "url_href": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    }
+  },
+  "false_positives": [],
+  "false_negatives": []
+}

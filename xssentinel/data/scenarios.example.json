@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "note": "Example declarative detection scenarios for --scenarios. Copy and adapt paths to the target app. Placeholders: {token} = unique verification token, {param} = reflected parameter name. A scenario runs when the scanned param matches match.param_names (omit the filter to always run). The token is semantic-verified in the final step's response.",
+    "version": 1
+  },
+  "scenarios": [
+    {
+      "id": "comment-stored-xss",
+      "title": "Stored XSS via comment/message field (POST create -> GET list)",
+      "match": {"param_names": ["comment", "message", "content", "bio", "text"]},
+      "steps": [
+        {"name": "inject", "method": "POST", "path": "/comment",
+         "payload": "<script>alert('{token}')</script>"},
+        {"name": "check", "method": "GET", "path": "/comments"}
+      ]
+    },
+    {
+      "id": "profile-stored-xss",
+      "title": "Stored XSS via profile field (PUT profile -> GET profile)",
+      "match": {"param_names": ["nickname", "about", "signature"]},
+      "steps": [
+        {"name": "inject", "method": "POST", "path": "/profile",
+         "payload": "\"><svg onload=alert('{token}')>"},
+        {"name": "check", "method": "GET", "path": "/profile",
+         "verify": true}
+      ]
+    }
+  ]
+}

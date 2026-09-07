@@ -1,0 +1,6225 @@
+{
+  "_meta": {
+    "note": "Compliance mapping corpus (OWASP/CWE/PCI DSS/ISO 27001/NIST/WASC). Moved out of compliance.py (~660 lines of literal tuples); that module is now a thin loader. Edit this JSON to add or adjust entries.",
+    "schema": {
+      "finding_type_map": "finding type -> [[framework, requirement_id, title, url], ...]",
+      "default_map": "fallback entries for unmapped types"
+    },
+    "entry_count": 123,
+    "version": 1
+  },
+  "finding_type_map": {
+    "reflected": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "stored": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "dom": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ],
+      [
+        "WASC",
+        "WASC-38",
+        "DOM-based Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246955/DOM-Based%20XSS"
+      ]
+    ],
+    "dom_dynamic": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ],
+      [
+        "WASC",
+        "WASC-38",
+        "DOM-based Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246955/DOM-Based%20XSS"
+      ]
+    ],
+    "blind": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "mutation_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "dom_clobber": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "template_ssti_angularjs": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-94",
+        "Improper Control of Generation of Code (Code Injection)",
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "template_ssti_vue": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-94",
+        "Improper Control of Generation of Code (Code Injection)",
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "jsonp_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "csp_bypass": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "polyglot_reflection": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "postmessage_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1021",
+        "Improper Restriction of Rendered UI Layers or Frames",
+        "https://cwe.mitre.org/data/definitions/1021.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "prototype_pollution": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-94",
+        "Improper Control of Generation of Code (Code Injection)",
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "service_worker_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "web_worker_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "open_redirect_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-601",
+        "URL Redirection to Untrusted Site ('Open Redirect')",
+        "https://cwe.mitre.org/data/definitions/601.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "header_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-81",
+        "Improper Neutralization of Script in an Error Message Web Page",
+        "https://cwe.mitre.org/data/definitions/81.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "path_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-81",
+        "Improper Neutralization of Script in an Error Message Web Page",
+        "https://cwe.mitre.org/data/definitions/81.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cookie_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "error_page_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-81",
+        "Improper Neutralization of Script in an Error Message Web Page",
+        "https://cwe.mitre.org/data/definitions/81.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "markdown_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "second_order": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "time_based_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "fuzzer_triage": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "framework_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "framework_lit_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "template_ssti": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "graphql_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "CWE",
+        "CWE-94",
+        "Improper Control of Generation of Code (Code Injection)",
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "graphql_introspection": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-94",
+        "Improper Control of Generation of Code (Code Injection)",
+        "https://cwe.mitre.org/data/definitions/94.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "websocket_xss": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1021",
+        "Improper Restriction of Rendered UI Layers or Frames",
+        "https://cwe.mitre.org/data/definitions/1021.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "websocket_insecure": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-319",
+        "Cleartext Transmission of Sensitive Information",
+        "https://cwe.mitre.org/data/definitions/319.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "trusted_types_taint_flow": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "trusted_types_policy_bypass": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "trusted_types_no_policy": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "trusted_types_policy_unused": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "trusted_types_violation": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "csp_nonce_too_short": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "csp_nonce_predictable": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "csp_nonce_misconfigured": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "csp_nonce_multi": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1333",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1333.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cookie_tossing_set_cookie": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1004",
+        "Sensitive Cookie Without 'HttpOnly' or 'Secure' Attributes",
+        "https://cwe.mitre.org/data/definitions/1004.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cookie_tossing_client": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1004",
+        "Sensitive Cookie Without 'HttpOnly' or 'Secure' Attributes",
+        "https://cwe.mitre.org/data/definitions/1004.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cookie_sink_flow": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_missing_script": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "CWE",
+        "CWE-353",
+        "Missing Support for Integrity Check",
+        "https://cwe.mitre.org/data/definitions/353.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_missing_script_summary": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "CWE",
+        "CWE-353",
+        "Missing Support for Integrity Check",
+        "https://cwe.mitre.org/data/definitions/353.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_missing_style": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "CWE",
+        "CWE-353",
+        "Missing Support for Integrity Check",
+        "https://cwe.mitre.org/data/definitions/353.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_broken_no_crossorigin": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_malformed": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sri_insecure_origin": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-319",
+        "Cleartext Transmission of Sensitive Information",
+        "https://cwe.mitre.org/data/definitions/319.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_user_controlled": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_cross_origin": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "CWE",
+        "CWE-353",
+        "Missing Support for Integrity Check",
+        "https://cwe.mitre.org/data/definitions/353.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_insecure_origin": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-319",
+        "Cleartext Transmission of Sensitive Information",
+        "https://cwe.mitre.org/data/definitions/319.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_after_module": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_multiple": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "import_map_invalid_json": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_vulnerable_version": [
+      [
+        "OWASP Top 10 2021",
+        "A06:2021",
+        "Vulnerable and Outdated Components",
+        "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A9:2017",
+        "Using Components with Known Vulnerabilities",
+        "https://owasp.org/www-project-top-ten/2017/A9_2017-Using_Components_with_Known_Vulnerabilities"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-1104",
+        "Use of Unmaintained Third Party Components",
+        "https://cwe.mitre.org/data/definitions/1104.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_add_script": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_allow_script": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_add_iframe": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_return_dom": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_return_dom_fragment": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_allow_unknown_protocols": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_allow_data_attr": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_config_keep_content": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "sanitizer_output_to_innerhtml": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "unsanitized_innerhtml_user_source": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_font_face_exfil": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_selector_exfil": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_import_injection": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_javascript_uri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_expression": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_moz_binding": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_behavior": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_template_reflection": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_cssText": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_background": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_liststyle": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_content": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_cursor": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_insertrule": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_insertrule_import": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "cssom_adoptedsheets": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "css_dynamic_exfil_gadget": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "dangling_markup_risk": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "dangling_markup_potential": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_script": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_script_external": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_script_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_foreignobject_script": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-80",
+        "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+        "https://cwe.mitre.org/data/definitions/80.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_foreignobject_iframe": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_foreignobject_event": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_foreignobject_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_foreignobject": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_use_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_use_data": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_use_external": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-345",
+        "Insufficient Verification of Data Authenticity",
+        "https://cwe.mitre.org/data/definitions/345.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_set_event": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_set_href_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_animate_event": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_animate_href_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_animatetransform_event": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_animatemotion_event": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_smil_onbegin": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_smil_onend": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_smil_onrepeat": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "CWE",
+        "CWE-1236",
+        "Improper Neutralization of an Inline Command in a Web Page",
+        "https://cwe.mitre.org/data/definitions/1236.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_a_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_a_data": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_image_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_image_data": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_handler": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_listener": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_discard_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_discard": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_onload": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "PCI DSS 4.0",
+        "6.2.4",
+        "Software engineering techniques for mitigating XSS",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_onclick": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_event_handler": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-83",
+        "Improper Neutralization of Script in Attributes in a Web Page",
+        "https://cwe.mitre.org/data/definitions/83.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_style_expression": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_style_mozbinding": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_style_behavior": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_text_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "PCI DSS 3.2.1",
+        "6.5.7",
+        "Cross-site scripting (XSS)",
+        "https://www.pcisecuritystandards.org/document_library"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_tref_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ],
+    "svg_xss_svg_altglyph_jsuri": [
+      [
+        "OWASP Top 10 2021",
+        "A03:2021",
+        "Injection",
+        "https://owasp.org/Top10/A03_2021-Injection/"
+      ],
+      [
+        "OWASP Top 10 2017",
+        "A1:2017",
+        "Injection",
+        "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+      ],
+      [
+        "CWE",
+        "CWE-79",
+        "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "https://cwe.mitre.org/data/definitions/79.html"
+      ],
+      [
+        "CWE",
+        "CWE-87",
+        "Improper Neutralization of Alternate XSS Syntax",
+        "https://cwe.mitre.org/data/definitions/87.html"
+      ],
+      [
+        "ISO 27001",
+        "A.14.2",
+        "Security in development and support processes",
+        "https://www.iso.org/standard/27001"
+      ],
+      [
+        "NIST SP 800-53",
+        "SI-10",
+        "Information Input Validation",
+        "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+      ],
+      [
+        "WASC",
+        "WASC-08",
+        "Cross Site Scripting",
+        "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+      ]
+    ]
+  },
+  "default_map": [
+    [
+      "OWASP Top 10 2021",
+      "A03:2021",
+      "Injection",
+      "https://owasp.org/Top10/A03_2021-Injection/"
+    ],
+    [
+      "OWASP Top 10 2017",
+      "A1:2017",
+      "Injection",
+      "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection"
+    ],
+    [
+      "CWE",
+      "CWE-79",
+      "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "https://cwe.mitre.org/data/definitions/79.html"
+    ],
+    [
+      "PCI DSS 3.2.1",
+      "6.5.7",
+      "Cross-site scripting (XSS)",
+      "https://www.pcisecuritystandards.org/document_library"
+    ],
+    [
+      "PCI DSS 4.0",
+      "6.2.4",
+      "Software engineering techniques for mitigating XSS",
+      "https://www.pcisecuritystandards.org/document_library"
+    ],
+    [
+      "ISO 27001",
+      "A.14.2",
+      "Security in development and support processes",
+      "https://www.iso.org/standard/27001"
+    ],
+    [
+      "NIST SP 800-53",
+      "SI-10",
+      "Information Input Validation",
+      "https://nvd.nist.gov/800-53/Rev4/control/SI-10"
+    ],
+    [
+      "WASC",
+      "WASC-08",
+      "Cross Site Scripting",
+      "http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting"
+    ]
+  ]
+}

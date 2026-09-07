@@ -1,0 +1,36 @@
+# Core dependencies (required for all features).
+requests>=2.28
+beautifulsoup4>=4.11
+lxml>=4.9
+# lxml is the recommended BeautifulSoup parser backend: faster and more
+# forgiving on malformed HTML than the stdlib html.parser.  The scanner
+# falls back to html.parser if lxml is missing.
+
+# --- Optional feature dependencies -------------------------------------
+# Install the extras you need:
+#   pip install -r requirements.txt           # core only
+#   pip install -r requirements.txt -e ".[async,headless,dev]"
+# or pick individual extras:
+#   pip install aiohttp                       # --async high-throughput scanner
+#   pip install playwright                    # --headless real-browser confirmation
+#   pip install pytest pytest-cov pytest-asyncio  # development / running tests
+
+# Async scanner (aiohttp-based, for --async mode).
+aiohttp>=3.9
+
+# Headless real-browser confirmation (--headless).
+playwright>=1.40
+
+# REST API service mode (--serve).  The stdlib backend (http.server) is
+# always available with zero extra dependencies; install Flask to use the
+# Flask backend instead (--use-flask flag).
+flask>=2.0  # optional: enables --serve --use-flask
+
+# Development: unit tests, coverage, async test support.
+pytest>=7.0
+pytest-cov>=4.0
+pytest-asyncio>=0.21
+# CI runs `pytest --timeout=120`; pyproject sets reruns=1 (flaky-loopback
+# absorb). Both options need their plugin installed to take effect.
+pytest-timeout>=2.1
+pytest-rerunfailures>=12.0

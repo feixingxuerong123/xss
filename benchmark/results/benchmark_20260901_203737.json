@@ -1,0 +1,270 @@
+{
+  "tool": "XSSentinel",
+  "engine": "sync",
+  "timestamp": "2026-09-01 20:37:37",
+  "total_cases": 10,
+  "total_time_s": 94.68,
+  "tp": 5,
+  "fp": 0,
+  "tn": 5,
+  "fn": 0,
+  "errors": 0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "fpr": 0.0,
+  "f1": 1.0,
+  "cases": [
+    {
+      "case_id": "pos-elem-01",
+      "path": "/r/elem01",
+      "param": "q",
+      "mode": "raw_element",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.826,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_57f0f1b7')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-02",
+      "path": "/r/elem02",
+      "param": "q",
+      "mode": "raw_element_table",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.816,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_d88d4d50')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-03",
+      "path": "/r/elem03",
+      "param": "q",
+      "mode": "raw_element_nested",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.859,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_95f15f10')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-04",
+      "path": "/r/elem04",
+      "param": "q",
+      "mode": "raw_element_span",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.146,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_3c2fe077')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-05",
+      "path": "/r/elem05",
+      "param": "q",
+      "mode": "raw_element_li",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 10.857,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_027c97e1')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-01",
+      "path": "/s/esc01",
+      "param": "q",
+      "mode": "escape_element",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.77,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-02",
+      "path": "/s/esc02",
+      "param": "q",
+      "mode": "escape_attr_dq",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 14.734,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-03",
+      "path": "/s/esc03",
+      "param": "q",
+      "mode": "escape_attr_sq",
+      "ground_truth": "safe",
+      "context": "html_attribute_sq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 21.206,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-04",
+      "path": "/s/esc04",
+      "param": "q",
+      "mode": "escape_script_string",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 36.006,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-05",
+      "path": "/s/esc05",
+      "param": "q",
+      "mode": "escape_href",
+      "ground_truth": "safe",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.457,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    }
+  ],
+  "by_context": {
+    "html_element": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 6
+    },
+    "html_attribute_dq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "html_attribute_sq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "script_string_dq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "url_href": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 3,
+      "fn": 0,
+      "error": 0,
+      "total": 8
+    },
+    "medium": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    }
+  },
+  "false_positives": [],
+  "false_negatives": []
+}

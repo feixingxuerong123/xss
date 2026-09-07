@@ -1,0 +1,4 @@
+# XSSentinel batch test
+http://127.0.0.1:8899/echo?q=test
+http://127.0.0.1:8899/attr?q=test
+http://127.0.0.1:8899/safe?q=test

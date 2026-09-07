@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 测试 / 覆盖率
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 运行生成物
+*.log
+report.html
+report.html.json
+.benchmarks/
+
+# 备份文件（git 即历史，.bak 不再需要入库）
+*.bak
+*.bak-*
+*-原版.md
+
+# 本地 AI 工具状态（非项目代码）
+.qoder/
+.trae/
+.agenthub/
+
+# tests 目录下的演示/扫描输出
+*_report.html
+*_report.json
+*_report.csv
+*_report.sarif
+tests/cli_csv.csv
+tests/cli_sarif.sarif
+tests/batch_reports/
+
+# benchmark 运行临时文件
+benchmark/results/tmp*.json
+.coverage*
+.coverage_report.txt

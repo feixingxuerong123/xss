@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>XSSentinel Benchmark Report</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         margin: 2rem auto; max-width: 1100px; padding: 0 1rem; color: #1a1a2e; }
+  h1 { border-bottom: 3px solid #0f3460; padding-bottom: .5rem; }
+  h2 { color: #16213e; margin-top: 2rem; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+              gap: 1rem; margin: 1.5rem 0; }
+  .metric-card { background: #f8f9fa; border-radius: 8px; padding: 1rem;
+                  text-align: center; border: 1px solid #e9ecef; }
+  .metric-card .value { font-size: 1.8rem; font-weight: 700; color: #0f3460; }
+  .metric-card .label { font-size: .85rem; color: #6c757d; margin-top: .3rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .9rem; }
+  th, td { border: 1px solid #dee2e6; padding: .5rem .75rem; text-align: left; }
+  th { background: #0f3460; color: white; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  tr.fp { background: #fff3cd; }
+  tr.fn { background: #f8d7da; }
+  .verdict { display: inline-block; padding: .3rem 1rem; border-radius: 4px;
+              font-weight: 700; font-size: 1.1rem; }
+  .verdict.pass { background: #d4edda; color: #155724; }
+  .verdict.warn { background: #fff3cd; color: #856404; }
+  .verdict.fail { background: #f8d7da; color: #721c24; }
+  .detail { font-family: monospace; font-size: .8rem; word-break: break-all; }
+  footer { margin-top: 3rem; color: #6c757d; font-size: .8rem;
+            border-top: 1px solid #dee2e6; padding-top: 1rem; }
+</style>
+</head>
+<body>
+<h1>XSSentinel Accuracy Benchmark Report</h1>
+<p>Generated: 2026-07-31 03:21:23 &nbsp;|&nbsp; Cases: 10 &nbsp;|&nbsp;
+   Duration: 19.5s</p>
+<p>Quality Verdict: <span class="verdict fail">POOR</span></p>
+
+<div class="metrics">
+  <div class="metric-card"><div class="value">100.0%</div><div class="label">Recall (Detection Rate)</div></div>
+  <div class="metric-card"><div class="value">71.4%</div><div class="label">Precision</div></div>
+  <div class="metric-card"><div class="value">40.0%</div><div class="label">False Positive Rate</div></div>
+  <div class="metric-card"><div class="value">0.8333</div><div class="label">F1 Score</div></div>
+</div>
+
+<h2>Confusion Matrix</h2>
+<table>
+<tr><th></th><th>Detected</th><th>Not Detected</th></tr>
+<tr><td><b>Vulnerable (GT)</b></td><td>TP = 5</td><td>FN = 0</td></tr>
+<tr><td><b>Safe (GT)</b></td><td>FP = 2</td><td>TN = 3</td></tr>
+</table>
+
+<h2>By Difficulty</h2>
+<table>
+<tr><th>Difficulty</th><th>Total</th><th>TP</th><th>FP</th><th>TN</th><th>FN</th><th>Recall</th><th>FPR</th></tr>
+<tr><td>easy</td><td>8</td><td>5</td><td>1</td><td>2</td><td>0</td><td>100.0%</td><td>33.3%</td></tr>
+<tr><td>medium</td><td>2</td><td>0</td><td>1</td><td>1</td><td>0</td><td>N/A</td><td>50.0%</td></tr>
+</table>
+
+<h2>By Context</h2>
+<table>
+<tr><th>Context</th><th>Total</th><th>TP</th><th>FP</th><th>TN</th><th>FN</th><th>Recall</th><th>FPR</th></tr>
+<tr><td>html_attribute_dq</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>N/A</td><td>0.0%</td></tr>
+<tr><td>html_attribute_sq</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>N/A</td><td>100.0%</td></tr>
+<tr><td>html_element</td><td>6</td><td>5</td><td>0</td><td>1</td><td>0</td><td>100.0%</td><td>0.0%</td></tr>
+<tr><td>script_string_dq</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>N/A</td><td>100.0%</td></tr>
+<tr><td>url_href</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>N/A</td><td>0.0%</td></tr>
+</table>
+
+<h2>False Positives (2)</h2>
+<table><tr><th>Case ID</th><th>Mode</th><th>Context</th><th>Finding Detail</th></tr><tr class='fp'><td>neg-escape-03</td><td>escape_attr_sq</td><td>html_attribute_sq</td><td class='detail'> autofocus onfocus=alert('xssv_910d49b3') x= (html_attribute_noquote)</td></tr>
+<tr class='fp'><td>neg-escape-04</td><td>escape_script_string</td><td>script_string_dq</td><td class='detail'>"></script><script>alert('xssv_8036a4ed')</script> (script_string_dq)</td></tr>
+</table>
+
+<h2>False Negatives (0)</h2>
+<p>None — perfect recall!</p>
+
+<footer>
+XSSentinel Benchmark Suite v1.0 — Independent accuracy evaluation.<br>
+Metrics: Recall = TP/(TP+FN), Precision = TP/(TP+FP), FPR = FP/(FP+TN), F1 = 2·P·R/(P+R)
+</footer>
+</body></html>

@@ -1,0 +1,61 @@
+name: CI
+
+# XSSentinel quality gate (Phase 42 / P2-10):
+#   1. unit + integration pytest (includes the pipeline slice over
+#      Attack Range #2 -- main-flow regressions fail here)
+#   2. accuracy benchmark (98 cases) -- gate: FPR<=20% and recall>=50%
+#      (hard thresholds; project runs at 100%/100%)
+#   3. accuracy drill on Range #2 (15 vuln + 5 safe, 100%/100% required)
+# Async/asyncio.run tests self-skip via tests/conftest.py when the runner's
+# loopback socketpair is throttled.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Unit + integration tests (pipeline slice included)
+        run: pytest tests/ -q --ignore=tests/test_benchmark.py --timeout=120
+
+      - name: Accuracy benchmark (98 cases, report saved)
+        run: python -m benchmark.runner --quick
+
+      - name: Range #2 accuracy drill (must be 100% / 100%)
+        run: python tests/run_range2.py
+
+  benchmark-full:
+    # Full 98-case drill on demand (slower, ~4 min of pure scanning).
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Full benchmark
+        run: python -m benchmark.runner
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark/results/*.json

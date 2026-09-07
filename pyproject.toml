@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xssentinel"
+version = "1.0.0"
+description = "Comprehensive, multi-layer XSS detection framework (reflected + context-aware + WAF-evasion + DOM taint + optional headless confirmation)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["requests>=2.28", "beautifulsoup4>=4.11", "lxml>=4.9"]
+
+[project.optional-dependencies]
+async = ["aiohttp>=3.9"]
+headless = ["playwright>=1.40"]
+api = ["flask>=2.0"]
+ast = ["esprima>=3.0"]  # Phase 43: JS AST data-flow channel (regex fallback when absent)
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21",
+    # CI passes --timeout=120 and [tool.pytest.ini_options] sets
+    # reruns/reruns_delay below; without these two plugins both of those
+    # safety nets are silently unavailable (pytest ignores unknown ini keys).
+    "pytest-timeout>=2.1",
+    "pytest-rerunfailures>=12.0",
+]
+
+[project.scripts]
+xssentinel = "xssentinel.__main__:main"
+
+[tool.setuptools]
+packages = ["xssentinel", "xssentinel.core", "xssentinel.core.layers", "xssentinel.api"]
+
+[tool.setuptools.package-data]
+xssentinel = ["data/*.json"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+# Phase 43: this host's security software intermittently throttles loopback
+# TCP mid-session; one automatic re-run absorbs those flaky failures (real
+# regressions still fail twice in a row).
+reruns = 1
+reruns_delay = 2
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+filterwarnings = [
+    "error::UserWarning",
+    "ignore::DeprecationWarning",
+]

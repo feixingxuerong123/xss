@@ -1,0 +1,92 @@
+{
+  "tool": "XSSentinel",
+  "timestamp": "2026-07-31 03:21:23",
+  "total_cases": 10,
+  "total_time_s": 19.53,
+  "metrics": {
+    "tp": 5,
+    "fp": 2,
+    "tn": 3,
+    "fn": 0,
+    "recall": 1.0,
+    "precision": 0.7143,
+    "fpr": 0.4,
+    "f1": 0.8333
+  },
+  "by_context": {
+    "html_element": {
+      "total": 6,
+      "tp": 5,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "fpr": 0.0
+    },
+    "html_attribute_dq": {
+      "total": 1,
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "recall": null,
+      "precision": null,
+      "fpr": 0.0
+    },
+    "html_attribute_sq": {
+      "total": 1,
+      "tp": 0,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0,
+      "recall": null,
+      "precision": 0.0,
+      "fpr": 1.0
+    },
+    "script_string_dq": {
+      "total": 1,
+      "tp": 0,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0,
+      "recall": null,
+      "precision": 0.0,
+      "fpr": 1.0
+    },
+    "url_href": {
+      "total": 1,
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "recall": null,
+      "precision": null,
+      "fpr": 0.0
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "total": 8,
+      "tp": 5,
+      "fp": 1,
+      "tn": 2,
+      "fn": 0,
+      "recall": 1.0,
+      "precision": 0.8333,
+      "fpr": 0.3333
+    },
+    "medium": {
+      "total": 2,
+      "tp": 0,
+      "fp": 1,
+      "tn": 1,
+      "fn": 0,
+      "recall": null,
+      "precision": 0.0,
+      "fpr": 0.5
+    }
+  },
+  "fp_count": 2,
+  "fn_count": 0
+}

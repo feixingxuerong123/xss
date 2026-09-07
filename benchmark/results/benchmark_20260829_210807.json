@@ -1,0 +1,2263 @@
+{
+  "tool": "XSSentinel",
+  "timestamp": "2026-08-29 21:08:07",
+  "total_cases": 98,
+  "total_time_s": 176.12,
+  "tp": 64,
+  "fp": 0,
+  "tn": 34,
+  "fn": 0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "fpr": 0.0,
+  "f1": 1.0,
+  "cases": [
+    {
+      "case_id": "pos-elem-01",
+      "path": "/r/elem01",
+      "param": "q",
+      "mode": "raw_element",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.896,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_23ac940b')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-02",
+      "path": "/r/elem02",
+      "param": "q",
+      "mode": "raw_element_table",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.794,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_2c16ba70')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-03",
+      "path": "/r/elem03",
+      "param": "q",
+      "mode": "raw_element_nested",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.841,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_466e04c8')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-04",
+      "path": "/r/elem04",
+      "param": "q",
+      "mode": "raw_element_span",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.797,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_d2331cd9')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-05",
+      "path": "/r/elem05",
+      "param": "q",
+      "mode": "raw_element_li",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.88,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_7aa263af')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-01",
+      "path": "/r/attr01",
+      "param": "q",
+      "mode": "raw_attr_dq",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.843,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_d61c55f7')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-02",
+      "path": "/r/attr02",
+      "param": "q",
+      "mode": "raw_attr_sq",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_sq",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.337,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "polyglot_reflection",
+          "payload": "</script></style>\">'>><svg/onload=alert('xss_poly_2e03f24f')><img src=x onerror=alert('xss_poly_2e03f24f')><input onfocu",
+          "context": "event_handler",
+          "severity": "medium",
+          "confidence": ""
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-03",
+      "path": "/r/attr03",
+      "param": "q",
+      "mode": "raw_attr_nq",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_noquote",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.032,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_93c122c9')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-04",
+      "path": "/r/attr04",
+      "param": "q",
+      "mode": "raw_attr_dq_href",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.06,
+      "findings_count": 2,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_e66ad5e3')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "markdown_xss",
+          "payload": "![x](x\" onerror=alert(\"xsmd_b08d8f\"))",
+          "context": "markdown_render",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-05",
+      "path": "/r/attr05",
+      "param": "q",
+      "mode": "raw_attr_dq_src",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_dq",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.967,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_b7d60d0f')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-06",
+      "path": "/r/attr06",
+      "param": "q",
+      "mode": "raw_attr_dq_action",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.872,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_a35e0ad2')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-07",
+      "path": "/r/attr07",
+      "param": "q",
+      "mode": "raw_attr_dq_event",
+      "ground_truth": "vulnerable",
+      "context": "event_handler",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.422,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "alert('xssv_a4f16006')",
+          "context": "event_handler",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-08",
+      "path": "/r/attr08",
+      "param": "q",
+      "mode": "raw_attr_dq_style",
+      "ground_truth": "vulnerable",
+      "context": "css_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.856,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "background:url(javascript:alert('xssv_6edd8f3b'))",
+          "context": "css_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-09",
+      "path": "/r/attr09",
+      "param": "q",
+      "mode": "raw_attr_dq_formaction",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.813,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_3af1184d')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-attr-10",
+      "path": "/r/attr10",
+      "param": "q",
+      "mode": "raw_attr_dq_data",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.9,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_63e3f2cc')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-01",
+      "path": "/r/scr01",
+      "param": "q",
+      "mode": "raw_script_string_dq",
+      "ground_truth": "vulnerable",
+      "context": "script_string_dq",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.001,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"></script><script>alert('xssv_39f698a7')</script>",
+          "context": "script_string_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-02",
+      "path": "/r/scr02",
+      "param": "q",
+      "mode": "raw_script_string_sq",
+      "ground_truth": "vulnerable",
+      "context": "script_string_sq",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.993,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "';alert('xssv_201bbc30');//",
+          "context": "script_string_sq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-03",
+      "path": "/r/scr03",
+      "param": "q",
+      "mode": "raw_script_block",
+      "ground_truth": "vulnerable",
+      "context": "script_block",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.959,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "alert('xssv_2a9a4a12')",
+          "context": "script_block",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-04",
+      "path": "/r/scr04",
+      "param": "q",
+      "mode": "raw_script_template",
+      "ground_truth": "vulnerable",
+      "context": "script_template",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.01,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "${alert('xssv_c44f35b5')}",
+          "context": "script_template",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-05",
+      "path": "/r/scr05",
+      "param": "q",
+      "mode": "raw_script_comment",
+      "ground_truth": "vulnerable",
+      "context": "script_block",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.017,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "alert('xssv_d09099e2')",
+          "context": "script_block",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-script-06",
+      "path": "/r/scr06",
+      "param": "q",
+      "mode": "raw_script_close",
+      "ground_truth": "vulnerable",
+      "context": "script_block",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.12,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"></script><script>alert('xssv_13017d5e')</script>",
+          "context": "script_string_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-svg-01",
+      "path": "/r/svg01",
+      "param": "q",
+      "mode": "raw_svg",
+      "ground_truth": "vulnerable",
+      "context": "svg_context",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.792,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "&lt;svg&#x2F;onload=alert&#40;&apos;xssv_b69e4367&apos;&#41;&gt;",
+          "context": "svg_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-svg-02",
+      "path": "/r/svg02",
+      "param": "q",
+      "mode": "raw_svg_attr",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_dq",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.81,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_47f97cd9')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-svg-03",
+      "path": "/r/svg03",
+      "param": "q",
+      "mode": "raw_svg_onload",
+      "ground_truth": "vulnerable",
+      "context": "event_handler",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.993,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "alert('xssv_0dd24430')",
+          "context": "event_handler",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-svg-04",
+      "path": "/r/svg04",
+      "param": "q",
+      "mode": "raw_svg_animate",
+      "ground_truth": "vulnerable",
+      "context": "svg_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.753,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "&lt;svg&#x2F;onload=alert&#40;&apos;xssv_9c4c6059&apos;&#41;&gt;",
+          "context": "svg_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-math-01",
+      "path": "/r/math01",
+      "param": "q",
+      "mode": "raw_math",
+      "ground_truth": "vulnerable",
+      "context": "math_context",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.991,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<math><mtext><img src=x onerror=alert('xssv_3733e0db')>",
+          "context": "math_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-math-02",
+      "path": "/r/math02",
+      "param": "q",
+      "mode": "raw_math_href",
+      "ground_truth": "vulnerable",
+      "context": "math_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.791,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_a8a6c93b')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-01",
+      "path": "/r/url01",
+      "param": "q",
+      "mode": "raw_href_js",
+      "ground_truth": "vulnerable",
+      "context": "url_javascript",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.042,
+      "findings_count": 2,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_052af192')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "markdown_xss",
+          "payload": "![x](x\" onerror=alert(\"xsmd_d30810\"))",
+          "context": "markdown_render",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-02",
+      "path": "/r/url02",
+      "param": "q",
+      "mode": "raw_href_data",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.962,
+      "findings_count": 2,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_972b188c')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "markdown_xss",
+          "payload": "![x](x\" onerror=alert(\"xsmd_895080\"))",
+          "context": "markdown_render",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-03",
+      "path": "/r/url03",
+      "param": "q",
+      "mode": "raw_meta_refresh",
+      "ground_truth": "vulnerable",
+      "context": "meta_refresh",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.262,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "0;url=javascript:alert('xssv_f9ab0aa7')",
+          "context": "meta_refresh",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-04",
+      "path": "/r/url04",
+      "param": "q",
+      "mode": "raw_iframe_src",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.887,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_be801559')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-05",
+      "path": "/r/url05",
+      "param": "q",
+      "mode": "raw_iframe_srcdoc",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute_dq",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.661,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"><script>alert('xssv_6943b061')</script>",
+          "context": "html_attribute_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-url-06",
+      "path": "/r/url06",
+      "param": "q",
+      "mode": "raw_base_href",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.735,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "javascript:alert('xssv_2f679cbf')",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-style-01",
+      "path": "/r/sty01",
+      "param": "q",
+      "mode": "raw_style_block",
+      "ground_truth": "vulnerable",
+      "context": "css_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.78,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "background:url(javascript:alert('xssv_8d42d144'))",
+          "context": "css_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-comment-01",
+      "path": "/r/cmt01",
+      "param": "q",
+      "mode": "raw_comment",
+      "ground_truth": "vulnerable",
+      "context": "html_comment",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.856,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "--><script>alert('xssv_89b32e5c')</script>",
+          "context": "html_comment",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-cdata-01",
+      "path": "/r/cdata01",
+      "param": "q",
+      "mode": "raw_cdata",
+      "ground_truth": "vulnerable",
+      "context": "cdata",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.826,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "]]></script><script>alert('xssv_70b4a605')</script><![CDATA[",
+          "context": "cdata",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-tpl-01",
+      "path": "/r/tpl01",
+      "param": "q",
+      "mode": "raw_template",
+      "ground_truth": "vulnerable",
+      "context": "template_angular",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.749,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "{{constructor.constructor('alert('xssv_a8df599a')')()}}",
+          "context": "template_angular",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-tpl-02",
+      "path": "/r/tpl02",
+      "param": "q",
+      "mode": "raw_template_vue",
+      "ground_truth": "vulnerable",
+      "context": "template_angular",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.675,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "{{constructor.constructor('alert('xssv_54fb33dd')')()}}",
+          "context": "template_angular",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-embed-01",
+      "path": "/r/emb01",
+      "param": "q",
+      "mode": "raw_element_embed",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.666,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_f56f956c')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-form-01",
+      "path": "/r/form01",
+      "param": "q",
+      "mode": "raw_element_form",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.778,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_47e2c22e')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-input-01",
+      "path": "/r/inp01",
+      "param": "q",
+      "mode": "raw_element_input",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.686,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_65434779')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-select-01",
+      "path": "/r/sel01",
+      "param": "q",
+      "mode": "raw_element_select",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.746,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_88b98119')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-details-01",
+      "path": "/r/det01",
+      "param": "q",
+      "mode": "raw_element_details",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.664,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_2098d2fb')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-video-01",
+      "path": "/r/vid01",
+      "param": "q",
+      "mode": "raw_element_video",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.638,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_08faf047')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-body-01",
+      "path": "/r/body01",
+      "param": "q",
+      "mode": "raw_element_body",
+      "ground_truth": "vulnerable",
+      "context": "event_handler",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.842,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_0b12a83b')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-a-01",
+      "path": "/r/a01",
+      "param": "q",
+      "mode": "raw_element_a",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.839,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_e3293311')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-div-tab-01",
+      "path": "/r/tab01",
+      "param": "q",
+      "mode": "raw_element_div_tabindex",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.818,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_e942f1aa')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-foreign-01",
+      "path": "/r/for01",
+      "param": "q",
+      "mode": "raw_svg_foreignobject",
+      "ground_truth": "vulnerable",
+      "context": "svg_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.851,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "&lt;svg&#x2F;onload=alert&#40;&apos;xssv_02d67d40&apos;&#41;&gt;",
+          "context": "svg_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-encode-01",
+      "path": "/r/enc01",
+      "param": "q",
+      "mode": "raw_url_decode",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.835,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_c453e075')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-encode-02",
+      "path": "/r/enc02",
+      "param": "q",
+      "mode": "raw_double_decode",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.893,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_d2a283b3')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-01",
+      "path": "/dom/hash-innerhtml",
+      "param": "",
+      "mode": "dom_hash_innerhtml",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.098,
+      "findings_count": 4,
+      "finding_details": [
+        {
+          "type": "dom_dynamic",
+          "payload": "xssentinel_dom_f7cd92c3",
+          "context": "Element.innerHTML",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "trusted_types_taint_flow",
+          "payload": "(TT: tt_taint_flow)",
+          "context": "trusted_types_innerHTML",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "trusted_types_no_policy",
+          "payload": "(TT: tt_no_policy)",
+          "context": "trusted_types_innerHTML",
+          "severity": "medium",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-02",
+      "path": "/dom/search-eval",
+      "param": "",
+      "mode": "dom_search_eval",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.855,
+      "findings_count": 3,
+      "finding_details": [
+        {
+          "type": "dom",
+          "payload": "var p = new URLSearchParams(location.search); eval(p.get('x'));",
+          "context": "dom_sink",
+          "severity": "medium",
+          "confidence": "medium"
+        },
+        {
+          "type": "trusted_types_taint_flow",
+          "payload": "(TT: tt_taint_flow)",
+          "context": "trusted_types_eval",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "trusted_types_no_policy",
+          "payload": "(TT: tt_no_policy)",
+          "context": "trusted_types_eval",
+          "severity": "medium",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-03",
+      "path": "/dom/postmsg",
+      "param": "",
+      "mode": "dom_postmessage",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.812,
+      "findings_count": 6,
+      "finding_details": [
+        {
+          "type": "dom",
+          "payload": ", function(e) {   document.getElementById('out').innerHTML = e.data; });",
+          "context": "dom_postmessage",
+          "severity": "medium",
+          "confidence": "medium"
+        },
+        {
+          "type": "dom_dynamic",
+          "payload": "xssentinel_dom_6836b8e2",
+          "context": "Element.innerHTML",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "postmessage_xss",
+          "payload": "(postMessage listener)",
+          "context": "dom_postmessage",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-04",
+      "path": "/dom/hash-docwrite",
+      "param": "",
+      "mode": "dom_hash_docwrite",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.756,
+      "findings_count": 3,
+      "finding_details": [
+        {
+          "type": "dom_dynamic",
+          "payload": "xssentinel_dom_4cbb2ab7",
+          "context": "document.write",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "trusted_types_taint_flow",
+          "payload": "(TT: tt_taint_flow)",
+          "context": "trusted_types_document.write",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "trusted_types_no_policy",
+          "payload": "(TT: tt_no_policy)",
+          "context": "trusted_types_document.write",
+          "severity": "medium",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-05",
+      "path": "/dom/jquery-html",
+      "param": "",
+      "mode": "dom_jquery_html",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 3.005,
+      "findings_count": 3,
+      "finding_details": [
+        {
+          "type": "dom",
+          "payload": "$('#out').html(location.hash.slice(1));",
+          "context": "dom_sink",
+          "severity": "medium",
+          "confidence": "medium"
+        },
+        {
+          "type": "dom_dynamic",
+          "payload": "xssentinel_dom_9c627526",
+          "context": "Element.innerHTML",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "sri_missing_script",
+          "payload": "(SRI: sri_missing_script)",
+          "context": "sri_sri_missing_script",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-dom-06",
+      "path": "/dom/hash-settimeout",
+      "param": "",
+      "mode": "dom_hash_settimeout",
+      "ground_truth": "vulnerable",
+      "context": "dom_xss",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.795,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "dom_dynamic",
+          "payload": "xssentinel_dom_8b8ead35",
+          "context": "setTimeout",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-polyglot-01",
+      "path": "/r/poly01",
+      "param": "q",
+      "mode": "raw_element",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.854,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_fd687227')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-marquee-01",
+      "path": "/r/marq01",
+      "param": "q",
+      "mode": "raw_element_marquee",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.775,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_dfca3fc1')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-audio-01",
+      "path": "/r/aud01",
+      "param": "q",
+      "mode": "raw_element_audio",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.98,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_ebf057fd')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-01",
+      "path": "/s/esc01",
+      "param": "q",
+      "mode": "escape_element",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 2.55,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-02",
+      "path": "/s/esc02",
+      "param": "q",
+      "mode": "escape_attr_dq",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.391,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-03",
+      "path": "/s/esc03",
+      "param": "q",
+      "mode": "escape_attr_sq",
+      "ground_truth": "safe",
+      "context": "html_attribute_sq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.602,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-04",
+      "path": "/s/esc04",
+      "param": "q",
+      "mode": "escape_script_string",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.632,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-05",
+      "path": "/s/esc05",
+      "param": "q",
+      "mode": "escape_href",
+      "ground_truth": "safe",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.593,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-06",
+      "path": "/s/esc06",
+      "param": "q",
+      "mode": "escape_attr_nq",
+      "ground_truth": "safe",
+      "context": "html_attribute_noquote",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.317,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-rcdata-01",
+      "path": "/s/rcd01",
+      "param": "q",
+      "mode": "rcdata_textarea",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.991,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-rcdata-02",
+      "path": "/s/rcd02",
+      "param": "q",
+      "mode": "rcdata_title",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 2.584,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-rcdata-03",
+      "path": "/s/rcd03",
+      "param": "q",
+      "mode": "rcdata_xmp",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.413,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-rcdata-04",
+      "path": "/s/rcd04",
+      "param": "q",
+      "mode": "rcdata_textarea_script",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.496,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-comment-01",
+      "path": "/s/cmt01",
+      "param": "q",
+      "mode": "comment_stripped",
+      "ground_truth": "safe",
+      "context": "html_comment",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 2.097,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-comment-02",
+      "path": "/s/cmt02",
+      "param": "q",
+      "mode": "comment_encoded",
+      "ground_truth": "safe",
+      "context": "html_comment",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.637,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-attr-01",
+      "path": "/s/attr01",
+      "param": "q",
+      "mode": "attr_quotes_stripped",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.409,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-attr-02",
+      "path": "/s/attr02",
+      "param": "q",
+      "mode": "attr_alnum_whitelist",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.195,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-attr-03",
+      "path": "/s/attr03",
+      "param": "q",
+      "mode": "attr_data_escaped",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 2.704,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-attr-04",
+      "path": "/s/attr04",
+      "param": "q",
+      "mode": "attr_angle_stripped",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.507,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-csp-01",
+      "path": "/s/csp01",
+      "param": "q",
+      "mode": "csp_strict_element",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.661,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-csp-02",
+      "path": "/s/csp02",
+      "param": "q",
+      "mode": "csp_strict_href",
+      "ground_truth": "safe",
+      "context": "url_href",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.621,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-csp-03",
+      "path": "/s/csp03",
+      "param": "q",
+      "mode": "csp_nonce_element",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.471,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-csp-04",
+      "path": "/s/csp04",
+      "param": "q",
+      "mode": "csp_strict_attr",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 1.613,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-jsonp-01",
+      "path": "/s/jsonp01",
+      "param": "callback",
+      "mode": "jsonp_whitelist",
+      "ground_truth": "safe",
+      "context": "script_block",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.48,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-jsonp-02",
+      "path": "/s/jsonp02",
+      "param": "callback",
+      "mode": "jsonp_wrapped",
+      "ground_truth": "safe",
+      "context": "script_block",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.503,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-01",
+      "path": "/s/flt01",
+      "param": "q",
+      "mode": "filter_script_tag",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 2.279,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<a id=x href=javascript:alert('xssv_a3335a7e')>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-02",
+      "path": "/s/flt02",
+      "param": "q",
+      "mode": "filter_event_handlers",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.217,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<embed src=javascript:alert('xssv_5eccd580')>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-03",
+      "path": "/s/flt03",
+      "param": "q",
+      "mode": "filter_javascript_uri",
+      "ground_truth": "vulnerable",
+      "context": "url_href",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.583,
+      "findings_count": 2,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "data:text/html,<script>alert('xssv_829d83a4')</script>",
+          "context": "url_href",
+          "severity": "high",
+          "confidence": "high"
+        },
+        {
+          "type": "markdown_xss",
+          "payload": "![x](x\" onerror=alert(\"xsmd_36f4ce\"))",
+          "context": "markdown_render",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-04",
+      "path": "/s/flt04",
+      "param": "q",
+      "mode": "filter_angle_brackets",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.494,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-05",
+      "path": "/s/flt05",
+      "param": "q",
+      "mode": "filter_keywords",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.2,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<embed src=javascript:alert('xssv_cd9f54f3')>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-filter-06",
+      "path": "/s/flt06",
+      "param": "q",
+      "mode": "filter_recursive_script",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 1.198,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<embed src=javascript:alert('xssv_48d015aa')>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-encode-01",
+      "path": "/s/enc01",
+      "param": "q",
+      "mode": "output_urlencoded",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.465,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-encode-02",
+      "path": "/s/enc02",
+      "param": "q",
+      "mode": "output_base64",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 0.75,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-encode-03",
+      "path": "/s/enc03",
+      "param": "q",
+      "mode": "double_encode_safe",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.46,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-encode-04",
+      "path": "/s/enc04",
+      "param": "q",
+      "mode": "case_lower_strip",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.479,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-json-01",
+      "path": "/s/json01",
+      "param": "q",
+      "mode": "json_string_escaped",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 5.758,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-json-02",
+      "path": "/s/json02",
+      "param": "q",
+      "mode": "json_object_value",
+      "ground_truth": "safe",
+      "context": "script_block",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.593,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-header-01",
+      "path": "/s/hdr01",
+      "param": "q",
+      "mode": "header_only",
+      "ground_truth": "safe",
+      "context": "header_reflection",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 0.749,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-js-01",
+      "path": "/s/js01",
+      "param": "q",
+      "mode": "js_textcontent",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.593,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-js-02",
+      "path": "/s/js02",
+      "param": "q",
+      "mode": "js_console_log",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.601,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-select-01",
+      "path": "/s/sel01",
+      "param": "q",
+      "mode": "select_option_escaped",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.497,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-null-01",
+      "path": "/s/null01",
+      "param": "q",
+      "mode": "null_byte_strip",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 3.496,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    }
+  ],
+  "by_context": {
+    "html_element": {
+      "tp": 22,
+      "fp": 0,
+      "tn": 14,
+      "fn": 0,
+      "total": 36
+    },
+    "html_attribute_dq": {
+      "tp": 4,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0,
+      "total": 10
+    },
+    "html_attribute_sq": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 2
+    },
+    "html_attribute_noquote": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 2
+    },
+    "url_href": {
+      "tp": 8,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "total": 10
+    },
+    "event_handler": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 3
+    },
+    "css_context": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 2
+    },
+    "script_string_dq": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 4,
+      "fn": 0,
+      "total": 5
+    },
+    "script_string_sq": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "script_block": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 3,
+      "fn": 0,
+      "total": 6
+    },
+    "script_template": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "svg_context": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 3
+    },
+    "math_context": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 2
+    },
+    "url_javascript": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "meta_refresh": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "html_comment": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "total": 3
+    },
+    "cdata": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "template_angular": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 2
+    },
+    "dom_xss": {
+      "tp": 6,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "total": 6
+    },
+    "header_reflection": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 1
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "tp": 26,
+      "fp": 0,
+      "tn": 11,
+      "fn": 0,
+      "total": 37
+    },
+    "medium": {
+      "tp": 23,
+      "fp": 0,
+      "tn": 16,
+      "fn": 0,
+      "total": 39
+    },
+    "hard": {
+      "tp": 15,
+      "fp": 0,
+      "tn": 7,
+      "fn": 0,
+      "total": 22
+    }
+  },
+  "false_positives": [],
+  "false_negatives": []
+}

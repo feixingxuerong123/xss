@@ -1,0 +1,21 @@
+{
+  "url": "http://127.0.0.1:8899/echo?q=test",
+  "method": "GET",
+  "header": [],
+  "timeout": 15,
+  "rate_limit": 0,
+  "crawl_depth": 2,
+  "dom_engine": "auto",
+  "max_transforms": 12,
+  "max_payloads": 14,
+  "threads": 4,
+  "oob_timeout": 12,
+  "stored_param": "q",
+  "login_field_user": "username",
+  "login_field_pass": "password",
+  "login_csrf_field": "csrf_token",
+  "progress": "none",
+  "output": "report.html",
+  "format": "html",
+  "verify_ssl": true
+}

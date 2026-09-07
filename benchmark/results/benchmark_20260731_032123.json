@@ -1,0 +1,308 @@
+{
+  "tool": "XSSentinel",
+  "timestamp": "2026-07-31 03:21:23",
+  "total_cases": 10,
+  "total_time_s": 19.53,
+  "tp": 5,
+  "fp": 2,
+  "tn": 3,
+  "fn": 0,
+  "recall": 1.0,
+  "precision": 0.7143,
+  "fpr": 0.4,
+  "f1": 0.8333,
+  "cases": [
+    {
+      "case_id": "pos-elem-01",
+      "path": "/r/elem01",
+      "param": "q",
+      "mode": "raw_element",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.805,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_74cd1b92')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-02",
+      "path": "/r/elem02",
+      "param": "q",
+      "mode": "raw_element_table",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.864,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_2e171b42')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-03",
+      "path": "/r/elem03",
+      "param": "q",
+      "mode": "raw_element_nested",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.923,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_5f63c300')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-04",
+      "path": "/r/elem04",
+      "param": "q",
+      "mode": "raw_element_span",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.866,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_6d8d3c3b')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "pos-elem-05",
+      "path": "/r/elem05",
+      "param": "q",
+      "mode": "raw_element_li",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.869,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "<script>alert('xssv_e08ae098')</script>",
+          "context": "html_element",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-01",
+      "path": "/s/esc01",
+      "param": "q",
+      "mode": "escape_element",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.033,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-02",
+      "path": "/s/esc02",
+      "param": "q",
+      "mode": "escape_attr_dq",
+      "ground_truth": "safe",
+      "context": "html_attribute_dq",
+      "difficulty": "easy",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 4.116,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-03",
+      "path": "/s/esc03",
+      "param": "q",
+      "mode": "escape_attr_sq",
+      "ground_truth": "safe",
+      "context": "html_attribute_sq",
+      "difficulty": "easy",
+      "detected": true,
+      "verdict": "FP",
+      "scan_time_s": 0.831,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": " autofocus onfocus=alert('xssv_910d49b3') x=",
+          "context": "html_attribute_noquote",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-04",
+      "path": "/s/esc04",
+      "param": "q",
+      "mode": "escape_script_string",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "detected": true,
+      "verdict": "FP",
+      "scan_time_s": 3.532,
+      "findings_count": 1,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "\"></script><script>alert('xssv_8036a4ed')</script>",
+          "context": "script_string_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": ""
+    },
+    {
+      "case_id": "neg-escape-05",
+      "path": "/s/esc05",
+      "param": "q",
+      "mode": "escape_href",
+      "ground_truth": "safe",
+      "context": "url_href",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 2.678,
+      "findings_count": 0,
+      "finding_details": [],
+      "error": ""
+    }
+  ],
+  "by_context": {
+    "html_element": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 6
+    },
+    "html_attribute_dq": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 1
+    },
+    "html_attribute_sq": {
+      "tp": 0,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "script_string_dq": {
+      "tp": 0,
+      "fp": 1,
+      "tn": 0,
+      "fn": 0,
+      "total": 1
+    },
+    "url_href": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "total": 1
+    }
+  },
+  "by_difficulty": {
+    "easy": {
+      "tp": 5,
+      "fp": 1,
+      "tn": 2,
+      "fn": 0,
+      "total": 8
+    },
+    "medium": {
+      "tp": 0,
+      "fp": 1,
+      "tn": 1,
+      "fn": 0,
+      "total": 2
+    }
+  },
+  "false_positives": [
+    {
+      "id": "neg-escape-03",
+      "path": "/s/esc03",
+      "mode": "escape_attr_sq",
+      "context": "html_attribute_sq",
+      "note": [
+        {
+          "type": "reflected",
+          "payload": " autofocus onfocus=alert('xssv_910d49b3') x=",
+          "context": "html_attribute_noquote",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "neg-escape-04",
+      "path": "/s/esc04",
+      "mode": "escape_script_string",
+      "context": "script_string_dq",
+      "note": [
+        {
+          "type": "reflected",
+          "payload": "\"></script><script>alert('xssv_8036a4ed')</script>",
+          "context": "script_string_dq",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "false_negatives": []
+}

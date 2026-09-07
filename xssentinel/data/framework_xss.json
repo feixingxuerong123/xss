@@ -1,0 +1,390 @@
+{
+  "_meta": {
+    "note": "Framework XSS detection rules (React/Vue/AngularJS/Svelte/Lit). Moved out of framework_xss.py (~320 lines of literal tuples); that module re-compiles the regexes at import. Edit this JSON to add or adjust rules.",
+    "schema": {
+      "framework_raw_patterns": "framework -> [[regex, pattern_name, description], ...]",
+      "framework_detectors": "[[regex, framework_name], ...] used by detect_framework()",
+      "severity_rank": "severity -> rank"
+    },
+    "version": 1
+  },
+  "framework_raw_patterns": {
+    "react": [
+      [
+        "dangerouslySetInnerHTML\\s*=\\s*\\{\\s*\\{\\s*__html\\s*:",
+        "React dangerouslySetInnerHTML renders raw HTML without escaping",
+        "high"
+      ],
+      [
+        "__html\\s*:\\s*[^,}\\s]+",
+        "React __html property receives raw HTML",
+        "high"
+      ],
+      [
+        "href\\s*=\\s*\\{[^}]*(?:props|state|input|user|data|param|item|val|content|text|msg|raw|html)\\w*[^}]*\\}",
+        "React href bound to dynamic value (potential javascript: URL)",
+        "medium"
+      ],
+      [
+        "\\beval\\s*\\(",
+        "React component calls eval() on dynamic value",
+        "low"
+      ],
+      [
+        "new\\s+Function\\s*\\(",
+        "React component calls new Function()",
+        "low"
+      ],
+      [
+        "setTimeout\\s*\\(\\s*['\\\"`]",
+        "React setTimeout with string argument (eval-like)",
+        "low"
+      ],
+      [
+        "setInterval\\s*\\(\\s*['\\\"`]",
+        "React setInterval with string argument (eval-like)",
+        "low"
+      ],
+      [
+        "href\\s*=\\s*\\{[`\\'\"]\\s*javascript:",
+        "React href bound to a javascript: URL literal",
+        "high"
+      ],
+      [
+        "\\.innerHTML\\s*=",
+        "React ref .innerHTML assignment (imperative sink)",
+        "medium"
+      ],
+      [
+        "dangerouslySetInnerHTML",
+        "React dangerouslySetInnerHTML usage (review for sanitization)",
+        "medium"
+      ]
+    ],
+    "vue": [
+      [
+        "v-html\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Vue v-html directive renders raw HTML",
+        "high"
+      ],
+      [
+        "v-html",
+        "Vue v-html directive present (review for sanitization)",
+        "medium"
+      ],
+      [
+        ":href\\s*=\\s*[\"\\'][^\"\\']*(?:props|data|input|user|param|item|val|content|text|msg|raw|html)\\w*[^\"\\']*[\"\\']",
+        "Vue :href bound to dynamic value (potential javascript: URL)",
+        "medium"
+      ],
+      [
+        ":href\\s*=\\s*[\"\\']\\s*javascript:",
+        "Vue :href bound to javascript: URL literal",
+        "high"
+      ],
+      [
+        "v-bind:href\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Vue v-bind:href bound to dynamic value",
+        "medium"
+      ],
+      [
+        "@\\w+\\s*=\\s*[\"\\'][^\"\\']*(?:eval|Function|innerHTML|document\\.write|setTimeout|setInterval)\\b",
+        "Vue event handler invokes a dangerous sink",
+        "medium"
+      ],
+      [
+        ":\\w+\\s*=\\s*[\"\\']\\s*\\{\\{[^}]+\\}\\}[\"\\']",
+        "Vue interpolation inside attribute binding (review)",
+        "medium"
+      ],
+      [
+        "\\bh\\s*\\(\\s*[\\'\"][a-z]+[\\'\"]\\s*,\\s*\\{[^}]*domProps\\s*:\\s*\\{[^}]*innerHTML",
+        "Vue render function sets domProps.innerHTML",
+        "high"
+      ],
+      [
+        "\\bref\\s*\\(\\s*(?:null|[\"\\'])\\s*\\)\\s*;?\\s*\\w+\\.\\s*value\\s*(?:\\.\\s*innerHTML\\s*=|\\.innerHTML)",
+        "Vue 3 ref() + .innerHTML sink flow (Composition API)",
+        "high"
+      ],
+      [
+        "defineComponent\\s*\\(\\s*\\{[^}]*render\\s*\\([^)]*\\)\\s*\\{[^}]*innerHTML",
+        "Vue 3 defineComponent render function uses innerHTML",
+        "high"
+      ],
+      [
+        "\\bcreateApp\\s*\\(",
+        "Vue 3 createApp() detected (review for v-html / ref+innerHTML sinks)",
+        "low"
+      ],
+      [
+        "<script\\s+setup[^>]*>[\\s\\S]*?v-html",
+        "Vue 3 <script setup> SFC with v-html directive",
+        "high"
+      ],
+      [
+        "(?:watchEffect|watch)\\s*\\(\\s*\\(\\s*\\)\\s*=>\\s*\\{[^}]*\\.innerHTML\\s*=",
+        "Vue 3 watch/watchEffect callback writes to innerHTML",
+        "high"
+      ],
+      [
+        "\\beval\\s*\\(",
+        "Vue component calls eval()",
+        "low"
+      ],
+      [
+        "new\\s+Function\\s*\\(",
+        "Vue component calls new Function()",
+        "low"
+      ]
+    ],
+    "angular": [
+      [
+        "\\[innerHTML\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular [innerHTML] binding (review for bypassSecurityTrust* usage)",
+        "medium"
+      ],
+      [
+        "bypassSecurityTrustHtml\\s*\\(",
+        "Angular bypassSecurityTrustHtml() disables sanitization",
+        "high"
+      ],
+      [
+        "bypassSecurityTrustScript\\s*\\(",
+        "Angular bypassSecurityTrustScript() disables script sanitization",
+        "high"
+      ],
+      [
+        "bypassSecurityTrustUrl\\s*\\(",
+        "Angular bypassSecurityTrustUrl() disables URL sanitization",
+        "high"
+      ],
+      [
+        "bypassSecurityTrustResourceUrl\\s*\\(",
+        "Angular bypassSecurityTrustResourceUrl() disables resource URL sanitization",
+        "high"
+      ],
+      [
+        "bypassSecurityTrustStyle\\s*\\(",
+        "Angular bypassSecurityTrustStyle() disables style sanitization",
+        "high"
+      ],
+      [
+        "DomSanitizer",
+        "Angular DomSanitizer import (review for bypass methods)",
+        "medium"
+      ],
+      [
+        "\\[href\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular [href] property binding (potential javascript: URL)",
+        "medium"
+      ],
+      [
+        "\\[(?:src|url|action|formaction|data)\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular attribute binding for dangerous attribute (src/url/action/data)",
+        "medium"
+      ],
+      [
+        "\\[attr\\.on\\w+\\]\\s*=",
+        "Angular [attr.on*] attribute binding to event handler",
+        "high"
+      ],
+      [
+        "\\beval\\s*\\(",
+        "Angular component calls eval()",
+        "low"
+      ],
+      [
+        "new\\s+Function\\s*\\(",
+        "Angular component calls new Function()",
+        "low"
+      ],
+      [
+        "\\[style\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular [style] binding (potential CSS injection)",
+        "medium"
+      ],
+      [
+        "\\[style\\.\\w+\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular [style.*] sub-property binding (CSS injection risk)",
+        "medium"
+      ],
+      [
+        "\\[class\\]\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Angular [class] binding (review for class injection)",
+        "low"
+      ],
+      [
+        "\\|\\s*(?:bypassSecurityTrustHtml|bypassSecurityTrustScript|bypassSecurityTrustUrl|bypassSecurityTrustResourceUrl|bypassSecurityTrustStyle)",
+        "Angular template pipe invokes bypassSecurityTrust* method",
+        "high"
+      ],
+      [
+        "ng-bind-html\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "AngularJS ng-bind-html (review for $sce.trustAsHtml usage)",
+        "medium"
+      ],
+      [
+        "\\$sce\\.trustAsHtml\\s*\\(",
+        "AngularJS $sce.trustAsHtml() disables sanitization",
+        "high"
+      ],
+      [
+        "\\[ngTemplateOutlet\\]\\s*=",
+        "Angular [ngTemplateOutlet] dynamic template (review for injection)",
+        "low"
+      ],
+      [
+        "\\[routerLink\\]\\s*=\\s*[\"\\'][^\"\\']*(?:props|input|user|param|data)\\w*[^\"\\']*[\"\\']",
+        "Angular [routerLink] bound to dynamic value",
+        "medium"
+      ]
+    ],
+    "svelte": [
+      [
+        "\\{@html\\s+\\$\\w+",
+        "Svelte {@html} with reactive $store value (raw HTML from store)",
+        "high"
+      ],
+      [
+        "\\{@html\\s+JSON\\.stringify",
+        "Svelte {@html JSON.stringify()} (unsanitized object to raw HTML)",
+        "high"
+      ],
+      [
+        "\\{@html\\s+[^}]+\\}",
+        "Svelte {@html} tag renders raw HTML",
+        "high"
+      ],
+      [
+        "\\{@html",
+        "Svelte {@html} tag present (review for sanitization)",
+        "medium"
+      ],
+      [
+        "href\\s*=\\s*\\{[^}]*(?:props|state|input|user|data|param|item|val|content|text|msg|raw|html)\\w*[^}]*\\}",
+        "Svelte href bound to dynamic value (potential javascript: URL)",
+        "medium"
+      ],
+      [
+        "href\\s*=\\s*\\{[`\\'\"]\\s*javascript:",
+        "Svelte href bound to javascript: URL literal",
+        "high"
+      ],
+      [
+        "on:\\w+\\s*=\\s*[\"\\'][^\"\\']*(?:eval|Function|innerHTML|document\\.write|setTimeout|setInterval)\\b",
+        "Svelte event handler invokes a dangerous sink",
+        "medium"
+      ],
+      [
+        "use:\\w+",
+        "Svelte use:action directive (review for arbitrary code execution)",
+        "low"
+      ],
+      [
+        "\\beval\\s*\\(",
+        "Svelte component calls eval()",
+        "low"
+      ],
+      [
+        "new\\s+Function\\s*\\(",
+        "Svelte component calls new Function()",
+        "low"
+      ],
+      [
+        "<svelte:component\\s+this\\s*=\\s*\\{[^}]+\\}",
+        "Svelte dynamic component instantiation (review)",
+        "low"
+      ],
+      [
+        "export\\s+function\\s+load\\s*\\([^)]*\\)\\s*\\{[\\s\\S]*?@html",
+        "SvelteKit load() function with @html in SSR context",
+        "medium"
+      ],
+      [
+        "function\\s+\\w+\\s*\\([^)]*\\)\\s*\\{[^}]*\\.innerHTML\\s*=",
+        "Svelte action function writes to innerHTML",
+        "high"
+      ]
+    ],
+    "lit": [
+      [
+        "\\bunsafeHTML\\s*\\(",
+        "Lit unsafeHTML() directive renders raw HTML without sanitization",
+        "high"
+      ],
+      [
+        "\\bunsafeSVG\\s*\\(",
+        "Lit unsafeSVG() directive renders raw SVG (script execution risk)",
+        "high"
+      ],
+      [
+        "\\bhtml\\s*`[^`]*\\$\\{[^}]*(?:user|input|data|param|item|val|content|text|msg|raw|html|props|query)\\w*[^}]*\\}[^`]*`",
+        "Lit html`` template with user-controlled interpolation (review context)",
+        "medium"
+      ],
+      [
+        "\\brender\\s*\\(\\s*html\\s*`",
+        "Lit render() function with html`` template (review for unsafeHTML)",
+        "low"
+      ],
+      [
+        "(?:LitElement|LitElementMixin|customElements\\.define)\\b",
+        "Lit custom element definition (review for unsafeHTML usage)",
+        "low"
+      ],
+      [
+        "(?:attached|ready|connectedCallback)\\s*\\([^)]*\\)\\s*\\{[^}]*\\.innerHTML\\s*=",
+        "Polymer lifecycle callback writes to innerHTML",
+        "high"
+      ],
+      [
+        "<dom-module\\s+id\\s*=\\s*[\"\\'][^\"\\']+[\"\\']",
+        "Polymer <dom-module> (review for innerHTML / template injection)",
+        "low"
+      ],
+      [
+        "this\\.\\$\\.\\w+\\.innerHTML\\s*=",
+        "Polymer this.$.element.innerHTML assignment (raw HTML sink)",
+        "high"
+      ],
+      [
+        "\\beval\\s*\\(",
+        "Lit/Polymer component calls eval()",
+        "low"
+      ],
+      [
+        "new\\s+Function\\s*\\(",
+        "Lit/Polymer component calls new Function()",
+        "low"
+      ]
+    ]
+  },
+  "framework_detectors": [
+    [
+      "(?:data-reactroot|data-reactid|__reactInternalInstance|_reactRootContainer|reactDOM|ReactDOM\\.render|react-dom|react\\.development|react\\.production|dangerouslySetInnerHTML)",
+      "react"
+    ],
+    [
+      "(?:data-v-[a-f0-9]{8}|v-if|v-for|v-html|v-show|v-model|v-bind|vue\\.runtime|vue\\.min\\.js|vue@2|vue@3|new\\s+Vue\\s*\\(|createApp\\s*\\(|__vue__|__vue_app__)",
+      "vue"
+    ],
+    [
+      "(?:_ngcontent-[a-z0-9]+|_nghost-[a-z0-9]+|ng-version|ng-app|ng-controller|ng-bind|ng-model|ng-init|\\[innerHTML\\]|\\[ngClass\\]|\\[ngStyle\\]|platformBrowserDynamic|@angular/core|angular\\.min\\.js|ng-reflect-)",
+      "angular"
+    ],
+    [
+      "(?:class=\"svelte-[a-z0-9]+|svelte-1|__svelte|svelte\\.\\w+\\.js|svelte\\.\\w+\\.mjs|svelte/internal|svelte.kit|@html\\})",
+      "svelte"
+    ],
+    [
+      "(?:LitElement|lit-html|lit-element|unsafeHTML|unsafeSVG|polymer|dom-module|customElements\\.define|@polymer|webcomponents\\.js|ShadyCSS|ShadyDOM)",
+      "lit"
+    ]
+  ],
+  "severity_rank": {
+    "high": 3,
+    "medium": 2,
+    "low": 1
+  }
+}
