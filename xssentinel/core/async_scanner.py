@@ -179,7 +179,15 @@ class AsyncScanner:
         self.findings: list[Finding] = []
         self._semaphore: asyncio.Semaphore | None = None
         self._last_request_time: dict[str, float] = {}
-        self._lock = asyncio.Lock()
+        # py3.9: asyncio.Lock() binds the CURRENT event loop at construction
+        # time.  Host environments that already consumed the main thread's
+        # implicit loop (pytest, --serve API, library embedding) raise
+        # RuntimeError here -- give the thread a fresh loop and retry.
+        try:
+            self._lock = asyncio.Lock()
+        except RuntimeError:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            self._lock = asyncio.Lock()
         self._aiohttp_available = self._check_aiohttp()
 
     def _next_proxy(self) -> str | None:

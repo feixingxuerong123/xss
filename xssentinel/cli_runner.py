@@ -601,10 +601,24 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint):
     # report writer (which expects scanner.findings / scanner.requests_made
     # / scanner.waf_name / scanner.coverage) works unchanged.
     from .core.scanner import Scanner
-    shim = Scanner(requester=None, verbose=args.verbose)
+    shim = Scanner(requester=None, verbose=args.verbose,
+                   poc_include_auth=getattr(args, "poc_include_auth", False))
     shim.findings = list(asc.findings)
     shim.requests_made = asc.requests_made
     shim.waf_name = getattr(asc, "waf_name", None)
+    # Phase 98b: bridge the ASYNC session's credentials into the shim's
+    # requester.  attach_pocs reads self.req.session.{cookies,headers} --
+    # on a fresh Scanner(requester=None) both were EMPTY, so the PoC
+    # authentication replay silently no-op'd on the whole async path
+    # (Phase 48 cookies AND Phase 98 headers).  The real credentials the
+    # scan used live on the AsyncScanner (CLI -H / -b, stealth UA).
+    try:
+        for _k, _v in (getattr(asc, "cookies", None) or {}).items():
+            shim.req.session.cookies.set(_k, _v)
+        for _k, _v in (getattr(asc, "headers", None) or {}).items():
+            shim.req.session.headers[_k] = _v
+    except Exception:
+        pass
     # Phase 44 standalone fast checks on the async path (they are cheap,
     # sync HTTP calls; piggyback before dedup so they are de-duplicated
     # alongside scanner findings).
@@ -806,10 +820,20 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
         if rng is None:
             continue  # URL was skipped (checkpoint) or errored before tracking
         lo, hi = rng
-        shim = Scanner(requester=None, verbose=args.verbose)
+        shim = Scanner(requester=None, verbose=args.verbose,
+                   poc_include_auth=getattr(args, "poc_include_auth", False))
         shim.findings = list(asc.findings[lo:hi])
         shim.requests_made = requests_before.get(orig_url, 0)
         shim.waf_name = getattr(asc, "waf_name", None)
+        # Phase 98b: same credential bridge as the single-URL async path
+        # (attach_pocs reads the shim's session, which was empty).
+        try:
+            for _k, _v in (getattr(asc, "cookies", None) or {}).items():
+                shim.req.session.cookies.set(_k, _v)
+            for _k, _v in (getattr(asc, "headers", None) or {}).items():
+                shim.req.session.headers[_k] = _v
+        except Exception:
+            pass
         shim.dedup()
         shim.attach_pocs()
         results[orig_url] = shim

@@ -12,6 +12,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import pytest
+
 from xssentinel.core.poc import build_poc, _poc_headers
 
 
@@ -85,3 +87,71 @@ def test_upload_poc_carries_auth_header():
     poc = build_poc(d, headers={"X-Auth": "t"})
     assert "-H 'X-Auth: t'" in poc["curl"]
     assert "-F 'avatar=@/dev/null;filename=" in poc["curl"]
+
+
+# --------------------------------------------------------------------------
+# Integration: the ASYNC CLI path must bridge its session credentials into
+# the sync shim before attach_pocs.  Regression for the gap found in the
+# Phase 98 review: Scanner(requester=None) had an EMPTY session, so both
+# Phase 48 cookies and Phase 98 headers silently no-op'd on --async scans.
+# --------------------------------------------------------------------------
+
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+from tests.conftest import SOCKETPAIR_OK
+
+pytestmark = pytest.mark.skipif(
+    not SOCKETPAIR_OK,
+    reason="Windows loopback degraded (security software/TCP state)")
+
+
+class _EchoHandler(BaseHTTPRequestHandler):
+    def log_message(self, *a):  # silence
+        pass
+
+    def do_GET(self):
+        from urllib.parse import urlparse, parse_qs
+        q = parse_qs(urlparse(self.path).query).get("q", [""])[0]
+        # RAW reflection (pos-elem shape): an escaped echo would be a TN --
+        # the escaped-reflection convergence correctly finds nothing there.
+        body = f"<!DOCTYPE html><html><body><div>{q}</div></body></html>"
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body.encode())
+
+
+def test_async_cli_poc_replays_credentials():
+    from xssentinel.cli_runner import _run_async_scan
+    from xssentinel.__main__ import build_parser
+
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _EchoHandler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    port = srv.server_address[1]
+    try:
+        argv = [
+            "--async", "-u", f"http://127.0.0.1:{port}/echo?q=probe",
+            "-b", "sid=abc",
+            "-H", "X-API-Key: k9",
+            "--poc-auth", "--threads", "2", "--timeout", "15",
+            "--max-payloads", "6", "--max-transforms", "4",
+        ]
+        args = build_parser().parse_args(argv)
+        # NOTE: pass the FULL URL (query included), exactly like
+        # __main__ does -- _run_async_scan parses the query of its
+        # second argument into the scan params.
+        shim = _run_async_scan(
+            args, f"http://127.0.0.1:{port}/echo?q=probe",
+            oob=None, progress=None, checkpoint=None)
+        assert shim is not None and shim.findings, "async scan found nothing"
+        curls = [f.data.get("poc", {}).get("curl", "")
+                 for f in shim.findings if f.data.get("poc")]
+        assert curls, "no PoC generated on the async path"
+        assert any("-b 'sid=abc'" in c for c in curls), (
+            f"session cookie missing from async PoCs: {curls[:1]}")
+        assert any("-H 'X-API-Key: k9'" in c for c in curls), (
+            f"session header missing from async PoCs: {curls[:1]}")
+    finally:
+        srv.shutdown()

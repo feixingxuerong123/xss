@@ -349,6 +349,8 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **Phase 98：PoC 认证 header 回放（09-02 复审"PoC 回放会失败"的最后一块）**。`build_poc` 此前只回放 cookies——API 目标用 `Authorization: Bearer` / `X-API-Key` / 自定义反爬头认证时，无凭据 curl PoC 直接 401，客户/复测复现不了。现在 `--poc-auth` 开关语义扩展为"回放会话凭据（cookies **和** 可回放 headers）"：`attach_pocs`（sync + scanner_layers 镜像）取 `session.headers`，经 blocklist 过滤（host/content-length/content-type/connection/accept 系/cookie——cookie 走 `-b` 专道）后以 `-H` 逐条进 curl，含 header/cookie/path 三类 transport 载体 finding 分支；PoC dict 带 `replay_headers` 键供报告展示。默认仍 OFF（报告外发不泄露测试者会话）。测试 `tests/test_poc_replay_headers.py` 7 例（认证头入 curl、控制头过滤、POST+cookie+header 组合、transport 载体分支、无 headers 零变化、None 值剔除、upload 分支）。
 
+**Phase 98b：async 路径的 PoC 凭据桥接（集成测试抓出的真缺口）**。async 引擎的 findings 经 `Scanner(requester=None)` shim 走报告链——该 shim 的 session 是**全新的空会话**，`attach_pocs` 读到的 cookies/headers 恒为空：**Phase 48 的 cookie 回放在 --async 模式下从未生效过，Phase 98 也会同样空转**。修复（cli_runner 两处 shim：单 URL + batch）：① 把 `asc.cookies`/`asc.headers`（CLI `-b`/`-H`/stealth UA 的真源）桥接进 shim 的 session；② shim 构造补传 `poc_include_auth`（此前开关也没传，闸门本身是关的）。附带修复：`AsyncScanner.__init__` 的 `asyncio.Lock()` 在 py3.9 于宿主环境（pytest/`--serve`/库嵌入）主线程隐式 loop 被消费时抛 RuntimeError——捕获后补建 loop 重试。新增集成测试 `test_async_cli_poc_replays_credentials`（真 CLI 参数 + 本地回显服务器 + 真 async 扫描，断言 PoC 同时含 `-b` 与 `-H`），8/8 过；全量回归 67/67 文件绿（1782s）。
+
 
 API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host 全方法校验（Phase 71）+ MITM CA 私钥 0600 与并发签名锁（Phase 72）。曾有两处结构性问题已修：`test_benchmark.py` 的 function-scope fixture 让每个测试重跑 6 端点 benchmark（需 1-2h）→ 改 module scope 共享一次运行后 **19 秒全过**（33 例）；`test_p27_api.py` 端到端偶发连接超时是劣化窗口掐 loopback（非代码问题，单跑必过）。
 
