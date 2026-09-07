@@ -351,6 +351,8 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **Phase 98b：async 路径的 PoC 凭据桥接（集成测试抓出的真缺口）**。async 引擎的 findings 经 `Scanner(requester=None)` shim 走报告链——该 shim 的 session 是**全新的空会话**，`attach_pocs` 读到的 cookies/headers 恒为空：**Phase 48 的 cookie 回放在 --async 模式下从未生效过，Phase 98 也会同样空转**。修复（cli_runner 两处 shim：单 URL + batch）：① 把 `asc.cookies`/`asc.headers`（CLI `-b`/`-H`/stealth UA 的真源）桥接进 shim 的 session；② shim 构造补传 `poc_include_auth`（此前开关也没传，闸门本身是关的）。附带修复：`AsyncScanner.__init__` 的 `asyncio.Lock()` 在 py3.9 于宿主环境（pytest/`--serve`/库嵌入）主线程隐式 loop 被消费时抛 RuntimeError——捕获后补建 loop 重试。新增集成测试 `test_async_cli_poc_replays_credentials`（真 CLI 参数 + 本地回显服务器 + 真 async 扫描，断言 PoC 同时含 `-b` 与 `-H`），8/8 过；全量回归 67/67 文件绿（1782s）。
 
+**Phase 99：HTTPS MITM 端到端演练（补齐被动扫描实战价值的验证空白）**。`test_passive_mitm.py` 只证明传输层（TLS 拦截、参数进捕获队列）——但工程师装 CA 浏览一次目标站就能拿到**已验证 finding + 可回放 PoC**才是被动扫描的卖点，这条全链路此前零覆盖。新增 `tests/test_passive_mitm_e2e.py`：本地 TLS origin（raw 回显）+ MitmManager CA + `PassiveProxy(mitm_ca=...)` + `drain_captures` 后台 worker + 真 Scanner（`verify_ssl=False` 对自签 origin）——客户端经代理访问 `https://…/vuln?q=login` 一次，断言 `stats.mitm/scans ≥ 1`、finding 的 URL 为 https 且 param=q、`attach_pocs` 后 curl PoC 携带确认载荷。**一次通过，无需修产品代码**——并行会话的 Phase 50 MITM 实现质量过关；proxy/scanner 对自签 origin 均需 `verify_ssl=False`（文档级注意点）。
+
 
 API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host 全方法校验（Phase 71）+ MITM CA 私钥 0600 与并发签名锁（Phase 72）。曾有两处结构性问题已修：`test_benchmark.py` 的 function-scope fixture 让每个测试重跑 6 端点 benchmark（需 1-2h）→ 改 module scope 共享一次运行后 **19 秒全过**（33 例）；`test_p27_api.py` 端到端偶发连接超时是劣化窗口掐 loopback（非代码问题，单跑必过）。
 
