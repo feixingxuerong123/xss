@@ -353,6 +353,8 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **Phase 99：HTTPS MITM 端到端演练（补齐被动扫描实战价值的验证空白）**。`test_passive_mitm.py` 只证明传输层（TLS 拦截、参数进捕获队列）——但工程师装 CA 浏览一次目标站就能拿到**已验证 finding + 可回放 PoC**才是被动扫描的卖点，这条全链路此前零覆盖。新增 `tests/test_passive_mitm_e2e.py`：本地 TLS origin（raw 回显）+ MitmManager CA + `PassiveProxy(mitm_ca=...)` + `drain_captures` 后台 worker + 真 Scanner（`verify_ssl=False` 对自签 origin）——客户端经代理访问 `https://…/vuln?q=login` 一次，断言 `stats.mitm/scans ≥ 1`、finding 的 URL 为 https 且 param=q、`attach_pocs` 后 curl PoC 携带确认载荷。**一次通过，无需修产品代码**——并行会话的 Phase 50 MITM 实现质量过关；proxy/scanner 对自签 origin 均需 `verify_ssl=False`（文档级注意点）。
 
+**Phase 100：async 侧 CSP nonce 泄漏利用（双引擎对偶缺口，基准抓出的真 FN）**。107 用例基准跑出 async **唯一一个非 timeout 的 FN**：`pos-csp-01`（`csp_nonce_ui_leak`，2.78s 正常完成），而 sync 是 TP（78.89s）。定位：**Phase 36 的 nonce-leak 利用 `_try_csp_nonce` 只在 sync 实现**，async 全文 `nonce` 仅出现在一行注释——`--async` 会静默漏掉所有 nonce 泄漏端点。修复：`_probe_param` 末尾（载荷循环与位置转移之后）加对偶实现，复用共享的 `csp.extract_nonces_from_csp` / `detect_nonce_near_marker`，发带**真实 nonce** 的 `<script nonce='N'>` 载荷，verifier 的 nonce 白名单仍防误报。**两个 async 专属坑**：① `text` 被载荷循环反复覆盖——必须用 marker 探测响应的快照（`probe_text`/`probe_headers`），否则检查的是最后一个载荷的响应，marker 与 nonce 都已不在；② 快照只能在探测处保存。测试 `tests/test_csp_nonce_async_parity.py` 2 例（检出 + 快照回归：nonce 只出现在探测响应时仍须检出）。效果：`pos-csp-01` FN→**TP（2.7s）**，async 有效口径 **TP72 FP0 TN35 FN0**（f1=1.000；本轮 neg-rcdata-02 两次劣化 timeout，单跑 13 请求即 TP）；全量回归 69/69 文件绿（1654s）。
+
 
 API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host 全方法校验（Phase 71）+ MITM CA 私钥 0600 与并发签名锁（Phase 72）。曾有两处结构性问题已修：`test_benchmark.py` 的 function-scope fixture 让每个测试重跑 6 端点 benchmark（需 1-2h）→ 改 module scope 共享一次运行后 **19 秒全过**（33 例）；`test_p27_api.py` 端到端偶发连接超时是劣化窗口掐 loopback（非代码问题，单跑必过）。
 

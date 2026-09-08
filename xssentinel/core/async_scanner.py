@@ -46,6 +46,7 @@ from . import pre_encode as pre_mod
 from . import reflection_profile as rp_mod
 from . import generator as gen_mod
 from . import cors_check as cors_mod   # Phase 54: sync CORS audit parity
+from . import csp as csp_mod           # Phase 100: CSP nonce-leak parity
 from . import dom_engine as dom_engine_mod  # Phase 65: DOM-dynamic parity
 from . import xs_leaks as xsleak_mod   # Phase 54: sync XS-Leaks audit parity
 # Phase 86: budget/circuit stops must be catchable by name at every layer --
@@ -462,6 +463,15 @@ class AsyncScanner:
                     **_body_kwargs(probe_data),
                 ) as resp:
                     text = await resp.text()
+                    # Phase 100: keep this response's headers AND body --
+                    # the CSP nonce-leak exploit (sync _try_csp_nonce
+                    # parity) runs on the marker-reflection response.  The
+                    # loop below overwrites ``text`` on every variant, so
+                    # without this snapshot the exploit inspects the LAST
+                    # payload's response, where the marker (and thus the
+                    # nonce-proximity check) is gone.
+                    probe_headers = dict(getattr(resp, "headers", None) or {})
+                    probe_text = text
                     self.requests_made += 1
                     self._record_status(getattr(resp, "status", 200))
         except (BudgetExhausted, CircuitOpen):
@@ -720,6 +730,78 @@ class AsyncScanner:
                     transform=["position_shift"],
                 )
                 return
+
+        # Phase 100: CSP nonce-leak exploitation (sync _try_csp_nonce
+        # parity).  A nonce CSP blocks plain inline payloads, so the loop
+        # above ends unconfirmed -- but when the nonce itself is echoed
+        # into the page (the classic "nonce in a template/JSON blob" leak)
+        # a script carrying the REAL nonce executes.  The async path had no
+        # equivalent, so --async silently missed every nonce-leak endpoint
+        # that sync reported (pos-csp-01: sync TP, async FN).
+        #
+        # The verifier allowlists the nonce against the response's own CSP
+        # header, so a server that rotates nonces per request still cannot
+        # be falsely confirmed.
+        csp_hdr = ""
+        try:
+            csp_hdr = probe_headers.get("Content-Security-Policy") or ""
+        except Exception:
+            csp_hdr = ""
+        if csp_hdr:
+            try:
+                _nonces = csp_mod.extract_nonces_from_csp(csp_hdr)
+            except Exception:
+                _nonces = []
+            if _nonces:
+                try:
+                    _near = csp_mod.detect_nonce_near_marker(
+                        csp_hdr, probe_text or text or "", marker)
+                except Exception:
+                    _near = {}
+                if _near.get("nonce_exposed_near_marker"):
+                    _n = _near.get("nonce_value") or _nonces[0]
+                    _ntok = "xssv_" + secrets.token_hex(4)
+                    _npay = (f"<script nonce='{_n}'>"
+                             f"alert('{_ntok}')</script>")
+                    _nparams, _ndata = self._probe_kv(
+                        params, data, param, _npay, is_body)
+                    try:
+                        async with self._semaphore:
+                            await self._throttle(url)
+                            async with session.request(
+                                method, url, params=_nparams or None,
+                                headers=self._req_headers(self.headers),
+                                proxy=self._next_proxy(),
+                                **_body_kwargs(_ndata),
+                            ) as nresp:
+                                _ntext = await nresp.text()
+                                _nhdrs = dict(
+                                    getattr(nresp, "headers", None) or {})
+                                self.requests_made += 1
+                                self._record_status(
+                                    getattr(nresp, "status", 200))
+                    except (BudgetExhausted, CircuitOpen):
+                        raise
+                    except Exception:
+                        _ntext = ""
+                        _nhdrs = {}
+                    if _ntext:
+                        _nv = await asyncio.to_thread(
+                            verifier.verify_semantic, _ntext, _ntok,
+                            response_headers=_nhdrs)
+                        if _nv.get("confirmed"):
+                            _idx = _ntext.find(_ntok)
+                            yield Finding(
+                                url=url, method=method, param=param,
+                                context=_nv.get("context") or context,
+                                payload=_npay,
+                                severity="high",
+                                evidence=_ntext[max(0, _idx - 30):
+                                                _idx + len(_ntok) + 30],
+                                type="reflected",
+                                confidence="high",
+                                transform=["csp_nonce"],
+                            )
 
     def _build_variants(self, marked: str, context: str, marker: str,
                         cap_override: int | None = None
