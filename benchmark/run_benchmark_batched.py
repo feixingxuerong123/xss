@@ -61,6 +61,16 @@ MAX_PAYLOADS = int(sys.argv[5]) if len(sys.argv) > 5 else 10
 MAX_TRANSFORMS = int(sys.argv[6]) if len(sys.argv) > 6 else 6
 TIMEOUT = int(sys.argv[7]) if len(sys.argv) > 7 else 45
 
+# Phase 101: how a degraded-FN is re-confirmed.  On this host a loopback
+# degradation window can outlast a single immediate retry (observed:
+# neg-rcdata-02 timed out twice in p97 and reproduced as TP in 13
+# requests standalone -- the window, not the scanner, decided it).  So:
+# retry up to FN_RETRY_MAX times, pausing FN_RETRY_WAIT seconds between
+# attempts to let the window pass.  Only degraded-shaped FNs are retried
+# (see _is_degraded_fn) and only FNs pay this cost.
+FN_RETRY_MAX = int(os.environ.get("XSS_FN_RETRY_MAX", "2"))
+FN_RETRY_WAIT = float(os.environ.get("XSS_FN_RETRY_WAIT", "20"))
+
 
 def start_server(port: int) -> ThreadingHTTPServer:
     BenchmarkHandler.routes = load_routes()
@@ -104,10 +114,24 @@ _META = {  # budget of THIS runner (audit: cross-run comparison needs it)
     "engine": ENGINE,
     "batch": BATCH,
     "fn_retry_on": True,   # Phase 97: degraded-FN second confirmation
+    "fn_retry_max": FN_RETRY_MAX,
+    "fn_retry_wait": FN_RETRY_WAIT,
 }
 
 FN_RETRY_BUDGET_KEYS = ("engine", "max_payloads", "max_transforms",
-                        "timeout", "fn_retry_on")
+                        "timeout", "fn_retry_on", "fn_retry_max",
+                        "fn_retry_wait")
+
+
+def _log_fn_exhausted(rec: dict) -> None:
+    """Note (in the printed log only) that retries were exhausted.
+
+    The record itself already carries every attempt inside fn_retry, so
+    nothing needs to be added -- this only makes the exhausted case
+    obvious in a long run's console output.
+    """
+    print(f"  [fn-retry] {rec.get('case_id')}: still degraded after "
+          f"{FN_RETRY_MAX} attempt(s) -- recorded as FN", flush=True)
 
 
 def _is_degraded_fn(rec: dict) -> bool:
@@ -135,7 +159,12 @@ def _atomic_flush(out_path, rows, tp, fp, tn, fn, err, mid):
     """Write results via tmp + os.replace so a mid-write kill can never
     truncate the output file and lose all resumed progress."""
     import tempfile
-    doc = {"meta": {"manifest_id": mid, **_META},
+    # fn_retry_* are read at WRITE time (not at import): the retry policy
+    # may be tuned after import (env vars, tests), and the meta block must
+    # describe the policy that actually produced these records.
+    doc = {"meta": {"manifest_id": mid, **_META,
+                    "fn_retry_max": FN_RETRY_MAX,
+                    "fn_retry_wait": FN_RETRY_WAIT},
            "cases": rows,
            "counts": {"tp": tp, "fp": fp, "tn": tn, "fn": fn,
                       "errors": err}}
@@ -229,27 +258,47 @@ def main() -> int:
                     # fn_retry note, so the substitution is always
                     # auditable -- never silently discarded.
                     if _is_degraded_fn(rec):
-                        try:
-                            rec2 = _eval(c)
+                        attempts = [{k: rec.get(k) for k in
+                                     ("verdict", "scan_time_s", "requests",
+                                      "error")}]
+                        for _attempt in range(1, FN_RETRY_MAX + 1):
+                            if _attempt > 1:
+                                # Let the degradation window pass: an
+                                # immediate second retry only re-measures
+                                # the same broken loopback.
+                                time.sleep(FN_RETRY_WAIT)
+                            try:
+                                rec2 = _eval(c)
+                            except Exception as e2:
+                                rec["fn_retry"] = {
+                                    "retried": True,
+                                    "retry_error":
+                                        f"{type(e2).__name__}: {e2}",
+                                    "attempts": attempts,
+                                }
+                                print(f"  [fn-retry] {rec['case_id']} "
+                                      f"retry {_attempt} raised ({e2}); "
+                                      f"keeping FN", flush=True)
+                                break
+                            attempts.append({k: rec2.get(k) for k in
+                                             ("verdict", "scan_time_s",
+                                              "requests", "error")})
                             rec2["fn_retry"] = {
                                 "retried": True,
-                                "first": {k: rec.get(k) for k in
-                                          ("verdict", "scan_time_s",
-                                           "requests", "error")},
+                                "first": attempts[0],
+                                "attempts": attempts,
                             }
-                            print(f"  [fn-retry] {rec['case_id']} "
-                                  f"FN({rec['scan_time_s']}s) -> "
-                                  f"{rec2['verdict']} "
+                            print(f"  [fn-retry] {rec['case_id']} attempt "
+                                  f"{_attempt}: FN({attempts[0]['scan_time_s']}s)"
+                                  f" -> {rec2['verdict']} "
                                   f"({rec2['scan_time_s']}s)", flush=True)
                             rec = rec2
-                        except Exception as e2:
-                            rec["fn_retry"] = {
-                                "retried": True,
-                                "retry_error": f"{type(e2).__name__}: {e2}",
-                            }
-                            print(f"  [fn-retry] {rec['case_id']} retry "
-                                  f"failed ({e2}); keeping first FN",
-                                  flush=True)
+                            if not _is_degraded_fn(rec2):
+                                break      # recovered -- stop spending time
+                        else:
+                            # Every attempt still looked degraded: the FN is
+                            # real as far as this environment can tell.
+                            _log_fn_exhausted(rec)
                     done[c["id"]] = rec
                     print(f"  [{len(done)}/{len(cases)}] {rec['case_id']} "
                           f"{rec['verdict']} ({rec['scan_time_s']}s)"

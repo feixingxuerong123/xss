@@ -180,16 +180,26 @@ class AsyncScanner:
         self.findings: list[Finding] = []
         self._semaphore: asyncio.Semaphore | None = None
         self._last_request_time: dict[str, float] = {}
-        # py3.9: asyncio.Lock() binds the CURRENT event loop at construction
-        # time.  Host environments that already consumed the main thread's
-        # implicit loop (pytest, --serve API, library embedding) raise
-        # RuntimeError here -- give the thread a fresh loop and retry.
-        try:
-            self._lock = asyncio.Lock()
-        except RuntimeError:
-            asyncio.set_event_loop(asyncio.new_event_loop())
-            self._lock = asyncio.Lock()
+        # py3.9: asyncio.Lock() binds whatever loop is current at
+        # construction.  Built HERE it would either raise (host thread
+        # without a loop: pytest, --serve, library embedding) or -- if
+        # this code first installed a loop of its own -- bind to a loop
+        # the caller's asyncio.run() never uses, which turns a clean
+        # error into a HANG.  So: create it lazily, inside the loop that
+        # is actually running us.
+        self._lock: asyncio.Lock | None = None
         self._aiohttp_available = self._check_aiohttp()
+
+    def _get_lock(self) -> asyncio.Lock:
+        """The scan-wide lock, created inside the running loop.
+
+        See __init__: constructing it eagerly bound it to whatever loop
+        happened to be current (or raised in a host thread), and a lock
+        bound to a dead loop hangs every ``async with`` on it.
+        """
+        if self._lock is None:
+            self._lock = asyncio.Lock()
+        return self._lock
 
     def _next_proxy(self) -> str | None:
         """Next proxy from the pool, or the static --proxy."""
@@ -1594,7 +1604,7 @@ class AsyncScanner:
                     raise        # Phase 86: stop instead of "next param"
                 except Exception:
                     continue
-                async with self._lock:
+                async with self._get_lock():
                     self._oob_pending.append({
                         "token": token, "url": url, "method": method,
                         "param": param, "payload": variant,
@@ -1622,7 +1632,7 @@ class AsyncScanner:
             return
         timeout = float(timeout if timeout is not None
                         else getattr(self, "oob_timeout", 12))
-        async with self._lock:
+        async with self._get_lock():
             expected = {p["token"] for p in self._oob_pending}
         if not expected:
             return
@@ -1632,7 +1642,7 @@ class AsyncScanner:
         except Exception as e:
             _log.warning("OOB poll failed: %s", e, exc_info=self.verbose)
             received = set()
-        async with self._lock:
+        async with self._get_lock():
             pending = list(self._oob_pending)
             self._oob_pending = []
         confirmed = {t for t in received if t in expected}
@@ -1656,7 +1666,7 @@ class AsyncScanner:
             )
         unconfirmed = [p for p in pending if p["token"] not in confirmed]
         if getattr(self, "oob_keep_listening", False):
-            async with self._lock:
+            async with self._get_lock():
                 self._oob_pending.extend(unconfirmed)
             if unconfirmed:
                 _log.info("[*] blind: %d payload(s) still armed -- the "
@@ -1756,7 +1766,7 @@ class AsyncScanner:
 
     async def _add_finding(self, finding: Finding) -> None:
         """Thread-safe append to the findings list."""
-        async with self._lock:
+        async with self._get_lock():
             self.findings.append(finding)
 
     def _log_budget_stop(self, exc: BaseException) -> None:
@@ -1824,7 +1834,7 @@ class AsyncScanner:
         import random
 
         # -- budget + breaker check (always runs, even with no delay) -----
-        async with self._lock:
+        async with self._get_lock():
             if self.max_requests is not None \
                     and self.requests_made >= self.max_requests:
                 self.budget_exhausted_reason = (

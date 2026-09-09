@@ -89,6 +89,43 @@ def test_async_detects_csp_nonce_leak():
         srv.shutdown()
 
 
+def test_host_loop_is_not_hijacked_by_scanner_construction():
+    """Regression: AsyncScanner must not bind primitives to a host loop.
+
+    py3.9 binds asyncio.Lock() to the loop that is current at
+    construction.  Building it in __init__ either raised (host thread
+    with no loop) or -- when the constructor installed a loop of its own
+    -- bound it to a loop the caller's ``asyncio.run()`` never uses,
+    which turned a clean error into a HANG (every ``async with lock``
+    awaited a dead loop).  Primitives are now created lazily inside the
+    running loop; this test hangs (pytest-timeout failure) if that
+    regresses.
+    """
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    from xssentinel.core.async_scanner import AsyncScanner
+
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    port = srv.server_address[1]
+    try:
+        asc = AsyncScanner(max_concurrent=4, max_payloads=4,
+                           max_transforms=2, timeout=15)
+        assert asc._lock is None, "lock must not be created before a loop runs"
+
+        async def run():
+            got = []
+            async for f in asc.scan(f"http://127.0.0.1:{port}/x",
+                                    method="GET", params={"q": "probe"},
+                                    data={}):
+                got.append(f)
+            return got
+
+        findings = asyncio.run(run())
+        assert findings, "host-loop scenario must still detect the leak"
+    finally:
+        srv.shutdown()
+
+
 def test_async_csp_nonce_uses_probe_response_not_last_variant():
     """Regression guard for the overwritten-``text`` trap.
 
