@@ -1399,6 +1399,110 @@
       "context": "html_element",
       "difficulty": "hard",
       "note": "Phase 110 safe twin: same filename echo, HTML-escaped"
+    },
+    {
+      "id": "pos-redirect-01",
+      "path": "/r/red01",
+      "param": "q",
+      "mode": "redirect_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "open_redirect_xss"
+      ],
+      "context": "redirect",
+      "difficulty": "medium",
+      "note": "Phase 113: redirect sink driven by ?redirect="
+    },
+    {
+      "id": "neg-redirect-01",
+      "path": "/s/red01",
+      "param": "q",
+      "mode": "redirect_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "open_redirect_xss"
+      ],
+      "context": "redirect",
+      "difficulty": "medium",
+      "note": "Phase 113 safe twin: same sink, fixed destination"
+    },
+    {
+      "id": "pos-proto-01",
+      "path": "/r/prt01",
+      "param": "q",
+      "mode": "prototype_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "prototype_pollution"
+      ],
+      "context": "dom_prototype",
+      "difficulty": "hard",
+      "note": "Phase 113: recursive merge + jQuery .html gadget"
+    },
+    {
+      "id": "neg-proto-01",
+      "path": "/s/prt01",
+      "param": "q",
+      "mode": "prototype_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "prototype_pollution"
+      ],
+      "context": "dom_prototype",
+      "difficulty": "hard",
+      "note": "Phase 113 safe twin: same merge, .text() sink"
+    },
+    {
+      "id": "pos-sw-01",
+      "path": "/r/sw01",
+      "param": "q",
+      "mode": "sw_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "service_worker_xss"
+      ],
+      "context": "service_worker",
+      "difficulty": "hard",
+      "note": "Phase 113: serviceWorker.register(<query param>)"
+    },
+    {
+      "id": "neg-sw-01",
+      "path": "/s/sw01",
+      "param": "q",
+      "mode": "sw_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "service_worker_xss"
+      ],
+      "context": "service_worker",
+      "difficulty": "hard",
+      "note": "Phase 113 safe twin: fixed script URL"
+    },
+    {
+      "id": "pos-worker-01",
+      "path": "/r/wk01",
+      "param": "q",
+      "mode": "worker_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "web_worker_xss"
+      ],
+      "context": "web_worker",
+      "difficulty": "hard",
+      "note": "Phase 113: new Worker(<query param>)"
+    },
+    {
+      "id": "neg-worker-01",
+      "path": "/s/wk01",
+      "param": "q",
+      "mode": "worker_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "web_worker_xss"
+      ],
+      "context": "web_worker",
+      "difficulty": "hard",
+      "note": "Phase 113 safe twin: fixed worker URL"
     }
   ]
 }

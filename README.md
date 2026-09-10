@@ -358,6 +358,12 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 113 / 113b：补 4 个页面分析层——又抓出一个系统性误报**。Phase 111 的覆盖矩阵列出 14 个未覆盖层，本轮先补**纯源码分析**的 4 个（不需要浏览器）：`L8_open_redirect`、`L8_prototype`、`L8_service_worker`、`L8_web_worker`（它们的层函数签名是 `(scanner, url, html)`，只看页面源码）。8 个用例（各类 vulnerable + safe 对照，基准 121 → 129）验证 **TP4 TN4 FP0 FN0**——prototype / service worker / worker 三层**首次验证即工作**。
+
+**113b：redirect 层的系统性误报（本轮最有价值的发现）**。`find_redirect_sinks` 用「sink 前后 260 字符窗口里有没有用户输入痕迹」判定 `user_controlled`，而 `USER_INPUT_RE` 的备选里含 **`location.href`** —— 而 sink 语句**自身**恰好就是 `location.href = ...`，于是**任何**对 `location.href` 的赋值都被判为"由用户输入驱动"：一个静态 `?redirect=` 链接 + `location.href = '/home';`（字面量）就被报成 open-redirect → XSS。
+
+修法分两步（第一步不够，被自己的测试逼出第二步）：① 右值是**字符串字面量**则一定不可控；② **排除 sink 自身的左值**再搜索输入来源——但**保留右值**，因为真来源常在右值里（`location.href = location.hash.slice(1)`）。验证：4 种安全形态（单/双引号字面量、链接+字面量、无来源变量）全部 `exploitable=False`，2 种真漏洞形态（URLSearchParams 参数、hash）仍 `True`；`tests/test_redirect_fp.py` 5 例锁定。
+
 **Phase 112：用例可以声明"哪个引擎支持我"（SKIP 而非记成漏报）**。121 用例基线里 async 的唯一 FN 是 `pos-stored-01`——但它不是检测失败：`--stored-inject` 按设计是 sync-only（Phase 85 会明确打印"ignored in --async mode"）。把"引擎从未声称支持的能力"记成漏报，是另一种不诚实（让 async 看起来漏了它根本没实现的向量）。现在用例可声明 `engines: [...]`，在不支持的引擎上求值返回 `verdict="SKIP"`——它不等于 TP/FP/TN/FN 中任何一个（统计正是按这四个显式求和），因此不进比率、但在逐用例记录里可见。stored 两个用例已标 `engines: ["sync"]`；`test_bench_engine_scope.py` 用"被 SKIP 的用例绝不能真的发起扫描"来锁定契约。
 
 **121 用例双引擎基线（Phase 110 口径）**：sync **TP79 FP0 TN42 FN0**（121/121）、async **TP78 FP0 TN42 FN1**（唯一 FN 即上述 sync-only 的 stored 用例，Phase 112 后应显示为 SKIP）。两引擎的 fn-retry 各触发 2 次且**全部翻案为 TP**（`pos-script-01` 3 次尝试、`neg-filter-02` 2 次、`pos-script-02`、`neg-rcdata-02`）——Phase 103 的退避+放宽机制在整轮跑动里又救回 4 个真漏洞。新增的 14 个盲区用例在整轮中**零错误**。结果文件 `benchmark/results/p110_sync.json` / `p110_async.json`。

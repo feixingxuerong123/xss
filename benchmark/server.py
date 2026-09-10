@@ -679,6 +679,105 @@ MODES_CTX: dict = {
     "markdown_filtered": m_markdown_filtered,
 }
 
+# ---------------------------------------------------------------------------
+# Phase 113: page-analysis targets for four layers that had zero coverage.
+#
+# Their layer functions take (scanner, url, html) -- pure source analysis --
+# so the target just contains the pattern they look for:
+#   open redirect  -- a redirect sink fed by a redirect parameter
+#   prototype      -- recursive merge next to a jQuery-style sink gadget
+#   service worker -- serviceWorker.register(<user input>)
+#   web worker     -- new Worker(<user input>)
+# Each has a safe twin keeping the shape but removing the user-controlled
+# flow, so a layer grepping only for the API name fails one of the pair.
+# ---------------------------------------------------------------------------
+
+def m_redirect_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: redirect sink driven by the `redirect` parameter."""
+    return _page(
+        "<a href='/go?redirect=/home'>Home</a><script>"
+        "var target = new URLSearchParams(location.search).get('redirect');"
+        "if (target) { location.href = target; }"
+        "</script>")
+
+
+def m_redirect_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: same sink, fixed destination."""
+    return _page(
+        "<a href='/go?redirect=/home'>Home</a>"
+        "<script>location.href = '/home';</script>")
+
+
+_PROTO_MERGE = (
+    "<div id='out'></div><script>"
+    "function deepMerge(target, src) {"
+    " for (var key in src) {"
+    "  if (typeof src[key] === 'object' && src[key] !== null) {"
+    "   target[key] = target[key] || {};"
+    "   deepMerge(target[key], src[key]);"
+    "  } else { target[key] = src[key]; }"
+    " }"
+    " return target;"
+    "}"
+)
+
+
+def m_prototype_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: recursive merge + jQuery .html(prop) gadget."""
+    return _page(_PROTO_MERGE +
+                 "var cfg = JSON.parse(location.hash.slice(1) || '{}');"
+                 "var opts = deepMerge({}, cfg);"
+                 "$('#out').html(opts.html);</script>")
+
+
+def m_prototype_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: same merge, sink is .text() (no gadget)."""
+    return _page(_PROTO_MERGE +
+                 "var cfg = JSON.parse(location.hash.slice(1) || '{}');"
+                 "var opts = deepMerge({}, cfg);"
+                 "$('#out').text(opts.text);</script>")
+
+
+def m_sw_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: service worker registered from a query parameter."""
+    return _page(
+        "<script>"
+        "var p = new URLSearchParams(location.search).get('sw');"
+        "navigator.serviceWorker.register(p || '/sw.js');"
+        "</script>")
+
+
+def m_sw_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: fixed script URL."""
+    return _page("<script>navigator.serviceWorker.register('/sw.js');"
+                 "</script>")
+
+
+def m_worker_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: worker URL taken from a query parameter."""
+    return _page(
+        "<script>"
+        "var w = new URLSearchParams(location.search).get('w');"
+        "if (w) { new Worker(w); }"
+        "</script>")
+
+
+def m_worker_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: fixed worker URL."""
+    return _page("<script>new Worker('/w.js');</script>")
+
+
+PAGE_MODES: dict = {
+    "redirect_vuln": m_redirect_vuln,
+    "redirect_safe": m_redirect_safe,
+    "prototype_vuln": m_prototype_vuln,
+    "prototype_safe": m_prototype_safe,
+    "sw_vuln": m_sw_vuln,
+    "sw_safe": m_sw_safe,
+    "worker_vuln": m_worker_vuln,
+    "worker_safe": m_worker_safe,
+}
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,
@@ -868,6 +967,9 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
         param = case.get("param", "q")
         ctx_handler = MODES_CTX.get(mode) or POST_MODES.get(mode)
         handler = MODES.get(mode) if ctx_handler is None else None
+        if ctx_handler is None and handler is None and mode in PAGE_MODES:
+            page_fn = PAGE_MODES[mode]
+            handler = lambda v, _h=page_fn: _h(v, {})  # noqa: E731
         if ctx_handler is None and handler is None:
             self._respond(500, {"Content-Type": "text/plain"}, f"unknown mode: {mode}")
             return

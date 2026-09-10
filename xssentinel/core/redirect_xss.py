@@ -146,7 +146,28 @@ def find_redirect_sinks(html_or_js: str) -> list[dict]:
             start = max(0, m.start() - 60)
             end = min(len(block), m.end() + 200)
             snippet = block[start:end]
-            user_controlled = bool(USER_INPUT_RE.search(snippet))
+            # Phase 113b: a literal destination is never attacker
+            # controlled.  Without this, the USER_INPUT_RE alternative
+            # "location.href" matched the sink's own left-hand side, so
+            # every "location.href = '/fixed'" was reported as an open
+            # redirect fed by user input.
+            matched = m.group(0)
+            # Look at the assignment's parts separately.
+            #   * a literal destination cannot carry attacker input, and
+            #   * the LEFT-hand side must not be counted as an input
+            #     source -- it is the sink itself, and USER_INPUT_RE's
+            #     ``location.href`` alternative otherwise matches it.
+            # The right-hand side is kept: a real source frequently lives
+            # there (``location.href = location.hash.slice(1)``).
+            eq = matched.find("=")
+            lhs = matched[:eq] if eq != -1 else ""
+            rhs_m = re.search(r"=\s*([^=].*)$", matched)
+            literal_rhs = bool(
+                rhs_m and re.match(r"""^['"`]""", rhs_m.group(1).strip()))
+            context = snippet.replace(matched, matched.replace(lhs, " "), 1) \
+                if lhs else snippet
+            user_controlled = (bool(USER_INPUT_RE.search(context))
+                               and not literal_rhs)
             sinks_found = [desc for pat, _, desc in DANGER_SINKS
                            if re.search(pat, snippet, re.IGNORECASE)]
             desc = sinks_found[0] if sinks_found else "redirect sink"
