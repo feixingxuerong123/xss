@@ -1,0 +1,207 @@
+{
+  "generated": "2026-09-10 21:45:02",
+  "cases": 12,
+  "total_requests": 514,
+  "total_findings": 12,
+  "elapsed_s": 11.2,
+  "layers": [
+    {
+      "layer": "L1_reflection_profile",
+      "requests": 121,
+      "findings": 0,
+      "share": 23.5,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L7_jsonp",
+      "requests": 96,
+      "findings": 0,
+      "share": 18.7,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L8_header",
+      "requests": 72,
+      "findings": 0,
+      "share": 14.0,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L8_cookie",
+      "requests": 60,
+      "findings": 0,
+      "share": 11.7,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L1_reflected",
+      "requests": 24,
+      "findings": 7,
+      "share": 4.7,
+      "cost_per_finding": 3.4
+    },
+    {
+      "layer": "L7_cors",
+      "requests": 24,
+      "findings": 0,
+      "share": 4.7,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L8_error_page",
+      "requests": 24,
+      "findings": 0,
+      "share": 4.7,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L1_csp_gate",
+      "requests": 24,
+      "findings": 0,
+      "share": 4.7,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L8_markdown",
+      "requests": 12,
+      "findings": 1,
+      "share": 2.3,
+      "cost_per_finding": 12.0
+    },
+    {
+      "layer": "L8_path",
+      "requests": 12,
+      "findings": 0,
+      "share": 2.3,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L7_polyglot",
+      "requests": 12,
+      "findings": 0,
+      "share": 2.3,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L7_mutation",
+      "requests": 11,
+      "findings": 0,
+      "share": 2.1,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L7_dom_clobber",
+      "requests": 11,
+      "findings": 0,
+      "share": 2.1,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L7_template",
+      "requests": 11,
+      "findings": 0,
+      "share": 2.1,
+      "cost_per_finding": null
+    },
+    {
+      "layer": "L3_dom",
+      "requests": 0,
+      "findings": 1,
+      "share": 0.0,
+      "cost_per_finding": 0.0
+    },
+    {
+      "layer": "(other)",
+      "requests": 0,
+      "findings": 3,
+      "share": 0.0,
+      "cost_per_finding": 0.0
+    }
+  ],
+  "per_case": [
+    {
+      "case": "pos-elem-01",
+      "requests": 31,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-attr-01",
+      "requests": 31,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-attr-05",
+      "requests": 37,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-script-01",
+      "requests": 31,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-comment-01",
+      "requests": 31,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-url-01",
+      "requests": 38,
+      "findings": 2,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-dom-01",
+      "requests": 26,
+      "findings": 4,
+      "layers": 7,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "pos-svg-01",
+      "requests": 31,
+      "findings": 1,
+      "layers": 12,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "neg-escape-01",
+      "requests": 39,
+      "findings": 0,
+      "layers": 13,
+      "top_layer": "L7_jsonp"
+    },
+    {
+      "case": "neg-comment-01",
+      "requests": 69,
+      "findings": 0,
+      "layers": 13,
+      "top_layer": "L1_reflection_profile"
+    },
+    {
+      "case": "neg-attr-01",
+      "requests": 93,
+      "findings": 0,
+      "layers": 13,
+      "top_layer": "L1_reflection_profile"
+    },
+    {
+      "case": "neg-csp-01",
+      "requests": 57,
+      "findings": 0,
+      "layers": 13,
+      "top_layer": "L1_csp_gate"
+    }
+  ]
+}

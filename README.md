@@ -358,6 +358,12 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 108：层开销剖析（速度差距拆到层）+ 暴露的基准盲区**。Phase 107 把速度差距量化了（30.5s vs 13.7s），本轮回答"请求花在哪、哪层产出 finding"。实现方式是**零侵入**：在已有的两个咽喉点埋点——`CoverageTracker.touch_layer()`（58 处层边界标记，现在同时记录本线程当前层）+ `Requester._send()`（所有请求的唯一出口，按当前层累加）——无需改任何调用点。工具 `benchmark/layer_profile.py` 输出"层 × 请求数 × 占比 × 产出 finding 数 × 每 finding 请求成本"。
+
+12 用例 514 请求的剖析结果：`L1_reflection_profile` **121 请求（23.5%）0 命中**、`L7_jsonp` 96（18.7%）、`L8_header` 72（14.0%）、`L8_cookie` 60（11.7%）——**前四层占 68% 请求**；而真正命中的 `L1_reflected` 只花 24 请求（4.7%）产出 7 个 finding（**3.4 请求/finding**）。
+
+⚠️ 剖析顺带暴露了一个更根本的问题：**这些"0 命中"不全是层的错，而是基准没有对应用例**。核对 manifest 的 106 个 mode 后确认，引擎有层在跑、但基准**零用例**的向量类型有 7 类：**cookie 注入、CORS、markdown、path 注入、error page、upload、stored**（`header`/`jsonp`/`template` 有用例，`cookie`/`cors`/`markdown`/`path`/`error`/`upload`/`stored` 全是空的）。也就是说这些检测层的代码从未被基准验证过——这是比速度更该优先补的缺口。
+
 **Phase 107：跨工具对照框架（打破自证循环）**。107 用例满分有个隐患——用例是我们设计的、修复是对着用例做的，等于"自己和自己一致"。新增 `benchmark/run_cross_tool.py` + `NucleiAdapter`：用 **ProjectDiscovery 官方的 DAST XSS 模板**（reflected-xss / dom-xss，第三方维护的 payload 与判定逻辑）在**同一批目标**上与 XSSentinel 对跑，产出逐用例矩阵与差异归因。
 
 首次对照（18 用例，覆盖 12 个可绕过家族 + 6 个安全家族）：

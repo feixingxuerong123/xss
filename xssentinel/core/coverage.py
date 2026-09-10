@@ -163,6 +163,48 @@ class EndpointCoverage:
         }
 
 
+# ---------------------------------------------------------------------------
+# Phase 108: per-layer request accounting ("where does the scan spend its
+# requests?").  Layer boundaries are already marked 58 times via
+# CoverageTracker.touch_layer(), so the accounting hangs off that hook plus
+# the Requester's single choke point (_send) -- no call-site changes.
+#
+# The current layer is per-THREAD (scans run concurrently); the counters
+# are shared and lock-protected.
+# ---------------------------------------------------------------------------
+_LAYER_TLS = threading.local()
+_LAYER_REQUESTS: dict = {}
+_LAYER_REQUEST_LOCK = threading.Lock()
+
+UNATTRIBUTED_LAYER = "(unattributed)"
+
+
+def set_current_layer(layer_id: str) -> None:
+    """Mark the layer subsequent requests belong to (this thread)."""
+    _LAYER_TLS.layer = layer_id
+
+
+def current_layer() -> str:
+    return getattr(_LAYER_TLS, "layer", UNATTRIBUTED_LAYER)
+
+
+def count_layer_request() -> None:
+    """Account one outbound request to the current thread's layer."""
+    lid = current_layer()
+    with _LAYER_REQUEST_LOCK:
+        _LAYER_REQUESTS[lid] = _LAYER_REQUESTS.get(lid, 0) + 1
+
+
+def layer_request_counts() -> dict:
+    with _LAYER_REQUEST_LOCK:
+        return dict(_LAYER_REQUESTS)
+
+
+def reset_layer_request_counts() -> None:
+    with _LAYER_REQUEST_LOCK:
+        _LAYER_REQUESTS.clear()
+
+
 class CoverageTracker:
     """Thread-safe scan coverage tracker.
 
@@ -209,6 +251,9 @@ class CoverageTracker:
 
     def touch_layer(self, url: str, layer_id: str,
                     method: str = "GET", detail: str = "") -> None:
+        # Phase 108: every layer boundary marks the current layer so the
+        # Requester can attribute its requests (see module-level helpers).
+        set_current_layer(layer_id)
         if not self._enabled:
             return
         with self._lock:

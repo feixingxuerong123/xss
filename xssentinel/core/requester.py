@@ -189,6 +189,13 @@ class Requester:
         every scan: on a proxy-level failure the entry is evicted and the
         request is retried once on the next live proxy.
         """
+        # Phase 108: attribute this request to the detection layer that is
+        # currently running (set by CoverageTracker.touch_layer).
+        try:
+            from .coverage import count_layer_request
+            count_layer_request()
+        except Exception:
+            pass
         proxies = self._stealth_proxies()
         if proxies is not None:
             kw["proxies"] = proxies
