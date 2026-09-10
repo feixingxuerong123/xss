@@ -358,6 +358,17 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 111：层覆盖矩阵——28 个检测层里有一半从未被基准触发**。Phase 108/109/110 是按"向量家族"补盲区；这轮反过来做完整的静态盘点：从 `coverage.py` 取出**引擎全部 28 个检测层**，逐个核对 121 个用例（120 个 mode）能否让它真正产出 finding。结果写进 `benchmark/layer_coverage.py`（可重跑）与 `benchmark/results/layer_coverage.md`：
+
+**已覆盖 14 层**（raw/attr/escape/rcdata/script/svg 等反射族、DOM 静态+动态、stored、jsonp、CSP、template、postMessage、header/path/cookie/error/markdown —— 后 5 个是 Phase 109/110 刚补的）。
+
+**未覆盖 14 层**：
+- **8 层只需补目标+用例**：`L7_mutation`（只有突变才可执行的形态）、`L7_dom_clobber`（DOM 覆盖）、`L7_polyglot`（需要 polyglot 才能触发）、`L7_time_based`（延迟 sink）、`L8_prototype`（原型污染）、`L8_service_worker`、`L8_web_worker`、`L8_open_redirect`；
+- **3 层需要特定基础设施**：`L2_waf_evade`（需 WAF 目标——目前只有 `test_waf_bypass_e2e.py` 覆盖，不在基准内）、`L4_second_order`（需 `--second-order-inject/-viewers`）、`L5_blind_oob`（需 OOB 监听）；
+- **3 层是爬取类**：`L9_param_miner` / `L9_js_miner` / `L9_form_miner`（需要带表单/JS/参数线索的页面）。
+
+这是下一轮补盲区的明确清单——**"一半的检测层没被验证过"比任何单个已知缺陷都更值得处理**，因为每一层都可能像 path 层那样"写着但实际不工作"。
+
 **Phase 110：补齐最后两类盲区（upload / stored）——基准覆盖盲区清零**。Phase 108 列出的 7 类未覆盖向量中，剩 upload（multipart 文件名回显）与 stored（写入后被另一 URL 渲染）两类，都需要 POST 能力。本轮给基准服务器加了 `do_POST`（表单/JSON/multipart 解析 + 进程内存储 + 视图端点注册），给 runner 加了三种用例形态（`method` / `upload_field` / `view_path` → 自动拼 `--method -d`、`--upload-field`、`--stored-inject/--stored-view/--stored-param`），117 个既有用例的命令行**逐字节不变**。新增 4 个用例（vulnerable/safe 各一对），验证 **TP2 TN2 FP0 FN0**——两层（`upload_xss`/`stored`）都能正常工作。
 
 至此 Phase 108 发现的 7 类盲区全部补齐（cookie / CORS / markdown / path / error-page / upload / stored），基准 **107 → 121 用例**。新增 `tests/test_bench_post_cases.py`（5 例：三种用例形态的旗标构造 + store 往返的 vulnerable/safe 对照）。

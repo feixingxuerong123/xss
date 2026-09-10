@@ -1,0 +1,236 @@
+{
+  "cases": 121,
+  "modes": 120,
+  "layers": 28,
+  "covered": 14,
+  "uncovered": 14,
+  "rows": [
+    {
+      "layer": "L1_reflected",
+      "covered": true,
+      "modes": [
+        "raw_*",
+        "attr_*",
+        "escape_*",
+        "comment_*",
+        "rcdata_*",
+        "output_*",
+        "filter_*",
+        "multi_*",
+        "double_encode_safe",
+        "csp_*"
+      ],
+      "note": "wide"
+    },
+    {
+      "layer": "L2_waf_evade",
+      "covered": false,
+      "modes": [],
+      "note": "no WAF-guarded target in the manifest -- the bypass chain is only covered by tests/test_waf_bypass_e2e.py"
+    },
+    {
+      "layer": "L3_dom_static",
+      "covered": true,
+      "modes": [
+        "dom_hash_*",
+        "dom_jquery_html",
+        "dom_search_eval",
+        "dom_postmessage"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L4_stored",
+      "covered": true,
+      "modes": [
+        "stored_write"
+      ],
+      "note": "added in Phase 110"
+    },
+    {
+      "layer": "L4_second_order",
+      "covered": false,
+      "modes": [],
+      "note": "needs --second-order-inject/-viewers; no case"
+    },
+    {
+      "layer": "L5_blind_oob",
+      "covered": false,
+      "modes": [],
+      "note": "needs an OOB listener configured; no case"
+    },
+    {
+      "layer": "L6_dom_dynamic",
+      "covered": true,
+      "modes": [
+        "dom_*"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L7_mutation",
+      "covered": false,
+      "modes": [],
+      "note": "the layer runs on every page but no target is built to be exploitable ONLY by mutation"
+    },
+    {
+      "layer": "L7_dom_clobber",
+      "covered": false,
+      "modes": [],
+      "note": "no clobbering-shaped target"
+    },
+    {
+      "layer": "L7_template",
+      "covered": true,
+      "modes": [
+        "raw_template",
+        "raw_template_vue"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L7_polyglot",
+      "covered": false,
+      "modes": [],
+      "note": "the layer runs, but no target needs a polyglot payload to fire"
+    },
+    {
+      "layer": "L7_jsonp",
+      "covered": true,
+      "modes": [
+        "jsonp_whitelist",
+        "jsonp_wrapped"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L7_csp",
+      "covered": true,
+      "modes": [
+        "csp_strict_*",
+        "csp_nonce_*"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L7_time_based",
+      "covered": false,
+      "modes": [],
+      "note": "no time-delayed-sink target"
+    },
+    {
+      "layer": "L8_postmessage",
+      "covered": true,
+      "modes": [
+        "dom_postmessage"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L8_prototype",
+      "covered": false,
+      "modes": [],
+      "note": "no prototype-pollution target"
+    },
+    {
+      "layer": "L8_service_worker",
+      "covered": false,
+      "modes": [],
+      "note": "no service-worker target"
+    },
+    {
+      "layer": "L8_web_worker",
+      "covered": false,
+      "modes": [],
+      "note": "no worker target"
+    },
+    {
+      "layer": "L8_open_redirect",
+      "covered": false,
+      "modes": [],
+      "note": "no redirect-echo target"
+    },
+    {
+      "layer": "L8_framework",
+      "covered": true,
+      "modes": [
+        "raw_template_vue"
+      ],
+      "note": "partial (Vue only)"
+    },
+    {
+      "layer": "L8_header",
+      "covered": true,
+      "modes": [
+        "header_only"
+      ],
+      "note": "yes"
+    },
+    {
+      "layer": "L8_path",
+      "covered": true,
+      "modes": [
+        "path_echo"
+      ],
+      "note": "added in Phase 109"
+    },
+    {
+      "layer": "L8_cookie",
+      "covered": true,
+      "modes": [
+        "cookie_echo"
+      ],
+      "note": "added in Phase 109"
+    },
+    {
+      "layer": "L8_error_page",
+      "covered": true,
+      "modes": [
+        "error_echo"
+      ],
+      "note": "added in Phase 109"
+    },
+    {
+      "layer": "L8_markdown",
+      "covered": true,
+      "modes": [
+        "markdown_raw"
+      ],
+      "note": "added in Phase 109"
+    },
+    {
+      "layer": "L9_param_miner",
+      "covered": false,
+      "modes": [],
+      "note": "crawl-time layer; no crawl case in the manifest"
+    },
+    {
+      "layer": "L9_js_miner",
+      "covered": false,
+      "modes": [],
+      "note": "crawl-time layer; no case"
+    },
+    {
+      "layer": "L9_form_miner",
+      "covered": false,
+      "modes": [],
+      "note": "crawl-time layer; no case"
+    }
+  ],
+  "uncovered_layers": [
+    "L2_waf_evade",
+    "L4_second_order",
+    "L5_blind_oob",
+    "L7_mutation",
+    "L7_dom_clobber",
+    "L7_polyglot",
+    "L7_time_based",
+    "L8_prototype",
+    "L8_service_worker",
+    "L8_web_worker",
+    "L8_open_redirect",
+    "L9_param_miner",
+    "L9_js_miner",
+    "L9_form_miner"
+  ]
+}
