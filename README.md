@@ -358,6 +358,19 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 107：跨工具对照框架（打破自证循环）**。107 用例满分有个隐患——用例是我们设计的、修复是对着用例做的，等于"自己和自己一致"。新增 `benchmark/run_cross_tool.py` + `NucleiAdapter`：用 **ProjectDiscovery 官方的 DAST XSS 模板**（reflected-xss / dom-xss，第三方维护的 payload 与判定逻辑）在**同一批目标**上与 XSSentinel 对跑，产出逐用例矩阵与差异归因。
+
+首次对照（18 用例，覆盖 12 个可绕过家族 + 6 个安全家族）：
+
+| tool | TP | FP | TN | FN | time |
+|---|---|---|---|---|---|
+| XSSentinel | 12 | 0 | 6 | 0 | 30.5s |
+| nuclei-dast-xss | 11 | 1 | 5 | 1 | 13.7s |
+
+**结论要两面看**：① 准确率上我们 18/18 全对，nuclei 漏了 `pos-dom-01`（它的 dom 模板未触发）并误报 `neg-csp-01`（反射模板不检查 CSP 是否阻断执行）；② **速度上我们更慢**（30.5s vs 13.7s，另一轮跑动里差距达 12 倍）——因为我们对每个参数做多层/语义确认，而 DAST 模板只查反射。这是有外部参照的真实差距，值得后续优化。
+
+过程中修掉两个让对照失真的问题：**XSSentinelAdapter 从 stdout 读 JSON，但 `-f json` 是写 `-o` 文件的**——旧代码因此把每个用例都判成"未检出"（对照被做局成我们全 FN）；**nuclei 的模板更新检查在代理环境下卡满 240s 超时**，加 `-duc -nc` 后降到 0.7s。另记录一个命名陷阱：`neg-` 前缀表示"**有防御**"而非"安全"（`neg-rcdata-01..04`、`neg-filter-01..03/05/06` 的 ground truth 是 vulnerable）。
+
 **Phase 105：`--diff` 的静默失败（真实使用时才发现）**。拿两份 `benchmark/results/*.json` 跑 `--diff`，它输出"New 0 / Fixed 0 / Regressed 0"、CI verdict PASS——**实际上什么都没比**：`load_report` 是 `data.get("findings", [])`，而基准结果 JSON 用的是 `cases[]`，于是静默返回空列表。客户复测时这类"看起来一切都好"的假绿灯比报错危险得多。现在 `load_report` 校验结构：顶层非对象 / 无 `findings` / `findings` 非列表 / 疑似基准结果（`cases[]`）全部抛 `ValueError` 并指明原因（CLI 已有捕获，打印错误并退出码 2）；**空 `findings` 仍合法**（干净目标是正常结果，不能误伤）。测试 11 例（新增 3 例：基准 JSON 误用、异形 JSON、空 findings 合法）。
 
 **Phase 104：复测差分（`--diff`）的测试覆盖补齐**。复测是漏洞闭环的一环：客户修完重扫，报告要说清哪些 NEW、哪些 FIXED、哪些严重度恶化。`diff_report.py` 的 259 行五分类逻辑（new/fixed/unchanged/regressed/improved + CI verdict）此前**零测试**——错了会直接进客户的复测报告。新增 `tests/test_diff_report.py` 8 例：URL 归一化忽略 fragment 与默认端口但非默认端口参与身份；finding key 对大小写/默认端口不敏感、对 param/context/type 敏感；severity 排序与未知值兜底 info；新增/修复/未变分类；恶化与改善按严重度判定且**恶化不得计入 unchanged**；**CI verdict 只在 new/regressed 时 FAIL（修好东西不能挂构建）**；HTML 渲染；load_report 读取。8/8 一次通过——实现本身正确，缺的只是覆盖。

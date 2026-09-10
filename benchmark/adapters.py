@@ -87,13 +87,27 @@ class XSSentinelAdapter:
         param = case.get("param", "q")
         url = f"{base_url}{path}?{param}=test"
 
+        # Phase 107 fix: -f json writes to the -o FILE, not stdout.  The
+        # old stdout parse therefore always saw an empty string, which
+        # silently scored every XSSentinel case as "not detected" -- the
+        # comparison was rigged against us.  Mirror runner.py: write a
+        # temp report and read it back.
+        import tempfile
+        fd, out_path = tempfile.mkstemp(suffix=".json", prefix="xt_")
+        os.close(fd)
+        # Same budget/knobs as benchmark/runner.py -- a comparison is only
+        # meaningful if we run ourselves the way the benchmark does.
         cmd = [
             sys.executable, "-m", "xssentinel",
             "-u", url,
+            "-f", "json",
+            "-o", out_path,
+            "--progress", "none",
+            "--log-level", "error",
             "--max-payloads", "10",
             "--max-transforms", "6",
-            "-f", "json",
-            "--no-color",
+            "--threads", "2",
+            "--timeout", "10",
         ]
 
         t0 = time.time()
@@ -107,7 +121,11 @@ class XSSentinelAdapter:
             detected = False
             error = None
             try:
-                report = json.loads(stdout)
+                content = ""
+                if os.path.isfile(out_path):
+                    with open(out_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                report = json.loads(content)
                 findings = report.get("findings", [])
                 # Filter to XSS findings (exclude CSP/info)
                 xss = [f for f in findings
@@ -123,6 +141,11 @@ class XSSentinelAdapter:
             return _scan_case_dict(False, "TIMEOUT", 90.0, "timeout")
         except Exception as e:  # noqa: BLE001
             return _scan_case_dict(False, str(e), 0.0, f"exception: {e}")
+        finally:
+            try:
+                os.unlink(out_path)
+            except OSError:
+                pass
 
 
 # ---------------------------------------------------------------------------
@@ -250,7 +273,94 @@ class XSStrikeAdapter:
 # Registry
 # ---------------------------------------------------------------------------
 
-_ALL_ADAPTERS = [XSSentinelAdapter(), DalfoxAdapter(), XSStrikeAdapter()]
+# ---------------------------------------------------------------------------
+# nuclei adapter (Phase 107): third-party DAST XSS templates
+# ---------------------------------------------------------------------------
+
+class NucleiAdapter:
+    """ProjectDiscovery's own DAST XSS templates against the same targets.
+
+    This is the "external corpus" leg: the payloads and the detection logic
+    are maintained by a third party, so agreeing (or disagreeing) with it
+    is real evidence about our detection, not a restatement of cases we
+    designed ourselves.
+
+    Note the template set is honest about its own limits:
+      * reflected-xss.yaml only checks REFLECTION (it cannot tell an escaped
+        reflection from an executable one) -- expect it to fire on our
+        neg-* escaped cases;
+      * dom-xss.yaml drives a real browser and waits for a dialog, i.e. it
+        is execution-level like our DOM engine.
+    Both are their own claim, and we report ourselves the same way.
+    """
+
+    name = "nuclei-dast-xss"
+
+    def __init__(self):
+        self._binary = shutil.which("nuclei") or self._find_go_bin()
+        self._templates = os.path.join(
+            os.path.expanduser("~"), "nuclei-templates", "dast",
+            "vulnerabilities", "xss")
+
+    @staticmethod
+    def _find_go_bin():
+        for cand in (os.path.join(os.path.expanduser("~"), "go", "bin",
+                                  "nuclei.exe"),
+                     os.path.join(os.path.expanduser("~"), "go", "bin",
+                                  "nuclei")):
+            if os.path.isfile(cand):
+                return cand
+        return None
+
+    def available(self) -> bool:
+        return bool(self._binary) and os.path.isdir(self._templates)
+
+    def scan_case(self, base_url: str, case: dict) -> dict:
+        if not self.available():
+            return _scan_case_dict(False, "nuclei or its DAST xss templates "
+                                          "are not installed", 0.0,
+                                   "not-installed")
+        path = case["path"]
+        param = case.get("param", "q")
+        url = f"{base_url}{path}?{param}=test"
+
+        cmd = [
+            self._binary, "-u", url,
+            "-dast", "-t", self._templates,
+            "-jsonl", "-silent", "-no-color",
+            "-timeout", "10", "-retries", "1",
+            # No template update check / no telemetry: on a proxied host the
+            # update probe hung for the full 240s ceiling per case before a
+            # single fuzz request went out.
+            "-duc", "-nc",
+        ]
+        t0 = time.time()
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True,
+                                  timeout=240, cwd=_ROOT)
+            elapsed = time.time() - t0
+            out = (proc.stdout or "")
+            hits = []
+            for line in out.splitlines():
+                line = line.strip()
+                if not line.startswith("{"):
+                    continue
+                try:
+                    j = json.loads(line)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                sev = str((j.get("info") or {}).get("severity", "")).lower()
+                if sev in ("medium", "high", "critical"):
+                    hits.append(j)
+            return _scan_case_dict(bool(hits), out[:500], elapsed)
+        except subprocess.TimeoutExpired:
+            return _scan_case_dict(False, "TIMEOUT", 240.0, "timeout")
+        except Exception as e:  # noqa: BLE001
+            return _scan_case_dict(False, str(e), 0.0, f"exception: {e}")
+
+
+_ALL_ADAPTERS = [XSSentinelAdapter(), DalfoxAdapter(),
+                  XSStrikeAdapter(), NucleiAdapter()]
 
 
 def get_adapters(only_available: bool = True) -> list:

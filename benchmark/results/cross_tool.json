@@ -1,0 +1,149 @@
+{
+  "generated": "2026-09-10 21:41:22",
+  "base_url": "http://127.0.0.1:8896",
+  "tools": [
+    "XSSentinel",
+    "nuclei-dast-xss"
+  ],
+  "cases": 18,
+  "per_tool": {
+    "XSSentinel": {
+      "tp": 12,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0,
+      "errors": 0,
+      "total_time_s": 30.5
+    },
+    "nuclei-dast-xss": {
+      "tp": 11,
+      "fp": 1,
+      "tn": 5,
+      "fn": 1,
+      "errors": 0,
+      "total_time_s": 13.7
+    }
+  },
+  "matrix": {
+    "pos-elem-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_element",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-attr-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_attr_dq",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-attr-05": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_attr_dq_src",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-script-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_script_string_dq",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-script-03": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_script_block",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-comment-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_comment",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-url-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_href_js",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-dom-01": {
+      "ground_truth": "vulnerable",
+      "mode": "dom_hash_innerhtml",
+      "XSSentinel": true,
+      "nuclei-dast-xss": false
+    },
+    "pos-svg-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_svg",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "pos-polyglot-01": {
+      "ground_truth": "vulnerable",
+      "mode": "raw_element",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "neg-rcdata-01": {
+      "ground_truth": "vulnerable",
+      "mode": "rcdata_textarea",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "neg-filter-01": {
+      "ground_truth": "vulnerable",
+      "mode": "filter_script_tag",
+      "XSSentinel": true,
+      "nuclei-dast-xss": true
+    },
+    "neg-escape-01": {
+      "ground_truth": "safe",
+      "mode": "escape_element",
+      "XSSentinel": false,
+      "nuclei-dast-xss": false
+    },
+    "neg-comment-01": {
+      "ground_truth": "safe",
+      "mode": "comment_stripped",
+      "XSSentinel": false,
+      "nuclei-dast-xss": false
+    },
+    "neg-attr-01": {
+      "ground_truth": "safe",
+      "mode": "attr_quotes_stripped",
+      "XSSentinel": false,
+      "nuclei-dast-xss": false
+    },
+    "neg-csp-01": {
+      "ground_truth": "safe",
+      "mode": "csp_strict_element",
+      "XSSentinel": false,
+      "nuclei-dast-xss": true
+    },
+    "neg-jsonp-01": {
+      "ground_truth": "safe",
+      "mode": "jsonp_whitelist",
+      "XSSentinel": false,
+      "nuclei-dast-xss": false
+    },
+    "neg-rcdata-05": {
+      "ground_truth": "safe",
+      "mode": "escape_rcdata_textarea",
+      "XSSentinel": false,
+      "nuclei-dast-xss": false
+    }
+  },
+  "disagreements": [
+    {
+      "case": "pos-dom-01",
+      "tool": "nuclei-dast-xss",
+      "kind": "missed-a-real-XSS"
+    },
+    {
+      "case": "neg-csp-01",
+      "tool": "nuclei-dast-xss",
+      "kind": "false-positive"
+    }
+  ]
+}
