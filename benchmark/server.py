@@ -533,6 +533,139 @@ def m_markdown_filtered(v: str, ctx: dict) -> tuple:
 
 
 # Modes whose handler needs the request context (headers / path).
+# ---------------------------------------------------------------------------
+# Phase 110: POST support, an in-memory store, and upload handlers.
+#
+# These cover the last two vector families that had a live detection layer
+# and no benchmark case (Phase 108):
+#   * upload  -- the app echoes the multipart FILENAME back (upload_probe)
+#   * stored  -- a payload written via one request is rendered later by a
+#                different URL (scanner_stored)
+# ---------------------------------------------------------------------------
+
+import cgi  # noqa: E402  (stdlib; only used for multipart parsing)
+import email as _email  # noqa: E402
+
+# inject-path -> [stored values]  (process-lifetime, like a real toy app)
+_STORE: dict = {}
+# view-path -> inject-path, built from the manifest (view_path field)
+VIEW_TO_INJECT: dict = {}
+
+
+def _parse_multipart_parts(content_type: str, body: bytes):
+    """Return [(name, value, filename_or_None)] for a multipart body."""
+    boundary = None
+    for part in (content_type or "").split(";"):
+        part = part.strip()
+        if part.startswith("boundary="):
+            boundary = part.split("=", 1)[1].strip().strip('"')
+            break
+    if not boundary or not body:
+        return []
+    try:
+        msg = _email.message_from_bytes(
+            b"MIME-Version: 1.0\r\n"
+            b"Content-Type: multipart/form-data; boundary="
+            + boundary.encode("utf-8", "replace") + b"\r\n\r\n" + body)
+    except Exception:
+        return []
+    out = []
+    for part in msg.walk():
+        if part.is_multipart():
+            continue
+        name = part.get_param("name", header="content-disposition")
+        if not name:
+            continue
+        fname = part.get_filename()
+        try:
+            payload = part.get_payload(decode=True)
+            value = payload.decode("utf-8", "replace") \
+                if isinstance(payload, bytes) else str(payload)
+        except Exception:
+            value = ""
+        out.append((name, value, fname))
+    return out
+
+
+def _parse_post_body(content_type: str, body: bytes) -> tuple:
+    """Return (fields, files) for a POST body.
+
+    fields: {name: value}; files: {field: filename}
+    """
+    ct = (content_type or "").lower()
+    text = body.decode("utf-8", "replace") if body else ""
+    if "multipart/form-data" in ct:
+        fields, files = {}, {}
+        for name, value, fname in _parse_multipart_parts(content_type, body):
+            if fname:
+                files[name] = fname
+            else:
+                fields[name] = value
+        return fields, files
+    if "json" in ct:
+        try:
+            obj = json.loads(text)
+            if isinstance(obj, dict):
+                return {str(k): ("" if v is None else str(v))
+                        for k, v in obj.items()}, {}
+        except Exception:
+            pass
+        return {}, {}
+    try:
+        return {k: v[0] for k, v in parse_qs(text,
+                                             keep_blank_values=True).items()}, {}
+    except Exception:
+        return {}, {}
+
+
+def m_stored_write(v: str, ctx: dict) -> tuple:
+    """Vulnerable: store the submitted value verbatim."""
+    _STORE.setdefault(ctx.get("path") or "", []).append(v)
+    return _page(f"<div>Saved: {v}</div>")
+
+
+def m_stored_write_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: store the HTML-escaped value."""
+    _STORE.setdefault(ctx.get("path") or "", []).append(
+        html.escape(v, quote=True))
+    return _page(f"<div>Saved: {html.escape(v, quote=True)}</div>")
+
+
+def m_stored_view(v: str, ctx: dict) -> tuple:
+    """Vulnerable: render every stored entry for this view's inject path."""
+    key = VIEW_TO_INJECT.get(ctx.get("path") or "", "")
+    items = _STORE.get(key, [])
+    body = "".join(f"<li>{x}</li>" for x in items) or "<li>(empty)</li>"
+    return _page(f"<ul>{body}</ul>")
+
+
+def m_upload_echo(v: str, ctx: dict) -> tuple:
+    """Vulnerable: echo the uploaded FILENAME raw."""
+    fname = (ctx.get("files") or {}).get(ctx.get("field") or "", "")
+    return _page(f"<div>Uploaded file: {fname}</div>")
+
+
+def m_upload_echo_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: same echo, HTML-escaped."""
+    fname = (ctx.get("files") or {}).get(ctx.get("field") or "", "")
+    return _page(f"<div>Uploaded file: {html.escape(fname, quote=True)}</div>")
+
+
+def m_json_echo(v: str, ctx: dict) -> tuple:
+    """Echo a JSON field back raw (JSON-body reflection, POST)."""
+    val = (ctx.get("fields") or {}).get(ctx.get("field") or "q", "")
+    return _page(f'<div>{"status": "ok", "echo": "{val}"}</div>')
+
+
+POST_MODES: dict = {
+    "stored_write": m_stored_write,
+    "stored_write_escaped": m_stored_write_escaped,
+    "stored_view": m_stored_view,
+    "upload_echo": m_upload_echo,
+    "upload_echo_escaped": m_upload_echo_escaped,
+    "json_echo": m_json_echo,
+}
+
 MODES_CTX: dict = {
     "cookie_echo": m_cookie_echo,
     "cookie_echo_escaped": m_cookie_echo_escaped,
@@ -682,6 +815,13 @@ def load_routes() -> dict[str, dict]:
     routes = {}
     for case in manifest["cases"]:
         routes[case["path"]] = case
+        # Phase 110: a stored case names the GET endpoint that renders what
+        # its POST endpoint stored.
+        vp = case.get("view_path")
+        if vp:
+            VIEW_TO_INJECT[vp] = case["path"]
+            routes.setdefault(vp, dict(case, mode=case.get(
+                "view_mode", "stored_view")))
     return routes
 
 
@@ -726,8 +866,8 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
 
         mode = case["mode"]
         param = case.get("param", "q")
-        ctx_handler = MODES_CTX.get(mode)
-        handler = MODES.get(mode)
+        ctx_handler = MODES_CTX.get(mode) or POST_MODES.get(mode)
+        handler = MODES.get(mode) if ctx_handler is None else None
         if ctx_handler is None and handler is None:
             self._respond(500, {"Content-Type": "text/plain"}, f"unknown mode: {mode}")
             return
@@ -752,6 +892,55 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
             return
 
         self._respond(status, headers, body)
+
+
+
+    def do_POST(self):
+        """POST endpoints: stored writes/views, multipart uploads, JSON echo.
+
+        The store lives in process memory keyed by the INJECT path, so a
+        later GET of a registered view path renders what was written --
+        that is the whole shape of stored XSS.
+        """
+        parsed = urlparse(self.path)
+        path = parsed.path
+        case = self.routes.get(path)
+        if case is None:
+            for pfx, pc in self.routes.items():
+                if pfx.endswith("*") and path.startswith(pfx[:-1]):
+                    case = pc
+                    break
+        if case is None:
+            self._respond(404, {"Content-Type": "text/html; charset=utf-8"},
+                          "<!DOCTYPE html><html><body><h1>404</h1>"
+                          "<p>No such resource.</p></body></html>")
+            return
+        mode = case["mode"]
+        handler = POST_MODES.get(mode)
+        if handler is None:
+            self._respond(405, {"Content-Type": "text/plain"},
+                          f"mode {mode} is not a POST endpoint")
+            return
+        length = int(self.headers.get("Content-Length") or 0)
+        body = self.rfile.read(length) if length > 0 else b""
+        fields, files = _parse_post_body(self.headers.get("Content-Type"), body)
+        field = case.get("param", "q")
+        value = fields.get(field, files.get(field, ""))
+        context = {
+            "headers": dict(self.headers),
+            "path": path,
+            "fields": fields,
+            "files": files,
+            "field": case.get("upload_field") or field,
+            "method": "POST",
+        }
+        try:
+            status, headers, out = handler(value, context)
+        except Exception as e:
+            self._respond(500, {"Content-Type": "text/plain"},
+                          f"mode error: {e}")
+            return
+        self._respond(status, headers, out)
 
     def _respond(self, status: int, headers: dict, body: str):
         self.send_response(status)

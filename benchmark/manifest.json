@@ -1331,6 +1331,68 @@
       "finding_types": [
         "reflected"
       ]
+    },
+    {
+      "id": "pos-stored-01",
+      "path": "/r/st01",
+      "view_path": "/v/st01",
+      "param": "q",
+      "mode": "stored_write",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "stored",
+        "stored_upload"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 110: POST /r/st01 stores the value verbatim and GET /v/st01 renders it raw -- classic stored XSS"
+    },
+    {
+      "id": "neg-stored-01",
+      "path": "/s/st01",
+      "view_path": "/v/st01e",
+      "param": "q",
+      "mode": "stored_write_escaped",
+      "ground_truth": "safe",
+      "finding_types": [
+        "stored",
+        "stored_upload"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 110 safe twin: the value is escaped at STORE time"
+    },
+    {
+      "id": "pos-upload-01",
+      "path": "/r/up01",
+      "upload_field": "avatar",
+      "param": "q",
+      "method": "POST",
+      "mode": "upload_echo",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "upload_xss",
+        "stored_upload"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 110: the multipart FILENAME is echoed back raw"
+    },
+    {
+      "id": "neg-upload-01",
+      "path": "/s/up01",
+      "upload_field": "avatar",
+      "param": "q",
+      "method": "POST",
+      "mode": "upload_echo_escaped",
+      "ground_truth": "safe",
+      "finding_types": [
+        "upload_xss",
+        "stored_upload"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 110 safe twin: same filename echo, HTML-escaped"
     }
   ]
 }

@@ -358,6 +358,10 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 110：补齐最后两类盲区（upload / stored）——基准覆盖盲区清零**。Phase 108 列出的 7 类未覆盖向量中，剩 upload（multipart 文件名回显）与 stored（写入后被另一 URL 渲染）两类，都需要 POST 能力。本轮给基准服务器加了 `do_POST`（表单/JSON/multipart 解析 + 进程内存储 + 视图端点注册），给 runner 加了三种用例形态（`method` / `upload_field` / `view_path` → 自动拼 `--method -d`、`--upload-field`、`--stored-inject/--stored-view/--stored-param`），117 个既有用例的命令行**逐字节不变**。新增 4 个用例（vulnerable/safe 各一对），验证 **TP2 TN2 FP0 FN0**——两层（`upload_xss`/`stored`）都能正常工作。
+
+至此 Phase 108 发现的 7 类盲区全部补齐（cookie / CORS / markdown / path / error-page / upload / stored），基准 **107 → 121 用例**。新增 `tests/test_bench_post_cases.py`（5 例：三种用例形态的旗标构造 + store 往返的 vulnerable/safe 对照）。
+
 **Phase 109：补上 7 类基准盲区中的 5 类——并立刻抓出 3 个真缺陷**。Phase 108 发现引擎有 7 类向量（cookie/CORS/markdown/path/error/upload/stored）**有层在跑但从无用例**。本轮先补 GET 可实现的 5 类（每类 vulnerable + safe 对照，共 10 个用例，基准 107→117），服务器为此扩展了"请求上下文分发"（handler 可读 Cookie/Origin/path）与"前缀路由"（path 层会把 payload 追加成新路径段）。补完立刻验出 3 个真缺陷：
 
 1. **path 注入层在真实目标上基本是坏的（最严重）**：`_scan_path_xss` 硬编码 `<svg/onload=alert('token')>` 并**裸拼**进路径，而该 payload 含 `/` —— 实际发出的请求是 `/r/pth01/*/%3Csvg/onload=alert('x')%3E`，payload 被 `/` **切成两段**，回显单段的目标永远不可能命中。该层的模块文档声称"不产生含 `/` 的载荷"、`path_xss.py` 也早就有 `path_payloads()` 与 `build_test_url()`（后者用 `safe=""` 把 `/` 编码为 `%2F`）——**代码没用它们**。修：改用模块的载荷集与 URL 构造器。对照证明：同一目标 error 层（用完整编码）命中、path 层不命中，修后两者都命中。

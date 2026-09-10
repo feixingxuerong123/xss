@@ -85,12 +85,41 @@ class BenchmarkResult:
 # Scanner invocation
 # ---------------------------------------------------------------------------
 
+
+def _case_extra_args(base_url: str, case: dict) -> list | None:
+    """CLI arguments a case needs beyond -u (Phase 110).
+
+    * ``method``: POST/PUT cases carry the parameter in -d.
+    * ``upload_field``: enables the multipart filename probe.
+    * ``view_path``: the GET endpoint that renders what this case stored
+      -- drives the dedicated --stored-inject/--stored-view entry point.
+
+    Returns None when a case needs nothing extra, so 117 existing cases
+    build the exact same command line as before.
+    """
+    extra: list = []
+    method = str(case.get("method", "GET")).upper()
+    param = case.get("param", "q")
+    if method != "GET":
+        extra += ["--method", method, "-d", f"{param}=xssentinel_bench_probe"]
+    if case.get("upload_field"):
+        extra += ["--upload-field", str(case["upload_field"])]
+    if case.get("view_path"):
+        extra += [
+            "--stored-inject", f"{base_url}{case['path']}",
+            "--stored-view", f"{base_url}{case['view_path']}",
+            "--stored-param", param,
+        ]
+    return extra or None
+
 def _build_target_url(base: str, case: dict) -> str:
     """Construct the target URL for a manifest case."""
     path = case["path"]
     param = case.get("param", "q")
     url = f"{base}{path}"
-    if param:
+    # Phase 110: body-carried cases (upload/stored) put the parameter in
+    # -d instead, so the URL must stay clean.
+    if param and case.get("method", "GET").upper() == "GET":
         url += f"?{param}=xssentinel_bench_probe"
     return url
 
@@ -254,7 +283,8 @@ def evaluate_case(base_url: str, case: dict, timeout: int,
     report, elapsed, error = _invoke_scanner(
         url, timeout=timeout,
         max_payloads=max_payloads, max_transforms=max_transforms,
-        engine=engine)
+        engine=engine,
+        extra_args=_case_extra_args(base_url, case))
 
     detected, count, details = _is_detected(report, case)
     gt = case["ground_truth"]
