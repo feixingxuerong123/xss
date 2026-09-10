@@ -57,10 +57,39 @@ def _severity_rank(s: str) -> int:
 
 
 def load_report(path: str) -> list[dict]:
-    """Load a JSON scan report and return its findings list."""
+    """Load a JSON scan report and return its findings list.
+
+    Phase 105: this used to be ``data.get("findings", [])`` -- feed it
+    anything else (a benchmark result with ``cases[]``, an unrelated
+    JSON, a report from another tool) and it silently returned [] , so
+    --diff cheerfully reported "0 new, 0 fixed, 0 regressed" and a build
+    passed on a comparison that never happened.  A re-test report saying
+    "nothing changed" when it read nothing is worse than an error, so
+    the shape is now validated and wrong input fails loudly.
+    """
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return data.get("findings", [])
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"{path}: expected a JSON object at the top level, got "
+            f"{type(data).__name__}")
+    if "findings" in data:
+        findings = data["findings"]
+        if not isinstance(findings, list):
+            raise ValueError(
+                f"{path}: 'findings' must be a list, got "
+                f"{type(findings).__name__}")
+        return findings
+    # The realistic mistake: benchmark/results/*.json carries case
+    # verdicts under "cases", not findings.
+    if "cases" in data and isinstance(data["cases"], list):
+        raise ValueError(
+            f"{path}: this looks like a BENCHMARK RESULT (cases[]), not a "
+            "scan report (findings[]).  --diff compares two SCAN reports "
+            "(the JSON produced by -o), not benchmark runs.")
+    raise ValueError(
+        f"{path}: no 'findings' array -- not an XSSentinel scan report "
+        "(keys: " + ", ".join(sorted(data)[:6]) + ")")
 
 
 def diff_findings(baseline: list[dict],

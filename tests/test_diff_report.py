@@ -14,6 +14,8 @@ import json
 import os
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from xssentinel.core.diff_report import (
@@ -88,6 +90,42 @@ def test_ci_verdict_fails_on_new_or_regressed_only():
     # FIXING things must not fail the build
     better = diff_report_json([_f(param="a", sev="high")], [])
     assert json.loads(better)["ci_verdict"] == "PASS"
+
+
+def test_load_report_rejects_a_benchmark_result(tmp_path):
+    """Phase 105: this used to silently return [] .
+
+    Feeding --diff a benchmark/results/*.json (cases[]) produced "0 new,
+    0 fixed, 0 regressed" -- a re-test report claiming nothing changed
+    when it had compared nothing, and a green CI verdict on top of it.
+    Wrong input must fail loudly.
+    """
+    p = tmp_path / "bench.json"
+    p.write_text(json.dumps({"meta": {}, "cases": [{"case_id": "a"}]}),
+                 encoding="utf-8")
+    with pytest.raises(ValueError) as ei:
+        load_report(str(p))
+    assert "BENCHMARK" in str(ei.value)
+
+
+def test_load_report_rejects_foreign_and_malformed_json(tmp_path):
+    for name, payload in (
+        ("unrelated.json", {"meta": {}, "rows": []}),
+        ("findings_not_list.json", {"findings": {"a": 1}}),
+        ("toplevel_list.json", [1, 2, 3]),
+    ):
+        p = tmp_path / name
+        p.write_text(json.dumps(payload), encoding="utf-8")
+        with pytest.raises(ValueError):
+            load_report(str(p))
+
+
+def test_load_report_accepts_an_empty_findings_list(tmp_path):
+    # "0 findings" is a legitimate scan result (a clean target), not an
+    # error -- it must NOT be rejected.
+    p = tmp_path / "clean.json"
+    p.write_text(json.dumps({"findings": []}), encoding="utf-8")
+    assert load_report(str(p)) == []
 
 
 def test_html_report_renders_all_categories():

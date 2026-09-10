@@ -354,7 +354,11 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 **Phase 102：WAF 目标的端到端演练（此前零覆盖的实战主场景）**。大量真实目标在 Cloudflare/ModSecurity/Akamai 之后，`waf.py` 指纹与 `bypass.py` 厂商绕过链（Phase 91）都存在、扫描器见到 WAF 也会前置绕过变体，但**从未被整体验证过**。新增 `tests/test_waf_bypass_e2e.py`：伪 WAF 宣告自己（Server: cloudflare + CF-RAY + body 里的 Ray ID 注释）、403 掉两类朴素签名（`<script`、`<svg onload=`）、放行大小写/实体/UTF-7/unicode/`javascript:` 等形态。结论：**链路是通的**——引擎检出 Cloudflare → 走绕过链 → 命中确认（获胜载荷是 `<svg/onload=...>` 这类替代语法，而非被拦形态），对照组（无 WAF 头同一页面）正常。校准踩坑已写进文件注释：① 预算故意取小（4x3），满预算（~170 变体）在本机会偶发跑不到可确认变体而 flaky（曾出现 96s/128s 与零 finding）；② 若连 `onerror=`/`onload=` 一起拦（解码后大小写不敏感），目标比真实规则型 WAF 还硬，只有大预算能过——那测的是本机速度而非绕过逻辑。
 
 
+**p103 基线（107 用例，Phase 103 口径）**：async **TP72 FP0 TN35 FN0**（f1=1.000，343s）——对比 p101 的 TP71/FN1，`neg-filter-06` 回归 TP、FN 归零。要说清楚的是：**这次跑动 fn_retry 一次都没触发**（环境正常、用例都是一次正常完成），所以 FN 归零主要来自环境本身，不能算 Phase 103 的功劳；Phase 103 的价值已由受控实验独立证明（同一慢度下 2s→FN / 30s→TP）。sync 那一轮撞上劣化窗口（30/107、耗时 23006s、FN15），结果已废弃不提交，改在环境恢复后重跑。
+
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
+
+**Phase 105：`--diff` 的静默失败（真实使用时才发现）**。拿两份 `benchmark/results/*.json` 跑 `--diff`，它输出"New 0 / Fixed 0 / Regressed 0"、CI verdict PASS——**实际上什么都没比**：`load_report` 是 `data.get("findings", [])`，而基准结果 JSON 用的是 `cases[]`，于是静默返回空列表。客户复测时这类"看起来一切都好"的假绿灯比报错危险得多。现在 `load_report` 校验结构：顶层非对象 / 无 `findings` / `findings` 非列表 / 疑似基准结果（`cases[]`）全部抛 `ValueError` 并指明原因（CLI 已有捕获，打印错误并退出码 2）；**空 `findings` 仍合法**（干净目标是正常结果，不能误伤）。测试 11 例（新增 3 例：基准 JSON 误用、异形 JSON、空 findings 合法）。
 
 **Phase 104：复测差分（`--diff`）的测试覆盖补齐**。复测是漏洞闭环的一环：客户修完重扫，报告要说清哪些 NEW、哪些 FIXED、哪些严重度恶化。`diff_report.py` 的 259 行五分类逻辑（new/fixed/unchanged/regressed/improved + CI verdict）此前**零测试**——错了会直接进客户的复测报告。新增 `tests/test_diff_report.py` 8 例：URL 归一化忽略 fragment 与默认端口但非默认端口参与身份；finding key 对大小写/默认端口不敏感、对 param/context/type 敏感；severity 排序与未知值兜底 info；新增/修复/未变分类；恶化与改善按严重度判定且**恶化不得计入 unchanged**；**CI verdict 只在 new/regressed 时 FAIL（修好东西不能挂构建）**；HTML 渲染；load_report 读取。8/8 一次通过——实现本身正确，缺的只是覆盖。
 
