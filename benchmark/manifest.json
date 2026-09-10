@@ -1345,7 +1345,10 @@
       ],
       "context": "html_element",
       "difficulty": "hard",
-      "note": "Phase 110: POST /r/st01 stores the value verbatim and GET /v/st01 renders it raw -- classic stored XSS"
+      "note": "Phase 110: POST /r/st01 stores the value verbatim and GET /v/st01 renders it raw -- classic stored XSS",
+      "engines": [
+        "sync"
+      ]
     },
     {
       "id": "neg-stored-01",
@@ -1360,7 +1363,10 @@
       ],
       "context": "html_element",
       "difficulty": "hard",
-      "note": "Phase 110 safe twin: the value is escaped at STORE time"
+      "note": "Phase 110 safe twin: the value is escaped at STORE time",
+      "engines": [
+        "sync"
+      ]
     },
     {
       "id": "pos-upload-01",

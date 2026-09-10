@@ -279,6 +279,22 @@ def evaluate_case(base_url: str, case: dict, timeout: int,
                   max_payloads: int, max_transforms: int,
                   engine: str = "sync") -> CaseResult:
     """Evaluate a single manifest case."""
+    # Phase 112: some vectors exist on one engine only (stored is
+    # sync-only).  Such a case is SKIPPED, not scored as a miss -- an
+    # engine cannot be credited with, or blamed for, a vector it does
+    # not implement.
+    supported = case.get("engines")
+    if supported and engine not in supported:
+        return CaseResult(
+            case_id=case["id"], path=case["path"],
+            param=case.get("param", "q"), mode=case["mode"],
+            ground_truth=case["ground_truth"],
+            context=case.get("context", ""),
+            difficulty=case.get("difficulty", ""),
+            detected=False, verdict="SKIP", scan_time_s=0.0,
+            findings_count=0, requests=0, error="",
+            finding_details=[],
+        )
     url = _build_target_url(base_url, case)
     report, elapsed, error = _invoke_scanner(
         url, timeout=timeout,

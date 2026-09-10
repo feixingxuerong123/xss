@@ -358,6 +358,10 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 112：用例可以声明"哪个引擎支持我"（SKIP 而非记成漏报）**。121 用例基线里 async 的唯一 FN 是 `pos-stored-01`——但它不是检测失败：`--stored-inject` 按设计是 sync-only（Phase 85 会明确打印"ignored in --async mode"）。把"引擎从未声称支持的能力"记成漏报，是另一种不诚实（让 async 看起来漏了它根本没实现的向量）。现在用例可声明 `engines: [...]`，在不支持的引擎上求值返回 `verdict="SKIP"`——它不等于 TP/FP/TN/FN 中任何一个（统计正是按这四个显式求和），因此不进比率、但在逐用例记录里可见。stored 两个用例已标 `engines: ["sync"]`；`test_bench_engine_scope.py` 用"被 SKIP 的用例绝不能真的发起扫描"来锁定契约。
+
+**121 用例双引擎基线（Phase 110 口径）**：sync **TP79 FP0 TN42 FN0**（121/121）、async **TP78 FP0 TN42 FN1**（唯一 FN 即上述 sync-only 的 stored 用例，Phase 112 后应显示为 SKIP）。两引擎的 fn-retry 各触发 2 次且**全部翻案为 TP**（`pos-script-01` 3 次尝试、`neg-filter-02` 2 次、`pos-script-02`、`neg-rcdata-02`）——Phase 103 的退避+放宽机制在整轮跑动里又救回 4 个真漏洞。新增的 14 个盲区用例在整轮中**零错误**。结果文件 `benchmark/results/p110_sync.json` / `p110_async.json`。
+
 **Phase 111：层覆盖矩阵——28 个检测层里有一半从未被基准触发**。Phase 108/109/110 是按"向量家族"补盲区；这轮反过来做完整的静态盘点：从 `coverage.py` 取出**引擎全部 28 个检测层**，逐个核对 121 个用例（120 个 mode）能否让它真正产出 finding。结果写进 `benchmark/layer_coverage.py`（可重跑）与 `benchmark/results/layer_coverage.md`：
 
 **已覆盖 14 层**（raw/attr/escape/rcdata/script/svg 等反射族、DOM 静态+动态、stored、jsonp、CSP、template、postMessage、header/path/cookie/error/markdown —— 后 5 个是 Phase 109/110 刚补的）。
