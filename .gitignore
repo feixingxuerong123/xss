@@ -39,3 +39,6 @@ tests/batch_reports/
 benchmark/results/tmp*.json
 .coverage*
 .coverage_report.txt
+
+# benchmark runs can drop per-target JSON reports in benchmark/
+benchmark/http_*.json
