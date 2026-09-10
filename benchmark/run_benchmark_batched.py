@@ -70,6 +70,14 @@ TIMEOUT = int(sys.argv[7]) if len(sys.argv) > 7 else 45
 # (see _is_degraded_fn) and only FNs pay this cost.
 FN_RETRY_MAX = int(os.environ.get("XSS_FN_RETRY_MAX", "2"))
 FN_RETRY_WAIT = float(os.environ.get("XSS_FN_RETRY_WAIT", "20"))
+# Phase 103: retries get a WIDER timeout.  p101 showed a FN whose three
+# attempts all timed out at 90s while reporting requests=91 -- every
+# request went out, the host was merely slow; standalone the same case
+# finished in 0.83s as a TP.  Retrying a slow environment at the same
+# ceiling just re-measures the slowness.  Only the retry path pays this,
+# and each attempt records the timeout it actually used.
+FN_RETRY_TIMEOUT_SCALE = float(
+    os.environ.get("XSS_FN_RETRY_TIMEOUT_SCALE", "2"))
 
 
 def start_server(port: int) -> ThreadingHTTPServer:
@@ -116,11 +124,12 @@ _META = {  # budget of THIS runner (audit: cross-run comparison needs it)
     "fn_retry_on": True,   # Phase 97: degraded-FN second confirmation
     "fn_retry_max": FN_RETRY_MAX,
     "fn_retry_wait": FN_RETRY_WAIT,
+    "fn_retry_timeout_scale": FN_RETRY_TIMEOUT_SCALE,
 }
 
 FN_RETRY_BUDGET_KEYS = ("engine", "max_payloads", "max_transforms",
                         "timeout", "fn_retry_on", "fn_retry_max",
-                        "fn_retry_wait")
+                        "fn_retry_wait", "fn_retry_timeout_scale")
 
 
 def _log_fn_exhausted(rec: dict) -> None:
@@ -164,7 +173,8 @@ def _atomic_flush(out_path, rows, tp, fp, tn, fn, err, mid):
     # describe the policy that actually produced these records.
     doc = {"meta": {"manifest_id": mid, **_META,
                     "fn_retry_max": FN_RETRY_MAX,
-                    "fn_retry_wait": FN_RETRY_WAIT},
+                    "fn_retry_wait": FN_RETRY_WAIT,
+                    "fn_retry_timeout_scale": FN_RETRY_TIMEOUT_SCALE},
            "cases": rows,
            "counts": {"tp": tp, "fp": fp, "tn": tn, "fn": fn,
                       "errors": err}}
@@ -210,10 +220,17 @@ def main() -> int:
     base = f"http://127.0.0.1:{PORT}"
     t0 = time.time()
 
-    def _eval(c: dict) -> dict:
-        """Evaluate one case and shape it into a result record."""
+    def _eval(c: dict, timeout: int | None = None) -> dict:
+        """Evaluate one case and shape it into a result record.
+
+        ``timeout`` overrides the run's ceiling -- used by the FN retry
+        path, which re-measures a slow environment at a wider ceiling
+        (Phase 103).  The value used is carried in the record so a
+        reader never has to guess.
+        """
+        used = int(timeout or TIMEOUT)
         res = evaluate_case(
-            base, c, timeout=TIMEOUT,
+            base, c, timeout=used,
             max_payloads=MAX_PAYLOADS,
             max_transforms=MAX_TRANSFORMS,
             engine=ENGINE)
@@ -228,6 +245,7 @@ def main() -> int:
             "findings_count": res.findings_count,
             "requests": res.requests,
             "error": res.error,
+            "timeout": used,
         }
 
     def _error_rec(c: dict, e: Exception) -> dict:
@@ -267,8 +285,12 @@ def main() -> int:
                                 # immediate second retry only re-measures
                                 # the same broken loopback.
                                 time.sleep(FN_RETRY_WAIT)
+                            # Phase 103: a SLOW host (requests went out,
+                            # the clock ran out) needs a wider ceiling,
+                            # not another identical measurement.
+                            _to = int(TIMEOUT * FN_RETRY_TIMEOUT_SCALE)
                             try:
-                                rec2 = _eval(c)
+                                rec2 = _eval(c, timeout=_to)
                             except Exception as e2:
                                 rec["fn_retry"] = {
                                     "retried": True,
@@ -282,7 +304,8 @@ def main() -> int:
                                 break
                             attempts.append({k: rec2.get(k) for k in
                                              ("verdict", "scan_time_s",
-                                              "requests", "error")})
+                                              "requests", "error",
+                                              "timeout")})
                             rec2["fn_retry"] = {
                                 "retried": True,
                                 "first": attempts[0],

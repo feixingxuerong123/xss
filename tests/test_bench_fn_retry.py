@@ -40,12 +40,13 @@ def _load_runner(tmp_path, scripts):
                              "context": "html_element",
                              "difficulty": "easy"}]
 
-    calls = {"n": 0}
+    calls = {"n": 0, "timeouts": []}
 
     def _fake(base, c, timeout=0, max_payloads=0, max_transforms=0,
               engine="sync"):
         i = calls["n"]
         calls["n"] += 1
+        calls["timeouts"].append(timeout)
         s = scripts[min(i, len(scripts) - 1)]
         return types.SimpleNamespace(
             case_id=c["id"], path=c["path"], param=c["param"],
@@ -98,6 +99,25 @@ def test_normal_finish_fn_is_never_retried(tmp_path):
     assert "fn_retry" not in rec, "a real code FN must stay untouched"
 
 
+def test_retry_uses_a_wider_timeout(tmp_path):
+    """The 'slow host' case (Phase 103): requests go out, the clock runs out.
+
+    p101's neg-filter-06 timed out three times at 90s with requests=91
+    and reproduced as TP in 0.83s standalone -- retrying it at the SAME
+    ceiling just re-measures the slowness.  The retry must widen the
+    timeout, and the record must say which ceiling each attempt used.
+    """
+    m, out, calls = _load_runner(tmp_path, [_TIMEOUT_FN, _TP])
+    m.main()
+    rec = json.load(open(out, encoding="utf-8"))["cases"][0]
+    assert calls["timeouts"][0] == m.TIMEOUT
+    assert calls["timeouts"][1] == int(m.TIMEOUT * m.FN_RETRY_TIMEOUT_SCALE), (
+        f"retry reused the original ceiling {m.TIMEOUT}s -- a slow-host FN "
+        f"can never be re-confirmed that way")
+    attempts = rec["fn_retry"]["attempts"]
+    assert attempts[1]["timeout"] == calls["timeouts"][1]
+
+
 def test_meta_records_retry_policy(tmp_path):
     m, out, _ = _load_runner(tmp_path, [_TP])
     m.main()
@@ -105,3 +125,4 @@ def test_meta_records_retry_policy(tmp_path):
     assert meta["fn_retry_on"] is True
     assert meta["fn_retry_max"] == m.FN_RETRY_MAX
     assert meta["fn_retry_wait"] == m.FN_RETRY_WAIT
+    assert meta["fn_retry_timeout_scale"] == m.FN_RETRY_TIMEOUT_SCALE

@@ -353,7 +353,11 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **Phase 102：WAF 目标的端到端演练（此前零覆盖的实战主场景）**。大量真实目标在 Cloudflare/ModSecurity/Akamai 之后，`waf.py` 指纹与 `bypass.py` 厂商绕过链（Phase 91）都存在、扫描器见到 WAF 也会前置绕过变体，但**从未被整体验证过**。新增 `tests/test_waf_bypass_e2e.py`：伪 WAF 宣告自己（Server: cloudflare + CF-RAY + body 里的 Ray ID 注释）、403 掉两类朴素签名（`<script`、`<svg onload=`）、放行大小写/实体/UTF-7/unicode/`javascript:` 等形态。结论：**链路是通的**——引擎检出 Cloudflare → 走绕过链 → 命中确认（获胜载荷是 `<svg/onload=...>` 这类替代语法，而非被拦形态），对照组（无 WAF 头同一页面）正常。校准踩坑已写进文件注释：① 预算故意取小（4x3），满预算（~170 变体）在本机会偶发跑不到可确认变体而 flaky（曾出现 96s/128s 与零 finding）；② 若连 `onerror=`/`onload=` 一起拦（解码后大小写不敏感），目标比真实规则型 WAF 还硬，只有大预算能过——那测的是本机速度而非绕过逻辑。
 
-**p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。已知改进方向：FN 重试时放宽 timeout（`TIMEOUT×2`，仅重试路径并在 `fn_retry` 注记中记录），可消除这类假 FN。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
+**p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
+
+**Phase 103：FN 重试时放宽 timeout（专治上面这类"慢而非断"的假 FN）**。同一份慢度下重试只是在重复测量慢本身，所以重试改走 `TIMEOUT × FN_RETRY_TIMEOUT_SCALE`（默认 2，`XSS_FN_RETRY_TIMEOUT_SCALE` 可配）；每次 attempt 记录其真实 timeout，`meta.fn_retry_timeout_scale` 与预算键同步扩展（跨 run 对比仍按口径校验）。核心命题已真实验证：同一慢服务器（每响应 0.35s）下 **tight=2s → FN（requests=0）/ widened=30s → TP（33 请求，15.6s）**，对照组（无延迟同一用例）TP 0.9s —— 说明瓶颈确是整体超时而非连接失败。注意 `timeout` 是**整体扫描超时**而非每请求超时（调参时踩过这一坑）。测试 `tests/test_bench_fn_retry.py` 5 例（含断言重试必须用 `TIMEOUT×scale`、而非复用原上限）。
+
+**Phase 101b：修掉一个我自己引入的挂死（异步锁的 loop 归属）**。
 
 **Phase 101b：修掉一个我自己引入的挂死（异步锁的 loop 归属）**。Phase 98b 为 `AsyncScanner.__init__` 加的"宿主无 loop 时补建 loop"兜底是错的：py3.9 的 `asyncio.Lock()` 绑定**构造时**的 loop，构造函数自己装的 loop 与调用方 `asyncio.run()` 的 loop 不是同一个——锁绑在死 loop 上，每个 `async with lock` 永久挂起，把原本清晰的 RuntimeError 变成了**测试集挂死**（回归中 `test_csp_nonce_async_parity.py` 卡在 `asyncio._poll`）。正确修法是**惰性创建**：`_lock` 在 `__init__` 置 None，`_get_lock()` 在真正运行的 loop 里首次使用才构造（6 处 `async with self._lock` 全部改走 `_get_lock()`）；既不报错也不劫持宿主的 loop。新增契约测试 `test_host_loop_is_not_hijacked_by_scanner_construction`（宿主先 `set_event_loop` 再 `asyncio.run`，挂死即 pytest-timeout 失败）。全量回归 **70/70 文件绿**（723s，较修复前 1875s 大幅缩短——挂死消除）。
 
