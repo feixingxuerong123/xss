@@ -208,11 +208,24 @@ def _is_detected(report: dict | None, case: dict) -> tuple[bool, int, list]:
     param = case.get("param", "q")
     path = case["path"]
 
-    # Filter findings relevant to this case's parameter
+    # Phase 109: vector families that do NOT inject through a query
+    # parameter label their carrier instead -- "(cookie:lang)", "(path)",
+    # "(error_path)" -- so param-name matching scored a real finding as
+    # "not relevant" and the case read as a false negative.  A case may
+    # declare the finding type(s) it is about; those count as relevant.
+    # Cases without the field keep the exact old behaviour.
+    want_types = case.get("finding_types") or []
+    path_key = path.rstrip("*")
+
+    # Filter findings relevant to this case
     relevant = []
     for f in findings:
         f_param = f.get("param", "")
         f_url = f.get("url", "")
+        if want_types:
+            if f.get("type", "") in want_types and path_key in f_url:
+                relevant.append(f)
+            continue
         # Match by param name (or accept any finding if param is empty for DOM)
         if not param:
             # DOM case: any finding on this path counts

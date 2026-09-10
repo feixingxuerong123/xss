@@ -358,6 +358,14 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 109：补上 7 类基准盲区中的 5 类——并立刻抓出 3 个真缺陷**。Phase 108 发现引擎有 7 类向量（cookie/CORS/markdown/path/error/upload/stored）**有层在跑但从无用例**。本轮先补 GET 可实现的 5 类（每类 vulnerable + safe 对照，共 10 个用例，基准 107→117），服务器为此扩展了"请求上下文分发"（handler 可读 Cookie/Origin/path）与"前缀路由"（path 层会把 payload 追加成新路径段）。补完立刻验出 3 个真缺陷：
+
+1. **path 注入层在真实目标上基本是坏的（最严重）**：`_scan_path_xss` 硬编码 `<svg/onload=alert('token')>` 并**裸拼**进路径，而该 payload 含 `/` —— 实际发出的请求是 `/r/pth01/*/%3Csvg/onload=alert('x')%3E`，payload 被 `/` **切成两段**，回显单段的目标永远不可能命中。该层的模块文档声称"不产生含 `/` 的载荷"、`path_xss.py` 也早就有 `path_payloads()` 与 `build_test_url()`（后者用 `safe=""` 把 `/` 编码为 `%2F`）——**代码没用它们**。修：改用模块的载荷集与 URL 构造器。对照证明：同一目标 error 层（用完整编码）命中、path 层不命中，修后两者都命中。
+2. **基准判定器把真命中判成 FN**：`_is_detected` 按 `param` 名过滤相关性，而 cookie/path/error 类 finding 的 param 是载体标记（`(cookie:lang)`、`(path)`、`(error_path)`）——与用例的 `q` 不匹配，于是"引擎明明找到了"被记成漏报。修：用例可声明 `finding_types`（精确到类型），未声明的 107 个老用例行为完全不变。
+3. **path_xss 模块文档不实**：声称载荷"无嵌入 `/`"，实际列表里 `</script>`、`';alert(1);//` 都含 `/`。真正的不变量在构造器（编码后无裸 `/`），文档已改正、测试锁定。
+
+另修两处测试目标自身的 bug（404 兜底曾让**每个**用例都附带 path/error finding 的噪声；markdown 安全版对非 markdown 文本未转义，`<b>` 直接反射——引擎检出它是对的）。验证：10 个新用例 **TP5 TN5 FP0 FN0**；新增 `tests/test_path_layer_payloads.py`、`tests/test_bench_relevance.py`。
+
 **Phase 108：层开销剖析（速度差距拆到层）+ 暴露的基准盲区**。Phase 107 把速度差距量化了（30.5s vs 13.7s），本轮回答"请求花在哪、哪层产出 finding"。实现方式是**零侵入**：在已有的两个咽喉点埋点——`CoverageTracker.touch_layer()`（58 处层边界标记，现在同时记录本线程当前层）+ `Requester._send()`（所有请求的唯一出口，按当前层累加）——无需改任何调用点。工具 `benchmark/layer_profile.py` 输出"层 × 请求数 × 占比 × 产出 finding 数 × 每 finding 请求成本"。
 
 12 用例 514 请求的剖析结果：`L1_reflection_profile` **121 请求（23.5%）0 命中**、`L7_jsonp` 96（18.7%）、`L8_header` 72（14.0%）、`L8_cookie` 60（11.7%）——**前四层占 68% 请求**；而真正命中的 `L1_reflected` 只花 24 请求（4.7%）产出 7 个 finding（**3.4 请求/finding**）。

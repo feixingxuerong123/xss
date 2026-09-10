@@ -1201,6 +1201,136 @@
       "difficulty": "hard",
       "source": "XSSentinel",
       "note": "Phase 98: same param echoed twice (RCDATA first, raw element second) -> verifier only sees the first occurrence"
+    },
+    {
+      "id": "pos-cookie-01",
+      "path": "/r/ck01",
+      "param": "q",
+      "mode": "cookie_echo",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109: Cookie `lang` echoed raw into the page body",
+      "finding_types": [
+        "cookie_xss"
+      ]
+    },
+    {
+      "id": "neg-cookie-01",
+      "path": "/s/ck01",
+      "param": "q",
+      "mode": "cookie_echo_escaped",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109 safe twin: same cookie echo, HTML-escaped",
+      "finding_types": [
+        "cookie_xss"
+      ]
+    },
+    {
+      "id": "pos-path-01",
+      "path": "/r/pth01/*",
+      "param": "q",
+      "mode": "path_echo",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109: appended URL path segment echoed raw",
+      "finding_types": [
+        "path_xss"
+      ]
+    },
+    {
+      "id": "neg-path-01",
+      "path": "/s/pth01/*",
+      "param": "q",
+      "mode": "path_echo_escaped",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109 safe twin: same path echo, HTML-escaped",
+      "finding_types": [
+        "path_xss"
+      ]
+    },
+    {
+      "id": "pos-error-01",
+      "path": "/r/err01/*",
+      "param": "q",
+      "mode": "error_echo",
+      "ground_truth": "vulnerable",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109: 404 page echoes the requested path raw",
+      "finding_types": [
+        "error_page_xss"
+      ]
+    },
+    {
+      "id": "neg-error-01",
+      "path": "/s/err01/*",
+      "param": "q",
+      "mode": "error_echo_escaped",
+      "ground_truth": "safe",
+      "context": "html_element",
+      "difficulty": "medium",
+      "note": "Phase 109 safe twin: same 404 echo, HTML-escaped",
+      "finding_types": [
+        "error_page_xss"
+      ]
+    },
+    {
+      "id": "pos-cors-01",
+      "path": "/r/cors01",
+      "param": "q",
+      "mode": "cors_reflect",
+      "ground_truth": "vulnerable",
+      "context": "header",
+      "difficulty": "medium",
+      "note": "Phase 109: ACAO reflects any Origin + credentials",
+      "finding_types": [
+        "cors_misconfig"
+      ]
+    },
+    {
+      "id": "neg-cors-01",
+      "path": "/s/cors01",
+      "param": "q",
+      "mode": "cors_whitelist",
+      "ground_truth": "safe",
+      "context": "header",
+      "difficulty": "medium",
+      "note": "Phase 109 safe twin: ACAO only for a fixed origin",
+      "finding_types": [
+        "cors_misconfig"
+      ]
+    },
+    {
+      "id": "pos-markdown-01",
+      "path": "/r/md01",
+      "param": "q",
+      "mode": "markdown_raw",
+      "ground_truth": "vulnerable",
+      "context": "html_attribute",
+      "difficulty": "hard",
+      "note": "Phase 109: markdown keeps javascript:/data: URL schemes",
+      "finding_types": [
+        "reflected"
+      ]
+    },
+    {
+      "id": "neg-markdown-01",
+      "path": "/s/md01",
+      "param": "q",
+      "mode": "markdown_filtered",
+      "ground_truth": "safe",
+      "context": "html_attribute",
+      "difficulty": "hard",
+      "note": "Phase 109 safe twin: dangerous schemes blocked, escaped",
+      "finding_types": [
+        "reflected"
+      ]
     }
   ]
 }

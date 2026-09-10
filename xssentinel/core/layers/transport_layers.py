@@ -74,21 +74,49 @@ def _scan_path_xss(scanner, req, url: str) -> None:
         if not parsed.path or parsed.path == "/":
             return  # nothing to inject into
         token = "xspath_" + secrets.token_hex(3)
-        payload = f"<svg/onload=alert('{token}')>"
-        # Insert the payload as a new path segment at the end.
-        new_path = parsed.path.rstrip("/") + "/" + payload
-        test_url = urlunparse((parsed.scheme, parsed.netloc, new_path,
-                               parsed.params, parsed.query, ""))
-        try:
-            resp = req.get(test_url)
-            scanner._bump()
-            scanner.coverage.record_request(url, "GET")
-        except Exception:
+        # Phase 109: use the module's PATH-SAFE payloads and its URL
+        # builder.  The previous inline payload was
+        # "<svg/onload=alert('token')>" -- it contains a SLASH, and it was
+        # concatenated into the path raw, so it arrived as TWO segments
+        # ("<svg" + "onload=...") and no target that echoes a single
+        # segment could ever reflect it.  build_test_url() percent-encodes
+        # with safe="" (so "/" becomes %2F) exactly like a browser.
+        segment = parsed.path.rstrip("/").rsplit("/", 1)[-1] or "x"
+        last_url = None
+        last_text = ""
+        last_resp = None
+        for tmpl in path_mod.path_payloads():
+            if tmpl == "xssentinel":
+                continue  # bare marker: reflection-only, cannot fire
+            payload = tmpl.replace("alert(1)", f"alert('{token}')")
+            if token not in payload:
+                payload = payload + token
+            test_url = path_mod.build_test_url(url, segment, payload)
+            if not test_url:
+                continue
+            try:
+                resp = req.get(test_url)
+                scanner._bump()
+                scanner.coverage.record_request(url, "GET")
+            except Exception:
+                continue
+            text = resp.text or ""
+            last_url, last_text, last_resp = test_url, text, resp
+            if not path_mod.analyze_response(text, token)["reflected"]:
+                continue
+            from .. import verifier
+            v = verifier.verify_semantic(text, token,
+                                         response_headers=dict(resp.headers))
+            if v["confirmed"]:
+                break
+        else:
             return
-        text = resp.text or ""
-        result = path_mod.analyze_response(text, token)
-        if not result["reflected"]:
+        if last_resp is None or token not in (last_text or ""):
             return
+        result = path_mod.analyze_response(last_text, token)
+        test_url = last_url
+        text = last_text
+        resp = last_resp
         from .. import verifier
         v = verifier.verify_semantic(text, token,
                                      response_headers=dict(resp.headers))

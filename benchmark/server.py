@@ -391,6 +391,161 @@ def m_null_byte_strip(v: str) -> tuple:
 # Mode registry
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Phase 109: vector families that previously had NO benchmark case.
+#
+# The layer profile (Phase 108) showed engines layers running with zero
+# coverage: cookie injection, CORS, markdown, path injection, error pages
+# (plus upload/stored, which need POST).  Those handlers get the REQUEST
+# CONTEXT (headers/path/query) -- the plain MODES handlers only see the
+# value of one query parameter, which cannot express "the Cookie header is
+# echoed" or "the URL path is echoed".
+# ---------------------------------------------------------------------------
+
+def _cookie_value(ctx: dict, name: str) -> str:
+    raw = (ctx.get("headers") or {}).get("Cookie") or ""
+    for part in raw.split(";"):
+        if "=" in part:
+            k, v = part.split("=", 1)
+            if k.strip() == name:
+                return v.strip()
+    return ""
+
+
+def m_cookie_echo(v: str, ctx: dict) -> tuple:
+    """Vulnerable: the `lang` cookie is rendered into the page raw."""
+    return _page(f'<div>Language: {_cookie_value(ctx, "lang")}</div>')
+
+
+def m_cookie_echo_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: same echo, HTML-escaped."""
+    val = html.escape(_cookie_value(ctx, "lang"), quote=True)
+    return _page(f'<div>Language: {val}</div>')
+
+
+def m_path_echo(v: str, ctx: dict) -> tuple:
+    """Vulnerable: the LAST path segment is echoed raw into the body.
+
+    The segment is percent-DECODED first, like any real framework/router
+    would: a payload arriving as %3Csvg...%3E must render as <svg...> for
+    the reflection to be exploitable at all.
+    """
+    seg = unquote((ctx.get("path") or "").rstrip("/").rsplit("/", 1)[-1])
+    if not seg or seg == "pth01":
+        seg = v  # fall back to the query value so a plain GET still renders
+    return _page(f'<div>Resource: {seg}</div>')
+
+
+def m_path_echo_escaped(v: str, ctx: dict) -> tuple:
+    seg = unquote((ctx.get("path") or "").rstrip("/").rsplit("/", 1)[-1])
+    if not seg or seg == "pth01":
+        seg = v
+    return _page(f'<div>Resource: {html.escape(seg, quote=True)}</div>')
+
+
+def m_error_echo(v: str, ctx: dict) -> tuple:
+    """Vulnerable: a 404 page echoes the requested path (status 404 is
+    required -- the error_xss layer only counts non-2xx reflection)."""
+    path = unquote(ctx.get("path") or "")
+    return (404, {"Content-Type": "text/html; charset=utf-8"},
+            "<!DOCTYPE html><html><head><title>bench</title></head><body>"
+            f"<h1>Not Found</h1><p>No such page: {path}</p></body></html>")
+
+
+def m_error_echo_escaped(v: str, ctx: dict) -> tuple:
+    path = html.escape(unquote(ctx.get("path") or ""), quote=True)
+    return (404, {"Content-Type": "text/html; charset=utf-8"},
+            "<!DOCTYPE html><html><head><title>bench</title></head><body>"
+            f"<h1>Not Found</h1><p>No such page: {path}</p></body></html>")
+
+
+def m_cors_reflect(v: str, ctx: dict) -> tuple:
+    """Vulnerable: echoes ANY Origin back with credentials allowed."""
+    origin = (ctx.get("headers") or {}).get("Origin") or ""
+    hdrs = {}
+    if origin:
+        hdrs["Access-Control-Allow-Origin"] = origin
+        hdrs["Access-Control-Allow-Credentials"] = "true"
+    return _page('<div>{"account": "12345", "balance": 100}</div>', hdrs)
+
+
+def m_cors_whitelist(v: str, ctx: dict) -> tuple:
+    """Safe twin: only a fixed trusted origin is allowed."""
+    origin = (ctx.get("headers") or {}).get("Origin") or ""
+    hdrs = {}
+    if origin == "https://trusted.example":
+        hdrs["Access-Control-Allow-Origin"] = origin
+        hdrs["Access-Control-Allow-Credentials"] = "true"
+    return _page('<div>{"account": "12345", "balance": 100}</div>', hdrs)
+
+
+def _md_minimal(v: str, allow_raw_links: bool) -> str:
+    """A deliberately tiny markdown subset: [t](u) and ![a](s).
+
+    Vulnerable mode keeps the URL scheme as given (so javascript: survives
+    into href/src); safe mode drops non-http(s) schemes and escapes the
+    text/url before interpolating.
+    """
+    if not allow_raw_links:
+        # A safe renderer escapes ALL raw markup up front; markdown's own
+        # syntax characters ([ ] ( )) survive html.escape, so the link
+        # rewriting below still works on the escaped text.  Without this,
+        # anything that is NOT markdown syntax (a bare <b>, a quote) went
+        # through raw and the "safe" twin was trivially exploitable.
+        v = html.escape(v, quote=True)
+    out = []
+    i = 0
+    while i < len(v):
+        img = v.startswith("![", i)
+        link = (not img) and v.startswith("[", i)
+        if img or link:
+            close = v.find("]", i + (2 if img else 1))
+            if close != -1 and close + 1 < len(v) and v[close + 1] == "(":
+                end = v.find(")", close + 2)
+                if end != -1:
+                    text = v[i + (2 if img else 1):close]
+                    url = v[close + 2:end]
+                    if not allow_raw_links:
+                        if url.lower().startswith(("javascript:", "data:",
+                                                   "vbscript:")):
+                            url = "#blocked"
+                        text = html.escape(text, quote=True)
+                        url = html.escape(url, quote=True)
+                    if img:
+                        out.append(f'<img src="{url}" alt="{text}">')
+                    else:
+                        out.append(f'<a href="{url}">{text}</a>')
+                    i = end + 1
+                    continue
+        out.append(v[i])
+        i += 1
+    return "".join(out)
+
+
+def m_markdown_raw(v: str, ctx: dict) -> tuple:
+    """Vulnerable: markdown rendered with the URL scheme intact."""
+    return _page(f'<div>{_md_minimal(v, allow_raw_links=True)}</div>')
+
+
+def m_markdown_filtered(v: str, ctx: dict) -> tuple:
+    """Safe twin: dangerous schemes blocked and text/url escaped."""
+    return _page(f'<div>{_md_minimal(v, allow_raw_links=False)}</div>')
+
+
+# Modes whose handler needs the request context (headers / path).
+MODES_CTX: dict = {
+    "cookie_echo": m_cookie_echo,
+    "cookie_echo_escaped": m_cookie_echo_escaped,
+    "path_echo": m_path_echo,
+    "path_echo_escaped": m_path_echo_escaped,
+    "error_echo": m_error_echo,
+    "error_echo_escaped": m_error_echo_escaped,
+    "cors_reflect": m_cors_reflect,
+    "cors_whitelist": m_cors_whitelist,
+    "markdown_raw": m_markdown_raw,
+    "markdown_filtered": m_markdown_filtered,
+}
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,
@@ -548,13 +703,32 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
 
         case = self.routes.get(path)
         if case is None:
-            self._respond(404, {"Content-Type": "text/plain"}, f"not found: {path}")
+            # Phase 109: prefix routes (manifest path ending in '*') exist
+            # for vector families that inject into a URL PATH SEGMENT --
+            # the scanner appends its payload as a new last segment, so an
+            # exact match can never hit.
+            for pfx, pc in self.routes.items():
+                if pfx.endswith("*") and path.startswith(pfx[:-1]):
+                    case = pc
+                    break
+        if case is None:
+            # Deliberately SAFE: the requested path is NOT echoed here.
+            # Only the registered prefix routes (/r/err01/*, /r/pth01/*)
+            # reflect it -- if this fallback echoed too, EVERY case would
+            # pick up a bonus path_xss/error_page_xss finding and the
+            # benchmark matrix would be noise.
+            self._respond(
+                404, {"Content-Type": "text/html; charset=utf-8"},
+                "<!DOCTYPE html><html><head><title>bench</title></head>"
+                "<body><h1>404 - Not Found</h1><p>No such resource.</p>"
+                "</body></html>")
             return
 
         mode = case["mode"]
         param = case.get("param", "q")
+        ctx_handler = MODES_CTX.get(mode)
         handler = MODES.get(mode)
-        if handler is None:
+        if ctx_handler is None and handler is None:
             self._respond(500, {"Content-Type": "text/plain"}, f"unknown mode: {mode}")
             return
 
@@ -563,7 +737,16 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
         value = qs.get(param, ["test"])[0] if param else ""
 
         try:
-            status, headers, body = handler(value)
+            if ctx_handler is not None:
+                context = {
+                    "headers": dict(self.headers),
+                    "path": path,
+                    "query": qs,
+                    "method": "GET",
+                }
+                status, headers, body = ctx_handler(value, context)
+            else:
+                status, headers, body = handler(value)
         except Exception as e:
             self._respond(500, {"Content-Type": "text/plain"}, f"mode error: {e}")
             return

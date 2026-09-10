@@ -54,11 +54,17 @@ import shlex
 from urllib.parse import quote, urlsplit, urlunsplit
 
 
-# Path-safe payloads.  Each contains the literal marker ``xssentinel``
-# so reflection can be detected by string search even if the
-# surrounding tag is mangled.  No embedded ``/`` (which would split
-# the segment on frameworks that don't decode it) and no raw ``?`` /
-# ``#`` (which would convert the path segment into a query / fragment).
+# Path payloads.  Each contains the literal marker ``xssentinel`` so
+# reflection can be detected by string search even if the surrounding
+# tag is mangled.
+#
+# NOTE (Phase 109 correction): a few entries DO contain ``/``
+# (``</script>``, ``';alert(1);//``).  The old comment claimed none did;
+# the real requirement is enforced by build_test_url(), which encodes
+# with safe="" so every payload -- including its slashes -- reaches the
+# wire percent-encoded (%2F).  Raw ``?`` / ``#`` remain forbidden: they
+# would turn the segment into a query string / fragment no matter what
+# the encoder does with them.
 PATH_PAYLOADS: list[str] = [
     # Plain marker -- test whether ANY of the segment lands raw.
     "xssentinel",
