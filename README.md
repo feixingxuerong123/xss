@@ -355,6 +355,8 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 104：复测差分（`--diff`）的测试覆盖补齐**。复测是漏洞闭环的一环：客户修完重扫，报告要说清哪些 NEW、哪些 FIXED、哪些严重度恶化。`diff_report.py` 的 259 行五分类逻辑（new/fixed/unchanged/regressed/improved + CI verdict）此前**零测试**——错了会直接进客户的复测报告。新增 `tests/test_diff_report.py` 8 例：URL 归一化忽略 fragment 与默认端口但非默认端口参与身份；finding key 对大小写/默认端口不敏感、对 param/context/type 敏感；severity 排序与未知值兜底 info；新增/修复/未变分类；恶化与改善按严重度判定且**恶化不得计入 unchanged**；**CI verdict 只在 new/regressed 时 FAIL（修好东西不能挂构建）**；HTML 渲染；load_report 读取。8/8 一次通过——实现本身正确，缺的只是覆盖。
+
 **Phase 103：FN 重试时放宽 timeout（专治上面这类"慢而非断"的假 FN）**。同一份慢度下重试只是在重复测量慢本身，所以重试改走 `TIMEOUT × FN_RETRY_TIMEOUT_SCALE`（默认 2，`XSS_FN_RETRY_TIMEOUT_SCALE` 可配）；每次 attempt 记录其真实 timeout，`meta.fn_retry_timeout_scale` 与预算键同步扩展（跨 run 对比仍按口径校验）。核心命题已真实验证：同一慢服务器（每响应 0.35s）下 **tight=2s → FN（requests=0）/ widened=30s → TP（33 请求，15.6s）**，对照组（无延迟同一用例）TP 0.9s —— 说明瓶颈确是整体超时而非连接失败。注意 `timeout` 是**整体扫描超时**而非每请求超时（调参时踩过这一坑）。测试 `tests/test_bench_fn_retry.py` 5 例（含断言重试必须用 `TIMEOUT×scale`、而非复用原上限）。
 
 **Phase 101b：修掉一个我自己引入的挂死（异步锁的 loop 归属）**。
