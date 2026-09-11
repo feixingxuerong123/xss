@@ -122,20 +122,27 @@ CREATE_POLICY_RE = re.compile(
 #                          createHTML: function(s){ return s; }
 #                          createHTML: s => s
 # Also catches ``return input;`` / ``return s;`` / ``return x;``.
+# Phase 116b: the identifier must be followed by a DELIMITER, not by
+# ``.replace(`` / ``.trim()`` / any other transform.  A plain ``\b``
+# matched ``s`` in ``s.replace(...)`` too, which made sanitising policies
+# indistinguishable from passthrough ones.
+_END = r'(?=\s*[,;)}\]]|\s*$)'
+
 _IDENTITY_ARROW_RE = re.compile(
-    r'createHTML\s*:\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*=>\s*\1\b',
+    r'createHTML\s*:\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*=>\s*\1' + _END,
 )
 _IDENTITY_FUNCTION_RE = re.compile(
     r'createHTML\s*:\s*function\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{'
     r'[\s\S]*?return\s+\1[\s;]*\}',
 )
 _IDENTITY_SHORT_RE = re.compile(
-    r'createHTML\s*:\s*([A-Za-z_$][\w$]*)\s*=>\s*\1\b',
+    r'createHTML\s*:\s*([A-Za-z_$][\w$]*)\s*=>\s*\1' + _END,
 )
 
 # ``createScript`` no-op policy (also a bypass if the page uses eval sinks).
 _CREATE_SCRIPT_IDENTITY_RE = re.compile(
-    r'createScript\s*:\s*(?:\([^)]*\)|([A-Za-z_$][\w$]*))\s*=>\s*\1\b',
+    r'createScript\s*:\s*(?:\([^)]*\)|([A-Za-z_$][\w$]*))\s*=>\s*\1'
+    + _END,
 )
 
 # Use of the policy: ``policy.createHTML(...)`` (proves the policy is

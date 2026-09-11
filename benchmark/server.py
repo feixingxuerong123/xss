@@ -778,6 +778,131 @@ PAGE_MODES: dict = {
     "worker_safe": m_worker_safe,
 }
 
+# ---------------------------------------------------------------------------
+# Phase 116: six more source-analysis targets.
+#
+# Same recipe as Phase 113 (which found a systematic FP in redirect, and
+# after which sw/worker/dom turned out to share the root cause): build a
+# pair per layer where only the user-controlled flow differs.
+# ---------------------------------------------------------------------------
+
+def m_css_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: the parameter lands INSIDE the CSS (url())."""
+    return _page(f'<style>.x{{background:url("{v}")}}</style>'
+                 '<div>styled</div>')
+
+
+def m_css_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: the CSS is fixed, the reflection is OUTSIDE it."""
+    return _page('<style>.x{background:url(/bg.png)}</style>'
+                 f'<div>{v}</div>')
+
+
+def m_dangling_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: a CSRF token value reflects unescaped -- a quote breaks
+    out of the attribute and starts a dangling-markup injection."""
+    return _page('<form action="/go"><input type="hidden" '
+                 f'name="csrf_token" value="{v}"></form>')
+
+
+def m_dangling_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: same form and same reflection, but NO hidden sensitive
+    value -- _HIDDEN_INPUT_VALUE_RE matches any hidden input and
+    _CSRF_TOKEN_RE matches csrf-ish names, so the twin uses a visible
+    text field with an ordinary name.  Without sensitive data there is
+    nothing to exfiltrate."""
+    return _page('<form action="/go"><input type="text" '
+                 f'name="page" value="{html.escape(v, quote=True)}">'
+                 '</form>')
+
+
+def m_importmap_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: the import map maps a module to a user-supplied URL."""
+    return _page(
+        '<script type="importmap">'
+        '{"imports":{"app":"https://cdn.example/' + v + '"}}'
+        '</script><script type="module">import "app";</script>')
+
+
+def m_importmap_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: fixed, SAME-origin module URL (the violation the layer
+    reports here is cross-origin mapping, so the twin must not map
+    cross-origin at all)."""
+    return _page(
+        '<script type="importmap">'
+        '{"imports":{"app":"/static/app.js"}}'
+        '</script><script type="module">import "app";</script>')
+
+
+def m_sri_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: third-party script with NO integrity attribute."""
+    return _page('<script src="https://cdn.example/lib.js"></script>'
+                 f'<div>{v}</div>')
+
+
+def m_sri_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: same third-party script, integrity + crossorigin."""
+    return _page('<script src="https://cdn.example/lib.js" '
+                 'integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/'
+                 'uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" '
+                 'crossorigin="anonymous"></script>'
+                 f'<div>{v}</div>')
+
+
+def m_tt_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: a Trusted Types policy that passes HTML through."""
+    return _page(
+        "<script>"
+        "trustedTypes.createPolicy('p', {createHTML: (s) => s});"
+        f"document.getElementById('o').innerHTML = '{v}';"
+        "</script><div id='o'></div>")
+
+
+def m_tt_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: policy sanitises instead of passing through."""
+    return _page(
+        "<script>"
+        "trustedTypes.createPolicy('p', {createHTML: (s) => s.replace("
+        "/</g, '&lt;')});"
+        f"document.getElementById('o').innerHTML = '{v}';"
+        "</script><div id='o'></div>")
+
+
+def m_ws_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: WebSocket endpoint taken from a query parameter and the
+    message is written with innerHTML."""
+    return _page(
+        "<script>"
+        "var ep = new URLSearchParams(location.search).get('ws');"
+        "var ws = new WebSocket(ep);"
+        "ws.onmessage = function(e) { document.body.innerHTML = e.data; };"
+        "</script>")
+
+
+def m_ws_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: fixed endpoint, textContent sink."""
+    return _page(
+        "<script>"
+        "var ws = new WebSocket('wss://example.test/socket');"
+        "ws.onmessage = function(e) { document.body.textContent = e.data; };"
+        "</script>")
+
+
+PAGE_MODES.update({
+    "css_vuln": m_css_vuln,
+    "css_safe": m_css_safe,
+    "dangling_vuln": m_dangling_vuln,
+    "dangling_safe": m_dangling_safe,
+    "importmap_vuln": m_importmap_vuln,
+    "importmap_safe": m_importmap_safe,
+    "sri_vuln": m_sri_vuln,
+    "sri_safe": m_sri_safe,
+    "tt_vuln": m_tt_vuln,
+    "tt_safe": m_tt_safe,
+    "ws_vuln": m_ws_vuln,
+    "ws_safe": m_ws_safe,
+})
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,

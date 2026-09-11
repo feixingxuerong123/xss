@@ -1503,6 +1503,136 @@
       "context": "web_worker",
       "difficulty": "hard",
       "note": "Phase 113 safe twin: fixed worker URL"
+    },
+    {
+      "id": "pos-dangle-01",
+      "path": "/r/dgl01",
+      "param": "q",
+      "mode": "dangling_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "dangling_markup_potential"
+      ],
+      "context": "attribute",
+      "difficulty": "hard",
+      "note": "Phase 116: unescaped CSRF token value -> dangling markup"
+    },
+    {
+      "id": "neg-dangle-01",
+      "path": "/s/dgl01",
+      "param": "q",
+      "mode": "dangling_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "dangling_markup_potential"
+      ],
+      "context": "attribute",
+      "difficulty": "hard",
+      "note": "Phase 116 safe twin: value HTML-escaped"
+    },
+    {
+      "id": "pos-importmap-01",
+      "path": "/r/imp01",
+      "param": "q",
+      "mode": "importmap_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "import_map_cross_origin"
+      ],
+      "context": "import_map",
+      "difficulty": "hard",
+      "note": "Phase 116: import map points at a user-supplied URL"
+    },
+    {
+      "id": "neg-importmap-01",
+      "path": "/s/imp01",
+      "param": "q",
+      "mode": "importmap_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "import_map_cross_origin"
+      ],
+      "context": "import_map",
+      "difficulty": "hard",
+      "note": "Phase 116 safe twin: fixed module URL"
+    },
+    {
+      "id": "pos-sri-01",
+      "path": "/r/sri01",
+      "param": "q",
+      "mode": "sri_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "sri_missing_script"
+      ],
+      "context": "sri",
+      "difficulty": "hard",
+      "note": "Phase 116: third-party script without integrity"
+    },
+    {
+      "id": "neg-sri-01",
+      "path": "/s/sri01",
+      "param": "q",
+      "mode": "sri_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "sri_missing_script"
+      ],
+      "context": "sri",
+      "difficulty": "hard",
+      "note": "Phase 116 safe twin: integrity + crossorigin present"
+    },
+    {
+      "id": "pos-tt-01",
+      "path": "/r/tt01",
+      "param": "q",
+      "mode": "tt_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "trusted_types_policy_bypass"
+      ],
+      "context": "trusted_types",
+      "difficulty": "hard",
+      "note": "Phase 116: Trusted Types policy passes HTML through"
+    },
+    {
+      "id": "neg-tt-01",
+      "path": "/s/tt01",
+      "param": "q",
+      "mode": "tt_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "trusted_types_policy_bypass"
+      ],
+      "context": "trusted_types",
+      "difficulty": "hard",
+      "note": "Phase 116 safe twin: policy sanitises"
+    },
+    {
+      "id": "pos-ws-01",
+      "path": "/r/wss01",
+      "param": "q",
+      "mode": "ws_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "websocket_xss"
+      ],
+      "context": "websocket",
+      "difficulty": "hard",
+      "note": "Phase 116: WebSocket endpoint from query, innerHTML sink"
+    },
+    {
+      "id": "neg-ws-01",
+      "path": "/s/wss01",
+      "param": "q",
+      "mode": "ws_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "websocket_xss"
+      ],
+      "context": "websocket",
+      "difficulty": "hard",
+      "note": "Phase 116 safe twin: fixed endpoint, textContent sink"
     }
   ]
 }

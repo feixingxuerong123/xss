@@ -362,6 +362,12 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
 
+**Phase 116 / 116b：再补五层，并抓出第五个同家族误报**。照 Phase 113/114 的配方，为纯源码分析的 5 个层各造一对目标（vulnerable + safe 对照，基准 141 → 139 用例）：`L7_dangling_markup`、`L7_import_map`、`L7_sri_bypass`、`L8_trusted_types`、`L8_websocket`，最终 **TP5 TN5 FP0 FN0**。过程中反复踩到同一个坑（**第四、五次**）：manifest 里写的 `finding_types` 是我"以为"的类型，不是层实际发出的类型——`dangling_markup_potential`、`import_map_cross_origin`、`sri_missing_script`、`trusted_types_policy_bypass` 全部与最初写的名字不同。
+
+**116b（Trusted Types 层的误报，家族第五例）**：`_IDENTITY_ARROW_RE` 用 `\b` 判定 `(s) => s` 结束，而 `(s) => s.replace(/</g,'&lt;')` 里标识符后跟 `.` **同样是单词边界** → **会净化的策略也被报成 identity bypass**（"透传"与"净化"两个双胞胎都报 `tt_policy_bypass`）。修：要求标识符后只能是分隔符（`, ; ) } ]` 或结尾），即"原样返回"才算 bypass。验证：3 种透传形态（箭头/短箭头/函数 return）仍报，2 种净化形态（`s.replace(...)`、`DOMPurify.sanitize(s)`）不再报。`tests/test_trusted_types_identity.py` 3 例锁定。
+
+**主动移除两个不合格用例**：CSS 注入对（`L7_css_injection`）被我从 manifest 删掉——该层要 CSS 里出现 `javascript:`/`expression()` 形态且只收到"参数名"作为 marker，**当前注入流程无法产生能触发它的请求**，留下就是永久 FN。同理样本设计也会被这类问题卡住。**基准里不留永远过不了的用例**，缺口记在账上而不是假装覆盖。
+
 **Phase 115：覆盖追踪器自身漏登了 11 个层——真实盲区是 39 层中的 19 层**。Phase 111 的"28 层"清单来自 `coverage.py` 的 `LAYERS` 表，而这轮发现**该表本身不完整**：`advanced_layers.py`/`content_layers.py` 实际调度的 22 个层名里，`L8_graphql`、`L8_websocket`、`L7_trusted_types`、`L7_import_map`、`L7_sanitizer_bypass`、`L7_sri_bypass`、`L7_css_injection`、`L7_dangling_markup`、`L7_svg_xss`、`L7_csp_nonce`、`L8_cookie_tossing` 共 **11 个 layer_id 从未登记**（`record_layer()` 的"未知层照记"兜底让它们在数据里存在，但对统计、汇总和 Phase 111 的矩阵完全不可见）。已全部登记（28 → 39），并修正矩阵脚本里 Phase 113 加用例时漏更新的 4 条映射，重新生成 `layer_coverage.md`。
 
 **修正后的真实图景（对账测试后最终版）：49 个 layer_id 中 26 个已覆盖，23 个未覆盖**（对账测试首跑又抓出 10 个未登记 id——、、、、 等散落在 scanner.py / async_scanner.py / advanced_layers.py 里，第一遍只 grep 了两个 layers 文件）。新增未覆盖的 10 层里 8 个是纯源码分析可补的（`L7_css_injection`、`L7_dangling_markup`、`L7_import_map`、`L7_sanitizer_bypass`、`L7_sri_bypass`、`L8_cookie_tossing`、`L8_graphql`、`L8_trusted_types`、`L8_websocket`）。盲区比 Phase 111 报告的更大，根因是**"覆盖追踪器"与"实际调度"没有对账机制**——新增层只要忘了登记，就从所有统计里消失。这本身值得一个后续改进（layer_guard 注册时强制登记，或测试断言 LAYERS 覆盖所有 run_layer 名字）。
