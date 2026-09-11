@@ -1,9 +1,9 @@
 {
   "cases": 129,
   "modes": 128,
-  "layers": 39,
-  "covered": 20,
-  "uncovered": 19,
+  "layers": 49,
+  "covered": 26,
+  "uncovered": 23,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -283,6 +283,79 @@
       "note": "no WebSocket target"
     },
     {
+      "layer": "L1_csp_gate",
+      "covered": true,
+      "modes": [
+        "csp_*"
+      ],
+      "note": "helper: runs before CSP-sensitive probes"
+    },
+    {
+      "layer": "L1_pre_encoded",
+      "covered": false,
+      "modes": [],
+      "note": "helper pass; no dedicated target"
+    },
+    {
+      "layer": "L1_reflection_profile",
+      "covered": true,
+      "modes": [
+        "raw_*",
+        "attr_*"
+      ],
+      "note": "helper: runs on every reflection case"
+    },
+    {
+      "layer": "L2_position_shift",
+      "covered": false,
+      "modes": [],
+      "note": "helper pass; no dedicated target"
+    },
+    {
+      "layer": "L7_cors",
+      "covered": true,
+      "modes": [
+        "cors_reflect"
+      ],
+      "note": "added in Phase 113"
+    },
+    {
+      "layer": "L7_nonce_bypass",
+      "covered": true,
+      "modes": [
+        "csp_nonce_*"
+      ],
+      "note": "partial (nonce-leak chain)"
+    },
+    {
+      "layer": "L7_xsleak",
+      "covered": false,
+      "modes": [],
+      "note": "no XS-Leak target"
+    },
+    {
+      "layer": "L8_request",
+      "covered": true,
+      "modes": [
+        "raw_*"
+      ],
+      "note": "helper: request-level checks on every case"
+    },
+    {
+      "layer": "L9_scenario",
+      "covered": false,
+      "modes": [],
+      "note": "no --scenarios case"
+    },
+    {
+      "layer": "L9_upload_filename",
+      "covered": true,
+      "modes": [
+        "upload_echo"
+      ],
+      "note": "added in Phase 110"
+    },
+    {
       "layer": "L9_js_miner",
       "covered": false,
       "modes": [],
@@ -313,6 +386,10 @@
     "L8_graphql",
     "L8_trusted_types",
     "L8_websocket",
+    "L1_pre_encoded",
+    "L2_position_shift",
+    "L7_xsleak",
+    "L9_scenario",
     "L9_js_miner",
     "L9_form_miner"
   ]

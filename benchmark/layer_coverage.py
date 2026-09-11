@@ -69,6 +69,19 @@ COVERAGE = {
     "L8_graphql": (None, "no GraphQL endpoint target"),
     "L8_trusted_types": (None, "no Trusted Types target"),
     "L8_websocket": (None, "no WebSocket target"),
+    # Phase 115: ids found by the reconciliation test (scanner.py /
+    # async_scanner.py / advanced_layers.py) -- helpers and probe stages
+    # included, so the matrix shows the whole engine.
+    "L1_csp_gate": (["csp_*"], "helper: runs before CSP-sensitive probes"),
+    "L1_pre_encoded": (None, "helper pass; no dedicated target"),
+    "L1_reflection_profile": (["raw_*", "attr_*"], "helper: runs on every reflection case"),
+    "L2_position_shift": (None, "helper pass; no dedicated target"),
+    "L7_cors": (["cors_reflect"], "added in Phase 113"),
+    "L7_nonce_bypass": (["csp_nonce_*"], "partial (nonce-leak chain)"),
+    "L7_xsleak": (None, "no XS-Leak target"),
+    "L8_request": (["raw_*"], "helper: request-level checks on every case"),
+    "L9_scenario": (None, "no --scenarios case"),
+    "L9_upload_filename": (["upload_echo"], "added in Phase 110"),
     "L9_js_miner": (None, "crawl-time layer; no case"),
     "L9_form_miner": (None, "crawl-time layer; no case"),
 }

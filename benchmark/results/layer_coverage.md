@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
 Benchmark: 129 cases / 128 modes  
-Engine layers: 39  
-Covered by at least one case: 20  
-NOT covered: 19
+Engine layers: 49  
+Covered by at least one case: 26  
+NOT covered: 23
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -44,6 +44,16 @@ NOT covered: 19
 | L8_graphql | **NO** | - | no GraphQL endpoint target |
 | L8_trusted_types | **NO** | - | no Trusted Types target |
 | L8_websocket | **NO** | - | no WebSocket target |
+| L1_csp_gate | yes | csp_* | helper: runs before CSP-sensitive probes |
+| L1_pre_encoded | **NO** | - | helper pass; no dedicated target |
+| L1_reflection_profile | yes | raw_*, attr_* | helper: runs on every reflection case |
+| L2_position_shift | **NO** | - | helper pass; no dedicated target |
+| L7_cors | yes | cors_reflect | added in Phase 113 |
+| L7_nonce_bypass | yes | csp_nonce_* | partial (nonce-leak chain) |
+| L7_xsleak | **NO** | - | no XS-Leak target |
+| L8_request | yes | raw_* | helper: request-level checks on every case |
+| L9_scenario | **NO** | - | no --scenarios case |
+| L9_upload_filename | yes | upload_echo | added in Phase 110 |
 | L9_js_miner | **NO** | - | crawl-time layer; no case |
 | L9_form_miner | **NO** | - | crawl-time layer; no case |
 
@@ -66,5 +76,9 @@ NOT covered: 19
 - `L8_graphql` -- no GraphQL endpoint target
 - `L8_trusted_types` -- no Trusted Types target
 - `L8_websocket` -- no WebSocket target
+- `L1_pre_encoded` -- helper pass; no dedicated target
+- `L2_position_shift` -- helper pass; no dedicated target
+- `L7_xsleak` -- no XS-Leak target
+- `L9_scenario` -- no --scenarios case
 - `L9_js_miner` -- crawl-time layer; no case
 - `L9_form_miner` -- crawl-time layer; no case

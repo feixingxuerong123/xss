@@ -83,6 +83,19 @@ LAYERS: list[tuple[str, str, str]] = [
     ("L8_graphql",         "GraphQL introspection -> XSS",     "L8"),
     ("L8_trusted_types",   "Trusted Types bypass",             "L8"),
     ("L8_websocket",       "WebSocket message -> sink",        "L8"),
+    # Phase 115 follow-up: the reconciliation test found ten MORE ids in
+    # scanner.py / async_scanner.py / advanced_layers.py that this table
+    # never listed (the first pass only grepped the two layers files).
+    ("L1_csp_gate",            "CSP gate probe",                   "L1"),
+    ("L1_pre_encoded",         "Pre-encoded payload pass",         "L1"),
+    ("L1_reflection_profile", "Reflection profiling",             "L1"),
+    ("L2_position_shift",     "Position-shift evasion",           "L2"),
+    ("L7_cors",               "CORS misconfiguration",            "L7"),
+    ("L7_nonce_bypass",       "Nonce bypass",                     "L7"),
+    ("L7_xsleak",             "XS-Leak surface audit",            "L7"),
+    ("L8_request",            "Request-level checks (async shim)", "L8"),
+    ("L9_scenario",           "Scenario replay",                  "L9"),
+    ("L9_upload_filename",    "Upload filename probing",          "L9"),
 ]
 
 LAYER_IDS = {lid for lid, _, _ in LAYERS}
