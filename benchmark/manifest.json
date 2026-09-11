@@ -1633,6 +1633,60 @@
       "context": "websocket",
       "difficulty": "hard",
       "note": "Phase 116 safe twin: fixed endpoint, textContent sink"
+    },
+    {
+      "id": "pos-sanitizer-01",
+      "path": "/r/san01",
+      "param": "q",
+      "mode": "sanitizer_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "sanitizer_vulnerable_version",
+        "sanitizer_output_to_innerhtml"
+      ],
+      "context": "sanitizer",
+      "difficulty": "hard",
+      "note": "Phase 117: outdated DOMPurify, sanitised output -> innerHTML"
+    },
+    {
+      "id": "neg-sanitizer-01",
+      "path": "/s/san01",
+      "param": "q",
+      "mode": "sanitizer_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "sanitizer_vulnerable_version",
+        "sanitizer_output_to_innerhtml"
+      ],
+      "context": "sanitizer",
+      "difficulty": "hard",
+      "note": "Phase 117 safe twin: current version + textContent sink"
+    },
+    {
+      "id": "pos-graphql-01",
+      "path": "/r/gql01",
+      "param": "q",
+      "mode": "graphql_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "graphql_xss"
+      ],
+      "context": "graphql",
+      "difficulty": "hard",
+      "note": "Phase 117: GraphQL data rendered with innerHTML"
+    },
+    {
+      "id": "neg-graphql-01",
+      "path": "/s/gql01",
+      "param": "q",
+      "mode": "graphql_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "graphql_xss"
+      ],
+      "context": "graphql",
+      "difficulty": "hard",
+      "note": "Phase 117 safe twin: same query, textContent sink"
     }
   ]
 }

@@ -903,6 +903,70 @@ PAGE_MODES.update({
     "ws_safe": m_ws_safe,
 })
 
+# ---------------------------------------------------------------------------
+# Phase 117: sanitizer_bypass + graphql targets.
+# ---------------------------------------------------------------------------
+
+def m_sanitizer_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: an outdated DOMPurify whose output goes to innerHTML."""
+    return _page(
+        '<script src="https://cdn.jsdelivr.net/npm/dompurify@1.0.1'
+        '/dist/purify.min.js" integrity="sha384-StZ3bcNoOOoHLWVB6OrOBue+0sluGaVMG6kHIs17IjHyqhhiotZI/ZPZfMww8Ycc"'
+        ' crossorigin="anonymous"></script>'
+        '<div id="o"></div><script>'
+        'document.getElementById("o").innerHTML = '
+        f'DOMPurify.sanitize("{v}");'
+        '</script>')
+
+
+def m_sanitizer_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: current version AND the sanitised output goes to a
+    non-sink (textContent).  (The layer flags any sanitise->innerHTML
+    flow, so changing only the version would still report.)"""
+    return _page(
+        '<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6'
+        '/dist/purify.min.js" integrity="sha384-aLMwkQFyLD6+QVnoIOJGuXs+fPHjPoUIQb8fAOr1UQgiuhDRImXlHZJEUS8ki3WD"'
+        ' crossorigin="anonymous"></script>'
+        '<div id="o"></div><script>'
+        'document.getElementById("o").textContent = '
+        f'DOMPurify.sanitize("{v}");'
+        '</script>')
+
+
+def m_graphql_vuln(v: str, ctx: dict) -> tuple:
+    """Vulnerable: GraphQL response data rendered with innerHTML."""
+    return _page(
+        '<div id="o"></div><script>'
+        'fetch("/graphql", {method:"POST", headers:{"Content-Type":'
+        '"application/json"}, body: JSON.stringify({query:'
+        '"query { user { name } }"})})'
+        '.then(r => r.json())'
+        '.then(d => { document.getElementById("o").innerHTML = '
+        'd.data.user.name; });'
+        '</script>')
+
+
+def m_graphql_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: same query, textContent sink."""
+    return _page(
+        '<div id="o"></div><script>'
+        'fetch("/graphql", {method:"POST", headers:{"Content-Type":'
+        '"application/json"}, body: JSON.stringify({query:'
+        '"query { user { name } }"})})'
+        '.then(r => r.json())'
+        '.then(d => { document.getElementById("o").textContent = '
+        'd.data.user.name; });'
+        '</script>')
+
+
+PAGE_MODES.update({
+    "sanitizer_vuln": m_sanitizer_vuln,
+    "sanitizer_safe": m_sanitizer_safe,
+    "graphql_vuln": m_graphql_vuln,
+    "graphql_safe": m_graphql_safe,
+})
+
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,

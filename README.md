@@ -362,6 +362,10 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
 
+**Phase 117：再补两层（`L7_sanitizer_bypass` / `L8_graphql`），一次通过**。这轮改了做法——**先读模块的真实触发条件与 finding 类型，再写用例**（Phase 116 因猜类型名返工了四次）：sanitizer 层实际报 `sanitizer_vulnerable_version` / `sanitizer_output_to_innerhtml`（且**任何**"净化 → innerHTML"都会报，所以 safe 双胞胎必须同时换版本**和**换成 textContent sink）；graphql 层要求 `has_graphql` + sink 消费 GraphQL 数据（`has_data_ref`），safe 双胞胎保留同样的查询、只换 textContent sink。结果 **TP2 TN2 FP0 FN0**（基准 139 → 143）。
+
+**另外两类记账为"需基础设施"，不硬造**：`L8_cookie_tossing` 需要**父域 Set-Cookie**（`Domain=` 指向响应主机的父域），而基准跑在 `127.0.0.1`/`localhost` 上，IP 与 localhost 没有父子域语义 → 本地环境无法触发；`L7_xsleak` 只在 async 引擎实现。
+
 **Phase 116 / 116b：再补五层，并抓出第五个同家族误报**。照 Phase 113/114 的配方，为纯源码分析的 5 个层各造一对目标（vulnerable + safe 对照，基准 141 → 139 用例）：`L7_dangling_markup`、`L7_import_map`、`L7_sri_bypass`、`L8_trusted_types`、`L8_websocket`，最终 **TP5 TN5 FP0 FN0**。过程中反复踩到同一个坑（**第四、五次**）：manifest 里写的 `finding_types` 是我"以为"的类型，不是层实际发出的类型——`dangling_markup_potential`、`import_map_cross_origin`、`sri_missing_script`、`trusted_types_policy_bypass` 全部与最初写的名字不同。
 
 **116b（Trusted Types 层的误报，家族第五例）**：`_IDENTITY_ARROW_RE` 用 `\b` 判定 `(s) => s` 结束，而 `(s) => s.replace(/</g,'&lt;')` 里标识符后跟 `.` **同样是单词边界** → **会净化的策略也被报成 identity bypass**（"透传"与"净化"两个双胞胎都报 `tt_policy_bypass`）。修：要求标识符后只能是分隔符（`, ; ) } ]` 或结尾），即"原样返回"才算 bypass。验证：3 种透传形态（箭头/短箭头/函数 return）仍报，2 种净化形态（`s.replace(...)`、`DOMPurify.sanitize(s)`）不再报。`tests/test_trusted_types_identity.py` 3 例锁定。
