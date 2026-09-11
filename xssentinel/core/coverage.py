@@ -68,6 +68,21 @@ LAYERS: list[tuple[str, str, str]] = [
     ("L9_param_miner",     "Hidden parameter discovery",       "L9"),
     ("L9_js_miner",        "JS endpoint mining",               "L9"),
     ("L9_form_miner",      "Form field discovery",             "L9"),
+    # Phase 115: these ten were live, dispatched layers whose layer_id was
+    # never registered here -- record_layer() stored them via its
+    # unknown-layer fallback, so they were invisible to the stats/summary
+    # and to the Phase 111 coverage matrix (which reads this table).
+    ("L7_csp_nonce",       "CSP nonce leak exploitation",      "L7"),
+    ("L7_css_injection",   "CSS injection",                    "L7"),
+    ("L7_dangling_markup", "Dangling markup injection",        "L7"),
+    ("L7_import_map",      "Import map hijacking",             "L7"),
+    ("L7_sanitizer_bypass", "Sanitizer bypass (DOMPurify etc.)", "L7"),
+    ("L7_sri_bypass",      "SRI bypass",                       "L7"),
+    ("L7_svg_xss",         "SVG-specific XSS",                 "L7"),
+    ("L8_cookie_tossing",  "Cookie tossing",                   "L8"),
+    ("L8_graphql",         "GraphQL introspection -> XSS",     "L8"),
+    ("L8_trusted_types",   "Trusted Types bypass",             "L8"),
+    ("L8_websocket",       "WebSocket message -> sink",        "L8"),
 ]
 
 LAYER_IDS = {lid for lid, _, _ in LAYERS}

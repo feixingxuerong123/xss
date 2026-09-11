@@ -1,9 +1,9 @@
 {
-  "cases": 121,
-  "modes": 120,
-  "layers": 28,
-  "covered": 14,
-  "uncovered": 14,
+  "cases": 129,
+  "modes": 128,
+  "layers": 39,
+  "covered": 20,
+  "uncovered": 19,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -128,27 +128,35 @@
     },
     {
       "layer": "L8_prototype",
-      "covered": false,
-      "modes": [],
-      "note": "no prototype-pollution target"
+      "covered": true,
+      "modes": [
+        "prototype_vuln"
+      ],
+      "note": "added in Phase 113"
     },
     {
       "layer": "L8_service_worker",
-      "covered": false,
-      "modes": [],
-      "note": "no service-worker target"
+      "covered": true,
+      "modes": [
+        "sw_vuln"
+      ],
+      "note": "added in Phase 113"
     },
     {
       "layer": "L8_web_worker",
-      "covered": false,
-      "modes": [],
-      "note": "no worker target"
+      "covered": true,
+      "modes": [
+        "worker_vuln"
+      ],
+      "note": "added in Phase 113"
     },
     {
       "layer": "L8_open_redirect",
-      "covered": false,
-      "modes": [],
-      "note": "no redirect-echo target"
+      "covered": true,
+      "modes": [
+        "redirect_vuln"
+      ],
+      "note": "added in Phase 113"
     },
     {
       "layer": "L8_framework",
@@ -205,6 +213,76 @@
       "note": "crawl-time layer; no crawl case in the manifest"
     },
     {
+      "layer": "L7_csp_nonce",
+      "covered": true,
+      "modes": [
+        "csp_nonce_*"
+      ],
+      "note": "yes (csp_nonce_element/ui_element/ui_leak)"
+    },
+    {
+      "layer": "L7_css_injection",
+      "covered": false,
+      "modes": [],
+      "note": "no CSS-injection target"
+    },
+    {
+      "layer": "L7_dangling_markup",
+      "covered": false,
+      "modes": [],
+      "note": "no dangling-markup target"
+    },
+    {
+      "layer": "L7_import_map",
+      "covered": false,
+      "modes": [],
+      "note": "no import-map target"
+    },
+    {
+      "layer": "L7_sanitizer_bypass",
+      "covered": false,
+      "modes": [],
+      "note": "no sanitizer/DOMPurify target"
+    },
+    {
+      "layer": "L7_sri_bypass",
+      "covered": false,
+      "modes": [],
+      "note": "no SRI target"
+    },
+    {
+      "layer": "L7_svg_xss",
+      "covered": true,
+      "modes": [
+        "raw_svg*"
+      ],
+      "note": "yes (raw_svg family)"
+    },
+    {
+      "layer": "L8_cookie_tossing",
+      "covered": false,
+      "modes": [],
+      "note": "no cookie-tossing target"
+    },
+    {
+      "layer": "L8_graphql",
+      "covered": false,
+      "modes": [],
+      "note": "no GraphQL endpoint target"
+    },
+    {
+      "layer": "L8_trusted_types",
+      "covered": false,
+      "modes": [],
+      "note": "no Trusted Types target"
+    },
+    {
+      "layer": "L8_websocket",
+      "covered": false,
+      "modes": [],
+      "note": "no WebSocket target"
+    },
+    {
       "layer": "L9_js_miner",
       "covered": false,
       "modes": [],
@@ -225,11 +303,16 @@
     "L7_dom_clobber",
     "L7_polyglot",
     "L7_time_based",
-    "L8_prototype",
-    "L8_service_worker",
-    "L8_web_worker",
-    "L8_open_redirect",
     "L9_param_miner",
+    "L7_css_injection",
+    "L7_dangling_markup",
+    "L7_import_map",
+    "L7_sanitizer_bypass",
+    "L7_sri_bypass",
+    "L8_cookie_tossing",
+    "L8_graphql",
+    "L8_trusted_types",
+    "L8_websocket",
     "L9_js_miner",
     "L9_form_miner"
   ]
