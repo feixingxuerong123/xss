@@ -358,6 +358,14 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **p101 基线（107 用例，退避版 fn-retry）**：sync **TP72 FP0 TN35 FN0**（f1=1.000），async **TP71 FP0 TN35 FN1**；`pos-dom-04` 首次 FN 经退避重试翻案为 **TP**（机制在真实跑动中生效），async 的 `neg-filter-06` 三次尝试均为 timeout 但 `requests=91`（请求全发出、只是慢）而单跑 0.83s 即 TP——属本机"慢而非断"的性能噪声。结果文件 `benchmark/results/p101_sync.json` / `p101_async.json`。
 
+**Phase 114b：同一家族第三例——DOM 层把 sink 自身当成了 taint source**。Phase 114 提交后的全量回归暴露 `test_benchmark_fp.py`（对全部 safe 用例断言**零 finding**，比基准判定器的类型过滤更严）失败：`neg-redirect-01` 的 `location.href = '/home';` 被 DOM 正则层报成 `medium` —— 窗口搜 source 时，**sink 匹配文本自身包含 `location`**（左值），于是每个 location 赋值都成了"由 location 喂养"。修法与 113b/114 同源：**把 sink 文本从 source 搜索窗口中掩掉，保留右值**（`location.href = location.hash.slice(1)` 的真来源在右值，不受影响）。验证：safe 双胞胎归零、vuln 双胞胎仍报 dom + open_redirect_xss；`tests/test_dom_source_fp.py` 4 例锁定。另：`test_benchmark_fp.py` 因 safe 用例增至 46 个、慢主机下超出 batched runner 的 540s 单文件预算而超时——`run_all_batched.py` 增加 per-file 超时 override（该文件作为 FPR 门禁获得 1800s）。
+
+**三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
+
+**Phase 114：同一 bug 家族再抓两例（service worker / web worker 层）**。Phase 113b 修完 redirect 后立刻 grep 同类写法——`USER_INPUT_RE` + 上下文窗口判定——在 `sw_xss.py` 与 `worker_xss.py` 里找到**一模一样的缺陷**，且窗口更宽（±300 字符）、无字面量检查：一个**无关**脚本里的 `new URLSearchParams(location.search)` 就能把字面量 `register("/sw.js")` / `new Worker("/w.js")` 判成"攻击者可控"（修复前已实测复现）。修法与 113b 一致：**引号字面量不可能携带攻击者输入**，直接判不可控；窗口搜索保留（变量形式的 URL 真的需要看周边的赋值来源）。验证五类形态全对（字面量+无关输入/干净字面量/参数驱动 × sw/wk）；`tests/test_sw_worker_fp.py` 4 例锁定；6 个相关基准用例 TP3 TN3 无回归。
+
+**教训已两次验证**：发现一个 bug 后，立刻 grep 同一写法在别处的实例——三次修复（redirect / sw / worker）来自同一个根因模式（"上下文窗口 + 关键词判定可控性，且不检查赋值/参数本身是什么"）。
+
 **Phase 113 / 113b：补 4 个页面分析层——又抓出一个系统性误报**。Phase 111 的覆盖矩阵列出 14 个未覆盖层，本轮先补**纯源码分析**的 4 个（不需要浏览器）：`L8_open_redirect`、`L8_prototype`、`L8_service_worker`、`L8_web_worker`（它们的层函数签名是 `(scanner, url, html)`，只看页面源码）。8 个用例（各类 vulnerable + safe 对照，基准 121 → 129）验证 **TP4 TN4 FP0 FN0**——prototype / service worker / worker 三层**首次验证即工作**。
 
 **113b：redirect 层的系统性误报（本轮最有价值的发现）**。`find_redirect_sinks` 用「sink 前后 260 字符窗口里有没有用户输入痕迹」判定 `user_controlled`，而 `USER_INPUT_RE` 的备选里含 **`location.href`** —— 而 sink 语句**自身**恰好就是 `location.href = ...`，于是**任何**对 `location.href` 的赋值都被判为"由用户输入驱动"：一个静态 `?redirect=` 链接 + `location.href = '/home';`（字面量）就被报成 open-redirect → XSS。

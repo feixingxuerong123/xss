@@ -90,12 +90,24 @@ def analyze_script(code: str) -> list[dict]:
         line = _line_of(code, m.start())
         snippet = code[max(0, m.start() - 80): m.start() + 80].replace("\n", " ")
         window = code[max(0, m.start() - 200): min(len(code), m.end() + 60)]
-        src_match = _SOURCE_RE.search(window)
+        # Phase 114b: the sink match itself often CONTAINS a source
+        # keyword as its left-hand side -- "location.href =" contains
+        # "location", so every location assignment was its own taint
+        # source and a fixed redirect read as attacker fed (found via the
+        # benchmark's safe twin neg-redirect-01).  Blank the sink text out
+        # of the window before searching for a source; the RIGHT-hand side
+        # stays, because that is where a real source lives
+        # ("location.href = location.hash.slice(1)").
+        w_start = max(0, m.start() - 200)
+        sink_at = m.start() - w_start
+        masked = (window[:sink_at] + " " * (m.end() - m.start())
+                  + window[sink_at + (m.end() - m.start()):])
+        src_match = _SOURCE_RE.search(masked)
         source = src_match.group(0) if src_match else None
         # variable-propagation: a tainted var name near the sink counts.
         if not source:
             for v in tainted:
-                if re.search(r"\b" + re.escape(v) + r"\b", window):
+                if re.search(r"\b" + re.escape(v) + r"\b", masked):
                     source = f"var:{v}"
                     break
         key = (line, sink, source)

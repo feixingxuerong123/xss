@@ -19,6 +19,14 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 PER_FILE_TIMEOUT = 540        # seconds
+# Phase 114: per-file overrides.  test_benchmark_fp.py runs one FULL CLI
+# scan per safe manifest case (47+ of them since Phases 109-113 added the
+# blind-spot families), which on a slow host exceeds the default budget
+# even though nothing is wrong.  The file is the FPR regression gate, so
+# it gets its own, larger budget instead of being trimmed down.
+PER_FILE_TIMEOUT_OVERRIDES = {
+    "test_benchmark_fp.py": 1800,
+}
 RETRIES = 1
 
 
@@ -30,13 +38,14 @@ def main() -> int:
     failures: list[str] = []
     t0 = time.perf_counter()
     for f in files:
+        budget = PER_FILE_TIMEOUT_OVERRIDES.get(f, PER_FILE_TIMEOUT)
         rc = 1
         for attempt in range(RETRIES + 1):
             try:
                 r = subprocess.run(
                     [sys.executable, "-m", "pytest", os.path.join(HERE, f),
                      "-q"],
-                    cwd=ROOT, timeout=PER_FILE_TIMEOUT,
+                    cwd=ROOT, timeout=budget,
                     capture_output=True)
                 rc = r.returncode
             except subprocess.TimeoutExpired:

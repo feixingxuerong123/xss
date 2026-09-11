@@ -129,6 +129,16 @@ USER_INPUT_RE = re.compile(
 )
 
 
+def _is_literal_expr(expr: str) -> bool:
+    """True when the URL expression is a quoted string literal.
+
+    Phase 114: the +/-300 char window search made any unrelated
+    URLSearchParams/location.search reference in the neighbourhood mark
+    a fixed URL like \"/sw.js\" as attacker controlled.
+    """
+    return bool(expr) and expr[0] in ('"', "'", "`")
+
+
 def find_register_calls(html_or_js: str) -> list[dict]:
     """Locate ``navigator.serviceWorker.register(...)`` call sites.
 
@@ -158,7 +168,8 @@ def find_register_calls(html_or_js: str) -> list[dict]:
         start = max(0, m.start() - 300)
         end = min(len(html_or_js), m.end() + 300)
         snippet = html_or_js[start:end]
-        user_controlled = bool(USER_INPUT_RE.search(snippet))
+        user_controlled = (not _is_literal_expr(url_expr)) and \
+            bool(USER_INPUT_RE.search(snippet))
         out.append({
             "snippet": snippet.strip()[:400],
             "url_expr": url_expr,

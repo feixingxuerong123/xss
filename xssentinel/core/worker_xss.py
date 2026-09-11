@@ -124,6 +124,17 @@ USER_INPUT_RE = re.compile(
 )
 
 
+def _is_literal_expr(expr: str) -> bool:
+    """True when the URL expression is a quoted string literal.
+
+    Phase 114: the window search marked a fixed ``new Worker("/w.js")``
+    as attacker controlled whenever an unrelated script in the +-300
+    char window referenced URLSearchParams / location.search.
+    """
+    return bool(expr) and expr[0] in ('"', "'", "`")
+
+
+
 def find_worker_construction(html_or_js: str) -> list[dict]:
     """Locate ``new Worker(...)`` / ``new SharedWorker(...)`` call sites.
 
@@ -149,7 +160,8 @@ def find_worker_construction(html_or_js: str) -> list[dict]:
         start = max(0, m.start() - 300)
         end = min(len(html_or_js), m.end() + 200)
         snippet = html_or_js[start:end]
-        user_controlled = bool(USER_INPUT_RE.search(snippet))
+        user_controlled = (not _is_literal_expr(url_expr)) and \
+            bool(USER_INPUT_RE.search(snippet))
         out.append({
             "snippet": snippet.strip()[:400],
             "url_expr": url_expr,
