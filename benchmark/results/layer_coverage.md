@@ -1,14 +1,14 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 129 cases / 128 modes  
+Benchmark: 145 cases / 144 modes  
 Engine layers: 49  
-Covered by at least one case: 26  
-NOT covered: 23
+Covered by at least one case: 35  
+NOT covered: 14
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
-| L1_reflected | yes | raw_*, attr_*, escape_*, comment_*, rcdata_*, output_*, filter_*, multi_*, double_encode_safe, csp_* | wide |
-| L2_waf_evade | **NO** | - | no WAF-guarded target in the manifest -- the bypass chain is only covered by tests/test_waf_bypass_e2e.py |
+| L1_reflected | yes | raw_*, attr_*, escape_*, comment_*, rcdata_*, raw_cdata, raw_base_href, raw_meta_refresh, output_*, filter_*, multi_*, double_encode_safe, csp_* | wide |
+| L2_waf_evade | yes | waf_naive | added in Phase 118 (pseudo-WAF target) |
 | L3_dom_static | yes | dom_hash_*, dom_jquery_html, dom_search_eval, dom_postmessage | yes |
 | L4_stored | yes | stored_write | added in Phase 110 |
 | L4_second_order | **NO** | - | needs --second-order-inject/-viewers; no case |
@@ -17,7 +17,7 @@ NOT covered: 23
 | L7_mutation | **NO** | - | the layer runs on every page but no target is built to be exploitable ONLY by mutation |
 | L7_dom_clobber | **NO** | - | no clobbering-shaped target |
 | L7_template | yes | raw_template, raw_template_vue | yes |
-| L7_polyglot | **NO** | - | the layer runs, but no target needs a polyglot payload to fire |
+| L7_polyglot | yes | waf_naive | reached via the WAF case (Phase 118) -- the bypass that lands is a polyglot |
 | L7_jsonp | yes | jsonp_whitelist, jsonp_wrapped | yes |
 | L7_csp | yes | csp_strict_*, csp_nonce_* | yes |
 | L7_time_based | **NO** | - | no time-delayed-sink target |
@@ -35,15 +35,15 @@ NOT covered: 23
 | L9_param_miner | **NO** | - | crawl-time layer; no crawl case in the manifest |
 | L7_csp_nonce | yes | csp_nonce_* | yes (csp_nonce_element/ui_element/ui_leak) |
 | L7_css_injection | **NO** | - | no CSS-injection target |
-| L7_dangling_markup | **NO** | - | no dangling-markup target |
-| L7_import_map | **NO** | - | no import-map target |
-| L7_sanitizer_bypass | **NO** | - | no sanitizer/DOMPurify target |
-| L7_sri_bypass | **NO** | - | no SRI target |
+| L7_dangling_markup | yes | dangling_vuln | added in Phase 116 |
+| L7_import_map | yes | importmap_vuln | added in Phase 116 |
+| L7_sanitizer_bypass | yes | sanitizer_vuln | added in Phase 117 |
+| L7_sri_bypass | yes | sri_vuln | added in Phase 116 |
 | L7_svg_xss | yes | raw_svg* | yes (raw_svg family) |
 | L8_cookie_tossing | **NO** | - | no cookie-tossing target |
-| L8_graphql | **NO** | - | no GraphQL endpoint target |
-| L8_trusted_types | **NO** | - | no Trusted Types target |
-| L8_websocket | **NO** | - | no WebSocket target |
+| L8_graphql | yes | graphql_vuln | added in Phase 117 |
+| L8_trusted_types | yes | tt_vuln | added in Phase 116 |
+| L8_websocket | yes | ws_vuln | added in Phase 116 |
 | L1_csp_gate | yes | csp_* | helper: runs before CSP-sensitive probes |
 | L1_pre_encoded | **NO** | - | helper pass; no dedicated target |
 | L1_reflection_profile | yes | raw_*, attr_* | helper: runs on every reflection case |
@@ -59,23 +59,14 @@ NOT covered: 23
 
 ## Uncovered layers (the shopping list)
 
-- `L2_waf_evade` -- no WAF-guarded target in the manifest -- the bypass chain is only covered by tests/test_waf_bypass_e2e.py
 - `L4_second_order` -- needs --second-order-inject/-viewers; no case
 - `L5_blind_oob` -- needs an OOB listener configured; no case
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L7_dom_clobber` -- no clobbering-shaped target
-- `L7_polyglot` -- the layer runs, but no target needs a polyglot payload to fire
 - `L7_time_based` -- no time-delayed-sink target
 - `L9_param_miner` -- crawl-time layer; no crawl case in the manifest
 - `L7_css_injection` -- no CSS-injection target
-- `L7_dangling_markup` -- no dangling-markup target
-- `L7_import_map` -- no import-map target
-- `L7_sanitizer_bypass` -- no sanitizer/DOMPurify target
-- `L7_sri_bypass` -- no SRI target
 - `L8_cookie_tossing` -- no cookie-tossing target
-- `L8_graphql` -- no GraphQL endpoint target
-- `L8_trusted_types` -- no Trusted Types target
-- `L8_websocket` -- no WebSocket target
 - `L1_pre_encoded` -- helper pass; no dedicated target
 - `L2_position_shift` -- helper pass; no dedicated target
 - `L7_xsleak` -- no XS-Leak target

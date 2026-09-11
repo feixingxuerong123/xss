@@ -362,6 +362,14 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
 
+**Phase 118：把 WAF 目标搬进基准（`L2_waf_evade`），并给覆盖矩阵补上对账测试**。伪 WAF 原本只存在于 `tests/test_waf_bypass_e2e.py`（Phase 102）里：响应头 `Server: cloudflare` + `CF-RAY`，403 掉 WAF 签名最熟的朴素形态（`<script`、`<svg onload=`），放行升级后的绕过变体。本轮把它做成两个基准目标——**弱 WAF**（可绕过，vulnerable）与**严 WAF**（所有可执行形态全拦，safe），验证 **TP1 TN1**。
+
+**第六次踩"类型名靠猜"**：WAF 绕过命中的 finding 是 **`polyglot_reflection`**，不是我以为的 `reflected`（清单里写错 → 判成 FN）。**意外收获**：这说明 `L7_polyglot` 层其实已被 WAF 用例间接覆盖，而矩阵一直标它未覆盖。
+
+**给覆盖矩阵加对账测试**（`tests/test_coverage_matrix_parity.py`）：Phase 116/117/118 加了 14 个用例却**没同步矩阵的 layer→modes 映射**，矩阵一直把它们标成"未覆盖"——与 Phase 115 同源的清单漂移。现在三条断言封死：矩阵只能引用真实存在的 mode（顺带查出 Phase 111 时我猜错的三个 mode 名：`base_href`/`cdata`/`meta_refresh` 实为 `raw_*`）、**每个 vulnerable 用例的 mode 必须被某个层认领**、矩阵必须覆盖全部已登记层。
+
+**修正后的真实图景：49 层中 35 层已覆盖，14 层未覆盖**（此前报告 26/23 是因为上述漂移）。
+
 **Phase 117：再补两层（`L7_sanitizer_bypass` / `L8_graphql`），一次通过**。这轮改了做法——**先读模块的真实触发条件与 finding 类型，再写用例**（Phase 116 因猜类型名返工了四次）：sanitizer 层实际报 `sanitizer_vulnerable_version` / `sanitizer_output_to_innerhtml`（且**任何**"净化 → innerHTML"都会报，所以 safe 双胞胎必须同时换版本**和**换成 textContent sink）；graphql 层要求 `has_graphql` + sink 消费 GraphQL 数据（`has_data_ref`），safe 双胞胎保留同样的查询、只换 textContent sink。结果 **TP2 TN2 FP0 FN0**（基准 139 → 143）。
 
 **另外两类记账为"需基础设施"，不硬造**：`L8_cookie_tossing` 需要**父域 Set-Cookie**（`Domain=` 指向响应主机的父域），而基准跑在 `127.0.0.1`/`localhost` 上，IP 与 localhost 没有父子域语义 → 本地环境无法触发；`L7_xsleak` 只在 async 引擎实现。

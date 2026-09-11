@@ -1,9 +1,9 @@
 {
-  "cases": 129,
-  "modes": 128,
+  "cases": 145,
+  "modes": 144,
   "layers": 49,
-  "covered": 26,
-  "uncovered": 23,
+  "covered": 35,
+  "uncovered": 14,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -14,6 +14,9 @@
         "escape_*",
         "comment_*",
         "rcdata_*",
+        "raw_cdata",
+        "raw_base_href",
+        "raw_meta_refresh",
         "output_*",
         "filter_*",
         "multi_*",
@@ -24,9 +27,11 @@
     },
     {
       "layer": "L2_waf_evade",
-      "covered": false,
-      "modes": [],
-      "note": "no WAF-guarded target in the manifest -- the bypass chain is only covered by tests/test_waf_bypass_e2e.py"
+      "covered": true,
+      "modes": [
+        "waf_naive"
+      ],
+      "note": "added in Phase 118 (pseudo-WAF target)"
     },
     {
       "layer": "L3_dom_static",
@@ -90,9 +95,11 @@
     },
     {
       "layer": "L7_polyglot",
-      "covered": false,
-      "modes": [],
-      "note": "the layer runs, but no target needs a polyglot payload to fire"
+      "covered": true,
+      "modes": [
+        "waf_naive"
+      ],
+      "note": "reached via the WAF case (Phase 118) -- the bypass that lands is a polyglot"
     },
     {
       "layer": "L7_jsonp",
@@ -228,27 +235,35 @@
     },
     {
       "layer": "L7_dangling_markup",
-      "covered": false,
-      "modes": [],
-      "note": "no dangling-markup target"
+      "covered": true,
+      "modes": [
+        "dangling_vuln"
+      ],
+      "note": "added in Phase 116"
     },
     {
       "layer": "L7_import_map",
-      "covered": false,
-      "modes": [],
-      "note": "no import-map target"
+      "covered": true,
+      "modes": [
+        "importmap_vuln"
+      ],
+      "note": "added in Phase 116"
     },
     {
       "layer": "L7_sanitizer_bypass",
-      "covered": false,
-      "modes": [],
-      "note": "no sanitizer/DOMPurify target"
+      "covered": true,
+      "modes": [
+        "sanitizer_vuln"
+      ],
+      "note": "added in Phase 117"
     },
     {
       "layer": "L7_sri_bypass",
-      "covered": false,
-      "modes": [],
-      "note": "no SRI target"
+      "covered": true,
+      "modes": [
+        "sri_vuln"
+      ],
+      "note": "added in Phase 116"
     },
     {
       "layer": "L7_svg_xss",
@@ -266,21 +281,27 @@
     },
     {
       "layer": "L8_graphql",
-      "covered": false,
-      "modes": [],
-      "note": "no GraphQL endpoint target"
+      "covered": true,
+      "modes": [
+        "graphql_vuln"
+      ],
+      "note": "added in Phase 117"
     },
     {
       "layer": "L8_trusted_types",
-      "covered": false,
-      "modes": [],
-      "note": "no Trusted Types target"
+      "covered": true,
+      "modes": [
+        "tt_vuln"
+      ],
+      "note": "added in Phase 116"
     },
     {
       "layer": "L8_websocket",
-      "covered": false,
-      "modes": [],
-      "note": "no WebSocket target"
+      "covered": true,
+      "modes": [
+        "ws_vuln"
+      ],
+      "note": "added in Phase 116"
     },
     {
       "layer": "L1_csp_gate",
@@ -369,23 +390,14 @@
     }
   ],
   "uncovered_layers": [
-    "L2_waf_evade",
     "L4_second_order",
     "L5_blind_oob",
     "L7_mutation",
     "L7_dom_clobber",
-    "L7_polyglot",
     "L7_time_based",
     "L9_param_miner",
     "L7_css_injection",
-    "L7_dangling_markup",
-    "L7_import_map",
-    "L7_sanitizer_bypass",
-    "L7_sri_bypass",
     "L8_cookie_tossing",
-    "L8_graphql",
-    "L8_trusted_types",
-    "L8_websocket",
     "L1_pre_encoded",
     "L2_position_shift",
     "L7_xsleak",

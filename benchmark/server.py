@@ -967,6 +967,110 @@ PAGE_MODES.update({
 })
 
 
+# ---------------------------------------------------------------------------
+# Phase 118: pseudo-WAF targets (L2_waf_evade).
+# ---------------------------------------------------------------------------
+
+# Headers that make the scanner classify the target as WAF-guarded.
+_WAF_HEADERS = {
+    "Server": "cloudflare",
+    "CF-RAY": "7c1f2e3a4b5c6d7e-SJC",
+}
+
+_WAF_NAIVE_BLOCKS = ("<script", "<svg onload=")
+_WAF_STRICT_BLOCKS = ("onload=", "onerror=", "onfocus=", "<script", "svg",
+                      "javascript:", "onanimationstart=", "onbegin=")
+
+_WAF_BLOCK_PAGE = (
+    "<!DOCTYPE html><html><head><title>Attention Required!</title></head>"
+    "<body><h1>Sorry, you have been blocked</h1>"
+    "<p>Cloudflare Ray ID: 7c1f2e3a4b5c6d7e</p></body></html>"
+)
+
+
+def _waf_blocked(value: str, needles) -> bool:
+    low = unquote(value or "").lower()
+    return any(n in low for n in needles)
+
+
+def _waf_respond(value: str, needles):
+    """403 + Cloudflare headers when blocked, else a raw echo page."""
+    if _waf_blocked(value, needles):
+        hdrs = dict(_WAF_HEADERS)
+        hdrs["Content-Type"] = "text/html; charset=utf-8"
+        return 403, hdrs, _WAF_BLOCK_PAGE
+    # Raw echo: whatever survives the WAF is reflected verbatim.
+    return _page(f"<!-- Cloudflare Ray ID: 7c1f2e3a4b5c6d7e -->"
+                 f"<div>{value}</div>", dict(_WAF_HEADERS))
+
+
+def m_waf_naive(v: str, ctx: dict) -> tuple:
+    """Vulnerable: a naive rule set -- escalation past it still lands."""
+    return _waf_respond(v, _WAF_NAIVE_BLOCKS)
+
+
+def m_waf_strict(v: str, ctx: dict) -> tuple:
+    """Safe twin: every executable shape is blocked, so no finding."""
+    return _waf_respond(v, _WAF_STRICT_BLOCKS)
+
+
+PAGE_MODES.update({
+    "waf_naive": m_waf_naive,
+    "waf_strict": m_waf_strict,
+})
+
+# ---------------------------------------------------------------------------
+# Phase 118: pseudo-WAF targets (L2_waf_evade).
+# ---------------------------------------------------------------------------
+
+# Headers that make the scanner classify the target as WAF-guarded.
+_WAF_HEADERS = {
+    "Server": "cloudflare",
+    "CF-RAY": "7c1f2e3a4b5c6d7e-SJC",
+}
+
+_WAF_NAIVE_BLOCKS = ("<script", "<svg onload=")
+_WAF_STRICT_BLOCKS = ("onload=", "onerror=", "onfocus=", "<script", "svg",
+                      "javascript:", "onanimationstart=", "onbegin=")
+
+_WAF_BLOCK_PAGE = (
+    "<!DOCTYPE html><html><head><title>Attention Required!</title></head>"
+    "<body><h1>Sorry, you have been blocked</h1>"
+    "<p>Cloudflare Ray ID: 7c1f2e3a4b5c6d7e</p></body></html>"
+)
+
+
+def _waf_blocked(value: str, needles) -> bool:
+    low = unquote(value or "").lower()
+    return any(n in low for n in needles)
+
+
+def _waf_respond(value: str, needles):
+    """403 + Cloudflare headers when blocked, else a raw echo page."""
+    if _waf_blocked(value, needles):
+        hdrs = dict(_WAF_HEADERS)
+        hdrs["Content-Type"] = "text/html; charset=utf-8"
+        return 403, hdrs, _WAF_BLOCK_PAGE
+    # Raw echo: whatever survives the WAF is reflected verbatim.
+    return _page(f"<!-- Cloudflare Ray ID: 7c1f2e3a4b5c6d7e -->"
+                 f"<div>{value}</div>", dict(_WAF_HEADERS))
+
+
+def m_waf_naive(v: str, ctx: dict) -> tuple:
+    """Vulnerable: a naive rule set -- escalation past it still lands."""
+    return _waf_respond(v, _WAF_NAIVE_BLOCKS)
+
+
+def m_waf_strict(v: str, ctx: dict) -> tuple:
+    """Safe twin: every executable shape is blocked, so no finding."""
+    return _waf_respond(v, _WAF_STRICT_BLOCKS)
+
+
+PAGE_MODES.update({
+    "waf_naive": m_waf_naive,
+    "waf_strict": m_waf_strict,
+})
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,

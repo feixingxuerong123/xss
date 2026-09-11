@@ -22,13 +22,11 @@ ROOT = "D:/qoder/xssentinel"
 # Derived by reading the layer's detection module and grepping the modes.
 COVERAGE = {
     "L1_reflected": (["raw_*", "attr_*", "escape_*", "comment_*", "rcdata_*",
-                      "script_*", "svg_*", "math_*", "style_*", "cdata",
-                      "base_href", "meta_refresh", "iframe_*", "href_*",
+                      "script_*", "svg_*", "math_*", "style_*", "raw_cdata",
+                      "raw_base_href", "raw_meta_refresh", "iframe_*", "href_*",
                       "output_*", "filter_*", "multi_*", "double_encode_safe",
                       "csp_*"], "wide"),
-    "L2_waf_evade": (None, "no WAF-guarded target in the manifest -- the "
-                            "bypass chain is only covered by "
-                            "tests/test_waf_bypass_e2e.py"),
+    "L2_waf_evade": (["waf_naive"], "added in Phase 118 (pseudo-WAF target)"),
     "L3_dom_static": (["dom_hash_*", "dom_jquery_html", "dom_search_eval",
                        "dom_postmessage"], "yes"),
     "L4_stored": (["stored_write"], "added in Phase 110"),
@@ -39,8 +37,8 @@ COVERAGE = {
                           "built to be exploitable ONLY by mutation"),
     "L7_dom_clobber": (None, "no clobbering-shaped target"),
     "L7_template": (["raw_template", "raw_template_vue"], "yes"),
-    "L7_polyglot": (None, "the layer runs, but no target needs a polyglot "
-                          "payload to fire"),
+    "L7_polyglot": (["waf_naive"], "reached via the WAF case (Phase 118) -- "
+                                   "the bypass that lands is a polyglot"),
     "L7_jsonp": (["jsonp_whitelist", "jsonp_wrapped"], "yes"),
     "L7_csp": (["csp_strict_*", "csp_nonce_*"], "yes"),
     "L7_time_based": (None, "no time-delayed-sink target"),
@@ -60,15 +58,15 @@ COVERAGE = {
     # from coverage.py's own LAYERS table (now registered).
     "L7_csp_nonce": (["csp_nonce_*"], "yes (csp_nonce_element/ui_element/ui_leak)"),
     "L7_css_injection": (None, "no CSS-injection target"),
-    "L7_dangling_markup": (None, "no dangling-markup target"),
-    "L7_import_map": (None, "no import-map target"),
-    "L7_sanitizer_bypass": (None, "no sanitizer/DOMPurify target"),
-    "L7_sri_bypass": (None, "no SRI target"),
+    "L7_dangling_markup": (["dangling_vuln"], "added in Phase 116"),
+    "L7_import_map": (["importmap_vuln"], "added in Phase 116"),
+    "L7_sanitizer_bypass": (["sanitizer_vuln"], "added in Phase 117"),
+    "L7_sri_bypass": (["sri_vuln"], "added in Phase 116"),
     "L7_svg_xss": (["raw_svg*"], "yes (raw_svg family)"),
     "L8_cookie_tossing": (None, "no cookie-tossing target"),
-    "L8_graphql": (None, "no GraphQL endpoint target"),
-    "L8_trusted_types": (None, "no Trusted Types target"),
-    "L8_websocket": (None, "no WebSocket target"),
+    "L8_graphql": (["graphql_vuln"], "added in Phase 117"),
+    "L8_trusted_types": (["tt_vuln"], "added in Phase 116"),
+    "L8_websocket": (["ws_vuln"], "added in Phase 116"),
     # Phase 115: ids found by the reconciliation test (scanner.py /
     # async_scanner.py / advanced_layers.py) -- helpers and probe stages
     # included, so the matrix shows the whole engine.
@@ -85,6 +83,15 @@ COVERAGE = {
     "L9_js_miner": (None, "crawl-time layer; no case"),
     "L9_form_miner": (None, "crawl-time layer; no case"),
 }
+
+
+def coverage_modes() -> set:
+    """Every manifest mode referenced by the map."""
+    out = set()
+    for patterns, _note in COVERAGE.values():
+        if patterns:
+            out.update(patterns)
+    return out
 
 
 def main():

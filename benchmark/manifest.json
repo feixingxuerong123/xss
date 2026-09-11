@@ -1687,6 +1687,34 @@
       "context": "graphql",
       "difficulty": "hard",
       "note": "Phase 117 safe twin: same query, textContent sink"
+    },
+    {
+      "id": "pos-waf-01",
+      "path": "/r/waf01",
+      "param": "q",
+      "mode": "waf_naive",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "polyglot_reflection",
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 118: naive WAF -- plain shapes 403, escalated variants land"
+    },
+    {
+      "id": "neg-waf-01",
+      "path": "/s/waf01",
+      "param": "q",
+      "mode": "waf_strict",
+      "ground_truth": "safe",
+      "finding_types": [
+        "polyglot_reflection",
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 118: strict WAF -- every executable shape is blocked"
     }
   ]
 }
