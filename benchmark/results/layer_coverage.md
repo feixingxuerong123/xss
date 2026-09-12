@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 145 cases / 144 modes  
+Benchmark: 153 cases / 150 modes  
 Engine layers: 49  
-Covered by at least one case: 35  
-NOT covered: 14
+Covered by at least one case: 37  
+NOT covered: 12
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -32,7 +32,7 @@ NOT covered: 14
 | L8_cookie | yes | cookie_echo | added in Phase 109 |
 | L8_error_page | yes | error_echo | added in Phase 109 |
 | L8_markdown | yes | markdown_raw | added in Phase 109 |
-| L9_param_miner | **NO** | - | crawl-time layer; no crawl case in the manifest |
+| L9_param_miner | **NO** | - | needs a page that hints at a hidden param name |
 | L7_csp_nonce | yes | csp_nonce_* | yes (csp_nonce_element/ui_element/ui_leak) |
 | L7_css_injection | **NO** | - | no CSS-injection target |
 | L7_dangling_markup | yes | dangling_vuln | added in Phase 116 |
@@ -54,8 +54,8 @@ NOT covered: 14
 | L8_request | yes | raw_* | helper: request-level checks on every case |
 | L9_scenario | **NO** | - | no --scenarios case |
 | L9_upload_filename | yes | upload_echo | added in Phase 110 |
-| L9_js_miner | **NO** | - | crawl-time layer; no case |
-| L9_form_miner | **NO** | - | crawl-time layer; no case |
+| L9_js_miner | yes | crawl_js_vuln | added in Phase 120 (behavioural) |
+| L9_form_miner | yes | crawl_form_vuln | added in Phase 120 (behavioural) |
 
 ## Uncovered layers (the shopping list)
 
@@ -64,12 +64,10 @@ NOT covered: 14
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L7_dom_clobber` -- no clobbering-shaped target
 - `L7_time_based` -- no time-delayed-sink target
-- `L9_param_miner` -- crawl-time layer; no crawl case in the manifest
+- `L9_param_miner` -- needs a page that hints at a hidden param name
 - `L7_css_injection` -- no CSS-injection target
 - `L8_cookie_tossing` -- no cookie-tossing target
 - `L1_pre_encoded` -- helper pass; no dedicated target
 - `L2_position_shift` -- helper pass; no dedicated target
 - `L7_xsleak` -- no XS-Leak target
 - `L9_scenario` -- no --scenarios case
-- `L9_js_miner` -- crawl-time layer; no case
-- `L9_form_miner` -- crawl-time layer; no case

@@ -1039,6 +1039,70 @@ PAGE_MODES.update({
 })
 
 
+# ---------------------------------------------------------------------------
+# Phase 120: crawl-discovered targets (L9_form_miner / L9_js_miner).
+#
+# The landing pages below reflect NOTHING and link to nothing; the echo
+# endpoints are reachable only by mining the form action / the inline JS.
+# ---------------------------------------------------------------------------
+
+def m_crawl_form_vuln(v: str, ctx: dict) -> tuple:
+    """Landing page: one form pointing at a raw-echo endpoint."""
+    return _page('<h1>Survey</h1>'
+                 '<form action="/r/formecho01" method="GET">'
+                 '<input type="text" name="q" value="">'
+                 '<button type="submit">Send</button></form>')
+
+
+def m_crawl_form_safe(v: str, ctx: dict) -> tuple:
+    """Same shape, endpoint escapes its output."""
+    return _page('<h1>Survey</h1>'
+                 '<form action="/s/formecho01" method="GET">'
+                 '<input type="text" name="q" value="">'
+                 '<button type="submit">Send</button></form>')
+
+
+def m_crawl_js_vuln(v: str, ctx: dict) -> tuple:
+    """Landing page: the endpoint exists only inside inline JS."""
+    return _page('<div id="out">loading</div><script>'
+                 'function load(x) {'
+                 '  fetch("/r/jsecho01?q=" + encodeURIComponent(x))'
+                 '    .then(r => r.text()).then(t => {'
+                 '      document.getElementById("out").innerHTML = t; });'
+                 '}'
+                 'load("home");'
+                 '</script>')
+
+
+def m_crawl_js_safe(v: str, ctx: dict) -> tuple:
+    return _page('<div id="out">loading</div><script>'
+                 'function load(x) {'
+                 '  fetch("/s/jsecho01?q=" + encodeURIComponent(x))'
+                 '    .then(r => r.text()).then(t => {'
+                 '      document.getElementById("out").textContent = t; });'
+                 '}'
+                 'load("home");'
+                 '</script>')
+
+
+def m_formecho_raw(v: str, ctx: dict) -> tuple:
+    """Vulnerable echo endpoint (reached by the crawler, not by a link)."""
+    return _page(f"<div>results for {v}</div>")
+
+
+def m_formecho_safe(v: str, ctx: dict) -> tuple:
+    return _page(f"<div>results for {html.escape(v, quote=True)}</div>")
+
+
+PAGE_MODES.update({
+    "crawl_form_vuln": m_crawl_form_vuln,
+    "crawl_form_safe": m_crawl_form_safe,
+    "crawl_js_vuln": m_crawl_js_vuln,
+    "crawl_js_safe": m_crawl_js_safe,
+    "formecho_raw": m_formecho_raw,
+    "formecho_safe": m_formecho_safe,
+})
+
 MODES: dict[str, callable] = {
     # Vulnerable: raw reflection
     "raw_element": m_raw_element,

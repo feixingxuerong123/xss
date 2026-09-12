@@ -1,9 +1,9 @@
 {
-  "cases": 145,
-  "modes": 144,
+  "cases": 153,
+  "modes": 150,
   "layers": 49,
-  "covered": 35,
-  "uncovered": 14,
+  "covered": 37,
+  "uncovered": 12,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -217,7 +217,7 @@
       "layer": "L9_param_miner",
       "covered": false,
       "modes": [],
-      "note": "crawl-time layer; no crawl case in the manifest"
+      "note": "needs a page that hints at a hidden param name"
     },
     {
       "layer": "L7_csp_nonce",
@@ -378,15 +378,19 @@
     },
     {
       "layer": "L9_js_miner",
-      "covered": false,
-      "modes": [],
-      "note": "crawl-time layer; no case"
+      "covered": true,
+      "modes": [
+        "crawl_js_vuln"
+      ],
+      "note": "added in Phase 120 (behavioural)"
     },
     {
       "layer": "L9_form_miner",
-      "covered": false,
-      "modes": [],
-      "note": "crawl-time layer; no case"
+      "covered": true,
+      "modes": [
+        "crawl_form_vuln"
+      ],
+      "note": "added in Phase 120 (behavioural)"
     }
   ],
   "uncovered_layers": [
@@ -401,8 +405,6 @@
     "L1_pre_encoded",
     "L2_position_shift",
     "L7_xsleak",
-    "L9_scenario",
-    "L9_js_miner",
-    "L9_form_miner"
+    "L9_scenario"
   ]
 }

@@ -110,6 +110,8 @@ def _case_extra_args(base_url: str, case: dict) -> list | None:
             "--stored-view", f"{base_url}{case['view_path']}",
             "--stored-param", param,
         ]
+    # Phase 120: verbatim CLI flags from the manifest (e.g. --crawl).
+    extra += list(case.get("extra_args") or [])
     return extra or None
 
 def _build_target_url(base: str, case: dict) -> str:
@@ -245,6 +247,9 @@ def _is_detected(report: dict | None, case: dict) -> tuple[bool, int, list]:
     # Cases without the field keep the exact old behaviour.
     want_types = case.get("finding_types") or []
     path_key = path.rstrip("*")
+    # Phase 120: a crawl case's finding lands on a DISCOVERED endpoint,
+    # not on the landing page, so the case may name the paths that count.
+    accept_paths = list(case.get("finding_paths") or [path_key])
 
     # Filter findings relevant to this case
     relevant = []
@@ -252,7 +257,8 @@ def _is_detected(report: dict | None, case: dict) -> tuple[bool, int, list]:
         f_param = f.get("param", "")
         f_url = f.get("url", "")
         if want_types:
-            if f.get("type", "") in want_types and path_key in f_url:
+            if (f.get("type", "") in want_types
+                    and any(p in f_url for p in accept_paths)):
                 relevant.append(f)
             continue
         # Match by param name (or accept any finding if param is empty for DOM)

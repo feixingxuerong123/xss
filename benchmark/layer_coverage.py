@@ -53,7 +53,7 @@ COVERAGE = {
     "L8_cookie": (["cookie_echo"], "added in Phase 109"),
     "L8_error_page": (["error_echo"], "added in Phase 109"),
     "L8_markdown": (["markdown_raw"], "added in Phase 109"),
-    "L9_param_miner": (None, "crawl-time layer; no crawl case in the manifest"),
+    "L9_param_miner": (None, "needs a page that hints at a hidden param name"),
     # Phase 115: eleven layers that were live and dispatched but missing
     # from coverage.py's own LAYERS table (now registered).
     "L7_csp_nonce": (["csp_nonce_*"], "yes (csp_nonce_element/ui_element/ui_leak)"),
@@ -80,8 +80,8 @@ COVERAGE = {
     "L8_request": (["raw_*"], "helper: request-level checks on every case"),
     "L9_scenario": (None, "no --scenarios case"),
     "L9_upload_filename": (["upload_echo"], "added in Phase 110"),
-    "L9_js_miner": (None, "crawl-time layer; no case"),
-    "L9_form_miner": (None, "crawl-time layer; no case"),
+    "L9_js_miner": (["crawl_js_vuln"], "added in Phase 120 (behavioural)"),
+    "L9_form_miner": (["crawl_form_vuln"], "added in Phase 120 (behavioural)"),
 }
 
 

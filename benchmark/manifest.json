@@ -1715,6 +1715,138 @@
       "context": "html_element",
       "difficulty": "hard",
       "note": "Phase 118: strict WAF -- every executable shape is blocked"
+    },
+    {
+      "id": "pos-formmine-01",
+      "path": "/r/crawl01",
+      "param": "q",
+      "mode": "crawl_form_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "finding_paths": [
+        "/r/formecho01"
+      ],
+      "extra_args": [
+        "--crawl"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 120: endpoint reachable only via form mining (--crawl)"
+    },
+    {
+      "id": "neg-formmine-01",
+      "path": "/s/crawl01",
+      "param": "q",
+      "mode": "crawl_form_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "finding_paths": [
+        "/s/formecho01"
+      ],
+      "extra_args": [
+        "--crawl"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 120 safe twin: discovered endpoint escapes output"
+    },
+    {
+      "id": "pos-jsmine-01",
+      "path": "/r/crawl02",
+      "param": "q",
+      "mode": "crawl_js_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "finding_paths": [
+        "/r/jsecho01"
+      ],
+      "extra_args": [
+        "--crawl"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 120: endpoint reachable only via JS mining (--crawl)"
+    },
+    {
+      "id": "neg-jsmine-01",
+      "path": "/s/crawl02",
+      "param": "q",
+      "mode": "crawl_js_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "finding_paths": [
+        "/s/jsecho01"
+      ],
+      "extra_args": [
+        "--crawl"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 120 safe twin: discovered endpoint escapes output"
+    },
+    {
+      "id": "aux-r-formecho01",
+      "path": "/r/formecho01",
+      "param": "q",
+      "mode": "formecho_raw",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "easy",
+      "aux": true,
+      "note": "Phase 120: crawler-discovery endpoint (served; scored through its landing case)"
+    },
+    {
+      "id": "aux-s-formecho01",
+      "path": "/s/formecho01",
+      "param": "q",
+      "mode": "formecho_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "easy",
+      "aux": true,
+      "note": "Phase 120: crawler-discovery endpoint (served; scored through its landing case)"
+    },
+    {
+      "id": "aux-r-jsecho01",
+      "path": "/r/jsecho01",
+      "param": "q",
+      "mode": "formecho_raw",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "easy",
+      "aux": true,
+      "note": "Phase 120: crawler-discovery endpoint (served; scored through its landing case)"
+    },
+    {
+      "id": "aux-s-jsecho01",
+      "path": "/s/jsecho01",
+      "param": "q",
+      "mode": "formecho_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "easy",
+      "aux": true,
+      "note": "Phase 120: crawler-discovery endpoint (served; scored through its landing case)"
     }
   ]
 }

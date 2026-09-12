@@ -362,6 +362,15 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
 
+**Phase 120：爬取类三层——`L9_form_miner` / `L9_js_miner` 用"行为"覆盖**。前几轮补的都是"层直接产出 finding"的用例；爬取层（表单发现 / JS 端点挖掘 / 参数挖掘）**不产 finding**，只做发现，所以这轮的用例是**行为性的**：landing 页**什么都不反射**、HTML 里也没有指向漏洞端点的链接——端点只存在于**表单 action**（或内联 JS 的 `fetch`）里。**不爬就找不到，找不到就不可能命中**。
+
+- `pos-formmine-01`：landing `/r/crawl01` 不反射 → 表单 action 指向 `/r/formecho01`（原样回显）→ **TP**（163 请求，爬取确实发生了）
+- `neg-formmine-01` / `pos-jsmine-01` / `neg-jsmine-01`（JS 端点同理）；另有 4 个 `aux-*` 用例让服务器提供被发现的端点本身（路由表来自 manifest）并单独计分
+
+验证 **TP4 TN4 FP0 FN0**。为支撑这类用例给 runner 加了两项能力：`extra_args`（`--crawl` 是 opt-in）与 `finding_paths`（命中落在**被发现的端点**上，而不是 landing 页——否则判定器会把它当"不相关"记成 FN）。
+
+**修正后：49 层中 37 已覆盖，12 未覆盖**（基准 153 用例）。
+
 **Phase 119：145 用例双引擎基线（双引擎 F1 均为 1.000），并修掉一个"我自己的 FP"**。
 
 **基线（145 用例）**：sync **TP91 FP0 TN54 FN0**（recall/precision/F1 全 1.000）；async **TP90 FP0 TN53 FN0 + 2 SKIP**（stored 是 sync-only，按声明跳过）。sync 侧 fn-retry 又救回 1 个（`pos-url-04`）；async 侧救回 2 个（`neg-rcdata-02`、`pos-tt-01`）。**Phase 109-118 新加的 38 个家族用例在两个引擎下全部正确**。

@@ -58,6 +58,7 @@ def test_every_vulnerable_case_mode_is_claimed_by_a_layer():
     unclaimed = sorted({
         c["mode"] for c in _cases()
         if c.get("ground_truth") == "vulnerable" and c.get("mode")
+        and not c.get("aux")          # aux cases are scaffolding, not coverage
         and not any(_matches(c["mode"], p) for p in patterns)})
     assert not unclaimed, (
         "vulnerable cases whose mode no layer claims -- the matrix "
