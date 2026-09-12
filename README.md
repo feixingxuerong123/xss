@@ -362,6 +362,14 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **三例同根因的完整记录**：redirect（113b）、service worker / web worker（114）、DOM regex（114b）——全部是"上下文窗口 + 关键词判定可控性，且不排除待判定语句自身"。凡写这类判定，先想清楚"窗口里出现的关键词是否就是待判定语句自己"。
 
+**Phase 119：145 用例双引擎基线（双引擎 F1 均为 1.000），并修掉一个"我自己的 FP"**。
+
+**基线（145 用例）**：sync **TP91 FP0 TN54 FN0**（recall/precision/F1 全 1.000）；async **TP90 FP0 TN53 FN0 + 2 SKIP**（stored 是 sync-only，按声明跳过）。sync 侧 fn-retry 又救回 1 个（`pos-url-04`）；async 侧救回 2 个（`neg-rcdata-02`、`pos-tt-01`）。**Phase 109-118 新加的 38 个家族用例在两个引擎下全部正确**。
+
+**那次 async FP 是我造的，不是引擎**：`neg-waf-01`（"严 WAF"安全目标）在 async 下报 high —— async 发了 `<details open ontoggle=alert(...)>`，而我的"严 WAF"只列举了几个事件处理器（`onload=`/`onerror=`/…），**`ontoggle=` 不在列表里** → 回显 → **引擎判定完全正确**，是我的 safe 目标不严。修法不是改引擎，而是把"严 WAF"从**列举式**改成**拦类**：任何标签开头、任何 `on\w+\s*=`、`javascript:`、`data:text/html`、以及 `&#60;`/`%3c`/`\u003c` 等编码形态。
+
+**顺带揪出一个隐蔽的工程 bug**：该块被插入过两次，而 Python 取**最后**一个定义 → 旧版 `_waf_blocked`（纯子串匹配）**静默覆盖**了支持正则的新版，导致"严 WAF 什么都不拦"。已去重，并加测试断言这几个 handler 只定义一次（同类重复插入在 Phase 117 也发生过——**写插入脚本要幂等：先查标记是否存在**）。
+
 **Phase 118：把 WAF 目标搬进基准（`L2_waf_evade`），并给覆盖矩阵补上对账测试**。伪 WAF 原本只存在于 `tests/test_waf_bypass_e2e.py`（Phase 102）里：响应头 `Server: cloudflare` + `CF-RAY`，403 掉 WAF 签名最熟的朴素形态（`<script`、`<svg onload=`），放行升级后的绕过变体。本轮把它做成两个基准目标——**弱 WAF**（可绕过，vulnerable）与**严 WAF**（所有可执行形态全拦，safe），验证 **TP1 TN1**。
 
 **第六次踩"类型名靠猜"**：WAF 绕过命中的 finding 是 **`polyglot_reflection`**，不是我以为的 `reflected`（清单里写错 → 判成 FN）。**意外收获**：这说明 `L7_polyglot` 层其实已被 WAF 用例间接覆盖，而矩阵一直标它未覆盖。
