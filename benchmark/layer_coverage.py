@@ -57,7 +57,7 @@ COVERAGE = {
     # Phase 115: eleven layers that were live and dispatched but missing
     # from coverage.py's own LAYERS table (now registered).
     "L7_csp_nonce": (["csp_nonce_*"], "yes (csp_nonce_element/ui_element/ui_leak)"),
-    "L7_css_injection": (None, "no CSS-injection target"),
+    "L7_css_injection": (["cssi_vuln"], "added in Phase 122 (static page analysis)"),
     "L7_dangling_markup": (["dangling_vuln"], "added in Phase 116"),
     "L7_import_map": (["importmap_vuln"], "added in Phase 116"),
     "L7_sanitizer_bypass": (["sanitizer_vuln"], "added in Phase 117"),
@@ -71,9 +71,9 @@ COVERAGE = {
     # async_scanner.py / advanced_layers.py) -- helpers and probe stages
     # included, so the matrix shows the whole engine.
     "L1_csp_gate": (["csp_*"], "helper: runs before CSP-sensitive probes"),
-    "L1_pre_encoded": (None, "helper pass; no dedicated target"),
+    "L1_pre_encoded": (["pe_vuln"], "added in Phase 122 (param_value container)"),
     "L1_reflection_profile": (["raw_*", "attr_*"], "helper: runs on every reflection case"),
-    "L2_position_shift": (None, "helper pass; no dedicated target"),
+    "L2_position_shift": (["pshift_vuln"], "added in Phase 122 (WAF guards body only)"),
     "L7_cors": (["cors_reflect"], "added in Phase 113"),
     "L7_nonce_bypass": (["csp_nonce_*"], "partial (nonce-leak chain)"),
     "L7_xsleak": (None, "no XS-Leak target"),

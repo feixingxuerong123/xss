@@ -122,7 +122,11 @@ def _build_target_url(base: str, case: dict) -> str:
     # Phase 110: body-carried cases (upload/stored) put the parameter in
     # -d instead, so the URL must stay clean.
     if param and case.get("method", "GET").upper() == "GET":
-        url += f"?{param}=xssentinel_bench_probe"
+        # Phase 122: param_value overrides the default probe value -- the
+        # pre-encoded family needs the ORIGINAL value to parse as a
+        # container (base64-JSON / JWT) or detect_structure never fires.
+        value = case.get("param_value") or "xssentinel_bench_probe"
+        url += f"?{param}={value}"
     return url
 
 

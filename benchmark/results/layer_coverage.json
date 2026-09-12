@@ -1,9 +1,9 @@
 {
-  "cases": 155,
-  "modes": 152,
+  "cases": 161,
+  "modes": 158,
   "layers": 49,
-  "covered": 38,
-  "uncovered": 11,
+  "covered": 41,
+  "uncovered": 8,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -231,9 +231,11 @@
     },
     {
       "layer": "L7_css_injection",
-      "covered": false,
-      "modes": [],
-      "note": "no CSS-injection target"
+      "covered": true,
+      "modes": [
+        "cssi_vuln"
+      ],
+      "note": "added in Phase 122 (static page analysis)"
     },
     {
       "layer": "L7_dangling_markup",
@@ -315,9 +317,11 @@
     },
     {
       "layer": "L1_pre_encoded",
-      "covered": false,
-      "modes": [],
-      "note": "helper pass; no dedicated target"
+      "covered": true,
+      "modes": [
+        "pe_vuln"
+      ],
+      "note": "added in Phase 122 (param_value container)"
     },
     {
       "layer": "L1_reflection_profile",
@@ -330,9 +334,11 @@
     },
     {
       "layer": "L2_position_shift",
-      "covered": false,
-      "modes": [],
-      "note": "helper pass; no dedicated target"
+      "covered": true,
+      "modes": [
+        "pshift_vuln"
+      ],
+      "note": "added in Phase 122 (WAF guards body only)"
     },
     {
       "layer": "L7_cors",
@@ -401,10 +407,7 @@
     "L7_mutation",
     "L7_dom_clobber",
     "L7_time_based",
-    "L7_css_injection",
     "L8_cookie_tossing",
-    "L1_pre_encoded",
-    "L2_position_shift",
     "L7_xsleak",
     "L9_scenario"
   ]

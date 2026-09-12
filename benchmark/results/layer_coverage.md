@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 155 cases / 152 modes  
+Benchmark: 161 cases / 158 modes  
 Engine layers: 49  
-Covered by at least one case: 38  
-NOT covered: 11
+Covered by at least one case: 41  
+NOT covered: 8
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -34,7 +34,7 @@ NOT covered: 11
 | L8_markdown | yes | markdown_raw | added in Phase 109 |
 | L9_param_miner | yes | pm_vuln | added in Phase 121 |
 | L7_csp_nonce | yes | csp_nonce_* | yes (csp_nonce_element/ui_element/ui_leak) |
-| L7_css_injection | **NO** | - | no CSS-injection target |
+| L7_css_injection | yes | cssi_vuln | added in Phase 122 (static page analysis) |
 | L7_dangling_markup | yes | dangling_vuln | added in Phase 116 |
 | L7_import_map | yes | importmap_vuln | added in Phase 116 |
 | L7_sanitizer_bypass | yes | sanitizer_vuln | added in Phase 117 |
@@ -45,9 +45,9 @@ NOT covered: 11
 | L8_trusted_types | yes | tt_vuln | added in Phase 116 |
 | L8_websocket | yes | ws_vuln | added in Phase 116 |
 | L1_csp_gate | yes | csp_* | helper: runs before CSP-sensitive probes |
-| L1_pre_encoded | **NO** | - | helper pass; no dedicated target |
+| L1_pre_encoded | yes | pe_vuln | added in Phase 122 (param_value container) |
 | L1_reflection_profile | yes | raw_*, attr_* | helper: runs on every reflection case |
-| L2_position_shift | **NO** | - | helper pass; no dedicated target |
+| L2_position_shift | yes | pshift_vuln | added in Phase 122 (WAF guards body only) |
 | L7_cors | yes | cors_reflect | added in Phase 113 |
 | L7_nonce_bypass | yes | csp_nonce_* | partial (nonce-leak chain) |
 | L7_xsleak | **NO** | - | no XS-Leak target |
@@ -64,9 +64,6 @@ NOT covered: 11
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L7_dom_clobber` -- no clobbering-shaped target
 - `L7_time_based` -- no time-delayed-sink target
-- `L7_css_injection` -- no CSS-injection target
 - `L8_cookie_tossing` -- no cookie-tossing target
-- `L1_pre_encoded` -- helper pass; no dedicated target
-- `L2_position_shift` -- helper pass; no dedicated target
 - `L7_xsleak` -- no XS-Leak target
 - `L9_scenario` -- no --scenarios case

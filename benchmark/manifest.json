@@ -1819,6 +1819,88 @@
       "note": "Phase 121 safe twin: hidden param accepted but echoed escaped into text only"
     },
     {
+      "id": "pos-cssi-01",
+      "path": "/r/cssi01",
+      "param": "",
+      "mode": "cssi_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "css_import_injection"
+      ],
+      "context": "css_context",
+      "difficulty": "medium",
+      "note": "Phase 122: pure static page analysis -- the stylesheet itself imports an external stylesheet; no payload involved"
+    },
+    {
+      "id": "neg-cssi-01",
+      "path": "/s/cssi01",
+      "param": "",
+      "mode": "cssi_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "css_import_injection"
+      ],
+      "context": "css_context",
+      "difficulty": "medium",
+      "note": "Phase 122 safe twin: self-contained stylesheet, no external references"
+    },
+    {
+      "id": "pos-preenc-01",
+      "path": "/r/pe01",
+      "param": "data",
+      "param_value": "eyJwYWdlIjoicHJvZmlsZSJ9",
+      "mode": "pe_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 122: original value is base64-JSON ({\"page\":\"profile\"}); app decodes and echoes raw -- only the pre-encode pass wraps payloads in the same container"
+    },
+    {
+      "id": "neg-preenc-01",
+      "path": "/s/pe01",
+      "param": "data",
+      "param_value": "eyJwYWdlIjoicHJvZmlsZSJ9",
+      "mode": "pe_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 122 safe twin: same container round-trip but every echo is escaped"
+    },
+    {
+      "id": "pos-pshift-01",
+      "path": "/r/ps01",
+      "param": "q",
+      "method": "POST",
+      "mode": "pshift_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 122: pseudo-WAF inspects the POST body only; payload loop is 406ed and the shift re-fires into the query -- the WAF blind spot the app echoes raw"
+    },
+    {
+      "id": "neg-pshift-01",
+      "path": "/s/ps01",
+      "param": "q",
+      "method": "POST",
+      "mode": "pshift_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 122 safe twin: WAF still guards the body; the query echo is escaped so the shifted payload cannot confirm"
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

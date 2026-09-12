@@ -230,7 +230,6 @@ def detect(response) -> dict:
     cookies_blob = " ".join(v for k, v in response.headers.items()
                             if k.lower() == "set-cookie")
     body_excerpt = (response.text or "")[:8000]
-    full_blob = headers_blob + " " + body_excerpt
 
     waf = None
     confidence = "none"
@@ -268,10 +267,18 @@ def detect(response) -> dict:
     elif response.status_code in _BLOCK_STATUS and waf:
         blocked = True
         reason = f"HTTP {response.status_code} + {waf} signature"
-    elif waf and _BLOCK_BODY_HINTS.search(full_blob):
+    elif waf and _BLOCK_BODY_HINTS.search(body_excerpt):
+        # Phase 122 fix: block-page HINTS are a BODY signal.  This used to
+        # search full_blob (headers + body), so the vendor FINGERPRINT
+        # headers themselves (Server: cloudflare / CF-RAY) matched the
+        # cloudflare/cf-ray hint patterns -- every UNBLOCKED 200 response
+        # from any fingerprinted WAF was classified as blocked, and
+        # _try_payload then discarded every payload the WAF actually let
+        # through (a silent false-negative generator on all WAF'd sites).
+        # A real block page carries its hints in the BODY.
         blocked = True
         reason = f"{waf} block page signature"
-    elif _BLOCK_BODY_HINTS.search(full_blob):
+    elif _BLOCK_BODY_HINTS.search(body_excerpt):
         # Block page hint without a vendor match.
         blocked = True
         reason = "generic block-page body signature"
