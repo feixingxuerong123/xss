@@ -30,16 +30,53 @@ PER_FILE_TIMEOUT_OVERRIDES = {
 RETRIES = 1
 
 
+LOG_DIR = os.path.join(ROOT, "benchmark", "results", "regression_logs")
+RUN_TS = time.strftime("%Y%m%d-%H%M%S")
+
+
+def _dump_log(path: str, attempts: list) -> None:
+    """Persist captured pytest output.
+
+    With --quiet the runner used to throw every file's output away and
+    print only "FAIL <file>" -- a red gate with no way to see WHY short of
+    re-running the whole file (which, on a degraded-loopback host, can
+    take hours).  Evidence must survive the run.
+    """
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        buf = []
+        for attempt, rc, out, err in attempts:
+            buf.append(f"===== attempt {attempt} rc={rc} =====")
+            for label, blob in (("stdout", out), ("stderr", err)):
+                if not blob:
+                    continue
+                text = blob.decode("utf-8", "replace") \
+                    if isinstance(blob, bytes) else str(blob)
+                buf.append(f"--- {label} ---")
+                buf.append(text[-20000:])
+        buf.append("")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(buf))
+    except Exception as e:          # logging must never break the gate
+        print(f"[!] could not write {path}: {e}", flush=True)
+
+
 def main() -> int:
     quiet = "--quiet" in sys.argv
+    # Any argv item that names a test file limits the run to those files --
+    # lets a long degraded run be resumed file by file instead of redone.
+    wanted = [a for a in sys.argv[1:] if a.startswith("test_")]
     os.environ.setdefault("NO_PROXY", "127.0.0.1,localhost")
     files = sorted(f for f in os.listdir(HERE)
                    if f.startswith("test_") and f.endswith(".py"))
+    if wanted:
+        files = [f for f in files if f in wanted]
     failures: list[str] = []
     t0 = time.perf_counter()
     for f in files:
         budget = PER_FILE_TIMEOUT_OVERRIDES.get(f, PER_FILE_TIMEOUT)
         rc = 1
+        attempts: list = []
         for attempt in range(RETRIES + 1):
             try:
                 r = subprocess.run(
@@ -48,13 +85,22 @@ def main() -> int:
                     cwd=ROOT, timeout=budget,
                     capture_output=True)
                 rc = r.returncode
-            except subprocess.TimeoutExpired:
+                attempts.append((attempt, rc, r.stdout, r.stderr))
+            except subprocess.TimeoutExpired as exc:
                 rc = 2   # hung file: treat as failure, do not kill the gate
+                attempts.append((attempt, "TIMEOUT",
+                                 exc.stdout or b"", exc.stderr or b""))
             if rc == 0:
                 break
+        log_path = os.path.join(LOG_DIR, RUN_TS, f + ".log")
+        if attempts and (rc != 0 or len(attempts) > 1):
+            _dump_log(log_path, attempts)
         if rc != 0:
             failures.append(f)
-            print(f"FAIL {f}", flush=True)
+            if os.path.exists(log_path):
+                print(f"FAIL {f}  log: {log_path}", flush=True)
+            else:
+                print(f"FAIL {f}", flush=True)
             if not quiet:
                 tail = (r.stdout or b"")[-2000:].decode("utf-8", "replace")
                 print(tail, flush=True)
@@ -64,6 +110,8 @@ def main() -> int:
     dt = time.perf_counter() - t0
     print(f"\n{len(files) - len(failures)}/{len(files)} files green "
           f"in {dt:.0f}s; failures: {failures or 'none'}")
+    if failures:
+        print(f"logs: {os.path.join(LOG_DIR, RUN_TS)}")
     return len(failures)
 
 
