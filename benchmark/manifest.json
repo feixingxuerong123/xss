@@ -1793,6 +1793,32 @@
       "note": "Phase 120 safe twin: discovered endpoint escapes output"
     },
     {
+      "id": "pos-pmmine-01",
+      "path": "/r/pm01",
+      "param": "",
+      "mode": "pm_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "script_string_dq",
+      "difficulty": "hard",
+      "note": "Phase 121: hidden param name has no UI hint; learnable only by param_miner probing (candidate #8, inside the 14-candidate budget)"
+    },
+    {
+      "id": "neg-pmmine-01",
+      "path": "/s/pm01",
+      "param": "",
+      "mode": "pm_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "reflected"
+      ],
+      "context": "script_string_dq",
+      "difficulty": "hard",
+      "note": "Phase 121 safe twin: hidden param accepted but echoed escaped into text only"
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

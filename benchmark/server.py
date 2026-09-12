@@ -1094,6 +1094,42 @@ def m_formecho_safe(v: str, ctx: dict) -> tuple:
     return _page(f"<div>results for {html.escape(v, quote=True)}</div>")
 
 
+# ---------------------------------------------------------------------------
+# Phase 121: hidden-parameter miner targets (L9_param_miner).
+#
+# The page carries NO UI hint for the `name` parameter -- no form field,
+# no link, no inline JS references it, and the manifest cases pin
+# param:"" so the scan URL arrives clean.  The only way the scanner can
+# learn that `name` exists is param_miner probing (candidate #8, inside
+# the 14-candidate budget that max_payloads=14 implies).  Registered in
+# MODES_CTX (not PAGE_MODES) because PAGE_MODES handlers only see the
+# one pinned param -- these need the full query dict to pick up whatever
+# the miner appended.
+# ---------------------------------------------------------------------------
+
+def m_pm_vuln(v: str, ctx: dict) -> tuple:
+    """Hidden `name` param reflected into a JS string sink."""
+    name_val = ((ctx.get("query") or {}).get("name") or [""])[0]
+    if name_val:
+        return _page("<h1>Profile</h1>"
+                     f'<script>var profile = "{name_val}";</script>')
+    return _page("<h1>Profile</h1><p>No profile selected.</p>")
+
+
+def m_pm_safe(v: str, ctx: dict) -> tuple:
+    """Same page; hidden param accepted but echoed escaped into text."""
+    name_val = ((ctx.get("query") or {}).get("name") or [""])[0]
+    if name_val:
+        return _page("<h1>Profile</h1>"
+                     f"<p>Showing {html.escape(name_val, quote=True)}.</p>")
+    return _page("<h1>Profile</h1><p>No profile selected.</p>")
+
+MODES_CTX.update({
+    "pm_vuln": m_pm_vuln,
+    "pm_safe": m_pm_safe,
+})
+
+
 PAGE_MODES.update({
     "crawl_form_vuln": m_crawl_form_vuln,
     "crawl_form_safe": m_crawl_form_safe,

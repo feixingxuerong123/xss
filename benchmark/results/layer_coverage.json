@@ -1,9 +1,9 @@
 {
-  "cases": 153,
-  "modes": 150,
+  "cases": 155,
+  "modes": 152,
   "layers": 49,
-  "covered": 37,
-  "uncovered": 12,
+  "covered": 38,
+  "uncovered": 11,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -215,9 +215,11 @@
     },
     {
       "layer": "L9_param_miner",
-      "covered": false,
-      "modes": [],
-      "note": "needs a page that hints at a hidden param name"
+      "covered": true,
+      "modes": [
+        "pm_vuln"
+      ],
+      "note": "added in Phase 121"
     },
     {
       "layer": "L7_csp_nonce",
@@ -399,7 +401,6 @@
     "L7_mutation",
     "L7_dom_clobber",
     "L7_time_based",
-    "L9_param_miner",
     "L7_css_injection",
     "L8_cookie_tossing",
     "L1_pre_encoded",

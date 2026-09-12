@@ -371,6 +371,13 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **修正后：49 层中 37 已覆盖，12 未覆盖**（基准 153 用例）。
 
+**Phase 121：`L9_param_miner` 隐藏参数覆盖——"参数本身是秘密"**。param_miner 对候选参数名逐个发探测请求（marker 反射 / 状态差 / 长度差 >50 即"interesting"），发现后把参数**合并进端点参数**喂给反射层——它自己是"使能型"层，不产 finding。用例设计：页面 HTML **没有任何** `name` 参数的线索（无表单字段、无链接、无内联 JS），manifest 用例钉 `param:""` 让扫描 URL 干净——扫描器唯一能学到 `name` 存在的途径就是 param_miner 探测（`name` 是候选表第 8 位，落在 max_payloads=14 ⇒ 14 候选的预算内）。
+
+- `pos-pmmine-01`：`/r/pm01` 对 `?name=` 原样反射进 JS 双引号字符串（`var profile = "..."`)——miner 发现（marker 反射）→ 参数合并 → 反射层注入 `"></script><script>alert(...)` 确认 → **TP**（46 请求，探测量可见）
+- `neg-pmmine-01`：`/s/pm01` 接受同一参数但只转义回显进文本节点（与 neg-formmine-01 同形状）——miner 同样报 interesting、反射层同样会来测，但转义输出无 finding → **TN**
+
+实现细节：handler 注册在 `MODES_CTX`（不是 `PAGE_MODES`）——后者只能拿到钉死的单个参数值，`param:""` 时探测值永远到不了 handler；必须从 `ctx["query"]` 全量字典里读 `name`。`tests/test_param_miner_target.py` 锁死这个契约（含"只反射 `name`、忽略其他探测候选"——否则滚动反射率镜像保护会误触发终止挖掘）。验证 **TP1 TN1 FP0 FN0**；**49 层中 38 已覆盖，11 未覆盖**（基准 155 用例）。
+
 **Phase 119：145 用例双引擎基线（双引擎 F1 均为 1.000），并修掉一个"我自己的 FP"**。
 
 **基线（145 用例）**：sync **TP91 FP0 TN54 FN0**（recall/precision/F1 全 1.000）；async **TP90 FP0 TN53 FN0 + 2 SKIP**（stored 是 sync-only，按声明跳过）。sync 侧 fn-retry 又救回 1 个（`pos-url-04`）；async 侧救回 2 个（`neg-rcdata-02`、`pos-tt-01`）。**Phase 109-118 新加的 38 个家族用例在两个引擎下全部正确**。

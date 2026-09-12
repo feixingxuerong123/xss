@@ -53,7 +53,7 @@ COVERAGE = {
     "L8_cookie": (["cookie_echo"], "added in Phase 109"),
     "L8_error_page": (["error_echo"], "added in Phase 109"),
     "L8_markdown": (["markdown_raw"], "added in Phase 109"),
-    "L9_param_miner": (None, "needs a page that hints at a hidden param name"),
+    "L9_param_miner": (["pm_vuln"], "added in Phase 121"),
     # Phase 115: eleven layers that were live and dispatched but missing
     # from coverage.py's own LAYERS table (now registered).
     "L7_csp_nonce": (["csp_nonce_*"], "yes (csp_nonce_element/ui_element/ui_leak)"),
