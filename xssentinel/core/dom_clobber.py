@@ -85,15 +85,53 @@ def payloads(token: str = "x") -> list[str]:
 
 
 def detect_reflection(response_text: str, token: str) -> bool:
-    """Check whether any clobber payload with this token was reflected."""
+    """Check whether the token landed as a REAL id/name attribute.
+
+    Phase 123: this used to ask only "does the text read id=<token>?"  That
+    question survives HTML escaping -- `&lt;a id=xclob_123 ...&gt;` is not a
+    tag at all, yet it matches.  Consequence: ANY page that escapes its
+    reflection but happens to have a `getElementById(...)` script and a
+    dangerous sink was reported as `dom_clobber` (high).  That is most
+    real-world apps, so the layer was a false-positive generator rather
+    than a detector.
+
+    What proves clobbering is not the letters "id=token" but the existence
+    of an actual parsed element carrying that id/name.  Hence: match only
+    inside a genuine, unescaped tag body.
+    """
     if not response_text or not token:
         return False
-    # Look for id=token or name=token as an HTML attribute.
-    pat = re.compile(
-        r'(?:id|name)\s*=\s*[\'"]?\s*' + re.escape(token) + r'\b',
-        re.IGNORECASE,
-    )
-    return bool(pat.search(response_text))
+    return bool(_real_tag_attr(response_text, token))
+
+
+_ATTR_RE = re.compile(
+    r'([a-zA-Z_:][-\w:.]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))'
+)
+
+
+def _real_tag_attr(response_text: str, token: str) -> bool:
+    """True if some real (unescaped) element carries id/name == token.
+
+    A tag body is `<` + element name + everything up to the FIRST `>`.
+    Splitting at the first `>` excludes text-content payloads: in
+    `<div id="stage">&lt;a id=TOKEN&gt;</div>` the token sits AFTER the
+    first `>`, i.e. in text content, not inside any tag body.
+
+    The body is then tokenised into genuine attribute assignments
+    (respecting quotes) instead of being searched as a blob -- otherwise
+    `<img alt="&lt;a id=TOKEN&gt;">` still matches, even though the token
+    there is just escaped TEXT inside alt's value and creates no element.
+    """
+    tok = token.strip().lower()
+    for tag in re.finditer(r'<\s*[a-zA-Z][^>]*>', response_text):
+        for m in _ATTR_RE.finditer(tag.group(0)):
+            vals = [v for v in m.group(2, 3, 4) if v is not None]
+            if not vals:
+                continue
+            if m.group(1).lower() in ("id", "name") \
+                    and vals[0].strip().lower() == tok:
+                return True
+    return False
 
 
 def find_clobbered_js_refs(response_text: str, token: str) -> list[str]:

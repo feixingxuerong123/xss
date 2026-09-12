@@ -35,7 +35,7 @@ COVERAGE = {
     "L6_dom_dynamic": (["dom_*"], "yes"),
     "L7_mutation": (None, "the layer runs on every page but no target is "
                           "built to be exploitable ONLY by mutation"),
-    "L7_dom_clobber": (None, "no clobbering-shaped target"),
+    "L7_dom_clobber": (["clobber_vuln"], "added in Phase 123 (needs a REAL id/name attribute -- Phase 123 also fixed the layer's escaping-blind FP)"),
     "L7_template": (["raw_template", "raw_template_vue"], "yes"),
     "L7_polyglot": (["waf_naive"], "reached via the WAF case (Phase 118) -- "
                                    "the bypass that lands is a polyglot"),

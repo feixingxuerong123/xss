@@ -386,7 +386,19 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **引擎缺陷（本轮真正的大鱼，家族第二例基准驱动）**：`waf.detect()` 用 `full_blob`（headers+body）搜 `_BLOCK_BODY_HINTS`，而 hints 里有 `cf-ray|cloudflare` 形态——**伪 WAF 的指纹响应头自己命中了自己**：所有 WAF 站**未拦截的 200 响应**被判成 blocked → `_try_payload` 全部 continue → **凡带 WAF 指纹的站点，所有 payload 确认静默失效**（无声漏报生成器，pos-pshift-01 的 227 请求零确认就是它）。修法：block-page hints 是 **body 信号**，两处 `full_blob` → `body_excerpt`；`tests/test_waf_detect_block_hints.py` 6 例锁定（未拦截 200 + 指纹头 ≠ blocked、真 block 页面 body → blocked、强状态码恒 blocked 等）。与 Phase 119（marker 边界）同源：**基准不只测"能不能检出"，还在抓"确认管线自相矛盾"的缺陷**。
 
-**修正后：49 层中 41 已覆盖，8 未覆盖**（基准 161 用例）。剩余 8 层全部是"需基础设施"（OOB 监听、second-order 流程、mutation-only DOM 靶、时延 sink、cookie tossing 需父子域、XS-Leak 仅 async、scenarios 跑批）。
+**Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
+
+按"先看代码再写用例"的规矩确认触发链：该层把 `<a id={token} name={token} href="javascript:alert(1)">x</a>` 打进参数，要求① `id=<token>` 是**真实落地的属性**、② 页面 JS 里存在 `getElementById(...)` / `document.<name>` / `querySelector('#...')` 这类引用、③ 存在危险 sink，三者齐才发 `type="dom_clobber"`（类型是查出来的，不是猜的）。
+
+写用例的过程中撞出**该层自身的系统性误报**（本轮真正的收获）：`detect_reflection` 判的是"文本里有没有 `id=<token>`"——**这个问法对 HTML 转义免疫**。正确转义后的页面 `<div id="stage">&lt;a id=xclob_123 ...&gt;</div>` 里，`id=xclob_123` 照样是肉眼可见的文本；而只要页面**碰巧**有 `getElementById` 脚本 + 一个 sink（真实应用几乎普遍满足），该层就报 `dom_clobber` **high**。基准用 `neg-clobber-02`（同一页面、同一脚本，**只把转义打开**）复现：修复前 **FP**，修复后 **TN**。与 Phase 122 的 WAF 指纹头同源：**对仅表示"样子像"、不表示"真成立"的信号做了强判定**。
+
+修法两层（第一层不够）：① 只在**真实、未转义的标签体**里找（`<\s*[a-zA-Z][^>]*>`，在第一个 `>` 处收尾——把落在文本节点里的转义载荷排除）；② 标签体再按「属性名 = 带引号值 / 无引号值」**正经分词**，否则 `<img alt="&lt;a id=TOKEN&gt;">` 仍会命中——那里 token 只是 alt 值里的转义文本，浏览器不会创建任何元素。10 种形态全对（文本节点转义 / 属性内转义 / 剥标签 / 无反射 / 无关属性值 均 False；裸反射 / `id` 带引号 / `name` / 大写标签等 5 种真元素形态**仍要检出**——修 FP 不能把层修瞎）；`tests/test_dom_clobber_reflection.py` 锁定。
+**家族特征**（已 grep core，暂无第二处）：**用"载荷碎片"判定反射**，而该碎片恰好在 HTML 转义下不变。往后凡"只搜片段不搜完整载荷"的判定，都要先问一句：转义之后它还成立吗？
+
+附带一个反直觉的设计约束：**这层的 safe 双胞胎不能靠转义**——`neg-clobber-01` 改用剥标签消毒器，而"转义救不了"这件事本身被做成了 `neg-clobber-02` 这个 FP 回归用例。
+
+基准增至 **164 用例**（`pos-clobber-01` TP、`neg-clobber-01` TN、`neg-clobber-02` 因为对的理由 TN），验证 **TP1 TN2 FP0 FN0**。
+**修正后：49 层中 42 已覆盖，7 未覆盖**（L4_second_order、L5_blind_oob、L7_mutation、L7_time_based、L8_cookie_tossing、L7_xsleak、L9_scenario）。
 
 **Phase 119：145 用例双引擎基线（双引擎 F1 均为 1.000），并修掉一个"我自己的 FP"**。
 

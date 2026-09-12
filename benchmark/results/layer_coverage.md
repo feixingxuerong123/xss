@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 161 cases / 158 modes  
+Benchmark: 164 cases / 161 modes  
 Engine layers: 49  
-Covered by at least one case: 41  
-NOT covered: 8
+Covered by at least one case: 42  
+NOT covered: 7
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -15,7 +15,7 @@ NOT covered: 8
 | L5_blind_oob | **NO** | - | needs an OOB listener configured; no case |
 | L6_dom_dynamic | yes | dom_* | yes |
 | L7_mutation | **NO** | - | the layer runs on every page but no target is built to be exploitable ONLY by mutation |
-| L7_dom_clobber | **NO** | - | no clobbering-shaped target |
+| L7_dom_clobber | yes | clobber_vuln | added in Phase 123 (needs a REAL id/name attribute -- Phase 123 also fixed the layer's escaping-blind FP) |
 | L7_template | yes | raw_template, raw_template_vue | yes |
 | L7_polyglot | yes | waf_naive | reached via the WAF case (Phase 118) -- the bypass that lands is a polyglot |
 | L7_jsonp | yes | jsonp_whitelist, jsonp_wrapped | yes |
@@ -62,7 +62,6 @@ NOT covered: 8
 - `L4_second_order` -- needs --second-order-inject/-viewers; no case
 - `L5_blind_oob` -- needs an OOB listener configured; no case
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
-- `L7_dom_clobber` -- no clobbering-shaped target
 - `L7_time_based` -- no time-delayed-sink target
 - `L8_cookie_tossing` -- no cookie-tossing target
 - `L7_xsleak` -- no XS-Leak target

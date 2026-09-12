@@ -1901,6 +1901,45 @@
       "note": "Phase 122 safe twin: WAF still guards the body; the query echo is escaped so the shifted payload cannot confirm"
     },
     {
+      "id": "pos-clobber-01",
+      "path": "/r/clob01",
+      "param": "q",
+      "mode": "clobber_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "dom_clobber"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 123: raw HTML reflection next to JS that consumes getElementById('cfg') and feeds it to innerHTML -- attacker-created id attributes win the lookup"
+    },
+    {
+      "id": "neg-clobber-01",
+      "path": "/s/clob01",
+      "param": "q",
+      "mode": "clobber_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "dom_clobber"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 123 safe twin: same page, same JS ref and sink, but a strip-tags sanitizer removes the ability to create an id/name attribute (escaping alone would NOT -- id=token stays textually visible)"
+    },
+    {
+      "id": "neg-clobber-02",
+      "path": "/s/clob02",
+      "param": "q",
+      "mode": "clobber_escaped",
+      "ground_truth": "safe",
+      "finding_types": [
+        "dom_clobber"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 123 FP lock: reflection is HTML-escaped, so no id/name attribute can be created -- but the text still reads id=<token>. The layer used to report dom_clobber here (high) purely from that textual match; fixed in dom_clobber.detect_reflection"
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

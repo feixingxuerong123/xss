@@ -1239,6 +1239,74 @@ def m_pshift_safe(v: str, ctx: dict) -> tuple:
     query_val = ((ctx.get("query") or {}).get("q") or [""])[0]
     return _pshift_render(body_val, query_val, escape_query=True)
 
+# ---------------------------------------------------------------------------
+# Phase 123: DOM clobbering targets (L7_dom_clobber).
+#
+# _scan_dom_clobber injects
+#   <a id={token} name={token} href="javascript:alert(1)">x</a>
+# and asks three things at once: (1) id=<token> landed as a REAL attribute
+# (detect_reflection), (2) the page's own JS consumes an element reference
+# (getElementById(...) / querySelector('#...') / document.<name>), and
+# (3) a dangerous sink is present.  So the target has to be raw HTML
+# reflection AND a JS reference AND a sink, on the same page.
+#
+# The safe twin CANNOT be "escape the parameter": html.escape() leaves
+# "id=<token>" textually intact (only the angle brackets change), and
+# detect_reflection's `(?:id|name)\s*=\s*TOKEN` regex still matches.  What
+# actually removes the premise is taking away the ability to CREATE an
+# attribute -- hence a strip-tags sanitizer.  Same page, same script, same
+# sink; only attacker-created attributes disappear.
+# ---------------------------------------------------------------------------
+
+_STRIP_TAGS_RE = re.compile(r"<[^>]*>")
+
+# getElementById('cfg') -> js ref; `download.href = ...` -> sink.
+# The sink is deliberately NOT innerHTML/outerHTML/document.write: those
+# put the page in the Trusted Types layer's line of fire, which then
+# reports `trusted_types_no_policy` (medium) on the SAFE twin and trips
+# the zero-finding gate.  A clobbered value flowing into a link href is
+# equally realistic (javascript: URL lands on the target element) and does
+# not drag an unrelated layer into the case.
+_CLOBBER_SCRIPT = ("<script>"
+                   "var cfg = document.getElementById('cfg');"
+                   "var dl = document.getElementById('download');"
+                   "dl.href = cfg ? cfg.textContent : '#';"
+                   "</script>")
+
+
+_CLOBBER_HEAD = ('<h1>Theme picker</h1>'
+                 '<a id="download" href="#">Download theme</a>')
+
+
+def m_clobber_vuln(v: str, ctx: dict) -> tuple:
+    """Raw HTML reflection beside JS that consumes an element by id."""
+    return _page(_CLOBBER_HEAD
+                 + f'<div id="stage">{v}</div>'
+                 + _CLOBBER_SCRIPT)
+
+
+def m_clobber_safe(v: str, ctx: dict) -> tuple:
+    """Same page; the value goes through a strip-tags sanitizer."""
+    return _page(_CLOBBER_HEAD
+                 + f'<div id="stage">{_STRIP_TAGS_RE.sub("", v or "")}</div>'
+                 + _CLOBBER_SCRIPT)
+
+
+def m_clobber_escaped(v: str, ctx: dict) -> tuple:
+    """Same page; the value is HTML-escaped (the apparently-correct fix).
+
+    This target exists because escaping is NOT enough for this layer:
+    `id=<token>` survives `<`/`>` escaping textually, so the layer used to
+    report `dom_clobber` here even though no attribute can be created --
+    a false positive on every page that escapes its reflection but has a
+    `getElementById` + sink script (i.e. most real apps).  See
+    dom_clobber.detect_reflection (Phase 123).
+    """
+    return _page(_CLOBBER_HEAD
+                 + f'<div id="stage">{html.escape(v or "", quote=True)}</div>'
+                 + _CLOBBER_SCRIPT)
+
+
 MODES_CTX.update({
     "pm_vuln": m_pm_vuln,
     "pm_safe": m_pm_safe,
@@ -1249,6 +1317,9 @@ PAGE_MODES.update({
     "cssi_safe": m_cssi_safe,
     "pe_vuln": m_pe_vuln,
     "pe_safe": m_pe_safe,
+    "clobber_vuln": m_clobber_vuln,
+    "clobber_safe": m_clobber_safe,
+    "clobber_escaped": m_clobber_escaped,
 })
 
 POST_MODES.update({

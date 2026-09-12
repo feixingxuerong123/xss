@@ -1,9 +1,9 @@
 {
-  "cases": 161,
-  "modes": 158,
+  "cases": 164,
+  "modes": 161,
   "layers": 49,
-  "covered": 41,
-  "uncovered": 8,
+  "covered": 42,
+  "uncovered": 7,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -80,9 +80,11 @@
     },
     {
       "layer": "L7_dom_clobber",
-      "covered": false,
-      "modes": [],
-      "note": "no clobbering-shaped target"
+      "covered": true,
+      "modes": [
+        "clobber_vuln"
+      ],
+      "note": "added in Phase 123 (needs a REAL id/name attribute -- Phase 123 also fixed the layer's escaping-blind FP)"
     },
     {
       "layer": "L7_template",
@@ -405,7 +407,6 @@
     "L4_second_order",
     "L5_blind_oob",
     "L7_mutation",
-    "L7_dom_clobber",
     "L7_time_based",
     "L8_cookie_tossing",
     "L7_xsleak",
