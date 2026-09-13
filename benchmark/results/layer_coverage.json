@@ -1,9 +1,9 @@
 {
-  "cases": 166,
-  "modes": 163,
+  "cases": 168,
+  "modes": 165,
   "layers": 49,
-  "covered": 43,
-  "uncovered": 6,
+  "covered": 44,
+  "uncovered": 5,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -125,9 +125,11 @@
     },
     {
       "layer": "L7_time_based",
-      "covered": false,
-      "modes": [],
-      "note": "no time-delayed-sink target"
+      "covered": true,
+      "modes": [
+        "tb_vuln"
+      ],
+      "note": "added in Phase 125 (CSP fallback; Phase 125 also fixed the layer never starting its own OOB listener)"
     },
     {
       "layer": "L8_postmessage",
@@ -408,7 +410,6 @@
   "uncovered_layers": [
     "L4_second_order",
     "L7_mutation",
-    "L7_time_based",
     "L8_cookie_tossing",
     "L7_xsleak",
     "L9_scenario"

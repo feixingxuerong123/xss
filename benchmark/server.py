@@ -1419,6 +1419,45 @@ def m_blind_safe(v: str, ctx: dict) -> tuple:
                  f'<div id="preview">{escaped}</div>')
 
 
+# ---------------------------------------------------------------------------
+# Phase 125: time-based fallback targets (L7_time_based).
+#
+# scan_time_based is a FALLBACK: it runs only after every standard variant
+# failed verify_semantic() while the marker still reflected -- exactly the
+# "strict CSP blocks alert()" case its own comment describes.  It then
+# fires three resource-fetch channels (<style>@import</style>,
+# <img src=x onerror=fetch(...)>, <img src=...>) carrying a fresh tb_
+# token, and polls the OOB listener for it.
+#
+# So the target needs: (1) raw reflection, (2) a CSP that stops the
+# verifier from confirming yet still lets images/CSS load -- `script-src
+# 'none'`, NOT `default-src 'none'` (that would block the very resources
+# this layer depends on), and (3) the Phase 124 victim simulator so the
+# injected resource is really fetched.
+#
+# The safe twin escapes, so no element/stylesheet is parsed, nothing is
+# fetched, and no token ever beacons.
+# ---------------------------------------------------------------------------
+
+_CSP_SCRIPT_NONE = {"Content-Security-Policy":
+                    "script-src 'none'; object-src 'none'"}
+
+
+def m_tb_vuln(v: str, ctx: dict) -> tuple:
+    """Raw reflection under a script-blocking CSP + resource unfurl."""
+    _unfurl(v or "")
+    return _page(f'<h1>Search</h1><div id="results">{v}</div>',
+                 _CSP_SCRIPT_NONE)
+
+
+def m_tb_safe(v: str, ctx: dict) -> tuple:
+    """Same CSP and unfurler; the value is escaped, so nothing resolves."""
+    escaped = html.escape(v or "", quote=True)
+    _unfurl(escaped)
+    return _page(f'<h1>Search</h1><div id="results">{escaped}</div>',
+                 _CSP_SCRIPT_NONE)
+
+
 MODES_CTX.update({
     "pm_vuln": m_pm_vuln,
     "pm_safe": m_pm_safe,
@@ -1434,6 +1473,8 @@ PAGE_MODES.update({
     "clobber_escaped": m_clobber_escaped,
     "blind_vuln": m_blind_vuln,
     "blind_safe": m_blind_safe,
+    "tb_vuln": m_tb_vuln,
+    "tb_safe": m_tb_safe,
 })
 
 POST_MODES.update({

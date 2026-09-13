@@ -1974,6 +1974,40 @@
       "note": "Phase 124 safe twin: the same unfurler, but the value is HTML-escaped first, so no element is parsed and nothing can be resolved -> no beacon. The unfurler must be parser-aware (not a regex sweep for URLs), otherwise this twin would beacon off the escaped text and prove nothing."
     },
     {
+      "id": "pos-tb-01",
+      "path": "/r/tb01",
+      "param": "q",
+      "mode": "tb_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "time_based_xss"
+      ],
+      "context": "time_based_css_import",
+      "difficulty": "hard",
+      "extra_args": [
+        "--oob",
+        "self"
+      ],
+      "note": "Phase 125: the CSP fallback channel. Raw reflection under `script-src 'none'` -- the verifier refuses to confirm inline execution, so the standard loop fails and scan_time_based runs, injecting <style>@import</style> / <img src> / onerror-fetch resource payloads. The Phase 124 unfurler then really fetches them, so the tb_ token beacons and the layer confirms. Note the CSP must NOT be default-src none (that would block the very resources the layer depends on)."
+    },
+    {
+      "id": "neg-tb-01",
+      "path": "/s/tb01",
+      "param": "q",
+      "mode": "tb_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "time_based_xss"
+      ],
+      "context": "time_based_css_import",
+      "difficulty": "hard",
+      "extra_args": [
+        "--oob",
+        "self"
+      ],
+      "note": "Phase 125 safe twin: same CSP, same unfurler, escaped reflection. No element or stylesheet is parsed, so the resource payload never loads and no token beacons -> the fallback correctly stays silent."
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

@@ -41,7 +41,7 @@ COVERAGE = {
                                    "the bypass that lands is a polyglot"),
     "L7_jsonp": (["jsonp_whitelist", "jsonp_wrapped"], "yes"),
     "L7_csp": (["csp_strict_*", "csp_nonce_*"], "yes"),
-    "L7_time_based": (None, "no time-delayed-sink target"),
+    "L7_time_based": (["tb_vuln"], "added in Phase 125 (CSP fallback; Phase 125 also fixed the layer never starting its own OOB listener)"),
     "L8_postmessage": (["dom_postmessage"], "yes"),
     "L8_prototype": (["prototype_vuln"], "added in Phase 113"),
     "L8_service_worker": (["sw_vuln"], "added in Phase 113"),

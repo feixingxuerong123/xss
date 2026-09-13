@@ -34,8 +34,11 @@ This module is a TRIAGE layer -- it does not replace the main verifier
 but provides a fallback when the standard sinks are blocked by CSP.
 """
 from __future__ import annotations
+import logging
 import time
 import secrets
+
+_log = logging.getLogger(__name__)
 
 
 def build_timing_payloads(callback_url: str, token: str) -> list[dict]:
@@ -220,6 +223,28 @@ def scan_time_based(scanner, req, url: str, method: str,
     import secrets as sec
     token = f"tb_{sec.token_hex(4)}"
 
+    # The listener MUST be live before the payload goes out.  The beacon is
+    # triggered by the very request that carries the payload, so a listener
+    # that has not been started yet is just a closed port: the fetch gets
+    # connection-refused, no token ever arrives, and the fallback reports
+    # nothing -- a silent false negative.  _inject_blind starts it lazily
+    # and time-based can run without blind ever having run (blind has its
+    # own "response contains a raw executable tag" gate), so this layer has
+    # to start it itself.  This was the reason time-based detection could
+    # never confirm on its own.
+    if scanner.oob is not None and not getattr(scanner, "_oob_started", False):
+        starter = getattr(scanner.oob, "start", None)
+        if callable(starter):
+            try:
+                starter()
+                scanner._oob_started = True
+            except Exception as e:
+                _log.warning("OOB listener failed to start: %s", e)
+                return
+        else:
+            # Listener without a lifecycle (simple/embedded implementations).
+            scanner._oob_started = True
+
     # Determine the callback URL.
     callback_url = None
     if scanner.oob:
@@ -235,6 +260,14 @@ def scan_time_based(scanner, req, url: str, method: str,
             callback_url = cb
         elif hasattr(scanner.oob, "url"):
             callback_url = scanner.oob.url
+
+    # A path-based listener (SelfHostedListener) already embeds the token in
+    # the URL it hands back, while build_timing_payloads appends one.  Strip
+    # the duplicate so the emitted path is /<token>, not /<token>/<token>
+    # (harmless for the current parser, which reads the first segment, but a
+    # trap for any listener that reads the last one).
+    if callback_url and callback_url.rstrip("/").endswith("/" + token):
+        callback_url = callback_url.rstrip("/")[:-(len(token) + 1)]
 
     if not callback_url:
         # No callback channel available -- skip time-based detection.

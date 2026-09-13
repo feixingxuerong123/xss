@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 166 cases / 163 modes  
+Benchmark: 168 cases / 165 modes  
 Engine layers: 49  
-Covered by at least one case: 43  
-NOT covered: 6
+Covered by at least one case: 44  
+NOT covered: 5
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -20,7 +20,7 @@ NOT covered: 6
 | L7_polyglot | yes | waf_naive | reached via the WAF case (Phase 118) -- the bypass that lands is a polyglot |
 | L7_jsonp | yes | jsonp_whitelist, jsonp_wrapped | yes |
 | L7_csp | yes | csp_strict_*, csp_nonce_* | yes |
-| L7_time_based | **NO** | - | no time-delayed-sink target |
+| L7_time_based | yes | tb_vuln | added in Phase 125 (CSP fallback; Phase 125 also fixed the layer never starting its own OOB listener) |
 | L8_postmessage | yes | dom_postmessage | yes |
 | L8_prototype | yes | prototype_vuln | added in Phase 113 |
 | L8_service_worker | yes | sw_vuln | added in Phase 113 |
@@ -61,7 +61,6 @@ NOT covered: 6
 
 - `L4_second_order` -- needs --second-order-inject/-viewers; no case
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
-- `L7_time_based` -- no time-delayed-sink target
 - `L8_cookie_tossing` -- no cookie-tossing target
 - `L7_xsleak` -- no XS-Leak target
 - `L9_scenario` -- no --scenarios case

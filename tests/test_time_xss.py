@@ -253,3 +253,103 @@ class TestScanTimeBased:
         assert req.calls == []
         assert sc.findings == []
         assert sc.bumps == 0
+
+
+# -- Phase 125: the listener must be LIVE before the payload goes out -----
+
+class _StartableOOB:
+    """Listener with a lifecycle, like every real (SelfHosted) listener.
+
+    The beacon is triggered by the very request that carries the payload, so
+    a listener that has not been started is just a closed port.  Before this
+    fix only _inject_blind ever started it, and time-based ran without blind
+    having run (blind has its own raw-tag gate) -- the fetch hit a closed
+    port, no token arrived, and the layer silently reported nothing.
+    """
+
+    name = "startable-oob"
+
+    def __init__(self, log):
+        self._log = log
+        self.started = 0
+        self._started = False
+
+    def start(self):
+        self.started += 1
+        self._started = True
+        self._log.append("oob.start")
+
+    def callback_url(self, token):
+        return f"http://oob.test/{token}"
+
+    def poll(self, expected, timeout=None):
+        return set()
+
+
+class _OrderReq:
+    """Requester double that records send order into the same log."""
+
+    def __init__(self, log):
+        self._log = log
+        self.calls = []
+
+    def request(self, method, url, params=None, data=None):
+        self._log.append("send")
+        self.calls.append({"method": method, "url": url,
+                           "params": dict(params or {}),
+                           "data": dict(data or {})})
+        return _Resp(200)
+
+
+class TestListenerIsStartedByTimeBased:
+    def test_listener_starts_before_the_first_probe(self):
+        log: list = []
+        oob = _StartableOOB(log)
+        req = _OrderReq(log)
+        sc = _FakeScanner(oob=oob)
+        scan_time_based(sc, req, "http://t/", "GET", {"q": "x"}, {}, "q")
+        assert oob.started == 1, "the layer must start the listener itself"
+        assert log[0] == "oob.start", f"start must precede any send: {log}"
+        assert "send" in log
+
+    def test_listener_is_started_only_once(self):
+        log: list = []
+        oob = _StartableOOB(log)
+        sc = _FakeScanner(oob=oob)
+        scan_time_based(sc, _OrderReq(log), "http://t/", "GET", {"q": "x"},
+                        {}, "q")
+        scan_time_based(sc, _OrderReq(log), "http://t/", "GET", {"q": "x"},
+                        {}, "q")
+        assert oob.started == 1, "already-started listener must not re-bind"
+
+    def test_listener_without_lifecycle_is_tolerated(self):
+        """Simple/embedded listeners need no start(); scanning must proceed."""
+        req = _FakeReq()
+        sc = _FakeScanner(oob=_FakeOOB())
+        scan_time_based(sc, req, "http://t/", "GET", {"q": "x"}, {}, "q")
+        assert len(req.calls) == 3
+
+    def test_path_listener_token_is_not_duplicated(self):
+        """SelfHosted.callback_url() already embeds the token.
+
+        build_timing_payloads() appends one more, so the emitted URL used to
+        read /<token>/<token>.  Harmless for the current parser (first path
+        segment wins) but a trap for any listener that reads the last one.
+        """
+        import re
+
+        class _PathOOB(_StartableOOB):
+            pass
+
+        log: list = []
+        req = _OrderReq(log)
+        sc = _FakeScanner(oob=_PathOOB(log))
+        scan_time_based(sc, req, "http://t/", "GET", {"q": "x"}, {}, "q")
+        for call in req.calls:
+            for value in list(call["params"].values()) + \
+                    list(call["data"].values()):
+                for hit in re.findall(r"http://oob\.test/([^\s'\")]+)",
+                                      str(value)):
+                    assert "tb_" in hit
+                    assert len(hit.split("/")) == 1, \
+                        f"token repeated in callback path: {hit}"
