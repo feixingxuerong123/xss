@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 164 cases / 161 modes  
+Benchmark: 166 cases / 163 modes  
 Engine layers: 49  
-Covered by at least one case: 42  
-NOT covered: 7
+Covered by at least one case: 43  
+NOT covered: 6
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -12,7 +12,7 @@ NOT covered: 7
 | L3_dom_static | yes | dom_hash_*, dom_jquery_html, dom_search_eval, dom_postmessage | yes |
 | L4_stored | yes | stored_write | added in Phase 110 |
 | L4_second_order | **NO** | - | needs --second-order-inject/-viewers; no case |
-| L5_blind_oob | **NO** | - | needs an OOB listener configured; no case |
+| L5_blind_oob | yes | blind_vuln | added in Phase 124 (real OOB callback; needs extra_args --oob self) |
 | L6_dom_dynamic | yes | dom_* | yes |
 | L7_mutation | **NO** | - | the layer runs on every page but no target is built to be exploitable ONLY by mutation |
 | L7_dom_clobber | yes | clobber_vuln | added in Phase 123 (needs a REAL id/name attribute -- Phase 123 also fixed the layer's escaping-blind FP) |
@@ -60,7 +60,6 @@ NOT covered: 7
 ## Uncovered layers (the shopping list)
 
 - `L4_second_order` -- needs --second-order-inject/-viewers; no case
-- `L5_blind_oob` -- needs an OOB listener configured; no case
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L7_time_based` -- no time-delayed-sink target
 - `L8_cookie_tossing` -- no cookie-tossing target

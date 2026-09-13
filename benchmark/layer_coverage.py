@@ -31,7 +31,7 @@ COVERAGE = {
                        "dom_postmessage"], "yes"),
     "L4_stored": (["stored_write"], "added in Phase 110"),
     "L4_second_order": (None, "needs --second-order-inject/-viewers; no case"),
-    "L5_blind_oob": (None, "needs an OOB listener configured; no case"),
+    "L5_blind_oob": (["blind_vuln"], "added in Phase 124 (real OOB callback; needs extra_args --oob self)"),
     "L6_dom_dynamic": (["dom_*"], "yes"),
     "L7_mutation": (None, "the layer runs on every page but no target is "
                           "built to be exploitable ONLY by mutation"),

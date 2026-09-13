@@ -1940,6 +1940,40 @@
       "note": "Phase 123 FP lock: reflection is HTML-escaped, so no id/name attribute can be created -- but the text still reads id=<token>. The layer used to report dom_clobber here (high) purely from that textual match; fixed in dom_clobber.detect_reflection"
     },
     {
+      "id": "pos-blind-01",
+      "path": "/r/bo01",
+      "param": "q",
+      "mode": "blind_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "blind"
+      ],
+      "context": "blind_oob",
+      "difficulty": "hard",
+      "extra_args": [
+        "--oob",
+        "self"
+      ],
+      "note": "Phase 124: real out-of-band confirmation. The app reflects raw markup and, link-unfurl style, resolves the src/href of REAL parsed elements -- so the injected <script src=callback> actually loads and the self-hosted listener receives the token. Confirms the whole inject -> beacon -> attribute chain without a browser."
+    },
+    {
+      "id": "neg-blind-01",
+      "path": "/s/bo01",
+      "param": "q",
+      "mode": "blind_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "blind"
+      ],
+      "context": "blind_oob",
+      "difficulty": "hard",
+      "extra_args": [
+        "--oob",
+        "self"
+      ],
+      "note": "Phase 124 safe twin: the same unfurler, but the value is HTML-escaped first, so no element is parsed and nothing can be resolved -> no beacon. The unfurler must be parser-aware (not a regex sweep for URLs), otherwise this twin would beacon off the escaped text and prove nothing."
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

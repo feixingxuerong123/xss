@@ -1,9 +1,9 @@
 {
-  "cases": 164,
-  "modes": 161,
+  "cases": 166,
+  "modes": 163,
   "layers": 49,
-  "covered": 42,
-  "uncovered": 7,
+  "covered": 43,
+  "uncovered": 6,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -60,9 +60,11 @@
     },
     {
       "layer": "L5_blind_oob",
-      "covered": false,
-      "modes": [],
-      "note": "needs an OOB listener configured; no case"
+      "covered": true,
+      "modes": [
+        "blind_vuln"
+      ],
+      "note": "added in Phase 124 (real OOB callback; needs extra_args --oob self)"
     },
     {
       "layer": "L6_dom_dynamic",
@@ -405,7 +407,6 @@
   ],
   "uncovered_layers": [
     "L4_second_order",
-    "L5_blind_oob",
     "L7_mutation",
     "L7_time_based",
     "L8_cookie_tossing",

