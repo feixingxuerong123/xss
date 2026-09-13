@@ -122,6 +122,13 @@ def _case_extra_args(base_url: str, case: dict) -> list | None:
             "--second-order-param", param,
             "--second-order-method", method,
         ]
+    # Phase 127: declarative multi-step scenarios (L9_scenario).  The path is
+    # resolved against the project root: _invoke_scanner spawns the CLI
+    # without cwd=, so a manifest-relative path would depend on wherever the
+    # caller happened to be standing.
+    if case.get("scenario_file"):
+        extra += ["--scenarios",
+                  os.path.join(_PROJECT_ROOT, str(case["scenario_file"]))]
     # Phase 120: verbatim CLI flags from the manifest (e.g. --crawl).
     extra += list(case.get("extra_args") or [])
     return extra or None

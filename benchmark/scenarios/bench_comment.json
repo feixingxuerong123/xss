@@ -1,0 +1,46 @@
+{
+  "scenarios": [
+    {
+      "id": "bench-comment-stored-xss",
+      "title": "Stored XSS via a comment field (benchmark pair, vulnerable twin)",
+      "match": {
+        "param_names": ["comment"]
+      },
+      "steps": [
+        {
+          "name": "inject",
+          "method": "POST",
+          "path": "/r/scin01",
+          "param": "{param}",
+          "payload": "<img src=x onerror=alert('{token}')>"
+        },
+        {
+          "name": "check",
+          "method": "GET",
+          "path": "/r/scview01"
+        }
+      ]
+    },
+    {
+      "id": "bench-comment-stored-xss-safe",
+      "title": "Stored XSS via a comment field (benchmark pair, safe twin)",
+      "match": {
+        "param_names": ["note"]
+      },
+      "steps": [
+        {
+          "name": "inject",
+          "method": "POST",
+          "path": "/s/scin01",
+          "param": "{param}",
+          "payload": "<img src=x onerror=alert('{token}')>"
+        },
+        {
+          "name": "check",
+          "method": "GET",
+          "path": "/s/scview01"
+        }
+      ]
+    }
+  ]
+}

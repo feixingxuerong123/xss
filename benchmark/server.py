@@ -1495,6 +1495,13 @@ POST_MODES.update({
     # cannot resolve VIEW_TO_INJECT, so it renders an empty store.  (That
     # is how stored_view has always worked.)
     "so2_view": m_stored_view,
+    # Phase 127: scenario-driven twins (L9_scenario).  Same two-page shape;
+    # what the scenario file adds is the DECLARATIVE multi-step recipe
+    # (POST /inject -> GET /view), so the finding carries type "scenario"
+    # and the flow is driven by data, not by a dedicated CLI flag.
+    "sc_write": m_stored_write,
+    "sc_write_escaped": m_stored_write_escaped,
+    "sc_view": m_stored_view,
 })
 
 
@@ -1643,23 +1650,39 @@ def load_routes() -> dict[str, dict]:
     routes = {}
     for case in manifest["cases"]:
         routes[case["path"]] = case
-        # Phase 110: a stored case names the GET endpoint that renders what
-        # its POST endpoint stored.
-        vp = case.get("view_path")
-        if vp:
-            VIEW_TO_INJECT[vp] = case["path"]
-            routes.setdefault(vp, dict(case, mode=case.get(
-                "view_mode", "stored_view")))
-        # Phase 126: a second-order case injects at A and is verified on a
-        # DIFFERENT page B.  Register B the same way, but under its own key
-        # so the two capabilities stay independent (setting view_path would
-        # also drag in the --stored-inject flow).
-        sop = case.get("second_order_view_path")
-        if sop:
-            VIEW_TO_INJECT[sop] = case["path"]
-            routes.setdefault(sop, dict(case, mode=case.get(
-                "second_order_view_mode", "so2_view")))
+        # Three capabilities need a RENDERER page that is not a manifest
+        # case of its own.  Each gets its own manifest key so the flows stay
+        # independent (e.g. view_path also wires --stored-inject, which a
+        # second-order or scenario case does not want).
+        for key, default_mode in (
+                ("view_path", "stored_view"),              # Phase 110
+                ("second_order_view_path", "so2_view"),    # Phase 126
+                ("scenario_view_path", "sc_view"),         # Phase 127
+        ):
+            _register_viewer(routes, case, key, default_mode)
     return routes
+
+
+_VIEW_MODE_KEY = {
+    "view_path": "view_mode",
+    "second_order_view_path": "second_order_view_mode",
+    "scenario_view_path": "scenario_view_mode",
+}
+
+
+def _register_viewer(routes: dict, case: dict, key: str,
+                     default_mode: str) -> None:
+    """Register a renderer page for ``case`` under manifest key ``key``."""
+    view = case.get(key)
+    if not view:
+        return
+    VIEW_TO_INJECT[view] = case["path"]
+    # Manifest key -> the key naming the override mode.  Mapping them
+    # explicitly matters: deriving it as key.replace("_view_path", "_view_mode")
+    # silently no-ops for "view_path" (no leading underscore) and the route
+    # then carries the PATH as its mode.
+    mode_key = _VIEW_MODE_KEY[key]
+    routes.setdefault(view, dict(case, mode=case.get(mode_key, default_mode)))
 
 
 # ---------------------------------------------------------------------------

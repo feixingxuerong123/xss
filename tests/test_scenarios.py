@@ -100,3 +100,39 @@ class TestScenarioExecution:
                        params={"nickname": "probe"})
         assert not [f for f in sc.findings
                     if f.data.get("type") == "scenario"]
+
+
+class TestDocumentedParamPlaceholder:
+    """Phase 127: the documented format writes "param": "{param}".
+
+    The placeholder used to be expanded only in `path` and `payload`, never
+    in the step's field name -- so the injection went out under a field
+    literally named "{param}", the app stored nothing, and the scenario
+    silently never confirmed.  Every scenario written from the module
+    docstring was affected.
+    """
+
+    def _scenario(self) -> dict:
+        return {
+            "id": "q-stored-xss",
+            "title": "documented {param} placeholder",
+            "match": {"param_names": ["q"]},
+            "steps": [
+                {"name": "inject", "method": "POST",
+                 "path": "/r2/stored/store", "param": "{param}",
+                 "payload": "<script>alert('{token}')</script>"},
+                {"name": "check", "method": "GET",
+                 "path": "/r2/stored/view"},
+            ],
+        }
+
+    def test_placeholder_expands_to_the_scanned_param(self, range_base,
+                                                      tmp_path):
+        path = _write(tmp_path, {"scenarios": [self._scenario()]})
+        sc = Scanner(requester=Requester(timeout=8), verbose=False,
+                     max_payloads=4, max_transforms=2, scenario_file=path)
+        sc.scan_target(f"{range_base}/r2/stored/store", method="POST",
+                       params={}, data={"q": "probe"})
+        hits = [f for f in sc.findings if f.data.get("type") == "scenario"]
+        assert hits, ("a scenario written with the documented {param} "
+                      "placeholder must post under the real field name")

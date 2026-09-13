@@ -2038,6 +2038,38 @@
       "note": "Phase 126 safe twin: same two-page flow, but A stores the HTML-escaped value, so B renders it as text -- no executable context on the viewer, no second-order finding."
     },
     {
+      "id": "pos-scn-01",
+      "path": "/r/scin01",
+      "param": "comment",
+      "method": "POST",
+      "mode": "sc_write",
+      "scenario_file": "benchmark/scenarios/bench_comment.json",
+      "scenario_view_path": "/r/scview01",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "scenario"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 127: declarative multi-step scenario (L9_scenario) -- the JSON recipe POSTs the token payload to /r/scin01 then GETs /r/scview01 and semantic-verifies the token there. Same two-page shape as the second-order pair, but here the FLOW is data, not a dedicated CLI flag, and the finding carries type 'scenario'."
+    },
+    {
+      "id": "neg-scn-01",
+      "path": "/s/scin01",
+      "param": "note",
+      "method": "POST",
+      "mode": "sc_write_escaped",
+      "scenario_file": "benchmark/scenarios/bench_comment.json",
+      "scenario_view_path": "/s/scview01",
+      "ground_truth": "safe",
+      "finding_types": [
+        "scenario"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 127 safe twin: same recipe, but the write endpoint stores the escaped value, so the viewer renders text -- the token never lands in an executable position and the scenario stays unconfirmed. The two twins use different param names (comment vs note) so each runs only its own scenario."
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

@@ -1,9 +1,9 @@
 {
-  "cases": 170,
-  "modes": 167,
+  "cases": 172,
+  "modes": 169,
   "layers": 49,
-  "covered": 45,
-  "uncovered": 4,
+  "covered": 46,
+  "uncovered": 3,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -380,9 +380,11 @@
     },
     {
       "layer": "L9_scenario",
-      "covered": false,
-      "modes": [],
-      "note": "no --scenarios case"
+      "covered": true,
+      "modes": [
+        "sc_write"
+      ],
+      "note": "added in Phase 127 (declarative recipe; Phase 127 also fixed the {param} placeholder never being expanded in the step field name)"
     },
     {
       "layer": "L9_upload_filename",
@@ -412,7 +414,6 @@
   "uncovered_layers": [
     "L7_mutation",
     "L8_cookie_tossing",
-    "L7_xsleak",
-    "L9_scenario"
+    "L7_xsleak"
   ]
 }

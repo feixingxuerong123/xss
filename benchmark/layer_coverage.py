@@ -78,7 +78,7 @@ COVERAGE = {
     "L7_nonce_bypass": (["csp_nonce_*"], "partial (nonce-leak chain)"),
     "L7_xsleak": (None, "no XS-Leak target"),
     "L8_request": (["raw_*"], "helper: request-level checks on every case"),
-    "L9_scenario": (None, "no --scenarios case"),
+    "L9_scenario": (["sc_write"], "added in Phase 127 (declarative recipe; Phase 127 also fixed the {param} placeholder never being expanded in the step field name)"),
     "L9_upload_filename": (["upload_echo"], "added in Phase 110"),
     "L9_js_miner": (["crawl_js_vuln"], "added in Phase 120 (behavioural)"),
     "L9_form_miner": (["crawl_form_vuln"], "added in Phase 120 (behavioural)"),

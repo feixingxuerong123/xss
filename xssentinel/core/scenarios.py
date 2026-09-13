@@ -104,7 +104,12 @@ def run_scenario(scanner, req, base_url: str, param: str, is_body: bool,
             "{token}", token).replace("{param}", param)
         # Field name: the scanned param by default; a step may override it
         # ("param": "q") when the write endpoint expects a different name.
-        fname = str(st.get("param", param))
+        # Phase 127: {param} MUST be expanded here too.  The documented
+        # format (this module's own docstring) writes "param": "{param}", and
+        # the placeholder was only expanded in `path` and `payload` -- so the
+        # payload went out under a field literally named "{param}", the app
+        # stored nothing, and the scenario silently never confirmed.
+        fname = str(st.get("param", param)).replace("{param}", param)
         p_params: dict = {}
         p_data: dict = {}
         if method == "POST" or is_body:

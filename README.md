@@ -417,6 +417,18 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **修正后：49 层中 45 已覆盖，4 未覆盖**（L7_mutation、L8_cookie_tossing、L7_xsleak、L9_scenario）。基准 170 用例，验证 **TP1 TN1 FP0 FN0**。
 
+**Phase 127：`L9_scenario` 覆盖（声明式多步场景），并修掉第五个基准驱动的引擎缺陷——按官方文档写场景的人一直在静默漏报**。
+
+`L9_scenario` 是"用 JSON 配方描述多步流程"的能力（Nuclei 风格）：step 1 把带 token 的载荷 POST 到写入端点，step 2 GET 读取端点并在响应里做语义确认；确认后发 `type="scenario"`（high/high）。步骤路径是**站点级**的（按 origin 解析，不受被扫页面路径影响）。用例 `pos/neg-scn-01` 复用二阶那套"两页"目标，区别只在于**流程由数据驱动，而不是专用 CLI 标志**；两个孪生用不同参数名（`comment` / `note`）保证每次扫描只跑自己那条场景。`scenario_file` 由 runner 按**项目根目录**拼成绝对路径（`_invoke_scanner` 不设 `cwd=`，相对路径会随调用方所在目录漂移）。
+
+**发现的缺陷**：`pos-scn-01` 首跑判 FN。SPY 抓到场景那一步实际发出的字段名叫 **`{param}`**——`{param}` 占位符只在 `path` 和 `payload` 里被展开，**步骤的字段名没有展开**（`fname = str(st.get("param", param))`）。而模块自己的文档示例恰恰写的是 `"param": "{param}"`：于是载荷被 POST 到一个字面名叫 `{param}` 的字段上，应用什么都没存，读取端自然查不到 token，**场景永远无法确认且一声不响**。既有测试全用字面量 `"param": "q"`，所以从来没碰到这条路径。修法是补上 `.replace("{param}", param)`，`tests/test_scenarios.py` 新增 1 例用**文档写法**锁定。
+
+另外两件小事：① `data/scenarios.example.json`——`--scenarios` 的帮助文本一直指向它，而它**根本不存在**，已补（含 `{param}` 说明与"路径按 origin 解析"的坑）。② `load_routes()` 里"注册渲染页"的逻辑出现第三次，抽成 `_register_viewer`；**这次抽取我自己写错了一处**——`key.replace("_view_path", "_view_mode")` 对 `view_path`（无前导下划线）静默失配，导致 stored 的渲染页 mode 被填成了路径字符串。是 Phase 126 加的那条结构断言把它当场抓住的（**测试的价值就在这儿**），已改为显式键映射表。
+
+**修正后：49 层中 46 已覆盖，3 未覆盖**（L7_mutation、L8_cookie_tossing、L7_xsleak）。基准 172 用例，验证 **TP1 TN1 FP0 FN0**。
+
+**Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
+
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
 
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。

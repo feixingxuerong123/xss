@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 170 cases / 167 modes  
+Benchmark: 172 cases / 169 modes  
 Engine layers: 49  
-Covered by at least one case: 45  
-NOT covered: 4
+Covered by at least one case: 46  
+NOT covered: 3
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -52,7 +52,7 @@ NOT covered: 4
 | L7_nonce_bypass | yes | csp_nonce_* | partial (nonce-leak chain) |
 | L7_xsleak | **NO** | - | no XS-Leak target |
 | L8_request | yes | raw_* | helper: request-level checks on every case |
-| L9_scenario | **NO** | - | no --scenarios case |
+| L9_scenario | yes | sc_write | added in Phase 127 (declarative recipe; Phase 127 also fixed the {param} placeholder never being expanded in the step field name) |
 | L9_upload_filename | yes | upload_echo | added in Phase 110 |
 | L9_js_miner | yes | crawl_js_vuln | added in Phase 120 (behavioural) |
 | L9_form_miner | yes | crawl_form_vuln | added in Phase 120 (behavioural) |
@@ -62,4 +62,3 @@ NOT covered: 4
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L8_cookie_tossing` -- no cookie-tossing target
 - `L7_xsleak` -- no XS-Leak target
-- `L9_scenario` -- no --scenarios case
