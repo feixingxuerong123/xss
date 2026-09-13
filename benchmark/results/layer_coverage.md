@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 168 cases / 165 modes  
+Benchmark: 170 cases / 167 modes  
 Engine layers: 49  
-Covered by at least one case: 44  
-NOT covered: 5
+Covered by at least one case: 45  
+NOT covered: 4
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -11,7 +11,7 @@ NOT covered: 5
 | L2_waf_evade | yes | waf_naive | added in Phase 118 (pseudo-WAF target) |
 | L3_dom_static | yes | dom_hash_*, dom_jquery_html, dom_search_eval, dom_postmessage | yes |
 | L4_stored | yes | stored_write | added in Phase 110 |
-| L4_second_order | **NO** | - | needs --second-order-inject/-viewers; no case |
+| L4_second_order | yes | so2_write | added in Phase 126 (inject at A, verify viewer B; needs second_order_view_path) |
 | L5_blind_oob | yes | blind_vuln | added in Phase 124 (real OOB callback; needs extra_args --oob self) |
 | L6_dom_dynamic | yes | dom_* | yes |
 | L7_mutation | **NO** | - | the layer runs on every page but no target is built to be exploitable ONLY by mutation |
@@ -59,7 +59,6 @@ NOT covered: 5
 
 ## Uncovered layers (the shopping list)
 
-- `L4_second_order` -- needs --second-order-inject/-viewers; no case
 - `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L8_cookie_tossing` -- no cookie-tossing target
 - `L7_xsleak` -- no XS-Leak target

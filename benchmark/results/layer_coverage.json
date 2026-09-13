@@ -1,9 +1,9 @@
 {
-  "cases": 168,
-  "modes": 165,
+  "cases": 170,
+  "modes": 167,
   "layers": 49,
-  "covered": 44,
-  "uncovered": 5,
+  "covered": 45,
+  "uncovered": 4,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -54,9 +54,11 @@
     },
     {
       "layer": "L4_second_order",
-      "covered": false,
-      "modes": [],
-      "note": "needs --second-order-inject/-viewers; no case"
+      "covered": true,
+      "modes": [
+        "so2_write"
+      ],
+      "note": "added in Phase 126 (inject at A, verify viewer B; needs second_order_view_path)"
     },
     {
       "layer": "L5_blind_oob",
@@ -408,7 +410,6 @@
     }
   ],
   "uncovered_layers": [
-    "L4_second_order",
     "L7_mutation",
     "L8_cookie_tossing",
     "L7_xsleak",

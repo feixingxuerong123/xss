@@ -110,6 +110,18 @@ def _case_extra_args(base_url: str, case: dict) -> list | None:
             "--stored-view", f"{base_url}{case['view_path']}",
             "--stored-param", param,
         ]
+    # Phase 126: second-order cases drive the dedicated CLI flow -- inject at
+    # A, then verify the EXPLICIT viewer B (no crawling, so the case is
+    # deterministic).  The scanner still runs its normal scan of A; the
+    # second-order finding is what this case is scored on.
+    if case.get("second_order_view_path"):
+        extra += [
+            "--second-order-inject", f"{base_url}{case['path']}",
+            "--second-order-viewers",
+            f"{base_url}{case['second_order_view_path']}",
+            "--second-order-param", param,
+            "--second-order-method", method,
+        ]
     # Phase 120: verbatim CLI flags from the manifest (e.g. --crawl).
     extra += list(case.get("extra_args") or [])
     return extra or None

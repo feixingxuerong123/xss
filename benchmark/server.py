@@ -1480,6 +1480,21 @@ PAGE_MODES.update({
 POST_MODES.update({
     "pshift_vuln": m_pshift_vuln,
     "pshift_safe": m_pshift_safe,
+    # Phase 126: second-order pairs REUSE the stored machinery (inject at A
+    # stores, the B page renders) but under their own mode names, so the
+    # manifest says which capability a case exercises and the coverage
+    # matrix can tell L4_stored and L4_second_order apart.  What makes it
+    # second-order is the CLI flow (inject at A, verify a DIFFERENT page B),
+    # not the handler.
+    "so2_write": m_stored_write,
+    "so2_write_escaped": m_stored_write_escaped,
+    # NOTE for future phases: the viewer belongs in POST_MODES, not
+    # PAGE_MODES.  The GET dispatcher resolves a ctx-aware handler via
+    # `MODES_CTX.get(mode) or POST_MODES.get(mode)` and only falls back to
+    # PAGE_MODES with an EMPTY ctx -- and a viewer with no ctx["path"]
+    # cannot resolve VIEW_TO_INJECT, so it renders an empty store.  (That
+    # is how stored_view has always worked.)
+    "so2_view": m_stored_view,
 })
 
 
@@ -1635,6 +1650,15 @@ def load_routes() -> dict[str, dict]:
             VIEW_TO_INJECT[vp] = case["path"]
             routes.setdefault(vp, dict(case, mode=case.get(
                 "view_mode", "stored_view")))
+        # Phase 126: a second-order case injects at A and is verified on a
+        # DIFFERENT page B.  Register B the same way, but under its own key
+        # so the two capabilities stay independent (setting view_path would
+        # also drag in the --stored-inject flow).
+        sop = case.get("second_order_view_path")
+        if sop:
+            VIEW_TO_INJECT[sop] = case["path"]
+            routes.setdefault(sop, dict(case, mode=case.get(
+                "second_order_view_mode", "so2_view")))
     return routes
 
 

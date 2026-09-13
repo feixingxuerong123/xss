@@ -30,7 +30,7 @@ COVERAGE = {
     "L3_dom_static": (["dom_hash_*", "dom_jquery_html", "dom_search_eval",
                        "dom_postmessage"], "yes"),
     "L4_stored": (["stored_write"], "added in Phase 110"),
-    "L4_second_order": (None, "needs --second-order-inject/-viewers; no case"),
+    "L4_second_order": (["so2_write"], "added in Phase 126 (inject at A, verify viewer B; needs second_order_view_path)"),
     "L5_blind_oob": (["blind_vuln"], "added in Phase 124 (real OOB callback; needs extra_args --oob self)"),
     "L6_dom_dynamic": (["dom_*"], "yes"),
     "L7_mutation": (None, "the layer runs on every page but no target is "

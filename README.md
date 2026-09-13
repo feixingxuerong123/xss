@@ -407,6 +407,18 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **修正后：49 层中 44 已覆盖，5 未覆盖**（L4_second_order、L7_mutation、L8_cookie_tossing、L7_xsleak、L9_scenario）。验证 **TP1 TN1 FP0 FN0**。
 
+**Phase 126：`L4_second_order` 覆盖——"在 A 注入、在 B 执行"的两页流程**。
+
+这层检测的是经典二阶（stored）形态：输入在端点 A 落库，**在另一个页面 B 上执行**；A 与 B 是两页，且 B 由 CLI 显式给出或爬取发现（`--second-order-inject/-viewers/-param/-method`），finding 类型 **`second_order`**。目标直接复用仓库里已验证的 stored 机制（A 存、B 渲染），但只给这对孪生**自己的 mode 名**（`so2_write`/`so2_write_escaped`/`so2_view`），这样 manifest 能自解释、覆盖矩阵也能把 `L4_stored` 与 `L4_second_order` 分开——真正让它成为"二阶"的是 **A→B 这条流程**，不是 handler。
+
+靶场侧只做两件小事：`load_routes()` 用**独立键** `second_order_view_path` 注册 B 页路由（若复用 `view_path` 会顺带触发 `--stored-inject` 流程，两个能力搅在一起），runner 把它翻成二阶 CLI 参数（显式 viewers，不靠爬取，保证确定性）。safe 双胞胎只改一处：A 存**转义后的值**，于是 B 渲染出来是文本、没有可执行上下文。
+
+写用例时踩到一个**静默 FN**，值得记下来：我最初把 viewer 注册在 `PAGE_MODES`，结果 B 页永远渲染空 store、`pos-so2-01` 判 FN，而目标手工打两步却是对的。根因在 GET 派发顺序——`ctx_handler = MODES_CTX.get(mode) or POST_MODES.get(mode)`，只有前两者失配时才回退到 `PAGE_MODES`，而**回退分支传的是空 ctx `{}`**；viewer 拿不到 `ctx["path"]` 就无法解析 `VIEW_TO_INJECT`，于是静默渲染空列表（`stored_view` 一直注册在 POST_MODES，就是这个道理）。已把 viewer 移到 ctx 感知的注册表，并加 `tests/test_second_order_target.py` 5 例锁死：**viewer 模式必须在 ctx 感知表里**、两对孪生不共享 store、raw/escaped 两侧行为正确。
+
+**修正后：49 层中 45 已覆盖，4 未覆盖**（L7_mutation、L8_cookie_tossing、L7_xsleak、L9_scenario）。基准 170 用例，验证 **TP1 TN1 FP0 FN0**。
+
+**Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
+
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
 
 按"先看代码再写用例"的规矩确认触发链：该层把 `<a id={token} name={token} href="javascript:alert(1)">x</a>` 打进参数，要求① `id=<token>` 是**真实落地的属性**、② 页面 JS 里存在 `getElementById(...)` / `document.<name>` / `querySelector('#...')` 这类引用、③ 存在危险 sink，三者齐才发 `type="dom_clobber"`（类型是查出来的，不是猜的）。

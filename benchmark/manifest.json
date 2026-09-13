@@ -2008,6 +2008,36 @@
       "note": "Phase 125 safe twin: same CSP, same unfurler, escaped reflection. No element or stylesheet is parsed, so the resource payload never loads and no token beacons -> the fallback correctly stays silent."
     },
     {
+      "id": "pos-so2-01",
+      "path": "/r/so2in01",
+      "param": "q",
+      "method": "POST",
+      "mode": "so2_write",
+      "second_order_view_path": "/r/so2view01",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "second_order"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 126: inject at A (POST, stores verbatim), verify at a DIFFERENT page B that renders what A stored -- raw. What makes this second-order is the A->B flow (CLI --second-order-inject/-viewers), not the handler."
+    },
+    {
+      "id": "neg-so2-01",
+      "path": "/s/so2in01",
+      "param": "q",
+      "method": "POST",
+      "mode": "so2_write_escaped",
+      "second_order_view_path": "/s/so2view01",
+      "ground_truth": "safe",
+      "finding_types": [
+        "second_order"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 126 safe twin: same two-page flow, but A stores the HTML-escaped value, so B renders it as text -- no executable context on the viewer, no second-order finding."
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",
