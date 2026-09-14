@@ -26,6 +26,16 @@ report.html.json
 .trae/
 .agenthub/
 
+# 根目录一次性探针 / 诊断 / 审计脚本及其输出目录。
+# 注意：这些此前只写在 .git/info/exclude（不入库、换机即失效），
+# 现迁入共享 .gitignore。_q_*.py 是并行智能体的在制品，只忽略、不删除。
+/_*.py
+/_*.log
+/_*.har
+/_*.json
+/_*_out/
+/_audit_backup/
+
 # tests 目录下的演示/扫描输出
 *_report.html
 *_report.json

@@ -281,6 +281,43 @@ def page_has_client_js(html: str) -> bool:
     return bool(_CLIENT_JS_RE.search(html or ""))
 
 
+# Upper bound on "swap a real query parameter for the marker" probes, so a
+# URL with dozens of parameters cannot multiply the browser cost.
+_MAX_SEARCH_PARAM_PROBES = 4
+
+
+def _query_param_names(url: str) -> list:
+    """Ordered, de-duplicated query parameter names of ``url``."""
+    from urllib.parse import urlparse, parse_qsl
+    try:
+        pairs = parse_qsl(urlparse(url).query, keep_blank_values=True)
+    except Exception:
+        return []
+    names: list = []
+    seen: set = set()
+    for key, _value in pairs:
+        if key and key not in seen:
+            seen.add(key)
+            names.append(key)
+    return names
+
+
+def _with_param_value(url: str, name: str, value: str) -> str:
+    """Return ``url`` with query parameter ``name`` set to ``value``.
+
+    Every other parameter keeps its original value so pages that branch on
+    them still reach the same code path.
+    """
+    from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
+    parsed = urlparse(url)
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    out = [(k, value if k == name else v) for k, v in pairs]
+    if not any(k == name for k, _v in pairs):
+        out.append((name, value))
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path,
+                       parsed.params, urlencode(out), ""))
+
+
 class DynamicDomAnalyzer:
     """Runs a real headless browser to confirm DOM-XSS sinks execute."""
 
@@ -316,9 +353,25 @@ class DynamicDomAnalyzer:
         probes.append({"kind": "goto", "url": base + "#" + marker,
                        "source": "location.hash"})
         # location.search
-        sep = "&" if "?" in url.split("#")[0] else "?"
+        # NOTE: ``base`` has already been stripped of both the fragment and
+        # the query, so the separator must be derived from ``base`` -- not
+        # from the original ``url``.  Deriving it from ``url`` produced
+        # ``http://h/p&__xss__=MK`` for every input that carried a query
+        # string, i.e. a path with no query at all, which silently disabled
+        # this probe on every URL a real scan visits.
+        sep = "&" if "?" in base else "?"
         probes.append({"kind": "goto", "url": base + sep + "__xss__=" + marker,
                        "source": "location.search"})
+        # A page reads a *specific* parameter (``?q=``), so the generic
+        # ``__xss__`` probe above only helps pages that read any parameter.
+        # Replay the original query with each real parameter's value swapped
+        # for the marker; capped so the browser cost stays bounded.
+        for name in _query_param_names(url)[:_MAX_SEARCH_PARAM_PROBES]:
+            if name == "__xss__":
+                continue
+            probes.append({"kind": "goto",
+                           "url": _with_param_value(url, name, marker),
+                           "source": "location.search"})
         # location.href (full URL reflected as-is)
         href_url = base + sep + "__xss__=" + quote(marker) + "#" + marker
         probes.append({"kind": "goto", "url": href_url,
