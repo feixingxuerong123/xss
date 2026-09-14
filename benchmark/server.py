@@ -1724,6 +1724,72 @@ MODES: dict[str, callable] = {
 # Routing table (built from manifest)
 # ---------------------------------------------------------------------------
 
+# Phase 129: harness-only route (deliberately NOT a manifest case).
+#
+# The manifest pairs are hand-written -- one shape per layer, chosen by us.
+# That is exactly the blind spot every escaping-blind false positive came
+# from (Phases 123/126/128): a shape nobody wrote down.  `/fuzz/render`
+# lets a GENERATOR drive the matrix instead of us: the caller picks the
+# rendering CONTEXT and the ESCAPING through query params, so the
+# "escaped => must not confirm" invariant can be fuzzed across contexts
+# without adding a route -- and a scored case -- per combination.
+# Registered here rather than in the manifest because aux cases are still
+# scored, and a parameterised helper is not a vulnerability target.
+# ---------------------------------------------------------------------------
+
+_FUZZ_TEMPLATES = {
+    "text": '<div class="x">{}</div>',
+    "attr_dq": '<input value="{}">',
+    "attr_sq": "<input value='{}'>",
+    "attr_bare": "<input value={}>",
+    "script_dq": '<script>var a = "{}";</script>',
+    "script_sq": "<script>var a = '{}';</script>",
+    "href": '<a href="{}">link</a>',
+    "svg": "<svg><title>{}</title></svg>",
+    "comment": "<!-- {} -->",
+}
+
+# Page-level "sinks" a real app might carry alongside the reflection.  Both
+# escaping-blind layer FPs (Phase 123 dom_clobber, Phase 128 mXSS) needed
+# exactly this combination: escaped reflection + a page feature the layer
+# keys on.  Note `dom` uses DOMParser and NOT innerHTML -- innerHTML is on
+# the Trusted Types layer's list, so it would add a legitimate medium
+# finding and poison a "no findings" assertion.
+_FUZZ_SINKS = {
+    "none": "",
+    "dom": ("<div id='o'></div><script>var d = new DOMParser()"
+            ".parseFromString('x', 'text/html');"
+            "document.getElementById('o').textContent = d.body.textContent;"
+            "</script>"),
+}
+
+
+def m_fuzz_render(v: str, ctx: dict) -> tuple:
+    """Render ``q`` into the requested context with the requested escaping."""
+    qs = ctx.get("query") or {}
+    which = (qs.get("ctx") or ["text"])[0]
+    esc = (qs.get("esc") or ["raw"])[0]
+    sink = (qs.get("sink") or ["none"])[0]
+    tpl = _FUZZ_TEMPLATES.get(which)
+    if tpl is None:
+        return _page("<p>unknown ctx</p>")
+    value = v or ""
+    if esc in ("html", "attr"):
+        value = html.escape(value, quote=True)
+    return _page(tpl.replace("{}", value) + _FUZZ_SINKS.get(sink, ""))
+
+
+EXTRA_ROUTES: dict = {
+    "/fuzz/render": {"path": "/fuzz/render", "param": "q",
+                     "mode": "fuzz_render"},
+}
+
+# Registered here (not with the other mode tables up top) because the
+# handler above must exist first.  MODES_CTX is the ctx-aware registry the
+# GET dispatcher consults -- m_fuzz_render reads ctx["query"].
+MODES_CTX.update({"fuzz_render": m_fuzz_render})
+
+
 def load_routes() -> dict[str, dict]:
     """Load manifest and build path -> case routing table."""
     with open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
@@ -1741,6 +1807,10 @@ def load_routes() -> dict[str, dict]:
                 ("scenario_view_path", "sc_view"),         # Phase 127
         ):
             _register_viewer(routes, case, key, default_mode)
+    # Phase 129: harness-only routes (never scored).  setdefault so a real
+    # manifest case with the same path would win.
+    for path, extra in EXTRA_ROUTES.items():
+        routes.setdefault(path, dict(extra))
     return routes
 
 

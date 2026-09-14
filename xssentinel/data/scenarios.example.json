@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "Example declarative detection scenarios for --scenarios. Copy and adapt paths to the target app. Placeholders: {token} = unique verification token, {param} = reflected parameter name. A scenario runs when the scanned param matches match.param_names (omit the filter to always run). The token is semantic-verified in the final step's response.",
+    "note": "Example declarative detection scenarios for --scenarios. Copy and adapt paths to the target app. Placeholders: {token} = unique verification token, {param} = reflected parameter name. A scenario runs when the scanned param matches match.param_names (omit the filter to always run). The token is semantic-verified in the final step's response. Two facts worth knowing (Phase 127): {param} is expanded in a step's `path`, `payload` AND `param` field name, and step paths are SITE-level -- they resolve against the ORIGIN of the scanned URL, not against the page URL being scanned. The examples below omit `param` and rely on the scanned param name.",
     "version": 1
   },
   "scenarios": [
