@@ -26,7 +26,7 @@ from urllib.parse import urlparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from xssentinel.core.requester import Requester
-from xssentinel.core.oob import make_listener
+from xssentinel.core.oob import make_listener, oob_callback_warning
 from xssentinel.core.config import Config, save_config
 from xssentinel.core.checkpoint import Checkpoint
 from xssentinel.core.logger import configure_logging, get_logger
@@ -325,6 +325,21 @@ def build_parser():
     g_bs = ap.add_argument_group("Blind / Stored XSS")
     g_bs.add_argument("--oob", choices=["self", "interactsh"], default=None,
                       help="Blind-XSS OOB callback mode")
+    g_bs.add_argument("--oob-host", dest="oob_host", default=None,
+                      help="Phase 134: host (name or IP) that goes into the "
+                           "callback URL -- i.e. what the VICTIM's browser "
+                           "must be able to reach. Required when "
+                           "--oob self scans a remote target: the default "
+                           "127.0.0.1 points the beacon at the victim's own "
+                           "loopback, so nothing ever comes back. The port "
+                           "must be reachable too (forward/NAT it here).")
+    g_bs.add_argument("--oob-bind", dest="oob_bind", default=None,
+                      help="Phase 134: local interface the self-hosted "
+                           "listener binds (default: 127.0.0.1, or 0.0.0.0 "
+                           "when --oob-host is given).")
+    g_bs.add_argument("--oob-port", dest="oob_port", type=int, default=None,
+                      help="Phase 134: local port for the self-hosted "
+                           "listener (default 8900).")
     g_bs.add_argument("--oob-timeout", type=float, default=12,
                       help="OOB callback collection window in seconds "
                            "(default 12). Realistic blind-XSS (admin views "
@@ -726,7 +741,23 @@ def main(argv=None):
     session_mgr = _do_login(requester, args)
 
     # OOB listener.
-    oob = make_listener(args.oob) if args.oob else None
+    #
+    # Phase 134: the bind address and the advertised callback host are
+    # separate knobs.  Passing --oob-host means "the target must be able to
+    # reach this host", so bind every interface unless told otherwise --
+    # binding 127.0.0.1 while advertising a public name is the classic
+    # "listener is up but nothing ever arrives" setup.
+    oob = None
+    if args.oob:
+        _oob_host = getattr(args, "oob_host", None)
+        _oob_bind = getattr(args, "oob_bind", None) or (
+            "0.0.0.0" if _oob_host else "127.0.0.1")
+        oob = make_listener(args.oob, host=_oob_bind,
+                            port=getattr(args, "oob_port", None) or 8900,
+                            public_host=_oob_host)
+        _warn = oob_callback_warning(oob, urls)
+        if _warn:
+            print(f"[!] {_warn}", file=sys.stderr)
 
     # Progress reporter.
     progress = _build_progress(args.progress)

@@ -67,15 +67,33 @@ class SelfHostedListener(OOBListener):
     """Local HTTP callback server.  Used for offline testing and internal apps.
 
     The injected token is placed in the URL path:
-        http://<host>:<port>/<token>
+        http://<public_host>:<port>/<token>
     The handler records every path it receives.  `poll` waits (up to `timeout`)
     for any of the `expected` tokens to arrive.
+
+    Two different hosts, on purpose (Phase 134):
+
+      * ``host``   -- the interface the local server BINDS to.  For a target
+        you do not control this must be reachable from outside, e.g.
+        ``0.0.0.0``.
+      * ``public_host`` -- the host written into ``callback_url``, i.e. what
+        the victim's browser must be able to resolve and connect to.  A
+        port-forwarded or NAT'd deployment usually needs a public DNS name
+        or IP here while still binding a private interface.
+
+    Before this split the same field drove both, so the only way to make a
+    remote target beacon was to bind a public address -- and the default
+    (``127.0.0.1``) silently produced a callback URL pointing at the
+    *victim's own* loopback, which can never arrive.
     """
 
     name = "self-hosted"
 
-    def __init__(self, host: str = "127.0.0.1", port: int | None = None):
+    def __init__(self, host: str = "127.0.0.1", port: int | None = None,
+                 public_host: str | None = None):
         self.host = host
+        # None -> same as the bind host (backwards compatible behaviour).
+        self.public_host = public_host or host
         # port=None -> let the OS pick a free port (avoids TIME_WAIT collisions
         # during rapid local testing).  The real port is read back after bind.
         self.port = port
@@ -128,7 +146,8 @@ class SelfHostedListener(OOBListener):
         return "xssv_" + secrets.token_hex(6)
 
     def callback_url(self, token: str) -> str:
-        return f"http://{self.host}:{self.port}/{token}"
+        # The advertised host, NOT the bind address -- see the class docstring.
+        return f"http://{self.public_host}:{self.port}/{token}"
 
     def poll(self, expected: set, timeout: float = 12) -> set:
         if not expected:
@@ -253,10 +272,79 @@ class InteractshListener(OOBListener):
         return confirmed & expected
 
 
-def make_listener(mode: str, host: str = "127.0.0.1", port: int | None = 8900):
+def make_listener(mode: str, host: str = "127.0.0.1", port: int | None = 8900,
+                  public_host: str | None = None):
     """Factory: mode in {'self', 'interactsh'} -> OOBListener instance."""
     if mode == "self":
-        return SelfHostedListener(host=host, port=port)
+        return SelfHostedListener(host=host, port=port,
+                                  public_host=public_host)
     if mode == "interactsh":
         return InteractshListener()
     raise ValueError(f"unknown OOB mode: {mode!r} (use 'self' or 'interactsh')")
+
+
+# Hosts a remote victim's browser can never be asked to reach: its own
+# loopback (the beacon would arrive on the *victim's* machine, not ours) or
+# a bind-only wildcard.
+_UNREACHABLE_CALLBACK_HOSTS = {"", "localhost", "::1", "0.0.0.0", "[::1]"}
+
+
+def callback_host_is_unreachable(host: str) -> bool:
+    """True when ``host`` cannot work as a callback destination."""
+    h = (host or "").strip().lower().strip("[]")
+    if h in _UNREACHABLE_CALLBACK_HOSTS:
+        return True
+    # any 127.0.0.0/8 address is the scanning host's own loopback
+    return h.startswith("127.")
+
+
+def oob_callback_warning(listener, targets) -> str | None:
+    """First reachability warning for ``listener`` against any of ``targets``.
+
+    Never raises: a listener that cannot produce a callback URL yet (an
+    interactsh listener that has not registered, say) simply has nothing to
+    warn about.
+    """
+    try:
+        url = listener.callback_url(listener.token())
+    except Exception:
+        return None
+    for target in targets or []:
+        msg = callback_reachability_warning(url, target)
+        if msg:
+            return msg
+    return None
+
+
+def callback_reachability_warning(callback_url: str, target: str) -> str | None:
+    """Warn when a self-hosted callback URL can never come back.
+
+    ``--oob self`` defaults to advertising ``127.0.0.1``.  Against a remote
+    target that is not a warning about style -- the injected payload tells
+    the victim's browser to beacon to *its own* loopback, so the callback
+    can never arrive and every blind finding silently stays unconfirmed.
+
+    Returns ``None`` when there is nothing to say (target is local too, or
+    the callback host is genuinely reachable).
+    """
+    from urllib.parse import urlparse
+    try:
+        cb_host = urlparse(callback_url).hostname or ""
+    except Exception:
+        return None
+    if not callback_host_is_unreachable(cb_host):
+        return None
+    try:
+        tgt_host = urlparse(target).hostname or ""
+    except Exception:
+        return None
+    # A local target beacons from this machine, so loopback is fine there.
+    if callback_host_is_unreachable(tgt_host):
+        return None
+    return (
+        f"OOB callbacks are unreachable: the payload beacons to "
+        f"'{cb_host}', which is the VICTIM's own loopback, not this host. "
+        f"A remote target can never call back -- every blind-XSS hit will "
+        f"silently stay unconfirmed. Pass --oob-host <public host or IP "
+        f"the target can reach> (and forward/NAT that port to this machine)."
+    )
