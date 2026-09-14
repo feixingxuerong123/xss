@@ -6,9 +6,8 @@ _scan_template and _scan_polyglot.
 """
 from __future__ import annotations
 
-from __future__ import annotations
-
 import secrets
+from typing import TYPE_CHECKING
 
 from . import payloads
 from . import verifier
@@ -24,11 +23,11 @@ from . import template as tpl_mod
 from . import polyglot as poly_mod
 from . import dom as dommod
 from . import dom_engine
-from . import spa_crawler as spa_mod
-from .findings import (Finding, _DEFAULT_TRANSFORMS,
-                       _norm, _proof, _safe_snippet)
+from .findings import Finding
 from .logger import get_logger
-from .stealth import marker as _stem_marker
+
+if TYPE_CHECKING:  # only ever referenced inside annotations
+    import requests
 
 _log = get_logger("scanner.mixins")
 
@@ -149,278 +148,16 @@ class AdvancedLayerMixin:
         # context.py -- do not re-implement it here.
         return ctx.is_marker_escaped(text, marker)
 
-    def _try_pre_encoded(self, req, url, method, params, data, param,
-                         is_body, orig_value, struct, context):
-        """Phase 34: fire container-encoded probes (base64/JWT/JSON).
-
-        The base payload is token-marked FIRST, then re-wrapped into the
-        container the original value used -- so the app decodes it back to
-        the executable payload and the semantic verifier can confirm it.
-        No transform chains: the container encoding IS the transformation.
-        """
-        self.coverage.touch_layer(
-            url, "L1_pre_encoded", method,
-            detail=f"param='{param}' struct={struct}")
-        for base in pre_mod.PRE_ENCODE_BASES:
-            token = "xssv_" + secrets.token_hex(4)
-            marked = verifier.mark(base, token)
-            enc = pre_mod.encode_payload(orig_value, struct, marked)
-            if not enc:
-                continue
-            probe = self._set_param(params, data, param, enc, is_body)
-            try:
-                resp2 = req.request(method, url, params=probe["params"],
-                                    data=probe["data"])
-                self._bump()
-                self.coverage.record_request(url, method)
-            except Exception:
-                continue
-            w = wafmod.detect(resp2)
-            if w.get("blocked") and w.get("reason"):
-                continue
-            v = verifier.verify_semantic(resp2.text, token,
-                                         response_headers=dict(resp2.headers))
-            if v["confirmed"]:
-                self._add(Finding(**{
-                    "url": url, "method": method, "param": param,
-                    "type": "reflected", "context": context,
-                    "payload": enc,
-                    "transform": [f"pre_encode:{struct}"],
-                    "severity": "high", "confidence": "high",
-                    "detail": v["detail"] + f" (pre-encoded {struct} param)",
-                    "headless": None,
-                    "proof": _proof(resp2, method, param, enc),
-                }))
-                return True
-        return False
-
-    def _probe_reflection_profile(self, req, url, method, params, data,
-                                  param, is_body):
-        """Phase 31: sandwich-marker probe (DalFox-style).
-
-        Sends ONE extra request whose value is ``<token>"'><>()=/;`` and
-        analyzes which special characters survive verbatim / come back
-        encoded / are stripped.  Returns a reflection-profile dict, or
-        None when the probe itself did not reflect (the caller then keeps
-        the default payload/transform order -- prioritization only).
-        """
-        probe_token = _stem_marker("xssp_") + secrets.token_hex(4)
-        probe_val = rp_mod.build_probe(probe_token)
-        probe = self._set_param(params, data, param, probe_val, is_body)
-        try:
-            resp = req.request(method, url, params=probe["params"],
-                               data=probe["data"])
-            self._bump()
-            self.coverage.record_request(url, method)
-        except Exception:
-            return None
-        prof = rp_mod.profile_reflection(resp.text or "", probe_token)
-        if prof is None or not prof["reflected"]:
-            return None
-        self.coverage.touch_layer(url, "L1_reflection_profile", method,
-                                  detail=prof["detail"])
-        if self.verbose:
-            _log.debug(f"    [profile] {prof['detail']}")
-        return prof
-
-    @staticmethod
-    def _dedupe_endpoint_signatures(endpoints):
-        """Phase 32: drop endpoints whose scan signature was already seen.
-
-        Signature = (method, host, path, sorted param names, sorted body
-        field names).  Query VALUES are deliberately excluded: /search?q=1
-        and /search?q=2 exercise the same sink, so only the first crawl
-        result per signature is scanned.  Index 0 (the user entry point)
-        always survives.
-        """
-        from urllib.parse import urlparse
-        seen = set()
-        out = []
-        for i, (url, method, params, data) in enumerate(endpoints):
-            try:
-                p = urlparse(url)
-                sig = (method.upper(), p.netloc.lower(), p.path or "/",
-                       tuple(sorted(params or {})),
-                       tuple(sorted(data or {})))
-            except Exception:
-                sig = None  # unparseable -> keep as-is
-            if i and sig is not None and sig in seen:
-                continue
-            if sig is not None:
-                seen.add(sig)
-            out.append((url, method, params, data))
-        return out
-
-    @staticmethod
-    def _audit_priority(endpoints):
-        """Phase 33: rank endpoints by attack-surface value (Burp's 80/20
-        audit ordering).  More parameters first, POST before GET, and
-        interesting path keywords (admin/comment/profile/...) boosted.
-        Stable sort: equal-value endpoints keep their crawl order."""
-        _KEYS = ("admin", "comment", "profile", "search", "upload",
-                 "message", "config", "user", "settings", "feedback")
-
-        def _score(ep):
-            url, method, params, data = ep
-            s = (len(params or {}) + len(data or {})) * 10
-            if method.upper() == "POST":
-                s += 5
-            low = (url or "").lower()
-            if any(k in low for k in _KEYS):
-                s += 5
-            return -s
-
-        return sorted(endpoints, key=_score)
-
-    def _set_param(self, params, data, param, value, is_body):
-        p = dict(params)
-        d = dict(data)
-        if is_body:
-            d[param] = value
-        else:
-            p[param] = value
-        return {"params": p, "data": d}
-
-    def _record(self, req, url, method, param, is_body, ftype, context, payload,
-                tset, verify, resp, token):
-        headless = None
-        if self.use_headless:
-            headless = verifier.verify_headless(
-                url, method,
-                params=None if is_body else {param: payload},
-                data={param: payload} if is_body else None,
-                headers=dict(self.req.session.headers),
-                token=token)
-        severity, confidence = "high", "high"
-        detail = verify["detail"]
-        # Phase 32: content-type confidence downgrade (ZAP-style).  Markup
-        # reflected into a JSON/plain-text response cannot execute in a
-        # browser tab -- keep the finding (the reflection is real) but mark
-        # it low-confidence so humans prioritize real HTML sinks first.
-        try:
-            ctype = (resp.headers.get("Content-Type") or "").lower() if resp is not None else ""
-        except Exception:
-            ctype = ""
-        if ctype and not any(t in ctype for t in (
-                "text/html", "application/xhtml", "image/svg")):
-            confidence = "low"
-            detail = (detail + " (non-HTML content-type '%s')"
-                      % ctype.split(";")[0].strip())
-        self._add(Finding(**{
-            "url": url, "method": method, "param": param,
-            "type": ftype, "context": context, "payload": payload,
-            "transform": tset, "severity": severity,
-            "confidence": confidence, "detail": detail,
-            "headless": headless, "proof": _proof(resp, method, param, payload),
-        }))
-
-    def _add(self, finding: Finding):
-        # Phase 48: see findings.attach_replay_ctx -- carries the CSRF /
-        # hidden fields of the original request onto confirmed findings.
-        try:
-            from .findings import attach_replay_ctx
-            attach_replay_ctx(finding, getattr(self, "_tl", None))
-        except Exception:
-            pass
-        with self._lock:
-            self.findings.append(finding)
-        if self._progress:
-            self._progress.on_finding(finding.data)
-
-    def _bump(self):
-        with self._lock:
-            self.requests_made += 1
-        if self._progress:
-            self._progress.on_request()
-
-    # -- dedup + poc ---------------------------------------------------------
-    @staticmethod
-    def _dedup_key(d: dict) -> tuple:
-        """Group key for collapsing duplicate findings.  Two findings are the
-        same issue when they hit the same sink with the same parameter on the
-        same (normalized) URL and context -- regardless of which crawl path or
-        transform variant discovered them.
-
-        For DOM types we strip the query string: a DOM XSS reachable via
-        location.hash / document.cookie is independent of URL query params, so
-        ``/dom`` and ``/dom?probe=1`` are the same finding and must merge.
-        """
-        url = _norm(d.get("url") or "")
-        if d.get("type") in ("dom", "dom_dynamic"):
-            url = url.split("?", 1)[0]
-        return (d.get("type"), url, d.get("param"), d.get("context"))
-
-    def dedup(self):
-        """Collapse duplicate findings, keeping the highest-severity copy of
-        each (type, url, param, context) group.  Idempotent."""
-        if not self.findings:
-            return
-        groups: dict = {}
-        order: list = []
-        for f in self.findings:
-            k = self._dedup_key(f.data)
-            if k not in groups:
-                groups[k] = f
-                order.append(k)
-            else:
-                # keep the higher-severity finding; tie-break: already kept.
-                sev = SEVERITY_ORDER.get(f.data.get("severity"), 0)
-                cur = SEVERITY_ORDER.get(groups[k].data.get("severity"), 0)
-                if sev > cur:
-                    groups[k] = f
-        self.findings = [groups[k] for k in order]
-
-    def attach_pocs(self):
-        """Generate a reproducible PoC for every finding (curl / URL / HTML).
-
-        Also enriches each finding with a CVSS v3.1 score and a replay
-        command (curl/browser URL/HTML PoC).  Call once after scanning +
-        dedup, before building reports.
-        """
-        for f in self.findings:
-            try:
-                cookies = None
-                replay_headers = None
-                if getattr(self, "poc_include_auth", False):
-                    try:
-                        cookies = self.req.session.cookies.get_dict() or None
-                    except Exception:
-                        cookies = None
-                    # Phase 98: same replay-header logic as the sync
-                    # attach_pocs (Authorization / X-API-Key / ...).
-                    try:
-                        replay_headers = (dict(self.req.session.headers)
-                                          or None)
-                    except Exception:
-                        replay_headers = None
-                f.data["poc"] = pocmod.build_poc(
-                    f, csrf_fields=f.data.get("csrf_fields"),
-                    cookies=cookies, headers=replay_headers)
-            except Exception as e:
-                if self.verbose:
-                    _log.debug(f"    [!] PoC build error: {e}")
-                f.data["poc"] = {"curl": "", "url": "", "html": ""}
-            # CVSS v3.1 scoring (Phase 6).
-            try:
-                enriched = cvss_mod.enrich_finding(f.data)
-                f.data["cvss_score"] = enriched["cvss_score"]
-                f.data["cvss_severity"] = enriched["cvss_severity"]
-                f.data["cvss_vector"] = enriched["cvss_vector"]
-            except Exception as e:
-                if self.verbose:
-                    _log.debug(f"    [!] CVSS score error: {e}")
-                f.data.setdefault("cvss_score", 0.0)
-                f.data.setdefault("cvss_severity", "info")
-                f.data.setdefault("cvss_vector", "")
-            # Replay PoC (curl/browser/HTML).
-            try:
-                replay = replay_mod.replay_for_finding(f.data, cookies=cookies)
-                f.data["replay"] = replay
-            except Exception as e:
-                if self.verbose:
-                    _log.debug(f"    [!] replay build error: {e}")
-                f.data["replay"] = {}
-
+    # NOTE (2026-09-14 cleanup): the stale duplicates that used to live
+    # here (_try_pre_encoded, _probe_reflection_profile, _add, dedup,
+    # attach_pocs, _set_param, _record, ...) were deleted.  Scanner
+    # (core/scanner.py) defines all of them, so MRO shadowed these
+    # copies unconditionally -- they were dead.  Worse, they referenced
+    # seven module-level names (pre_mod/wafmod/rp_mod/pocmod/cvss_mod/
+    # replay_mod/SEVERITY_ORDER) that are only defined in scanner.py,
+    # so activating any of them would have raised NameError; and two of
+    # them (_set_param/_record) were missing the newer JSON-body
+    # handling that Scanner has.  Scanner is the single source of truth.
     # -- L7 advanced detection layers (Phase 1+) ---------------------------
     def _scan_jsonp(self, req, url, method, params, data):
         """JSONP callback XSS detection.

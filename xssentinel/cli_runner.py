@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 import time
 from datetime import datetime
 from urllib.parse import urlparse
@@ -18,7 +19,7 @@ from .core.budget import BudgetExhausted, CircuitOpen
 from .core.scanner import Scanner
 from .core import report as reportmod
 from .core.progress import ConsoleProgress, NullProgress
-from .core.session import login_with_csrf
+from .core.session import SessionManager, login_with_csrf
 from .core.logger import get_logger
 
 _log = get_logger("cli")
@@ -108,8 +109,6 @@ def _do_login(requester, args) -> "SessionManager | None":
     Returns the manager when some auth was configured (even if it fails --
     the caller reports and continues unprotected), else None.
     """
-    from .core.session import SessionManager, login_with_csrf
-
     want = [args.login_url, getattr(args, "login_basic", None),
             getattr(args, "login_header", None),
             getattr(args, "login_token", None),
@@ -319,6 +318,14 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
     # win; the preset only fills unset policy-managed parameters).
     apply_scan_policy(args)
 
+    # ``load_wordlist`` lives in core.param_miner; the name used to be
+    # referenced here without any import, so ``--param-wordlist`` raised
+    # NameError before the scan even started.
+    _param_wl = None
+    if getattr(args, "param_wordlist", None):
+        from .core.param_miner import load_wordlist
+        _param_wl = load_wordlist(args.param_wordlist)
+
     scanner = Scanner(
         requester=requester, use_headless=args.headless,
         max_transforms=args.max_transforms, max_payloads=args.max_payloads,
@@ -328,8 +335,7 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
         custom_payloads=custom_pl, crawl_engine=args.crawl_engine,
         scenario_file=getattr(args, "scenarios", None),
         bav=bool(getattr(args, "bav", False)),
-        param_wordlist=(load_wordlist(args.param_wordlist)
-                        if getattr(args, "param_wordlist", None) else None),
+        param_wordlist=_param_wl,
         max_requests=getattr(args, "max_requests", None),
         max_requests_per_endpoint=getattr(
             args, "max_requests_per_endpoint", None),

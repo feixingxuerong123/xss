@@ -24,6 +24,10 @@ dev = [
     # safety nets are silently unavailable (pytest ignores unknown ini keys).
     "pytest-timeout>=2.1",
     "pytest-rerunfailures>=12.0",
+    # tests/test_no_undefined_names.py gates on pyflakes reporting zero
+    # "undefined name" findings.  Without pyflakes that test silently
+    # skips, and the NameError-landmine family it locks comes right back.
+    "pyflakes>=3.0",
 ]
 
 [project.scripts]

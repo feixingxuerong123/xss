@@ -3,8 +3,6 @@ as a Scanner mixin.  Phase 40 split: moved verbatim from scanner.py.
 """
 from __future__ import annotations
 
-from __future__ import annotations
-
 import secrets
 
 from . import payloads

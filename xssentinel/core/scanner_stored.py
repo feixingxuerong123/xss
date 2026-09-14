@@ -6,9 +6,8 @@ coverage, max_transforms/max_payloads, verbose, findings.
 """
 from __future__ import annotations
 
-from __future__ import annotations
-
 import secrets
+from typing import TYPE_CHECKING
 
 from . import payloads
 from . import verifier
@@ -25,6 +24,9 @@ from . import spa_crawler as spa_mod
 from .findings import (Finding, _DEFAULT_TRANSFORMS,
                        _norm, _proof, _safe_snippet)
 from .logger import get_logger
+
+if TYPE_CHECKING:  # only ever referenced inside annotations
+    from .requester import Requester
 
 _log = get_logger("scanner.mixins")
 
