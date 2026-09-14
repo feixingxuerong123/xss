@@ -321,6 +321,18 @@ def build_parser():
                             "X-API-Key) into curl PoCs. OFF by default so "
                             "shared reports do not leak the tester's "
                             "authenticated session.")
+    g_det.add_argument("--poc-verify", dest="poc_verify",
+                       action="store_true", default=True,
+                       help="Phase 135: replay each finding's own PoC once "
+                            "and record whether it reproduced "
+                            "(finding.poc_verified / poc_verify). ON by "
+                            "default: it is one request per confirmed "
+                            "finding, and it is the difference between a "
+                            "PoC that works and one that does not.")
+    g_det.add_argument("--no-poc-verify", dest="poc_verify",
+                       action="store_false",
+                       help="Skip the PoC self-check (no extra request per "
+                            "finding).")
     # Blind / Stored
     g_bs = ap.add_argument_group("Blind / Stored XSS")
     g_bs.add_argument("--oob", choices=["self", "interactsh"], default=None,

@@ -341,6 +341,7 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
             args, "max_requests_per_endpoint", None),
         upload_fields=getattr(args, "upload_field", None),
         poc_include_auth=getattr(args, "poc_include_auth", False),
+        poc_verify=getattr(args, "poc_verify", True),
         xsleak_audit=getattr(args, "xsleak_audit", False))
     # Phase 46: JSON-carrier mode (see _run_scan docstring above).
     if json_body is not None:
@@ -608,7 +609,8 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint):
     # / scanner.waf_name / scanner.coverage) works unchanged.
     from .core.scanner import Scanner
     shim = Scanner(requester=None, verbose=args.verbose,
-                   poc_include_auth=getattr(args, "poc_include_auth", False))
+                   poc_include_auth=getattr(args, "poc_include_auth", False),
+                   poc_verify=getattr(args, "poc_verify", True))
     shim.findings = list(asc.findings)
     shim.requests_made = asc.requests_made
     shim.waf_name = getattr(asc, "waf_name", None)
@@ -827,7 +829,8 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
             continue  # URL was skipped (checkpoint) or errored before tracking
         lo, hi = rng
         shim = Scanner(requester=None, verbose=args.verbose,
-                   poc_include_auth=getattr(args, "poc_include_auth", False))
+                   poc_include_auth=getattr(args, "poc_include_auth", False),
+                   poc_verify=getattr(args, "poc_verify", True))
         shim.findings = list(asc.findings[lo:hi])
         shim.requests_made = requests_before.get(orig_url, 0)
         shim.waf_name = getattr(asc, "waf_name", None)

@@ -34,7 +34,7 @@ from urllib.parse import urlparse, urljoin
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
 from .scanner_layers import AdvancedLayerMixin
 from .scanner_crawl import CrawlMixin
-from .requester import JsonBody
+from .requester import JsonBody, CountingRequester
 from . import payloads as payloads_mod
 from . import context as ctx
 from . import layer_guard
@@ -1197,8 +1197,8 @@ class AsyncScanner:
         try:
             # Counting proxy: the miner never bumps a counter itself, so
             # without this its ~N probe requests would not show up at all.
-            shim.req = _CountingRequester(self._get_sync_requester(),
-                                          shim._bump)
+            shim.req = CountingRequester(self._get_sync_requester(),
+                                     shim._bump)
             found = await asyncio.to_thread(
                 shim._mine_hidden_params, url, method, params, data, False)
             self.requests_made += shim.requests_made
@@ -2061,31 +2061,6 @@ class _FakeResp:
         self.text = text
         self.status_code = status
         self.headers = headers
-
-
-class _CountingRequester:
-    """Requester proxy that counts the network calls made through it.
-
-    ``param_miner`` drives a Requester directly and never bumps a counter,
-    and the sync Requester built by ``_get_sync_requester()`` carries no
-    shared Budget either -- so without this, hidden-parameter mining would
-    be invisible in the scan's request total.  Sync's mining traffic *is*
-    counted (it rides the scan's budgeted Requester), so counting here is
-    what keeps the two engines' numbers comparable.
-
-    Everything except ``request`` is delegated untouched.
-    """
-
-    def __init__(self, inner, on_call):
-        self._inner = inner
-        self._on_call = on_call
-
-    def __getattr__(self, name):
-        return getattr(self._inner, name)
-
-    def request(self, *args, **kwargs):
-        self._on_call()
-        return self._inner.request(*args, **kwargs)
 
 
 class _AsyncScannerShim(AdvancedLayerMixin, CrawlMixin):

@@ -382,3 +382,29 @@ class Requester:
         # dying mid-scan is re-authenticated regardless of which clone saw it.
         clone.on_response = self.on_response
         return clone
+
+
+class CountingRequester:
+    """Requester proxy that counts the calls made through it.
+
+    Some sync modules drive a Requester directly and never bump the
+    scanner's ``requests_made`` counter -- ``param_miner`` and the PoC
+    replayer (``verify_fix._replay_request``) both call ``request()`` and
+    nothing else.  Wrapping the Requester keeps that traffic visible in the
+    scan's request total instead of silently dropping off the report.
+
+    Only ``request()`` is counted: that is the entry point both call sites
+    use.  Everything else is delegated untouched, so the proxy is a drop-in
+    substitute.
+    """
+
+    def __init__(self, inner, on_call):
+        self._inner = inner
+        self._on_call = on_call
+
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+    def request(self, *args, **kwargs):
+        self._on_call()
+        return self._inner.request(*args, **kwargs)

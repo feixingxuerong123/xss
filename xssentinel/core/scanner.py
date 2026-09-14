@@ -28,7 +28,7 @@ from . import dom as dommod
 from . import dom_engine
 from . import poc as pocmod
 from .oob import OOBListener
-from .requester import Requester, JsonBody
+from .requester import Requester, JsonBody, CountingRequester
 # New detection modules (Phase 1+): mXSS, DOM clobber, template SSTI,
 # JSONP callback, CSP analysis, polyglot, WAF bypass chains.
 from . import mutation as mxss_mod
@@ -61,6 +61,7 @@ from . import spa_crawler as spa_mod
 # Reporting enhancements (Phase 6): CVSS scoring + replay PoC.
 from . import cvss as cvss_mod
 from . import replay as replay_mod
+from . import verify_fix as verifyfix_mod
 # Phase 20-3: scan coverage tracker -- records which layers/params/payloads
 # were exercised per endpoint so the report can prove comprehensiveness.
 from . import coverage as cov_mod
@@ -136,6 +137,7 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                  upload_fields: list[str] | None = None,
                  bav: bool = False,
                  poc_include_auth: bool = False,
+                 poc_verify: bool = True,
                  xsleak_audit: bool = False):
         self.req = requester or Requester()
         self.use_headless = use_headless
@@ -163,6 +165,12 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         # often shared with people who should not receive the tester's
         # authenticated session).
         self.poc_include_auth = bool(poc_include_auth)
+        # Phase 135: replay each finding's own PoC once, so "reproducible"
+        # is measured rather than asserted.  ON by default -- it is one
+        # request per *confirmed finding* (findings are rare) and it is the
+        # only thing that distinguishes a PoC that works from one that does
+        # not.  --no-poc-verify turns it off.
+        self._poc_verify = bool(poc_verify)
         # Phase 53: target XS-Leaks surface audit (OFF by default; enabled
         # with --audit-xs-leaks).  Records a low xs_leak_surface finding for
         # pages that set none of the cross-origin isolation / framing
@@ -1341,6 +1349,41 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                 if self.verbose:
                     _log.debug(f"    [!] replay build error: {e}")
                 f.data["replay"] = {}
+            # Phase 135: actually RUN the PoC once.  Everything above only
+            # *builds* strings -- nothing checked that the exported curl /
+            # URL / HTML reproduces the finding, so "reproducible PoC" was a
+            # claim rather than a measurement.  One request per finding
+            # (findings are rare); disable with --no-poc-verify.
+            if getattr(self, "_poc_verify", False) and self.req is not None:
+                try:
+                    # Counting proxy: the replayer drives the Requester
+                    # directly and never bumps, so without this its requests
+                    # would not appear in the scan's total.
+                    verdict = verifyfix_mod.verify_poc(
+                        CountingRequester(self.req, self._bump), f.data,
+                        verbose=self.verbose)
+                    if (not getattr(self, "poc_include_auth", False)
+                            and verdict.get("verified")):
+                        # The replay used the scan session; the exported PoC
+                        # does not carry it.  Say so, rather than letting a
+                        # reader discover it as a 401.
+                        try:
+                            _creds = bool(
+                                self.req.session.cookies.get_dict()
+                                or self.req.session.headers)
+                        except Exception:
+                            _creds = False
+                        if _creds:
+                            verdict["note"] = (
+                                "replayed with the scan session; the exported "
+                                "PoC omits credentials (pass "
+                                "--poc-include-auth to include them)")
+                    f.data["poc_verified"] = verdict.get("verified")
+                    f.data["poc_verify"] = verdict
+                except Exception as e:
+                    if self.verbose:
+                        _log.debug(f"    [!] PoC verify error: {e}")
+                    f.data.setdefault("poc_verified", None)
 
     # -- L7 advanced detection layers (Phase 1+) ---------------------------
 

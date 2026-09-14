@@ -124,11 +124,11 @@ class _CountingInner:
 
 
 def test_counting_requester_delegates_and_counts():
-    from xssentinel.core.async_scanner import _CountingRequester
+    from xssentinel.core.requester import CountingRequester
 
     inner = _CountingInner()
     bumps = []
-    proxy = _CountingRequester(inner, lambda: bumps.append(1))
+    proxy = CountingRequester(inner, lambda: bumps.append(1))
     proxy.request("GET", "http://t/x")
     proxy.request("GET", "http://t/x")
     assert len(bumps) == 2, bumps

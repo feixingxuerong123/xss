@@ -342,6 +342,64 @@ def verify_findings(findings: list[dict], requester,
 
 
 # ---------------------------------------------------------------------------
+# In-scan PoC self-verification (Phase 135)
+# ---------------------------------------------------------------------------
+def _poc_verdict(verified, status: str, detail: str,
+                 context: str | None = None) -> dict:
+    return {
+        "verified": verified,
+        "status": status,
+        "detail": detail,
+        "context": context,
+        "checked_at": datetime.now().isoformat(timespec="seconds"),
+    }
+
+
+def verify_poc(requester, finding: dict, verbose: bool = False) -> dict:
+    """Replay a finding's own payload once; report whether it reproduced.
+
+    ``attach_pocs()`` has always *generated* curl / browser-URL / HTML PoCs
+    but never ran one, so "reproducible PoC" meant "a string you can copy"
+    rather than "a request we confirmed reproduces the finding".  Nothing
+    in the report told the two apart -- not even the case where the
+    exported PoC cannot work at all because ``--poc-include-auth`` is off
+    and the target needs a session.
+
+    ``_replay_request`` already does the hard part (fresh token marking,
+    header / cookie / multipart carriers, semantic confirmation), so this
+    is a thin verdict layer over it.  The replay goes through the scanner's
+    own Requester, i.e. it re-verifies *the finding* with the session the
+    scan used.
+
+    ``verified`` is ``True`` only when the replay confirmed the finding;
+    ``False`` when it did not; ``None`` when a replay was not applicable
+    (no headless replay path, or no concrete payload).
+    """
+    ftype = (finding.get("type") or "reflected").lower()
+    if not _is_replayable(ftype):
+        return _poc_verdict(
+            None, "skipped",
+            f"finding type '{ftype}' has no headless replay path")
+    payload = _extract_payload(finding)
+    if not payload:
+        return _poc_verdict(None, "skipped", "no concrete payload recorded")
+
+    try:
+        res = _replay_request(requester, finding, payload)
+    except Exception as e:                       # never fail the scan for this
+        return _poc_verdict(False, "error", f"{type(e).__name__}: {e}")
+
+    status = res.get("status")
+    if status == "still_vuln":
+        return _poc_verdict(True, "verified", res.get("detail") or "",
+                            context=res.get("context"))
+    if status == "fixed":
+        return _poc_verdict(False, "not_reproduced", res.get("detail") or "",
+                            context=res.get("context"))
+    return _poc_verdict(False, status or "error", res.get("detail") or "")
+
+
+# ---------------------------------------------------------------------------
 # Summary + reporting
 # ---------------------------------------------------------------------------
 def summarize(results: list[dict]) -> dict:
