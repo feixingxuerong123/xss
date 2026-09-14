@@ -33,6 +33,7 @@ from urllib.parse import urlparse, urljoin
 
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
 from .scanner_layers import AdvancedLayerMixin
+from .scanner_crawl import CrawlMixin
 from .requester import JsonBody
 from . import payloads as payloads_mod
 from . import context as ctx
@@ -244,6 +245,18 @@ class AsyncScanner:
 
         params = params or {}
         data = data or {}
+
+        # Phase 133: hidden-parameter mining (sync parity).  Sync enriches
+        # the endpoint's params before probing it; without this, an
+        # endpoint whose interesting parameter has no UI hint was only
+        # probed with the params already in the URL (sync TP / async FN on
+        # pos-pmmine-01).  Discoveries override existing names, matching
+        # sync's ``{**ep_params, **extra_params}`` merge.
+        if self.advanced_layers:
+            _extra = await self._mine_hidden_params_async(url, method,
+                                                          params, data)
+            if _extra:
+                params = {**params, **_extra}
 
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         connector = aiohttp.TCPConnector(ssl=self.verify_ssl, limit=50)
@@ -1162,6 +1175,41 @@ class AsyncScanner:
             _log.warning("async advanced param layers error: %s", e,
                          exc_info=self.verbose)
 
+    async def _mine_hidden_params_async(self, url: str, method: str,
+                                        params: dict, data: dict) -> dict:
+        """Phase 133: hidden-parameter mining (sync parity).
+
+        Sync merges ``param_miner``'s discoveries into the endpoint's
+        params *before* probing it (scanner.py:302-324).  Async never had
+        an equivalent, so an endpoint whose interesting parameter has no
+        UI hint was only ever probed with the parameters already in the
+        URL -- benchmark case pos-pmmine-01 was a clean sync TP / async FN
+        (sync 46 requests, async 10).
+
+        ``param_miner`` issues blocking requests, so this runs the sync
+        miner in a worker thread against the shared sync Requester.
+
+        BAV is deliberately NOT enabled here: the CLI documents ``--bav`` as
+        sync-only, and half-implementing it would be worse than not
+        claiming it.
+        """
+        shim = _AsyncScannerShim(self)
+        try:
+            # Counting proxy: the miner never bumps a counter itself, so
+            # without this its ~N probe requests would not show up at all.
+            shim.req = _CountingRequester(self._get_sync_requester(),
+                                          shim._bump)
+            found = await asyncio.to_thread(
+                shim._mine_hidden_params, url, method, params, data, False)
+            self.requests_made += shim.requests_made
+            return dict(found or {})
+        except (BudgetExhausted, CircuitOpen):
+            raise        # a budget/circuit stop is NOT a miner bug
+        except Exception as e:
+            _log.warning("async hidden-param mining error: %s", e,
+                         exc_info=self.verbose)
+            return {}
+
     def _get_sync_requester(self):
         """Lazily-built sync Requester for thread-offloaded sync layers.
 
@@ -2015,7 +2063,32 @@ class _FakeResp:
         self.headers = headers
 
 
-class _AsyncScannerShim(AdvancedLayerMixin):
+class _CountingRequester:
+    """Requester proxy that counts the network calls made through it.
+
+    ``param_miner`` drives a Requester directly and never bumps a counter,
+    and the sync Requester built by ``_get_sync_requester()`` carries no
+    shared Budget either -- so without this, hidden-parameter mining would
+    be invisible in the scan's request total.  Sync's mining traffic *is*
+    counted (it rides the scan's budgeted Requester), so counting here is
+    what keeps the two engines' numbers comparable.
+
+    Everything except ``request`` is delegated untouched.
+    """
+
+    def __init__(self, inner, on_call):
+        self._inner = inner
+        self._on_call = on_call
+
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+    def request(self, *args, **kwargs):
+        self._on_call()
+        return self._inner.request(*args, **kwargs)
+
+
+class _AsyncScannerShim(AdvancedLayerMixin, CrawlMixin):
     """Minimal scanner-like object for sync detection modules.
 
     The sync ``advanced_layers`` / ``jsonp`` / ``csp`` modules expect a
@@ -2081,6 +2154,10 @@ class _AsyncScannerShim(AdvancedLayerMixin):
         # getattr: tests build the scanner with __new__ to skip __init__.
         self.json_body = getattr(async_scanner, "json_body", None)
         self._advanced_layers = True
+        # Phase 133: CrawlMixin._mine_hidden_params reads these.
+        self.max_payloads = getattr(async_scanner, "max_payloads", 14)
+        self.param_wordlist = None      # --param-wordlist stays sync-only
+        self.bav = False                # --bav is documented sync-only
         import threading
         self._lock = threading.Lock()
 
