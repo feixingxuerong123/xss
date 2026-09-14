@@ -1,9 +1,9 @@
 {
-  "cases": 172,
-  "modes": 169,
+  "cases": 176,
+  "modes": 173,
   "layers": 49,
-  "covered": 46,
-  "uncovered": 3,
+  "covered": 48,
+  "uncovered": 1,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -78,9 +78,11 @@
     },
     {
       "layer": "L7_mutation",
-      "covered": false,
-      "modes": [],
-      "note": "the layer runs on every page but no target is built to be exploitable ONLY by mutation"
+      "covered": true,
+      "modes": [
+        "mx_vuln"
+      ],
+      "note": "added in Phase 128 (raw reflection + a mutating sink in a script region; Phase 128 also killed the escaping-blind FP in the mXSS confirm path)"
     },
     {
       "layer": "L7_dom_clobber",
@@ -366,9 +368,11 @@
     },
     {
       "layer": "L7_xsleak",
-      "covered": false,
-      "modes": [],
-      "note": "no XS-Leak target"
+      "covered": true,
+      "modes": [
+        "xs_vuln"
+      ],
+      "note": "added in Phase 128 (header-surface audit pair; opt-in --audit-xs-leaks, finding is severity low)"
     },
     {
       "layer": "L8_request",
@@ -412,8 +416,6 @@
     }
   ],
   "uncovered_layers": [
-    "L7_mutation",
-    "L8_cookie_tossing",
-    "L7_xsleak"
+    "L8_cookie_tossing"
   ]
 }

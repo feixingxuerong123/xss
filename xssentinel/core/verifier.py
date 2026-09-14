@@ -579,6 +579,50 @@ _URI_ATTRS = frozenset([
     "codebase", "profile", "icon", "xlink:href",
 ])
 
+# Phase 128: attribute tokenizer for the mXSS exec-context check.  Quoted
+# values are consumed atomically, so handler/URI text sitting inside ANOTHER
+# attribute's value cannot masquerade as a live attribute.
+_MXSS_ATTR_RE = re.compile(
+    r'([a-zA-Z_:][-\w:.]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))')
+
+
+def _marker_in_exec_context(response_text: str, token: str) -> bool:
+    """True when the token sits where a browser would actually EXECUTE it.
+
+    Phase 128: `_mxss_confirm` used to accept "the token appears somewhere
+    AND the page carries a mutating sink".  ``mutation.analyze()``'s
+    ``reflected`` flag is a bare substring test over the whole response, so
+    an HTML-ESCAPED token sitting in a text node counted as reflected -- and
+    any page with innerHTML/DOMParser in a script then produced a
+    high-severity finding the moment the token showed up.  Execution needs
+    one of:
+      * a live ``<script>`` block containing the token, or
+      * a REAL element attribute whose tokenised value carries the token --
+        an ``on*`` handler, or a ``javascript:`` URI in a URI attribute.
+    Escaped text is inert: ``&lt;img src=x onerror=alert(&#x27;TOK&#x27;)&gt;``
+    starts no tag, and ``onerror=`` inside another attribute's quoted value
+    is text, not an attribute.  (Same discipline as
+    ``dom_clobber._real_tag_attr``.)
+    """
+    if not response_text or not token:
+        return False
+    for m in re.finditer(r"<script\b[^>]*>(.*?)</script>", response_text,
+                         re.IGNORECASE | re.DOTALL):
+        if token in m.group(1):
+            return True
+    for tag in re.finditer(r"<\s*[a-zA-Z][^>]*>", response_text):
+        for m in _MXSS_ATTR_RE.finditer(tag.group(0)):
+            name = m.group(1).lower()
+            value = next((g for g in m.groups()[1:] if g is not None), "")
+            if token not in value:
+                continue
+            if name.startswith("on"):
+                return True
+            if name in _URI_ATTRS and value.strip().lower().startswith(
+                    "javascript:"):
+                return True
+    return False
+
 
 def _event_handler_raw_confirmed(response_text: str, idx: int,
                                  token: str) -> bool:
@@ -717,6 +761,22 @@ def _mxss_confirm(response_text: str, token: str, idx: int) -> dict | None:
         from . import mutation as mxss_mod
         mxss_result = mxss_mod.analyze(response_text, token)
         if mxss_result.get("exploitable"):
+            # Phase 128: "the token appears somewhere AND the page carries a
+            # sink" is NOT mutation evidence.  analyze()'s `reflected` is a
+            # bare substring test over the whole response, so an
+            # HTML-ESCAPED token sitting in a text node counted as
+            # "reflected" -- and then any page with innerHTML/DOMParser in a
+            # script produced a high-severity `reflected` finding the moment
+            # the token showed up.  That is the escaping-blind family again
+            # (Phase 123), and it fired on the benchmark's escaping twin,
+            # i.e. on every ordinary app that escapes its output.
+            # Require the token to have actually landed in an EXECUTABLE
+            # context in the served bytes: a live <script>, an on*= handler
+            # value, or a javascript: URI.  The helper lives in this module
+            # on purpose -- it must not depend on a module that is not part
+            # of the repository.
+            if not _marker_in_exec_context(response_text, token):
+                return None
             # Phase 43 (async-benchmark FP): a polyglot payload carries
             # its OWN tag structure (<div id=x><script>...), so the
             # "mutating sink" the analyzer sees may be payload-internal

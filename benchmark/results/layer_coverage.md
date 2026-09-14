@@ -1,9 +1,9 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 172 cases / 169 modes  
+Benchmark: 176 cases / 173 modes  
 Engine layers: 49  
-Covered by at least one case: 46  
-NOT covered: 3
+Covered by at least one case: 48  
+NOT covered: 1
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
@@ -14,7 +14,7 @@ NOT covered: 3
 | L4_second_order | yes | so2_write | added in Phase 126 (inject at A, verify viewer B; needs second_order_view_path) |
 | L5_blind_oob | yes | blind_vuln | added in Phase 124 (real OOB callback; needs extra_args --oob self) |
 | L6_dom_dynamic | yes | dom_* | yes |
-| L7_mutation | **NO** | - | the layer runs on every page but no target is built to be exploitable ONLY by mutation |
+| L7_mutation | yes | mx_vuln | added in Phase 128 (raw reflection + a mutating sink in a script region; Phase 128 also killed the escaping-blind FP in the mXSS confirm path) |
 | L7_dom_clobber | yes | clobber_vuln | added in Phase 123 (needs a REAL id/name attribute -- Phase 123 also fixed the layer's escaping-blind FP) |
 | L7_template | yes | raw_template, raw_template_vue | yes |
 | L7_polyglot | yes | waf_naive | reached via the WAF case (Phase 118) -- the bypass that lands is a polyglot |
@@ -50,7 +50,7 @@ NOT covered: 3
 | L2_position_shift | yes | pshift_vuln | added in Phase 122 (WAF guards body only) |
 | L7_cors | yes | cors_reflect | added in Phase 113 |
 | L7_nonce_bypass | yes | csp_nonce_* | partial (nonce-leak chain) |
-| L7_xsleak | **NO** | - | no XS-Leak target |
+| L7_xsleak | yes | xs_vuln | added in Phase 128 (header-surface audit pair; opt-in --audit-xs-leaks, finding is severity low) |
 | L8_request | yes | raw_* | helper: request-level checks on every case |
 | L9_scenario | yes | sc_write | added in Phase 127 (declarative recipe; Phase 127 also fixed the {param} placeholder never being expanded in the step field name) |
 | L9_upload_filename | yes | upload_echo | added in Phase 110 |
@@ -59,6 +59,4 @@ NOT covered: 3
 
 ## Uncovered layers (the shopping list)
 
-- `L7_mutation` -- the layer runs on every page but no target is built to be exploitable ONLY by mutation
 - `L8_cookie_tossing` -- no cookie-tossing target
-- `L7_xsleak` -- no XS-Leak target

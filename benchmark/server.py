@@ -1477,6 +1477,81 @@ PAGE_MODES.update({
     "tb_safe": m_tb_safe,
 })
 
+# ---------------------------------------------------------------------------
+# Phase 128b: mXSS targets (L7_mutation).
+#
+# The layer fires when the injected mXSS payload survives into the response
+# VERBATIM *and* the page carries a mutating sink in a script/handler region
+# (mutation.has_mutating_sink only searches <script> blocks and on*=
+# handlers).  So the page is a "markdown preview" that reflects the value
+# raw and then parses/serialises a string -- exactly the flow that lets
+# inert markup become executable.
+#
+# The sink is deliberately DOMParser + parseFromString, NOT innerHTML:
+# innerHTML/outerHTML/insertAdjacentHTML/document.write are on the Trusted
+# Types layer's list, so a page using them makes the SAFE twin emit
+# `trusted_types_no_policy` (medium) and the zero-finding gate goes red for
+# a completely correct case (learned in Phase 123).  DOMParser is a real
+# mutation vehicle and is not on that list.
+#
+# The safe twin escapes, so the payload never survives verbatim and
+# mutation.detect_reflection() is False -- the premise is genuinely gone.
+# ---------------------------------------------------------------------------
+
+_MXSS_REPARSE_SCRIPT = (
+    "<script>"
+    "var doc = new DOMParser().parseFromString("
+    "document.getElementById('stage').textContent, 'text/html');"
+    "document.getElementById('out').textContent = doc.body.textContent;"
+    "</script>")
+
+
+def m_mx_vuln(v: str, ctx: dict) -> tuple:
+    return _page('<h1>Markdown preview</h1>'
+                 f'<div id="stage">{v}</div><div id="out"></div>'
+                 + _MXSS_REPARSE_SCRIPT)
+
+
+def m_mx_safe(v: str, ctx: dict) -> tuple:
+    return _page('<h1>Markdown preview</h1>'
+                 f'<div id="stage">{html.escape(v or "", quote=True)}</div>'
+                 '<div id="out"></div>'
+                 + _MXSS_REPARSE_SCRIPT)
+
+
+# ---------------------------------------------------------------------------
+# Phase 128: XS-Leak surface audit targets (L7_xsleak).
+#
+# This layer is a response-HEADER audit behind the opt-in --audit-xs-leaks
+# flag: a page that sets NO cross-origin isolation (COOP/CORP/COEP) and no
+# framing restriction (X-Frame-Options / CSP frame-ancestors) leaves the
+# whole no-cors / frame-timing / window.name surface open.  Partial
+# hardening suppresses the note, so the pair is:
+#   * vuln -> an ordinary page with no isolation headers at all
+#   * safe -> the SAME page plus one hardening header
+# It is an audit pair, not an exploit pair: the finding is severity
+# "low"/confidence "firm" -- which is also why the zero-finding gate
+# (high/medium only) cannot catch a regression here, and why the safe twin
+# has to be verified with the flag actually ON.
+# ---------------------------------------------------------------------------
+
+
+def _isolation_page(v: str, hardened: bool) -> tuple:
+    body = ('<h1>Dashboard</h1>'
+            '<p>Internal reporting surface.</p>')
+    if not hardened:
+        return _page(body)
+    return _page(body, {"X-Frame-Options": "DENY"})
+
+
+def m_xs_vuln(v: str, ctx: dict) -> tuple:
+    return _isolation_page(v, hardened=False)
+
+
+def m_xs_safe(v: str, ctx: dict) -> tuple:
+    return _isolation_page(v, hardened=True)
+
+
 POST_MODES.update({
     "pshift_vuln": m_pshift_vuln,
     "pshift_safe": m_pshift_safe,
@@ -1502,6 +1577,12 @@ POST_MODES.update({
     "sc_write": m_stored_write,
     "sc_write_escaped": m_stored_write_escaped,
     "sc_view": m_stored_view,
+    # Phase 128b: mXSS pair (no ctx needed).
+    "mx_vuln": m_mx_vuln,
+    "mx_safe": m_mx_safe,
+    # Phase 128: no ctx needed -- the audit only looks at response headers.
+    "xs_vuln": m_xs_vuln,
+    "xs_safe": m_xs_safe,
 })
 
 

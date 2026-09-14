@@ -2070,6 +2070,64 @@
       "note": "Phase 127 safe twin: same recipe, but the write endpoint stores the escaped value, so the viewer renders text -- the token never lands in an executable position and the scenario stays unconfirmed. The two twins use different param names (comment vs note) so each runs only its own scenario."
     },
     {
+      "id": "pos-xs-01",
+      "path": "/r/xs01",
+      "param": "q",
+      "mode": "xs_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "xs_leak_surface"
+      ],
+      "context": "response_headers",
+      "difficulty": "medium",
+      "extra_args": [
+        "--audit-xs-leaks"
+      ],
+      "note": "Phase 128: an audit pair, not an exploit pair. The page sets NO cross-origin isolation (COOP/CORP/COEP) and no framing restriction, so L7_xsleak reports the open no-cors / frame-timing / window.name surface (low/firm). The layer is opt-in, hence --audit-xs-leaks."
+    },
+    {
+      "id": "neg-xs-01",
+      "path": "/s/xs01",
+      "param": "q",
+      "mode": "xs_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "xs_leak_surface"
+      ],
+      "context": "response_headers",
+      "difficulty": "medium",
+      "extra_args": [
+        "--audit-xs-leaks"
+      ],
+      "note": "Phase 128 safe twin: byte-identical page plus a single hardening header (X-Frame-Options: DENY). audit_mitigations() returns None once ANY isolation family is present -- one header is all it takes to silence the audit. Note the finding is severity low, so the high/medium zero-finding gate cannot catch a regression here; the twin is verified with the flag genuinely ON."
+    },
+    {
+      "id": "pos-mx-01",
+      "path": "/r/mx01",
+      "param": "q",
+      "mode": "mx_vuln",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "mutation_xss"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 128b: mXSS. Raw reflection + a mutating sink inside a script region (DOMParser/parseFromString) -- the layer requires BOTH, and its sink scan only looks at <script> blocks and on*= handlers. DOMParser is used instead of innerHTML on purpose: the innerHTML family is on the Trusted Types layer's list and would make the SAFE twin emit trusted_types_no_policy (medium), turning a correct case into a red gate."
+    },
+    {
+      "id": "neg-mx-01",
+      "path": "/s/mx01",
+      "param": "q",
+      "mode": "mx_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "mutation_xss"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "note": "Phase 128b safe twin: same page and same re-serialising script, but the value is escaped -- mutation.detect_reflection() is a verbatim substring check, so the payload never survives and the layer stays silent. The premise removed is the survival of the markup, not the sink."
+    },
+    {
       "id": "aux-r-formecho01",
       "path": "/r/formecho01",
       "param": "q",

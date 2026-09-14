@@ -427,6 +427,23 @@ sync 首次跑出**全绿**（旧基线有 6 个 safe 用例因 loopback 中断�
 
 **修正后：49 层中 46 已覆盖，3 未覆盖**（L7_mutation、L8_cookie_tossing、L7_xsleak）。基准 172 用例，验证 **TP1 TN1 FP0 FN0**。
 
+**Phase 128：`L7_xsleak` + `L7_mutation` 覆盖，并修掉第六个基准驱动的引擎缺陷（mXSS 确认路径同样是转义盲的）——覆盖到 48/49，只剩本地不可行的那一层**。
+
+两组用例：
+- `pos/neg-xs-01`（`L7_xsleak`）：这层是**响应头面审查**（需 `--audit-xs-leaks` 开关，不是常开）：页面**完全没有**跨源隔离（COOP/CORP/COEP）也没有框架限制（X-Frame-Options / CSP frame-ancestors）时才报 `xs_leak_surface`；任一硬化头在场即静默。孪生只差一个 `X-Frame-Options: DENY`。**注意它的严重度是 low**——常规零 finding 门禁（只看 high/medium）**抓不住**这层的回归，所以安全孪生必须**带着开关**验证（脚本里单列了这一步）。
+- `pos/neg-mx-01`（`L7_mutation`）：层要求"载荷**原样存活**进响应"+"页面在 `<script>` 或 `on*=` 区域里有变异 sink"（`has_mutating_sink` 只搜这两处）。靶场是"markdown 预览"形态：原样渲染 + 用 `DOMParser().parseFromString(...)` 解析再序列化。**sink 刻意选 DOMParser 而不是 innerHTML**：innerHTML 家族在 Trusted Types 层的清单上（Phase 123 的教训），会让正确用例的安全孪生报 medium 把门禁打红；DOMParser 同样是真实变异载体且不在那张清单上。安全孪生只改一处：转义后载荷不再原样存活。
+
+**缺陷（本轮最值钱的东西）**：写 mx 用例时，安全孪生（已转义、文本节点里躺着 token）竟然产出 **`reflected` = high**。顺着证据链查到 `verifier._mxss_confirm`：它把 **token**（而不是载荷）传给了 `mutation.analyze()`，而该函数的 `reflected` 是**全响应子串测试**——于是判定退化成"**token 出现在某处 + 页面某处有变异 sink**"，哪怕 token 已被转义成文本、浏览器永远不会执行。任何"转义输出 + 页面带 innerHTML/DOMParser 脚本"的正常应用都会被打上 high：这是 Phase 123 那个家族的**又一次现身**（用对转义免疫的信号做强判定）。
+修法两步：① 要求 token 真的落在**可执行上下文**（活 `<script>`、`on*=` 值、`javascript:` URI）；② 第一版我复用了 `mxss_verify.marker_in_exec_context()`，结果发现**这个助手自己也是转义盲的**——它的 handler/URI 正则在全文档上搜，`&lt;img src=x onerror=alert(&#x27;TOKEN&#x27;)&gt;` 照样命中。于是按 Phase 123 的做法改成"**只在真实标签体内、且按完整属性分词**"（`alt="x onerror=alert(TOKEN)"` 这种"handler 文本躺在别的属性值里"也不再算）。8 种形态全对；`tests/test_mxss_exec_context.py` 10 例锁定（含"转义反射 + sink 不得确认""原样反射 + sink 必须确认"两面）。
+
+**顺带发现并规避的一颗雷**：`xssentinel/core/mxss_verify.py` 被 `.git/info/exclude` 排除、**从未进过仓库**，而全仓库**没有任何已跟踪代码**引用它。如果我的修复就这么 `import` 它，别人 clone 后这里会 ImportError、再被 `_mxss_confirm` 的 `except` 吞掉——**整条 mXSS 确认分支静默失效**，比原来的误报更糟。因此该检查最终写成 verifier 自带的 `_marker_in_exec_context()`，不引入对未跟踪模块的依赖（那个模块本身仍是未跟踪状态，是否入库由你决定）。
+
+**教训**：**不要因为助手函数名字合理就信任它的语义**——这次我把 Phase 123 的修复思路套用到一个语义更弱的助手（`marker_in_exec_context`）上，同款 bug 换了个地方复现；而且差点把 shipped 代码绑上一个不在仓库里的模块。凡是"判断某段文本是否构成真实标记/真可执行"的地方，都要用同一条纪律：真实标签体 + 属性分词 + 对转义免疫的信号一律不作数。
+
+**修正后：49 层中 48 已覆盖，1 未覆盖**（仅 `L8_cookie_tossing`——需要父子域语义，在本机 127.0.0.1/localhost 上不可构造，继续记账而非硬造）。基准 176 用例，验证 **TP2 TN2 FP0 FN0**。
+
+**Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
+
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
 
 **Phase 123：`L7_dom_clobber` 覆盖，并修掉第三个基准驱动的引擎缺陷（转义过的反射仍被当成真实属性）**。
