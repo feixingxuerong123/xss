@@ -6,6 +6,7 @@ _scan_template and _scan_polyglot.
 """
 from __future__ import annotations
 
+import copy
 import secrets
 from typing import TYPE_CHECKING
 
@@ -25,6 +26,7 @@ from . import dom as dommod
 from . import dom_engine
 from .findings import Finding
 from .logger import get_logger
+from .requester import JsonBody
 
 if TYPE_CHECKING:  # only ever referenced inside annotations
     import requests
@@ -633,3 +635,69 @@ class AdvancedLayerMixin:
                     _log.debug(f"    [*] polyglot ({kind}) reflected (token={token})")
                 return  # one confirmed polyglot finding is enough
 
+
+    # -- shared parameter plumbing (moved from Scanner, Phase 132) ---------
+    #
+    # These two used to live on ``Scanner``.  They are needed by BOTH
+    # engines: the sync Scanner runs them directly, and the async engine
+    # reaches them through ``_AsyncScannerShim`` (which now inherits this
+    # mixin).  Keeping one copy here keeps the two engines from drifting --
+    # the async engine had no equivalent of either, so ``--async`` never
+    # ran the L7 parameter layers at all.
+
+    def _set_param(self, params, data, param, value, is_body):
+        p = dict(params)
+        if is_body and self.json_body is not None:
+            # Phase 46: JSON-carrier probe -- set the leaf at the dotted
+            # path inside a deep copy of the original document and send it
+            # as application/json (Requester translates JsonBody).
+            #
+            # ``_set_json_leaf`` is defined in scanner.py, which imports
+            # this module -- a module-level import here would be circular,
+            # so it is resolved lazily on the JSON path only.
+            from .scanner import _set_json_leaf
+            try:
+                obj = copy.deepcopy(self.json_body)
+                _set_json_leaf(obj, param, value)
+            except Exception:
+                obj = dict(self.json_body)
+                obj[param] = value
+            return {"params": p, "data": JsonBody(obj)}
+        d = dict(data)
+        if is_body:
+            d[param] = value
+        else:
+            p[param] = value
+        return {"params": p, "data": d}
+
+    def _run_advanced_layers(self, req, url, method, params, data, param,
+                             is_body, marker, resp_text):
+        """L7 advanced layers: mutation / DOM clobber / template / polyglot
+        / markdown etc.  Failures here are logged, never fatal."""
+        try:
+            self._scan_mutation(req, url, method, params, data, param,
+                                is_body, marker, resp_text)
+            self._scan_dom_clobber(req, url, method, params, data, param,
+                                   is_body)
+            self._scan_template(req, url, method, params, data, param,
+                                is_body, resp_text)
+            # Polyglot is a FALLBACK: only run when no other finding was
+            # confirmed for this (url, param) -- otherwise it's just noise
+            # on top of an already-confirmed XSS.
+            already_found = any(
+                f.data.get("url") == url and f.data.get("param") == param
+                for f in self.findings
+            )
+            if not already_found:
+                self._scan_polyglot(req, url, method, params, data, param,
+                                    is_body)
+            # Markdown/BBCode XSS (Phase 11): inject markup-renderer payloads
+            # when the response looks like it might be rendering markup.
+            if self._advanced_layers:
+                from . import advanced_layers
+                advanced_layers.run_param_layers(
+                    self, req, url, method, params, data, param, is_body,
+                    resp_text)
+        except Exception as e:
+            if self.verbose:
+                _log.debug(f"    [!] advanced param layers error: {e}")

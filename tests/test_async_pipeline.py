@@ -92,19 +92,37 @@ class _Session:
 
 
 def _collect(params, escape=False, decode=False):
-    """Drive _probe_param inside a fresh loop; Scanner built in-loop."""
+    """Drive _probe_param inside a fresh loop; Scanner built in-loop.
 
-    async def run():
-        asc = AsyncScanner(max_concurrent=4, per_host_delay=0, jitter=0)
-        asc._semaphore = asyncio.Semaphore(4)
-        session = _Session(escape=escape, decode=decode)
-        out = []
-        async for f in asc._probe_param(session, "http://t/x", "GET", "q",
-                                        params, {}, False, "x"):
-            out.append(f)
-        return out, session
+    Phase 132: ``_probe_param`` now hands off to the L7 parameter layers,
+    which issue real blocking requests through a sync Requester.  A
+    fake-session unit test cannot serve that (the request would leave the
+    machine), and every assertion here is about the fake session's call
+    list, which the hand-off never touches -- so it is stubbed out.  The
+    hand-off is covered by tests/test_async_param_stage_parity.py and by
+    benchmark case pos-clobber-01.
+    """
+    original = AsyncScanner._scan_advanced_param_layers
 
-    return asyncio.run(run())
+    async def _noop(self, *a, **k):
+        if False:                     # pragma: no cover -- keeps it a gen
+            yield None
+
+    AsyncScanner._scan_advanced_param_layers = _noop
+    try:
+        async def run():
+            asc = AsyncScanner(max_concurrent=4, per_host_delay=0, jitter=0)
+            asc._semaphore = asyncio.Semaphore(4)
+            session = _Session(escape=escape, decode=decode)
+            out = []
+            async for f in asc._probe_param(session, "http://t/x", "GET", "q",
+                                            params, {}, False, "x"):
+                out.append(f)
+            return out, session
+
+        return asyncio.run(run())
+    finally:
+        AsyncScanner._scan_advanced_param_layers = original
 
 
 class TestForContextFixed:

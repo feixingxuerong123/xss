@@ -32,6 +32,7 @@ from typing import AsyncIterator
 from urllib.parse import urlparse, urljoin
 
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
+from .scanner_layers import AdvancedLayerMixin
 from .requester import JsonBody
 from . import payloads as payloads_mod
 from . import context as ctx
@@ -636,7 +637,19 @@ class AsyncScanner:
             except Exception:
                 pass
 
+        # Phase 132: ``return`` on the first confirmed payload used to end
+        # ``_probe_param`` outright, so the position shift, the CSP-nonce
+        # exploit AND the L7 parameter layers were all skipped on exactly
+        # the endpoints that were easiest to confirm -- async reported the
+        # reflected hit and nothing else (13 requests vs sync's 45 on
+        # pos-clobber-01, where sync also reports dom_clobber).  Sync breaks
+        # out of its loop and keeps going (scanner.py:667 gates the loop on
+        # ``not confirmed`` and reaches _run_advanced_layers unconditionally),
+        # so this mirrors that: flag + break, later stages gated on the flag.
+        param_confirmed = False
         for payload in cands:
+            if param_confirmed:
+                break
             marked = verifier.mark(payload, marker)
             # Phase 86: WAF/filter evasion parity with the sync _try_payload.
             # Until now the async path fired only the bare marked payload plus
@@ -696,50 +709,56 @@ class AsyncScanner:
                         confidence="high",
                         transform=tchain,
                     )
-                    return  # one confirmed finding per param is enough
+                    param_confirmed = True
+                    break  # leave the variant loop; outer loop re-checks
 
         # Phase 37: parameter position shift (sync parity).  WAFs often
         # guard only the ORIGINAL parameter location -- re-fire the top
         # payloads with the param cloned into the OTHER location.
-        for payload in cands[:3]:
-            marked = verifier.mark(payload, marker)
-            # Phase 47: flipped is_body routes through _probe_kv so a
-            # JSON-mode query->body shift lands in the JSON document
-            # instead of a form body the server ignores.
-            sp, sd = self._probe_kv(params, data, param, marked,
-                                    not is_body)
-            try:
-                async with self._semaphore:
-                    await self._throttle(url)
-                    async with session.request(
-                        method, url, params=sp or None,
-                        headers=self._req_headers(self.headers), proxy=self._next_proxy(),
-                        **_body_kwargs(sd),
-                    ) as resp:
-                        text = await resp.text()
-                        resp_headers = dict(getattr(resp, "headers", None) or {})  # CSP gate parity
-                        self.requests_made += 1
+        # Phase 132: gated on ``not param_confirmed`` -- sync's call site
+        # (scanner.py:693) has the same guard, and re-firing after a
+        # confirmed hit would only add requests.
+        if not param_confirmed:
+            for payload in cands[:3]:
+                marked = verifier.mark(payload, marker)
+                # Phase 47: flipped is_body routes through _probe_kv so a
+                # JSON-mode query->body shift lands in the JSON document
+                # instead of a form body the server ignores.
+                sp, sd = self._probe_kv(params, data, param, marked,
+                                        not is_body)
+                try:
+                    async with self._semaphore:
+                        await self._throttle(url)
+                        async with session.request(
+                            method, url, params=sp or None,
+                            headers=self._req_headers(self.headers), proxy=self._next_proxy(),
+                            **_body_kwargs(sd),
+                        ) as resp:
+                            text = await resp.text()
+                            resp_headers = dict(getattr(resp, "headers", None) or {})  # CSP gate parity
+                            self.requests_made += 1
                         self._record_status(getattr(resp, "status", 200))
-            except (BudgetExhausted, CircuitOpen):
-                raise            # Phase 86: stop instead of "next param"
-            except Exception:
-                continue
-            v = await asyncio.to_thread(verifier.verify_semantic,
-                                        text, marker,
-                                        response_headers=resp_headers)
-            if v["confirmed"]:
-                idx = text.find(marker)
-                yield Finding(
-                    url=url, method=method, param=param,
-                    context=v.get("context") or context,
-                    payload=marked,
-                    severity="high",
-                    evidence=text[max(0, idx - 30):idx + len(marker) + 30],
-                    type="reflected",
-                    confidence="high",
-                    transform=["position_shift"],
-                )
-                return
+                except (BudgetExhausted, CircuitOpen):
+                    raise            # Phase 86: stop instead of "next param"
+                except Exception:
+                    continue
+                v = await asyncio.to_thread(verifier.verify_semantic,
+                                            text, marker,
+                                            response_headers=resp_headers)
+                if v["confirmed"]:
+                    idx = text.find(marker)
+                    yield Finding(
+                        url=url, method=method, param=param,
+                        context=v.get("context") or context,
+                        payload=marked,
+                        severity="high",
+                        evidence=text[max(0, idx - 30):idx + len(marker) + 30],
+                        type="reflected",
+                        confidence="high",
+                        transform=["position_shift"],
+                    )
+                    param_confirmed = True
+                    break
 
         # Phase 100: CSP nonce-leak exploitation (sync _try_csp_nonce
         # parity).  A nonce CSP blocks plain inline payloads, so the loop
@@ -757,7 +776,10 @@ class AsyncScanner:
             csp_hdr = probe_headers.get("Content-Security-Policy") or ""
         except Exception:
             csp_hdr = ""
-        if csp_hdr:
+        # Phase 132: also gated on ``not param_confirmed`` -- sync's nonce
+        # step (scanner.py:656) carries the same guard, and the block is
+        # only reached on an unconfirmed param anyway.
+        if not param_confirmed and csp_hdr:
             try:
                 _nonces = csp_mod.extract_nonces_from_csp(csp_hdr)
             except Exception:
@@ -812,6 +834,16 @@ class AsyncScanner:
                                 confidence="high",
                                 transform=["csp_nonce"],
                             )
+
+        # Phase 132: L7 parameter layers (mutation / DOM clobber / template
+        # / polyglot / markdown).  Sync reaches these at the end of
+        # ``_scan_param``; async stopped after the CSP-nonce block, so the
+        # whole family was async-only FN.  Reached only when the marker
+        # actually reflected, matching the sync call site.
+        async for _f in self._scan_advanced_param_layers(
+                url, method, params, data, param, is_body, marker,
+                probe_text or text or ""):
+            yield _f
 
     def _build_variants(self, marked: str, context: str, marker: str,
                         cap_override: int | None = None
@@ -1082,6 +1114,52 @@ class AsyncScanner:
             raise        # Phase 86: a budget/circuit stop is NOT a layer bug
         except Exception as e:
             _log.warning("async request layers error: %s", e,
+                         exc_info=self.verbose)
+
+    async def _scan_advanced_param_layers(self, url: str, method: str,
+                                          params: dict, data: dict,
+                                          param: str, is_body: bool,
+                                          marker: str,
+                                          resp_text: str
+                                          ) -> AsyncIterator[Finding]:
+        """L7 parameter layers (mutation / DOM clobber / template /
+        polyglot / markdown).
+
+        Phase 132: ``--async`` never ran these.  ``_probe_param`` did the
+        payload loop, the position shift and the CSP-nonce exploit, then
+        stopped -- so five whole detection families (mutation XSS, DOM
+        clobbering, client-side template injection, polyglot, and the
+        markdown/BBCode markup layers) were reported by sync and silently
+        missed by async.
+
+        These sub-layers issue blocking ``requests`` calls, so this mirrors
+        ``_scan_request_layers``: a real sync Requester plus the
+        ``AdvancedLayerMixin``-backed shim, run in a worker thread, with
+        the shim's findings streamed back.
+
+        Unlike the payload loop this is a *step* the sync engine always
+        takes once the marker reflected -- even when the reflection is
+        HTML-escaped.  It is deliberately NOT gated on ``marker_escaped``
+        so the two engines stay in step (see scanner.py ``_scan_param``,
+        which reaches ``_run_advanced_layers`` unconditionally).
+        """
+        shim = _AsyncScannerShim(self)
+        try:
+            req = self._get_sync_requester()
+            shim.req = req
+            await asyncio.to_thread(
+                shim._run_advanced_layers,
+                req, url, method, params, data, param, is_body, marker,
+                resp_text)
+            # The sub-layers bump the shim's own counter; fold it in so the
+            # scan's request accounting stays honest.
+            self.requests_made += shim.requests_made
+            for f in shim._findings:
+                yield f
+        except (BudgetExhausted, CircuitOpen):
+            raise        # a budget/circuit stop is NOT a layer bug
+        except Exception as e:
+            _log.warning("async advanced param layers error: %s", e,
                          exc_info=self.verbose)
 
     def _get_sync_requester(self):
@@ -1937,7 +2015,7 @@ class _FakeResp:
         self.headers = headers
 
 
-class _AsyncScannerShim:
+class _AsyncScannerShim(AdvancedLayerMixin):
     """Minimal scanner-like object for sync detection modules.
 
     The sync ``advanced_layers`` / ``jsonp`` / ``csp`` modules expect a
@@ -1996,6 +2074,13 @@ class _AsyncScannerShim:
         # tossing follow-up probes).  Async has no sync Requester, so those
         # layers' own try/except degrades gracefully.
         self.req = None
+        # Phase 132: the L7 parameter layers (mutation / DOM clobber /
+        # template / polyglot / markup) read these two off the scanner.
+        # Without them ``_run_advanced_layers`` would raise on the JSON
+        # carrier path and skip the markup sub-layer entirely.
+        # getattr: tests build the scanner with __new__ to skip __init__.
+        self.json_body = getattr(async_scanner, "json_body", None)
+        self._advanced_layers = True
         import threading
         self._lock = threading.Lock()
 
