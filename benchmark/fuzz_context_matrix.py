@@ -63,13 +63,15 @@ CTX_TO_CORPUS = {
 }
 
 DIAGNOSE_N = 6      # corpus entries checked by hand when a context is silent
+RESCANS_ON_ZERO = 2  # Phase 138: extra scans before a zero is called a FN
 
 
 # Escaping/filter modes exercised on the FN side.  `raw` is the baseline;
 # the two filters are where bypass failures (real FNs) hide.  Full HTML
 # escaping is the FP net's job (fuzz_escape_matrix.py), not this one.
 FN_ESCAPES = ["raw", "strip_script", "encode_angles", "encode_quotes",
-              "strip_tags", "strip_script_recursive"]
+              "strip_tags", "strip_script_recursive", "strip_handlers",
+              "entity_decode", "escape_lt_only"]
 
 
 def _scan(base: str, ctx: str, esc: str = "raw", sink: str = "none"):
@@ -124,6 +126,14 @@ def _diagnose(base: str, ctx: str, esc: str) -> tuple[bool, str]:
 
 def main() -> int:
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8965
+    # Optional: restrict to a subset of filters ("raw,strip_handlers") so a
+    # newly added mode can be explored without re-running all 81 combos.
+    escapes = (sys.argv[2].split(",") if len(sys.argv) > 2
+               else FN_ESCAPES)
+    unknown = [e for e in escapes if e not in FN_ESCAPES]
+    if unknown:
+        print("unknown esc:", unknown)
+        return 2
     base = f"http://127.0.0.1:{port}"
     threading.Thread(target=srv.run_server, kwargs={"port": port},
                      daemon=True).start()
@@ -145,8 +155,19 @@ def main() -> int:
     print("                     must be confirmed whenever the verifier says "
           "the shape is live")
     for ctx in CTX_TO_CORPUS:
-        for esc in FN_ESCAPES:
+        for esc in escapes:
             hits = _scan(base, ctx, esc)
+            if not hits:
+                # Phase 138: a single zero is NOT evidence.  On this machine
+                # the loopback is intermittently killed, and the filtered
+                # combos cost more requests (59 vs 45) -- i.e. more chances
+                # to lose one.  Re-scan before accusing: only a *stable*
+                # zero, backed by the verifier's ground truth, is a FN.
+                # (Caught after a "FN" that reproduced 6/6 as a detection.)
+                for _ in range(RESCANS_ON_ZERO):
+                    hits = _scan(base, ctx, esc)
+                    if hits:
+                        break
             if hits:
                 print("  %-9s %-14s confirmed: %-3d %s"
                       % (ctx, esc, len(hits),

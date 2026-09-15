@@ -1829,6 +1829,22 @@ def m_fuzz_render(v: str, ctx: dict) -> tuple:
         # Drop every tag.  A payload whose power comes from a tag dies; one
         # that only needs a quote or a space (attribute break-out) survives.
         value = re.sub(r"<[^>]*>", "", value)
+    elif esc == "strip_handlers":
+        # Remove event-handler attributes only (`on...=`): the classic
+        # "blacklist on* handlers" filter.  Tag payloads and javascript:
+        # URIs are untouched.
+        value = re.sub(r"\son\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]*)", "",
+                       value, flags=re.I)
+    elif esc == "entity_decode":
+        # The app DECODES entities once before output (the double-decoding
+        # bug class): an entity-encoded payload such as `&#60;script&#62;`
+        # turns back into a live tag.
+        value = html.unescape(value)
+    elif esc == "escape_lt_only":
+        # Half-hearted escaping: only "<" is escaped, ">" and quotes stay
+        # raw -- attribute break-outs that need no "<" are still live, and
+        # the corpus's multi-encode shapes matter here.
+        value = value.replace("<", "&lt;")
     elif esc == "strip_script_recursive":
         # The hardened version of `strip_script`: keep stripping until no
         # script tag is left, so the recursive-strip bypass
