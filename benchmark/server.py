@@ -843,12 +843,19 @@ def m_sri_vuln(v: str, ctx: dict) -> tuple:
 
 
 def m_sri_safe(v: str, ctx: dict) -> tuple:
-    """Safe twin: same third-party script, integrity + crossorigin."""
+    """Safe twin: same third-party script, integrity + crossorigin.
+
+    Phase 136: the reflected value is escaped.  This twin used to interpolate
+    it RAW into the div, so the page was a plain XSS while being labelled
+    `safe` -- the engine's `reflected` finding was CORRECT and the LABEL was
+    wrong.  A twin's "safe" premise must be the single property under test
+    (here: SRI present), not "and also no trivial injection".
+    """
     return _page('<script src="https://cdn.example/lib.js" '
                  'integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/'
                  'uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" '
                  'crossorigin="anonymous"></script>'
-                 f'<div>{v}</div>')
+                 f'<div>{html.escape(v or "")}</div>')
 
 
 def m_tt_vuln(v: str, ctx: dict) -> tuple:
@@ -860,13 +867,36 @@ def m_tt_vuln(v: str, ctx: dict) -> tuple:
         "</script><div id='o'></div>")
 
 
+def _js_string_literal(v: str) -> str:
+    """JS string literal for an inline <script> block (Phase 136).
+
+    Two encodings are needed, not one:
+      * ``json.dumps`` -- escapes the quote/backslash so the value cannot
+        break out of the JS STRING;
+      * ``<`` -> ``\\u003c`` -- json.dumps does NOT touch angle brackets, so
+        a value containing ``</script`` would still terminate the SCRIPT
+        BLOCK in the HTML parser no matter how well the string is quoted.
+        Both twins missed the second one, and the engine's
+        ``script_string_*`` payloads (``"></script><script>...``) were
+        perfectly correct to confirm.
+    """
+    return json.dumps(v or "").replace("<", "\\u003c").replace(">", "\\u003e")
+
+
 def m_tt_safe(v: str, ctx: dict) -> tuple:
-    """Safe twin: policy sanitises instead of passing through."""
+    """Safe twin: policy sanitises instead of passing through.
+
+    Phase 136: the value is encoded for an inline JS string (see
+    ``_js_string_literal``).  It used to sit raw between single quotes, so
+    `';alert(1);//` broke out of the string and ran -- the engine's
+    confirmation was CORRECT and this twin was mislabelled `safe`.
+    """
     return _page(
         "<script>"
         "trustedTypes.createPolicy('p', {createHTML: (s) => s.replace("
         "/</g, '&lt;')});"
-        f"document.getElementById('o').innerHTML = '{v}';"
+        f"document.getElementById('o').innerHTML = "
+        f"{_js_string_literal(v)};"
         "</script><div id='o'></div>")
 
 
@@ -924,14 +954,20 @@ def m_sanitizer_vuln(v: str, ctx: dict) -> tuple:
 def m_sanitizer_safe(v: str, ctx: dict) -> tuple:
     """Safe twin: current version AND the sanitised output goes to a
     non-sink (textContent).  (The layer flags any sanitise->innerHTML
-    flow, so changing only the version would still report.)"""
+    flow, so changing only the version would still report.)
+
+    Phase 136: the value is encoded for an inline JS string (see
+    ``_js_string_literal``).  It used to sit raw between double quotes, so a
+    `"` -- or, more decisively, a `</script>` -- broke out and ran: the
+    engine's `script_string_dq` confirmation was CORRECT.
+    """
     return _page(
         '<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6'
         '/dist/purify.min.js" integrity="sha384-aLMwkQFyLD6+QVnoIOJGuXs+fPHjPoUIQb8fAOr1UQgiuhDRImXlHZJEUS8ki3WD"'
         ' crossorigin="anonymous"></script>'
         '<div id="o"></div><script>'
         'document.getElementById("o").textContent = '
-        f'DOMPurify.sanitize("{v}");'
+        f'DOMPurify.sanitize({_js_string_literal(v)});'
         '</script>')
 
 
@@ -1776,6 +1812,14 @@ def m_fuzz_render(v: str, ctx: dict) -> tuple:
     value = v or ""
     if esc in ("html", "attr"):
         value = html.escape(value, quote=True)
+    elif esc == "strip_script":
+        # Classic "remove <script> tags" sanitizer -- the target of the
+        # recursive-strip bypass (<scr<script>ipt>).
+        value = re.sub(r"</?script[^>]*>", "", value, flags=re.I)
+    elif esc == "encode_angles":
+        # Escape the angle brackets ONLY, leaving quotes raw: an attribute
+        # break-out that needs no "<" still works.
+        value = value.replace("<", "&lt;").replace(">", "&gt;")
     return _page(tpl.replace("{}", value) + _FUZZ_SINKS.get(sink, ""))
 
 

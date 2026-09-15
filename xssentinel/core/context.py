@@ -182,7 +182,17 @@ _ATTR_RE = re.compile(
 def _attribute_context(segment: str) -> dict | None:
     # The reflection sits *inside* the value, possibly before the closing
     # quote, so extend the segment to let quoted values match correctly.
-    seg = segment + '">'
+    #
+    # Phase 130: the tail must be able to close BOTH quote styles.  The old
+    # `">` only terminated a double-quoted value; an unterminated
+    # SINGLE-quoted value fell through to the unquoted branch and the whole
+    # attribute was classified `html_attribute_noquote` -- so the scanner
+    # picked the space-break-out corpus for `<input value='...'>`, could not
+    # break out of the quotes, and reported a live single-quote break-out as
+    # nothing (or diluted it to a medium polyglot note).  Appending `'">`
+    # closes a single-quoted value while still closing a double-quoted one
+    # and leaving genuinely unquoted values unquoted.
+    seg = segment + "'\">"
     matches = list(_ATTR_RE.finditer(seg))
     if not matches:
         return None
