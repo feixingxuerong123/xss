@@ -1820,6 +1820,24 @@ def m_fuzz_render(v: str, ctx: dict) -> tuple:
         # Escape the angle brackets ONLY, leaving quotes raw: an attribute
         # break-out that needs no "<" still works.
         value = value.replace("<", "&lt;").replace(">", "&gt;")
+    elif esc == "encode_quotes":
+        # Mirror image of encode_angles: escape the QUOTES only, leaving
+        # angle brackets raw.  Tag-shaped payloads still live in text
+        # contexts; attribute break-outs (which need a quote) die.
+        value = (value.replace('"', "&quot;").replace("'", "&#x27;"))
+    elif esc == "strip_tags":
+        # Drop every tag.  A payload whose power comes from a tag dies; one
+        # that only needs a quote or a space (attribute break-out) survives.
+        value = re.sub(r"<[^>]*>", "", value)
+    elif esc == "strip_script_recursive":
+        # The hardened version of `strip_script`: keep stripping until no
+        # script tag is left, so the recursive-strip bypass
+        # (<scr<script>ipt>) does NOT work here.
+        while re.search(r"</?script", value, re.I):
+            new = re.sub(r"</?script[^>]*>", "", value, flags=re.I)
+            if new == value:
+                break
+            value = new
     return _page(tpl.replace("{}", value) + _FUZZ_SINKS.get(sink, ""))
 
 

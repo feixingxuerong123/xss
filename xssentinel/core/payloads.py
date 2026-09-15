@@ -54,10 +54,18 @@ _CROSS_CONTEXT: dict[str, list[tuple[str, int]]] = {
                      ("framework_vue", 3), ("framework_mustache", 2)],
     "cdata": [("script_block", 4)],
     "css_context": [("css_exfil", 3)],
+    # Phase 137: `url_javascript` was only ever a sibling of url_href /
+    # meta_refresh, so in a plain element context the engine never sent a
+    # javascript:-URI payload -- yet `<a href="javascript:...">x</a>` is
+    # perfectly live there.  Found by benchmark/fuzz_context_matrix.py
+    # (text + strip-a-<script>-filter: the payload keeps no script tag, so
+    # the filter does not touch it and the verifier confirms it).
+    # Kept at n=2: the Phase 43 note above -- cross-context samples reorder
+    # the budget window, so they go in small.
     "html_element": [("dom_clobber", 2), ("html5_new", 2),
                      ("dangling_markup", 1), ("script_gadget", 2),
                      ("markdown", 2), ("framework_react", 1),
-                     ("framework_svelte", 1)],
+                     ("framework_svelte", 1), ("url_javascript", 2)],
     "script_block": [("service_worker", 2), ("postmessage_source", 2),
                      ("prototype_gadget", 2)],
 }

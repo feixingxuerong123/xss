@@ -68,7 +68,8 @@ DIAGNOSE_N = 6      # corpus entries checked by hand when a context is silent
 # Escaping/filter modes exercised on the FN side.  `raw` is the baseline;
 # the two filters are where bypass failures (real FNs) hide.  Full HTML
 # escaping is the FP net's job (fuzz_escape_matrix.py), not this one.
-FN_ESCAPES = ["raw", "strip_script", "encode_angles"]
+FN_ESCAPES = ["raw", "strip_script", "encode_angles", "encode_quotes",
+              "strip_tags", "strip_script_recursive"]
 
 
 def _scan(base: str, ctx: str, esc: str = "raw", sink: str = "none"):
