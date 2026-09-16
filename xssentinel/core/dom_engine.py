@@ -87,13 +87,37 @@ def _init_script(marker: str) -> str:
     }
   });
 
-  // Function constructor (covers eval-like dynamic code)
-  var OrigFn = window.Function;
-  window.Function = function(){
-    var code = Array.prototype.map.call(arguments, String).join(',');
-    if (has(code)) hit('Function', code);
-    return OrigFn.apply(this, arguments);
-  };
+  // Function constructor (covers eval-like dynamic code).
+  //
+  // Phase 141: a plain ``window.Function = function(){...}`` replacement is
+  // NOT transparent -- it drops the constructor's own prototype/identity and,
+  // critically, breaks frameworks that build their dependency-injection
+  // closures with ``new Function(...)``.  Angular does exactly that, and the
+  // observable symptom was brutal: the SPA never finished bootstrapping, the
+  // marker never reached the page, and every probe silently "found nothing"
+  // (confirmed on OWASP Juice Shop: with the override in place the marker was
+  // absent from the DOM; with it removed the marker rendered normally).
+  // A Proxy forwards apply/construct to the native function, so the marker is
+  // still observed while page behaviour stays intact.
+  try {
+    var OrigFn = window.Function;
+    var fnHook = function(args){
+      try {
+        var code = Array.prototype.map.call(args, String).join(',');
+        if (has(code)) hit('Function', code);
+      } catch(e){}
+    };
+    window.Function = new Proxy(OrigFn, {
+      apply: function(t, thisArg, args){
+        fnHook(args);
+        return Reflect.apply(t, thisArg, args);
+      },
+      construct: function(t, args, newTarget){
+        fnHook(args);
+        return Reflect.construct(t, args, newTarget);
+      }
+    });
+  } catch(e) { /* leave the native Function alone rather than break the page */ }
 
   // setTimeout / setInterval with string body
   ['setTimeout','setInterval'].forEach(function(m){
@@ -105,11 +129,20 @@ def _init_script(marker: str) -> str:
   });
 
   // location.assign / replace / href / search / hash / pathname
+  //
+  // Phase 141: ``location`` is [Unforgeable] -- assigning to its members
+  // throws a TypeError in Chrome.  Without this ``try`` the whole IIFE died
+  // here, so every hook BELOW this point (window.open, setAttribute, the
+  // jQuery wrappers, addEventListener/postMessage) was never installed at
+  // all.  Verified with an end-of-script sentinel: before the fix the IIFE
+  // never reached its last statement.
   ['assign','replace'].forEach(function(m){
-    if (location[m]){
-      var o = location[m];
-      location[m] = function(u){ if (has(u)) hit('location.'+m, u); return o.call(location, u); };
-    }
+    try {
+      if (location[m]){
+        var o = location[m];
+        location[m] = function(u){ if (has(u)) hit('location.'+m, u); return o.call(location, u); };
+      }
+    } catch(e){}
   });
   ['href','search','hash','pathname'].forEach(function(p){
     try {
@@ -285,6 +318,15 @@ def page_has_client_js(html: str) -> bool:
 # URL with dozens of parameters cannot multiply the browser cost.
 _MAX_SEARCH_PARAM_PROBES = 4
 
+# Phase 141: how long to let a page settle after navigation before reading
+# the sink log.  ``page.goto()`` returns once the load event fires, but an
+# SPA renders its route *after* that -- reading immediately returns an empty
+# hit log, so every probe on a client-rendered page looked like a miss.  A
+# page that renders synchronously pays this once per goto probe; the default
+# probe set has ~8, so the cost is bounded and only paid when the DOM engine
+# is actually enabled.
+_DOM_SETTLE_MS = 700
+
 
 def _query_param_names(url: str) -> list:
     """Ordered, de-duplicated query parameter names of ``url``."""
@@ -316,6 +358,69 @@ def _with_param_value(url: str, name: str, value: str) -> str:
         out.append((name, value))
     return urlunparse((parsed.scheme, parsed.netloc, parsed.path,
                        parsed.params, urlencode(out), ""))
+
+
+# ---------------------------------------------------------------------------
+# SPA hash routing (``http://h/#/search?q=1``) -- Phase 141
+#
+# The query lives *inside* the fragment, so ``urlparse().query`` is empty
+# and every parameter-discovery path used to miss it.  Only the browser can
+# see these values (an HTTP request never carries the fragment), so unlike
+# ordinary parameters they are a DOM-XSS concern only -- which is also why
+# fixing this in the DOM engine is enough.
+# ---------------------------------------------------------------------------
+
+def _hash_route_query(url: str) -> str:
+    """Query string carried inside the URL fragment, or ``""``.
+
+    ``http://h/#/search?q=1`` -> ``q=1``.  A fragment without a ``?``
+    (``#/search``) yields ``""``.
+    """
+    from urllib.parse import urlparse
+    try:
+        frag = urlparse(url).fragment
+    except Exception:
+        return ""
+    if not frag:
+        return ""
+    _, sep, query = frag.partition("?")
+    return query if sep else ""
+
+
+def _hash_param_names(url: str) -> list:
+    """Ordered, de-duplicated names of the fragment-carried parameters."""
+    from urllib.parse import parse_qsl
+    try:
+        pairs = parse_qsl(_hash_route_query(url), keep_blank_values=True)
+    except Exception:
+        return []
+    names: list = []
+    seen: set = set()
+    for key, _value in pairs:
+        if key and key not in seen:
+            seen.add(key)
+            names.append(key)
+    return names
+
+
+def _with_hash_param_value(url: str, name: str, value: str) -> str:
+    """Set a fragment-carried parameter, keeping the route path intact.
+
+    ``http://h/#/search?q=1`` + ``name='q'`` + ``value=MK`` becomes
+    ``http://h/#/search?q=MK``.  The ``/search`` route must survive: drop it
+    and the SPA renders a different view (usually its 404), so the sink is
+    never reached and the probe silently proves nothing.
+    """
+    from urllib.parse import urlparse, urlunparse, urlencode, parse_qsl
+    parsed = urlparse(url)
+    route, sep, query = parsed.fragment.partition("?")
+    pairs = parse_qsl(query, keep_blank_values=True) if sep else []
+    out = [(k, value if k == name else v) for k, v in pairs]
+    if not any(k == name for k, _v in pairs):
+        out.append((name, value))
+    new_fragment = route + "?" + urlencode(out)
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path,
+                       parsed.params, parsed.query, new_fragment))
 
 
 class DynamicDomAnalyzer:
@@ -372,6 +477,17 @@ class DynamicDomAnalyzer:
             probes.append({"kind": "goto",
                            "url": _with_param_value(url, name, marker),
                            "source": "location.search"})
+        # SPA hash routing: the parameters live inside the fragment
+        # (``#/search?q=``).  Nothing above reaches them -- ``base`` has the
+        # fragment stripped, ``urlparse().query`` is empty, and an HTTP
+        # request never carries the fragment at all.  The page's own router
+        # is the only thing that ever sees these values, which is precisely
+        # the DOM-XSS case.  Verified against OWASP Juice Shop, where both
+        # hash-routed XSS went undetected without this probe.
+        for name in _hash_param_names(url)[:_MAX_SEARCH_PARAM_PROBES]:
+            probes.append({"kind": "goto",
+                           "url": _with_hash_param_value(url, name, marker),
+                           "source": "location.hash"})
         # location.href (full URL reflected as-is)
         href_url = base + sep + "__xss__=" + quote(marker) + "#" + marker
         probes.append({"kind": "goto", "url": href_url,
@@ -414,7 +530,25 @@ class DynamicDomAnalyzer:
                 for probe in self._probes(url, marker):
                     try:
                         if probe["kind"] == "goto":
-                            page.goto(probe["url"], timeout=self.timeout * 1000)
+                            # Phase 141: wait_until="load" (the old default)
+                            # waits for every subresource.  A real page pulls
+                            # CDN fonts and trackers, so on a slow or filtered
+                            # network the navigation times out and the outer
+                            # ``except: continue`` discards the probe WITHOUT
+                            # ever reading the sink log -- the DOM engine looks
+                            # like it found nothing while it never actually
+                            # looked.  domcontentloaded is enough to run the
+                            # page's own scripts, and a navigation error must
+                            # not skip the hit log either: the sink can fire
+                            # before a late subresource trips the timeout.
+                            try:
+                                page.goto(probe["url"],
+                                          wait_until="domcontentloaded",
+                                          timeout=self.timeout * 1000)
+                            except Exception:
+                                pass
+                            # Let the route render (see _DOM_SETTLE_MS).
+                            page.wait_for_timeout(_DOM_SETTLE_MS)
                         elif probe["kind"] == "cookie":
                             page.context.add_cookies(
                                 [{"name": "__xss__", "value": marker,

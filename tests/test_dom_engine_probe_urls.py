@@ -189,3 +189,82 @@ def test_live_browser_stays_quiet_on_textcontent_sink():
         pytest.skip("loopback degraded")
     hits = _live_analyze({"/safe": _SAFE_PAGE}, "/safe?q=1", "LIVEMK2")
     assert hits == [], hits
+
+
+# --------------------------------------------------------------------------
+# 3. Phase 141: SPA hash routing -- the query lives inside the fragment
+#
+# ``http://h/#/search?q=1`` has an EMPTY ``urlparse().query``; the parameter
+# is in ``.fragment`` as ``/search?q=1``.  Every parameter-discovery path in
+# the project used to miss these, so hash-routed DOM XSS was invisible.
+# Confirmed on OWASP Juice Shop, where both official XSS challenges sit
+# behind ``#/`` routes and neither was detected.
+# --------------------------------------------------------------------------
+
+def _hash_probe_urls(url: str, marker: str = "MK") -> list:
+    analyzer = DynamicDomAnalyzer.__new__(DynamicDomAnalyzer)
+    return [p.get("url") for p in analyzer._probes(url, marker)
+            if p.get("source") == "location.hash"]
+
+
+def test_hash_route_query_is_extracted():
+    assert dom_engine._hash_route_query("http://h/#/search?q=1") == "q=1"
+    assert dom_engine._hash_route_query("http://h/#/search") == ""
+    assert dom_engine._hash_route_query("http://h/p?a=1") == ""
+
+
+def test_hash_param_names():
+    assert dom_engine._hash_param_names("http://h/#/search?q=1") == ["q"]
+    assert dom_engine._hash_param_names("http://h/p?a=1") == []
+    assert dom_engine._hash_param_names("http://h/#/a?x=1&y=2&x=3") == ["x", "y"]
+
+
+def test_hash_param_swap_keeps_route():
+    """The route must survive the swap -- otherwise the SPA renders a
+    different view (usually its 404) and the sink is never reached, which
+    makes the probe silently prove nothing."""
+    out = dom_engine._with_hash_param_value("http://h/#/search?q=1", "q", "MK")
+    assert out == "http://h/#/search?q=MK", out
+
+
+def test_hash_param_swap_preserves_siblings_and_outer_query():
+    out = dom_engine._with_hash_param_value("http://h/p?a=1#/x?q=1&r=2",
+                                            "q", "MK")
+    assert out == "http://h/p?a=1#/x?q=MK&r=2", out
+
+
+def test_hash_route_parameter_is_probed():
+    """A hash-routed parameter must yield a probe carrying the marker into
+    the fragment, with the route intact."""
+    urls = _hash_probe_urls("http://h/#/search?q=1")
+    assert any(u == "http://h/#/search?q=MK" for u in urls), urls
+
+
+def test_plain_query_url_gains_no_fragment_probe():
+    """Regression guard: ordinary query URLs must not accumulate fragment
+    junk (the existing probes already cover them)."""
+    urls = _hash_probe_urls("http://h/p?q=1")
+    assert not any("#/search" in u for u in urls), urls
+
+
+_HASH_PAGE = b"""<!doctype html><html><body><div id="o"></div><script>
+function render() {
+  var qs = (location.hash.split("?")[1] || "");
+  var m = qs.match(/(?:^|&)q=([^&]*)/);
+  if (m) { document.getElementById("o").innerHTML = decodeURIComponent(m[1]); }
+}
+window.addEventListener("hashchange", render);
+render();
+</script></body></html>"""
+
+
+@pytest.mark.skipif(not _LIVE, reason="set XSS_DOM_LIVE=1 to run live browser tests")
+@pytest.mark.skipif(not SOCKETPAIR_OK, reason="loopback socketpair degraded")
+@pytest.mark.skipif(not _HAS_PW, reason="Playwright not installed")
+def test_live_browser_confirms_dom_xss_via_hash_route():
+    """The end-to-end shape the pure tests lock: ``#/route?q=`` -> innerHTML."""
+    if not loopback_healthy():
+        pytest.skip("loopback degraded")
+    hits = _live_analyze({"/app": _HASH_PAGE}, "/app#/search?q=1", "HASHMK1")
+    assert hits, "real browser missed a DOM XSS delivered via #/route?q="
+    assert any(h.get("sink") == "Element.innerHTML" for h in hits), hits
