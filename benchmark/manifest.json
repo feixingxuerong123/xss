@@ -1845,6 +1845,20 @@
       "note": "Phase 122 safe twin: self-contained stylesheet, no external references"
     },
     {
+      "id": "neg-cssi-02",
+      "path": "/s/cssi02",
+      "param": "",
+      "mode": "cssi_gfonts_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "css_font_face_exfil",
+        "css_import_injection"
+      ],
+      "context": "css_context",
+      "difficulty": "medium",
+      "note": "Phase 140 regression guard: an ordinary page loading a real CDN webfont (Google Fonts emits @font-face + unicode-range + external src:url()). Nothing is attacker-controlled, so it must NOT be reported -- this exact shape produced a high false positive on OWASP Juice Shop while both real XSS went unreported."
+    },
+    {
       "id": "pos-preenc-01",
       "path": "/r/pe01",
       "param": "data",

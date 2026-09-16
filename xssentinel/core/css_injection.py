@@ -202,7 +202,8 @@ def analyze_page(html: str, page_url: str | None = None,
         block = m.group(1)
         start = m.start(1)
         line = html.count("\n", 0, start) + 1
-        violations.extend(_analyze_css_block(block, line, page_url))
+        violations.extend(
+            _analyze_css_block(block, line, page_url, extra_markers))
 
     # 2. Inline style="..." attribute analysis -- detect javascript: URI
     #    and expression() inside inline styles (rare but exploitable).
@@ -263,37 +264,91 @@ def analyze_page(html: str, page_url: str | None = None,
     return {"violations": unique, "page_url": page_url}
 
 
+def _css_user_controlled(block: str,
+                         extra_markers: list[str] | None) -> bool:
+    """True if this CSS block shows evidence of user-controlled content.
+
+    Phase 140 -- "a gadget exists on the page" is NOT "the gadget is
+    exploitable".  A page shipping its own stylesheet matches the gadget
+    patterns exactly: Google Fonts emits ``@font-face`` + ``unicode-range``
+    + an external ``src:url()``, and a plain ``@import`` of a CDN is
+    equally ordinary.  None of it is attacker-controlled, yet both used to
+    be reported as *high* -- so the scanner cried wolf on a large share of
+    the real web (confirmed on OWASP Juice Shop, where the only finding
+    was a false ``css_font_face_exfil`` and both real XSS were missed).
+
+    Gadget rules therefore require evidence the CSS context is
+    user-controlled.  Two kinds, strongest first:
+
+    1. a server-side template placeholder (``{{ }}`` / ``<%= %>`` /
+       ``${ }``) -- the page literally interpolates a variable into CSS;
+    2. one of the caller-supplied markers appearing in the block.
+
+    Marker matching is deliberately conservative: a short parameter name
+    such as ``q`` or ``id`` matches inside plenty of unrelated CSS
+    identifiers, so names under 4 chars are skipped and the rest must
+    appear as a whole word.
+    """
+    if _TEMPLATE_PLACEHOLDER_RE.search(block):
+        return True
+    if not extra_markers:
+        return False
+    for marker in extra_markers:
+        if not marker or len(marker) < 4:
+            continue
+        if re.search(r"(?<![A-Za-z0-9_-])" + re.escape(marker)
+                     + r"(?![A-Za-z0-9_-])", block, re.IGNORECASE):
+            return True
+    return False
+
+
 def _analyze_css_block(block: str, line: int,
-                       page_url: str | None) -> list[dict[str, Any]]:
-    """Analyze a single <style> block body for CSSI patterns."""
+                       page_url: str | None,
+                       extra_markers: list[str] | None = None,
+                       ) -> list[dict[str, Any]]:
+    """Analyze a single <style> block body for CSSI patterns.
+
+    Two families of rules live here:
+
+    * **Gadget rules** (``@font-face`` exfil, ``@import``) only assert
+      "this CSS references an external resource" -- something legitimate
+      pages do constantly.  They require :func:`_css_user_controlled`.
+    * **Construct rules** (CSS keylogger selectors, ``-moz-binding``,
+      ``behavior:url()``, ``url(javascript:)``, ``expression()``) describe
+      things no sane page ships, so they stay unconditional.
+    """
     out: list[dict[str, Any]] = []
+    user_controlled = _css_user_controlled(block, extra_markers)
     # @font-face unicode-range exfil -- match each @font-face block and
     # check for BOTH unicode-range and src:url() (in any order).
-    for ff in _FONT_FACE_BLOCK_RE.finditer(block):
-        body = ff.group(1)
-        if _FONT_FACE_UNICODE_RE.search(body) and _FONT_FACE_URL_RE.search(body):
+    if user_controlled:
+        for ff in _FONT_FACE_BLOCK_RE.finditer(block):
+            body = ff.group(1)
+            if (_FONT_FACE_UNICODE_RE.search(body)
+                    and _FONT_FACE_URL_RE.search(body)):
+                out.append({
+                    "type": "css_font_face_exfil",
+                    "severity": "high",
+                    "title": "@font-face unicode-range data exfiltration gadget",
+                    "evidence": "@font-face with unicode-range + external src:url() "
+                                "detected -- can leak secrets character-by-character "
+                                "via CSS-triggered HTTP requests (bypasses CSP "
+                                "script-src)",
+                    "line": line,
+                })
+                break  # one per block is enough
+        # @import from external/javascript.
+        for imp_match in _IMPORT_RE.finditer(block):
+            url = (imp_match.group(1) if imp_match.lastindex
+                   else imp_match.group(0))
             out.append({
-                "type": "css_font_face_exfil",
+                "type": "css_import_injection",
                 "severity": "high",
-                "title": "@font-face unicode-range data exfiltration gadget",
-                "evidence": "@font-face with unicode-range + external src:url() "
-                            "detected -- can leak secrets character-by-character "
-                            "via CSS-triggered HTTP requests (bypasses CSP "
-                            "script-src)",
-                "line": line,
+                "title": "@import loads external/attacker-controlled stylesheet",
+                "evidence": f"@import directive loading external resource: "
+                            f"{_truncate(url)}",
+                "line": line + block.count("\n", 0, imp_match.start()),
             })
-            break  # one per block is enough
-    # @import from external/javascript.
-    for imp_match in _IMPORT_RE.finditer(block):
-        url = imp_match.group(1) if imp_match.lastindex else imp_match.group(0)
-        out.append({
-            "type": "css_import_injection",
-            "severity": "high",
-            "title": "@import loads external/attacker-controlled stylesheet",
-            "evidence": f"@import directive loading external resource: "
-                        f"{_truncate(url)}",
-            "line": line + block.count("\n", 0, imp_match.start()),
-        })
     # CSS selector attribute theft (CSS keylogger).
     if _SELECTOR_EXFIL_RE.search(block):
         out.append({
