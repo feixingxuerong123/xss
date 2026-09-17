@@ -958,6 +958,18 @@ class TestAsyncBatchEventLoopReuse:
             "--max-payloads", "5",
             "--progress", "none",
             "--log-level", "error",
+            # Phase 142: PoC self-verification (Phase 135) replays every
+            # confirmed finding once and -- by design -- counts that request,
+            # so with it on a URL with N findings reports 1 + N and the
+            # "requests_made == 1" assertions below can no longer hold.  This
+            # test is about per-URL bookkeeping being independent rather than
+            # cumulative; verification has its own coverage in
+            # tests/test_poc_self_verify.py (including a case asserting that
+            # turning it off costs no extra request).  Leaving it on also made
+            # this test fire REAL requests at http://t/... through the shim's
+            # own Requester, which is a latent flakiness source on a host with
+            # an intermittent loopback.
+            "--no-poc-verify",
         ]
         (tmp_path / "urls.txt").write_text(
             "\n".join(urls) + "\n", encoding="utf-8")
