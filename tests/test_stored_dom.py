@@ -13,7 +13,9 @@ delivery report) depends on:
   * emits a stored_dom finding only when the browser reports a hit,
   * self-view (no explicit view URL) is confidence=medium,
   * payloads without an alert() call are skipped (mark() would leave
-    them token-free -- the hooks could never see them).
+    them token-free -- the hooks could never see them),
+  * extra_fields (companion fields real write APIs demand -- password,
+    csrf, captcha) ride along in BOTH encodings, payload in `param`.
 """
 from __future__ import annotations
 
@@ -158,6 +160,28 @@ def test_alertless_payloads_are_skipped(monkeypatch):
     assert ok is False
     assert host.findings == []
     assert all(c["method"] != "POST" for c in host.req.calls)
+
+
+def test_extra_fields_ride_along_in_both_encodings():
+    """Phase 152b (Juice Shop): register/profile write APIs reject a POST
+    that carries only the payload field -- companion fields (password,
+    securityAnswer, ...) must be merged into every submission while the
+    payload still rides in ``param``."""
+    eng = _FakeEngine(HIT)
+    host = _Host(eng)
+    extras = {"password": "Xss-T3st!", "securityAnswer": "x"}
+    ok = host.scan_stored_dom("http://t/users", view_url="http://t/admin",
+                              param="email", extra_fields=extras)
+    assert ok is True
+    posts = [c for c in host.req.calls if c["method"] == "POST"]
+    assert len(posts) == 2
+    for sub in posts:
+        body = sub["json"] if sub["json"] is not None else sub["data"]
+        assert body["password"] == "Xss-T3st!"
+        assert body["securityAnswer"] == "x"
+        assert body["email"].startswith("<")  # payload field intact
+    # the payload field must be the only marker-carrying field
+    assert eng.calls and eng.calls[0][1] in posts[1]["json"]["email"]
 
 
 if __name__ == "__main__":

@@ -397,6 +397,11 @@ def build_parser():
                            "value client-side, so the view HTML never "
                            "contains it). Submits both a form-encoded and a "
                            "JSON body variant. Requires --stored-inject.")
+    g_bs.add_argument("--stored-extra", dest="stored_extra", action="append",
+                      default=[], metavar="K=V",
+                      help="Companion POST field the write endpoint demands "
+                           "(password, csrf, captcha, ...); repeatable. "
+                           "The payload always rides in --stored-param.")
     # Second-order XSS (Phase 21-4): inject at A, crawl to discover B.
     g_bs.add_argument("--second-order-inject", default=None,
                       help="Second-order XSS inject URL (inject A, crawl B)")

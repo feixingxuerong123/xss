@@ -471,9 +471,17 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint,
         if getattr(args, "stored_dom", False):
             # Phase 152: SPA shape -- the view page renders the stored value
             # client-side, so verification happens in the real browser.
+            # Phase 152b: companion fields for write APIs that demand
+            # password/csrf/captcha alongside the payload field.
+            extras: dict = {}
+            for pair in (getattr(args, "stored_extra", None) or []):
+                if "=" in pair:
+                    k, v = pair.split("=", 1)
+                    extras[k.strip()] = v.strip()
             scanner.scan_stored_dom(args.stored_inject,
                                     view_url=args.stored_view,
-                                    param=args.stored_param)
+                                    param=args.stored_param,
+                                    extra_fields=extras)
         else:
             scanner.scan_stored(args.stored_inject, view_url=args.stored_view,
                                 param=args.stored_param,

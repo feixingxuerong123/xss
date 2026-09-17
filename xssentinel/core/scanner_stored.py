@@ -157,7 +157,8 @@ class StoredBlindMixin:
     # -- L4 stored XSS, DOM-verified (SPA shape) ---------------------------
 
     def scan_stored_dom(self, inject_url: str, view_url: str | None = None,
-                        param: str = "q", json_body: bool = False):
+                        param: str = "q", json_body: bool = False,
+                        extra_fields: dict | None = None):
         """Phase 152: stored XSS verified by the REAL BROWSER (SPA shape).
 
         ``scan_stored`` verifies persistence by looking for the token in the
@@ -174,7 +175,10 @@ class StoredBlindMixin:
         hooks report any flow of the token into an executable sink
         (innerHTML / outerHTML / document.write / ...), which is the same
         marker discipline as URL probing with the marker carried by the
-        STORED payload instead of the URL.  Auth state (cookies, headers,
+        STORED payload instead of the URL.  ``extra_fields`` carries the
+        companion fields real write APIs demand (register/profile
+        endpoints want password, captcha, csrf, ...).  Auth state (cookies,
+        headers,
         localStorage) is the scanner's configured browser session, so
         authenticated view routes render exactly as a victim sees them.
 
@@ -211,14 +215,19 @@ class StoredBlindMixin:
                 # would store a token-free string the hooks can never see.
                 continue
             stored = False
+            # Companion fields real write APIs demand (register/profile
+            # endpoints want password, captcha, csrf, ...).  The payload
+            # always rides in ``param``; companions are constant per scan.
+            body: dict = dict(extra_fields or {})
+            body[param] = variant
             for enc in encodings:
                 try:
                     if enc == "json":
                         req2 = self.req.request("POST", inject_url,
-                                                json={param: variant})
+                                                json=body)
                     else:
                         req2 = self.req.request("POST", inject_url,
-                                                data={param: variant})
+                                                data=body)
                     self._bump()
                     stored = stored or (req2 is not None)
                 except Exception:
