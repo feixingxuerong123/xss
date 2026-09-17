@@ -268,3 +268,43 @@ def test_live_browser_confirms_dom_xss_via_hash_route():
     hits = _live_analyze({"/app": _HASH_PAGE}, "/app#/search?q=1", "HASHMK1")
     assert hits, "real browser missed a DOM XSS delivered via #/route?q="
     assert any(h.get("sink") == "Element.innerHTML" for h in hits), hits
+
+
+# --------------------------------------------------------------------------
+# 4. Phase 144: the sink value is not always a primitive string
+#
+# A framework using Trusted Types (Angular does) hands the innerHTML setter
+# a TrustedHTML wrapper whose typeof is 'object'.  The marker check required
+# `typeof v === 'string'`, so on such a page EVERY innerHTML assignment was
+# dismissed and the whole DOM engine went quiet -- which is how OWASP Juice
+# Shop stayed undetected.  `new String(v)` reproduces the shape without
+# needing a Trusted Types policy.
+# --------------------------------------------------------------------------
+
+_WRAPPED_PAGE = b"""<!doctype html><html><body><div id="o"></div><script>
+function render() {
+  var m = (location.hash.split("?")[1] || "").match(/(?:^|&)q=([^&]*)/);
+  if (m) { document.getElementById("o").innerHTML = new String(decodeURIComponent(m[1])); }
+}
+window.addEventListener("hashchange", render);
+render();
+</script></body></html>"""
+
+
+def test_probe_keeps_fragment_when_no_query():
+    """A hash-routed parameter must reach the engine intact (Phase 145)."""
+    urls = _hash_probe_urls("http://h/#/search?q=1")
+    assert any(u == "http://h/#/search?q=MK" for u in urls), urls
+
+
+@pytest.mark.skipif(not _LIVE, reason="set XSS_DOM_LIVE=1 to run live browser tests")
+@pytest.mark.skipif(not SOCKETPAIR_OK, reason="loopback socketpair degraded")
+@pytest.mark.skipif(not _HAS_PW, reason="Playwright not installed")
+def test_live_browser_sees_a_wrapped_string_sink_value():
+    """Phase 144: a String/TrustedHTML wrapper reaching innerHTML is a hit."""
+    if not loopback_healthy():
+        pytest.skip("loopback degraded")
+    hits = _live_analyze({"/wrapped": _WRAPPED_PAGE}, "/wrapped#/s?q=1",
+                         "WRAPMK1")
+    assert hits, "sink missed when the value is a wrapper, not a primitive"
+    assert any(h.get("sink") == "Element.innerHTML" for h in hits), hits

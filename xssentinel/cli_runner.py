@@ -241,6 +241,24 @@ def _maybe_run_fast_checks(args, requester, url: str, method: str,
             _log.debug("outdated-js check failed for %s: %s", url, e)
 
 
+def _base_url_keeping_fragment(parsed) -> str:
+    """``scheme://host/path`` plus the fragment, if there is one.
+
+    Phase 145.  The fragment is deliberately preserved.  An HTTP request
+    never carries it -- clients strip it before sending -- so this changes
+    nothing about what reaches the server, but the real-browser DOM engine
+    needs it: an SPA router puts its parameters INSIDE the fragment
+    (``#/search?q=``), and dropping it here pointed the browser at the site
+    root instead, which made every hash-routed DOM XSS invisible.  Checked
+    directly against OWASP Juice Shop: the fragment-bearing URL yields the
+    finding, the stripped one does not.
+    """
+    base = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+    if parsed.fragment:
+        base += "#" + parsed.fragment
+    return base
+
+
 def _run_scan(args, url: str, requester, oob, progress, checkpoint):
     """Run a single-target scan and return findings."""
     import json as _json
@@ -301,7 +319,7 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
             if want_json:
                 _log.warning("--json given but -d is not valid JSON; "
                              "falling back to form encoding")
-    base_url = parsed.scheme + "://" + parsed.netloc + parsed.path
+    base_url = _base_url_keeping_fragment(parsed)
     if parsed.query:
         for pair in parsed.query.split("&"):
             if "=" in pair:
@@ -506,7 +524,7 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint):
     else:
         params = kv
     parsed = urlparse(url)
-    base_url = parsed.scheme + "://" + parsed.netloc + parsed.path
+    base_url = _base_url_keeping_fragment(parsed)
     if parsed.query:
         for pair in parsed.query.split("&"):
             if "=" in pair:
@@ -757,7 +775,7 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
             else:
                 params = kv
         parsed = urlparse(url)
-        base_url = parsed.scheme + "://" + parsed.netloc + parsed.path
+        base_url = _base_url_keeping_fragment(parsed)
         if parsed.query:
             for pair in parsed.query.split("&"):
                 if "=" in pair:

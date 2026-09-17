@@ -39,7 +39,21 @@ def _init_script(marker: str) -> str:
     window.__xss_dom_hits.push({sink: sink, snippet: String(snippet||'').slice(0,200)});
     try { alert(MARKER); } catch(e){}
   }
-  function has(v){ return typeof v === 'string' && v.indexOf(MARKER) !== -1; }
+  // Phase 144: do NOT require a primitive string.  Angular (Trusted Types)
+  // hands the innerHTML setter a TrustedHTML wrapper -- typeof is 'object',
+  // not 'string' -- so the old check answered "no marker" while the marker
+  // was sitting in String(v) all along.  On such a page EVERY innerHTML
+  // assignment is an object, so this silently disabled the sink for the
+  // whole DOM engine.  Found on OWASP Juice Shop: the hash-routed marker
+  // demonstrably reached <span id="searchValue">, the hook demonstrably
+  // worked on a manual assignment, and the hit log still read zero.
+  // Coercing via String() is what the browser itself does before parsing the
+  // value, so a toString() match is a genuine match.
+  function has(v){
+    if (v == null) return false;
+    if (typeof v === 'string') return v.indexOf(MARKER) !== -1;
+    try { return String(v).indexOf(MARKER) !== -1; } catch(e) { return false; }
+  }
 
   // innerHTML / outerHTML setters
   ['innerHTML','outerHTML'].forEach(function(prop){
