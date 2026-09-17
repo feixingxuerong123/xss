@@ -1,0 +1,1449 @@
+{
+  "dalfox": {
+    "tp": 86,
+    "fp": 12,
+    "tn": 60,
+    "fn": 21,
+    "errors": 0,
+    "completed": 179,
+    "recall": 0.8037383177570093,
+    "precision": 0.8775510204081632,
+    "fpr": 0.16666666666666666,
+    "f1": 0.8390243902439024,
+    "total_time_s": 169.71864223480225,
+    "details": [
+      {
+        "case_id": "pos-elem-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7712554931640625
+      },
+      {
+        "case_id": "pos-elem-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8540687561035156
+      },
+      {
+        "case_id": "pos-elem-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8530426025390625
+      },
+      {
+        "case_id": "pos-elem-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8189024925231934
+      },
+      {
+        "case_id": "pos-elem-05",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7917852401733398
+      },
+      {
+        "case_id": "pos-attr-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8254837989807129
+      },
+      {
+        "case_id": "pos-attr-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.762528657913208
+      },
+      {
+        "case_id": "pos-attr-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8445358276367188
+      },
+      {
+        "case_id": "pos-attr-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8111753463745117
+      },
+      {
+        "case_id": "pos-attr-05",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8479831218719482
+      },
+      {
+        "case_id": "pos-attr-06",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8788020610809326
+      },
+      {
+        "case_id": "pos-attr-07",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8637945652008057
+      },
+      {
+        "case_id": "pos-attr-08",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9346203804016113
+      },
+      {
+        "case_id": "pos-attr-09",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.85811448097229
+      },
+      {
+        "case_id": "pos-attr-10",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7885479927062988
+      },
+      {
+        "case_id": "pos-script-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8565757274627686
+      },
+      {
+        "case_id": "pos-script-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.806570291519165
+      },
+      {
+        "case_id": "pos-script-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8850898742675781
+      },
+      {
+        "case_id": "pos-script-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7864193916320801
+      },
+      {
+        "case_id": "pos-script-05",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8663966655731201
+      },
+      {
+        "case_id": "pos-script-06",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8048074245452881
+      },
+      {
+        "case_id": "pos-svg-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8945460319519043
+      },
+      {
+        "case_id": "pos-svg-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8096599578857422
+      },
+      {
+        "case_id": "pos-svg-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.869952917098999
+      },
+      {
+        "case_id": "pos-svg-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8447034358978271
+      },
+      {
+        "case_id": "pos-math-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9695162773132324
+      },
+      {
+        "case_id": "pos-math-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8452577590942383
+      },
+      {
+        "case_id": "pos-url-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7911396026611328
+      },
+      {
+        "case_id": "pos-url-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.888655424118042
+      },
+      {
+        "case_id": "pos-url-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7905800342559814
+      },
+      {
+        "case_id": "pos-url-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8786354064941406
+      },
+      {
+        "case_id": "pos-url-05",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8096268177032471
+      },
+      {
+        "case_id": "pos-url-06",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9648294448852539
+      },
+      {
+        "case_id": "pos-style-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8127655982971191
+      },
+      {
+        "case_id": "pos-comment-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9003863334655762
+      },
+      {
+        "case_id": "pos-cdata-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7925992012023926
+      },
+      {
+        "case_id": "pos-tpl-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8679368495941162
+      },
+      {
+        "case_id": "pos-tpl-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7826695442199707
+      },
+      {
+        "case_id": "pos-embed-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8807129859924316
+      },
+      {
+        "case_id": "pos-form-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.76350998878479
+      },
+      {
+        "case_id": "pos-input-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8532934188842773
+      },
+      {
+        "case_id": "pos-select-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7860486507415771
+      },
+      {
+        "case_id": "pos-details-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8773789405822754
+      },
+      {
+        "case_id": "pos-video-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.800250768661499
+      },
+      {
+        "case_id": "pos-body-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8721747398376465
+      },
+      {
+        "case_id": "pos-a-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8073399066925049
+      },
+      {
+        "case_id": "pos-div-tab-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8766508102416992
+      },
+      {
+        "case_id": "pos-foreign-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7792341709136963
+      },
+      {
+        "case_id": "pos-encode-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8668570518493652
+      },
+      {
+        "case_id": "pos-encode-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.771507978439331
+      },
+      {
+        "case_id": "pos-dom-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0636684894561768
+      },
+      {
+        "case_id": "pos-dom-02",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 0.9909632205963135
+      },
+      {
+        "case_id": "pos-dom-03",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0132935047149658
+      },
+      {
+        "case_id": "pos-dom-04",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0124847888946533
+      },
+      {
+        "case_id": "pos-dom-05",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.711458683013916
+      },
+      {
+        "case_id": "pos-dom-06",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0048365592956543
+      },
+      {
+        "case_id": "pos-dom-07",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 1.0577664375305176
+      },
+      {
+        "case_id": "neg-dom-07",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0291376113891602
+      },
+      {
+        "case_id": "pos-polyglot-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8872127532958984
+      },
+      {
+        "case_id": "pos-marquee-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8788864612579346
+      },
+      {
+        "case_id": "pos-audio-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9080207347869873
+      },
+      {
+        "case_id": "neg-escape-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.812910795211792
+      },
+      {
+        "case_id": "neg-escape-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8952028751373291
+      },
+      {
+        "case_id": "neg-escape-03",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8186924457550049
+      },
+      {
+        "case_id": "neg-escape-04",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8984518051147461
+      },
+      {
+        "case_id": "neg-escape-05",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8497433662414551
+      },
+      {
+        "case_id": "neg-escape-06",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8690948486328125
+      },
+      {
+        "case_id": "neg-rcdata-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8241860866546631
+      },
+      {
+        "case_id": "neg-rcdata-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8431394100189209
+      },
+      {
+        "case_id": "neg-rcdata-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8732175827026367
+      },
+      {
+        "case_id": "neg-rcdata-04",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8302505016326904
+      },
+      {
+        "case_id": "neg-comment-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8868412971496582
+      },
+      {
+        "case_id": "neg-comment-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8103482723236084
+      },
+      {
+        "case_id": "neg-attr-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8903923034667969
+      },
+      {
+        "case_id": "neg-attr-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8837027549743652
+      },
+      {
+        "case_id": "neg-attr-03",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.785515308380127
+      },
+      {
+        "case_id": "neg-attr-04",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8740170001983643
+      },
+      {
+        "case_id": "neg-csp-01",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8124234676361084
+      },
+      {
+        "case_id": "neg-csp-02",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8989994525909424
+      },
+      {
+        "case_id": "neg-csp-03",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.798182487487793
+      },
+      {
+        "case_id": "neg-csp-04",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8792593479156494
+      },
+      {
+        "case_id": "neg-jsonp-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.3390331268310547
+      },
+      {
+        "case_id": "neg-jsonp-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.3751795291900635
+      },
+      {
+        "case_id": "neg-filter-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8094320297241211
+      },
+      {
+        "case_id": "neg-filter-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.917670726776123
+      },
+      {
+        "case_id": "neg-filter-03",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8047997951507568
+      },
+      {
+        "case_id": "neg-filter-04",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.9088456630706787
+      },
+      {
+        "case_id": "neg-filter-05",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8090872764587402
+      },
+      {
+        "case_id": "neg-filter-06",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8624696731567383
+      },
+      {
+        "case_id": "neg-encode-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.9832742214202881
+      },
+      {
+        "case_id": "neg-encode-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.983900785446167
+      },
+      {
+        "case_id": "neg-encode-03",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8781094551086426
+      },
+      {
+        "case_id": "neg-encode-04",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 1.0155384540557861
+      },
+      {
+        "case_id": "neg-json-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.9033632278442383
+      },
+      {
+        "case_id": "neg-json-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8780725002288818
+      },
+      {
+        "case_id": "neg-header-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.9987473487854004
+      },
+      {
+        "case_id": "neg-js-01",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.7984163761138916
+      },
+      {
+        "case_id": "neg-js-02",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.885035514831543
+      },
+      {
+        "case_id": "neg-select-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.7785854339599609
+      },
+      {
+        "case_id": "neg-null-01",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8614959716796875
+      },
+      {
+        "case_id": "neg-rcdata-05",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.738062858581543
+      },
+      {
+        "case_id": "neg-rcdata-06",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8703830242156982
+      },
+      {
+        "case_id": "neg-rcdata-07",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.7982823848724365
+      },
+      {
+        "case_id": "neg-rcdata-08",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8545758724212646
+      },
+      {
+        "case_id": "neg-csp-05",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8305878639221191
+      },
+      {
+        "case_id": "pos-csp-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8990764617919922
+      },
+      {
+        "case_id": "pos-csp-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8480668067932129
+      },
+      {
+        "case_id": "pos-multi-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8902459144592285
+      },
+      {
+        "case_id": "pos-multi-02",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7809536457061768
+      },
+      {
+        "case_id": "pos-cookie-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.013134241104126
+      },
+      {
+        "case_id": "neg-cookie-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0322620868682861
+      },
+      {
+        "case_id": "pos-path-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.3858730792999268
+      },
+      {
+        "case_id": "neg-path-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.428952932357788
+      },
+      {
+        "case_id": "pos-error-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.4301526546478271
+      },
+      {
+        "case_id": "neg-error-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.3718810081481934
+      },
+      {
+        "case_id": "pos-cors-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0420873165130615
+      },
+      {
+        "case_id": "neg-cors-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.042268991470337
+      },
+      {
+        "case_id": "pos-markdown-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9272148609161377
+      },
+      {
+        "case_id": "neg-markdown-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8228411674499512
+      },
+      {
+        "case_id": "pos-stored-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8875536918640137
+      },
+      {
+        "case_id": "neg-stored-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.790569543838501
+      },
+      {
+        "case_id": "pos-upload-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0349042415618896
+      },
+      {
+        "case_id": "neg-upload-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0938365459442139
+      },
+      {
+        "case_id": "pos-redirect-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0250067710876465
+      },
+      {
+        "case_id": "neg-redirect-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0608255863189697
+      },
+      {
+        "case_id": "pos-proto-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0762522220611572
+      },
+      {
+        "case_id": "neg-proto-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0487265586853027
+      },
+      {
+        "case_id": "pos-sw-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0277314186096191
+      },
+      {
+        "case_id": "neg-sw-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.00315523147583
+      },
+      {
+        "case_id": "pos-worker-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0548336505889893
+      },
+      {
+        "case_id": "neg-worker-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0237414836883545
+      },
+      {
+        "case_id": "pos-dangle-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9051527976989746
+      },
+      {
+        "case_id": "neg-dangle-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8018028736114502
+      },
+      {
+        "case_id": "pos-importmap-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9029338359832764
+      },
+      {
+        "case_id": "neg-importmap-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.9654760360717773
+      },
+      {
+        "case_id": "pos-sri-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7848629951477051
+      },
+      {
+        "case_id": "neg-sri-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8974146842956543
+      },
+      {
+        "case_id": "pos-tt-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8519279956817627
+      },
+      {
+        "case_id": "neg-tt-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8754627704620361
+      },
+      {
+        "case_id": "pos-ws-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 0.9669480323791504
+      },
+      {
+        "case_id": "neg-ws-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.983738899230957
+      },
+      {
+        "case_id": "pos-sanitizer-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8315849304199219
+      },
+      {
+        "case_id": "neg-sanitizer-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8984942436218262
+      },
+      {
+        "case_id": "pos-graphql-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.111530065536499
+      },
+      {
+        "case_id": "neg-graphql-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0607545375823975
+      },
+      {
+        "case_id": "pos-waf-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.7268197536468506
+      },
+      {
+        "case_id": "neg-waf-01",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.8101546764373779
+      },
+      {
+        "case_id": "pos-formmine-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.1582608222961426
+      },
+      {
+        "case_id": "neg-formmine-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.095984697341919
+      },
+      {
+        "case_id": "pos-jsmine-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.00529146194458
+      },
+      {
+        "case_id": "neg-jsmine-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0200669765472412
+      },
+      {
+        "case_id": "pos-pmmine-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 1.4910743236541748
+      },
+      {
+        "case_id": "neg-pmmine-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.4549000263214111
+      },
+      {
+        "case_id": "pos-cssi-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 8.587217807769775
+      },
+      {
+        "case_id": "neg-cssi-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.01570463180542
+      },
+      {
+        "case_id": "neg-cssi-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.0216014385223389
+      },
+      {
+        "case_id": "pos-preenc-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8310456275939941
+      },
+      {
+        "case_id": "neg-preenc-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8969390392303467
+      },
+      {
+        "case_id": "pos-pshift-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.756704568862915
+      },
+      {
+        "case_id": "neg-pshift-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8366858959197998
+      },
+      {
+        "case_id": "pos-clobber-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.827460527420044
+      },
+      {
+        "case_id": "neg-clobber-01",
+        "ground_truth": "safe",
+        "detected": true,
+        "verdict": "FP",
+        "error": null,
+        "time_s": 0.9051239490509033
+      },
+      {
+        "case_id": "neg-clobber-02",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8007340431213379
+      },
+      {
+        "case_id": "pos-blind-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9193832874298096
+      },
+      {
+        "case_id": "neg-blind-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8175702095031738
+      },
+      {
+        "case_id": "pos-tb-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9330587387084961
+      },
+      {
+        "case_id": "neg-tb-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8478808403015137
+      },
+      {
+        "case_id": "pos-so2-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.8916552066802979
+      },
+      {
+        "case_id": "neg-so2-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.7974381446838379
+      },
+      {
+        "case_id": "pos-scn-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9429621696472168
+      },
+      {
+        "case_id": "neg-scn-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8215909004211426
+      },
+      {
+        "case_id": "pos-xs-01",
+        "ground_truth": "vulnerable",
+        "detected": false,
+        "verdict": "FN",
+        "error": null,
+        "time_s": 1.0184130668640137
+      },
+      {
+        "case_id": "neg-xs-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 1.086549997329712
+      },
+      {
+        "case_id": "pos-mx-01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.911574125289917
+      },
+      {
+        "case_id": "neg-mx-01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.7893636226654053
+      },
+      {
+        "case_id": "aux-r-formecho01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.9151132106781006
+      },
+      {
+        "case_id": "aux-s-formecho01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.8089606761932373
+      },
+      {
+        "case_id": "aux-r-jsecho01",
+        "ground_truth": "vulnerable",
+        "detected": true,
+        "verdict": "TP",
+        "error": null,
+        "time_s": 0.871117115020752
+      },
+      {
+        "case_id": "aux-s-jsecho01",
+        "ground_truth": "safe",
+        "detected": false,
+        "verdict": "TN",
+        "error": null,
+        "time_s": 0.7898378372192383
+      }
+    ]
+  }
+}

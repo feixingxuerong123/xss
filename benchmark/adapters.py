@@ -59,14 +59,33 @@ def _find_tool(name: str) -> str | None:
     return None
 
 
+def _is_dalfox_finding(f) -> bool:
+    """True only for entries that carry real vulnerability signal.
+
+    dalfox --format json (v2.x) emits a JSON **array** that ALWAYS ends
+    with a trailing empty object ``{}`` (terminator quirk — observed on
+    2026-09-17 against dalfox in C:\\GoWorkspace\\bin).  In JSONL mode a
+    finding is ``{"type":"found",...}``; in array mode it is
+    ``{"type":"V",...,"payload":...}``.  An empty dict, ints, or info/meta
+    entries without type/poc/payload must NOT count, or every case —
+    including all safe cases — is scored "detected" (FPR 100% artifact).
+    """
+    if not isinstance(f, dict) or not f:
+        return False
+    t = str(f.get("type", "")).lower()
+    if t in ("v", "found"):
+        return True
+    return bool(f.get("poc") or f.get("payload"))
+
+
 def _parse_dalfox_findings(stdout: str) -> list:
     """Parse dalfox `--format json` output into a list of finding dicts.
 
-    dalfox v2.x emits JSONL: one finding object per line, e.g.
-        {"data":"...","poc":"...","type":"found","param":"q",...}
-    It is NOT a JSON array, and single-finding output is a bare object
-    (not wrapped in {"findings": [...]}) — handle all shapes defensively.
-    Empty stdout means "no findings".
+    Shapes seen in the wild (both must work):
+      * JSON array with a trailing empty object: ``[{...V...}, {}]`` —
+        and ``[{}]`` alone when nothing was found (NOT a finding).
+      * JSONL: one finding object per line ``{"type":"found",...}``.
+    Only entries passing _is_dalfox_finding are returned.
     """
     text = (stdout or "").strip()
     if not text:
@@ -75,12 +94,12 @@ def _parse_dalfox_findings(stdout: str) -> list:
     try:
         data = json.loads(text)
         if isinstance(data, list):
-            return [f for f in data if isinstance(f, dict)]
+            return [f for f in data if _is_dalfox_finding(f)]
         if isinstance(data, dict):
             inner = data.get("findings")
             if isinstance(inner, list):
-                return [f for f in inner if isinstance(f, dict)]
-            return [data]
+                return [f for f in inner if _is_dalfox_finding(f)]
+            return [data] if _is_dalfox_finding(data) else []
     except json.JSONDecodeError:
         pass
     # JSONL: accumulate finding objects line by line
@@ -91,10 +110,10 @@ def _parse_dalfox_findings(stdout: str) -> list:
             continue
         try:
             obj = json.loads(line)
-            if isinstance(obj, dict):
-                findings.append(obj)
         except json.JSONDecodeError:
             continue
+        if _is_dalfox_finding(obj):
+            findings.append(obj)
     return findings
 
 

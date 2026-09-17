@@ -7,6 +7,10 @@ They lock in the verdict-calibration fixes:
      multi-finding runs fell into an over-broad "reflected" regex (FP).
   2. Timeout / crash / bad-output runs carry error != None and must be
      excluded from the confusion matrix (never silently scored TN/FN).
+  3. dalfox --format json (v2.x array mode, observed 2026-09-17) ALWAYS
+     appends a trailing empty object {} — and prints [{}] alone when
+     nothing was found. Any-dict-counts parsing therefore scored every
+     safe case as detected (FPR=100% artifact across all 179 cases).
 """
 from benchmark.adapters import (
     _parse_dalfox_findings,
@@ -57,12 +61,41 @@ class TestParseDalfoxFindings:
         assert len(findings) == 1
 
     def test_non_dict_json_lines_ignored(self):
-        out = '[1, 2]\n{"data":"a"}'
+        out = '[1, 2]\n{"data":"a","type":"found"}'
         # whole-output parse fails (two docs) -> JSONL branch:
         # the [1, 2] line parses but is not a dict (skipped),
-        # the object line is kept.
-        assert _parse_dalfox_findings(out) == [{"data": "a"}]
+        # the finding object is kept.
+        assert _parse_dalfox_findings(out) == [{"data": "a", "type": "found"}]
         assert _parse_dalfox_findings("[1, 2]") == []  # ints filtered out
+
+    def test_trailing_empty_object_is_not_a_finding(self):
+        # REAL BUG (2026-09-17): dalfox --format json always appends a
+        # trailing {} to its array; "[{}]" (no findings at all) scored as
+        # 1 finding -> every safe case FP across the whole 179-case run.
+        assert _parse_dalfox_findings("[{}]") == []
+        assert _parse_dalfox_findings("[\n{}\n]") == []
+
+    def test_array_mode_v_finding_plus_trailing_empty_object(self):
+        # Exact shape observed against the real binary on a vulnerable case:
+        # one real finding (type=V, payload, evidence) + trailing {}.
+        real = ('{"type":"V","inject_type":"inHTML-URL","poc_type":"plain",'
+                '"method":"GET","data":"http://x/?q=payload","param":"q",'
+                '"payload":"<sVg/onload=alert(1) class=dalfox>",'
+                '"evidence":"<div>test...</div>","cwe":"CWE-79",'
+                '"severity":"High","message_id":158,"message_str":"Triggered"}')
+        out = "[%s,\n{}]" % real
+        findings = _parse_dalfox_findings(out)
+        assert len(findings) == 1
+        assert findings[0]["type"] == "V"
+        assert findings[0]["param"] == "q"
+
+    def test_signalless_entries_are_not_findings(self):
+        # Info/meta entries without type V/found and without poc/payload
+        # must not count — otherwise reflection-only chatter becomes FP.
+        assert _parse_dalfox_findings('[{"data":"a"}]') == []
+        assert _parse_dalfox_findings('{"type":"I","message":"scan done"}') == []
+        # ...but poc/payload-bearing entries do, even with an odd type.
+        assert len(_parse_dalfox_findings('[{"type":"X","payload":"<svg>"}]')) == 1
 
     def test_garbage_lines_do_not_crash(self):
         out = ('some progress noise\n'
