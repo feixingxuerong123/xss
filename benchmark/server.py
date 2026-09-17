@@ -170,6 +170,70 @@ render();
 </body></html>""")
 
 
+def m_dom_tt_wrapper_innerhtml(v: str) -> tuple:
+    """Router-shaped fragment parameter reaching innerHTML as a NON-PRIMITIVE.
+
+    Phase 151, locks the Phase 144 fix in dom_engine.has().  Angular (and any
+    Trusted Types app) hands the innerHTML setter a TrustedHTML wrapper, not a
+    string: typeof is 'object', and the old has() (typeof v === 'string') went
+    silent on EVERY assignment of such pages.  The browser coerces the value
+    via ToString when it parses, so the payload still executes -- a real
+    vulnerability whose sink hook receives an object.
+
+    A real TrustedHTML is created via a permissive policy when the runtime
+    offers one (Chromium does, CSP or not); elsewhere a {toString} wrapper
+    exercises the identical has() contract.  The policy is created once per
+    document so hashchange re-renders keep wrapping (per-document names are
+    single-use and a second createPolicy would throw).
+    """
+    return _page_raw("""<!DOCTYPE html><html><body>
+<div id="out"></div>
+<script>
+var POL = null;
+try {
+  if (window.trustedTypes && trustedTypes.createPolicy) {
+    POL = trustedTypes.createPolicy('probePolicy',
+            { createHTML: function(s){ return s; } });
+  }
+} catch (e) { POL = null; }
+function render(){
+  var qs = (location.hash.split('?')[1] || '');
+  var q = new URLSearchParams(qs).get('q');
+  if (!q) { return; }
+  var val = POL ? POL.createHTML(q) : { toString: function(){ return q; } };
+  document.getElementById('out').innerHTML = val;
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body></html>""")
+
+
+def m_dom_tt_wrapper_safe(v: str) -> tuple:
+    """The identical wrapper shape, written as TEXT (textContent is not a sink)."""
+    return _page_raw("""<!DOCTYPE html><html><body>
+<div id="out"></div>
+<script>
+var POL = null;
+try {
+  if (window.trustedTypes && trustedTypes.createPolicy) {
+    POL = trustedTypes.createPolicy('probePolicy',
+            { createHTML: function(s){ return s; } });
+  }
+} catch (e) { POL = null; }
+function render(){
+  var qs = (location.hash.split('?')[1] || '');
+  var q = new URLSearchParams(qs).get('q');
+  if (!q) { return; }
+  var val = POL ? POL.createHTML(q) : { toString: function(){ return q; } };
+  document.getElementById('out').textContent = val;
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body></html>""")
+
+
 def m_dom_search_eval(v: str) -> tuple:
     return _page_raw("""<!DOCTYPE html><html><body>
 <script>var p = new URLSearchParams(location.search); eval(p.get('x'));</script>
@@ -1767,6 +1831,8 @@ MODES: dict[str, callable] = {
     "dom_hash_innerhtml": m_dom_hash_innerhtml,
     "dom_hash_route_innerhtml": m_dom_hash_route_innerhtml,
     "dom_hash_route_safe": m_dom_hash_route_safe,
+    "dom_tt_wrapper_innerhtml": m_dom_tt_wrapper_innerhtml,
+    "dom_tt_wrapper_safe": m_dom_tt_wrapper_safe,
     "dom_search_eval": m_dom_search_eval,
     "dom_postmessage": m_dom_postmessage,
     "dom_hash_docwrite": m_dom_hash_docwrite,

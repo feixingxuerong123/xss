@@ -669,6 +669,33 @@
       "note": "Phase 146: the safe twin of pos-dom-07 -- the identical router-shaped fragment written with textContent. Also the first DOM safe case in the manifest: the DOM layer previously had only vulnerable cases, so it was never checked for false positives."
     },
     {
+      "id": "pos-dom-08",
+      "path": "/dom/tt-innerhtml#/route",
+      "param": "q",
+      "mode": "dom_tt_wrapper_innerhtml",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "dom_dynamic"
+      ],
+      "context": "dom_xss",
+      "difficulty": "hard",
+      "source": "OWASP Juice Shop",
+      "note": "Phase 151: the Trusted Types wrapper shape -- the fragment parameter reaches innerHTML as a NON-PRIMITIVE (real TrustedHTML via a permissive createPolicy when the runtime offers one, else a toString wrapper). The browser coerces via ToString and the payload executes, but the sink hook receives an object: the pre-Phase-144 has() (typeof v === 'string') went silent on EVERY assignment of such pages -- the whole innerHTML sink went dark on Angular/Juice Shop. Locks the String(v) contract in has()."
+    },
+    {
+      "id": "neg-dom-08",
+      "path": "/dom/tt-innerhtml-safe#/route",
+      "param": "q",
+      "mode": "dom_tt_wrapper_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "dom_dynamic"
+      ],
+      "context": "dom_xss",
+      "difficulty": "hard",
+      "note": "Phase 151: the safe twin of pos-dom-08 -- the identical Trusted Types wrapper shape written with textContent (not a sink, no execution)."
+    },
+    {
       "id": "pos-polyglot-01",
       "path": "/r/poly01",
       "param": "q",
