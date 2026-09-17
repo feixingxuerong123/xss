@@ -332,7 +332,12 @@ class TestAsyncDomParity:
     def test_dynamic_confirms_and_suppresses_static_hint(self):
         async def fn(asc):
             asc.dom_engine = "playwright"
+            # Phase 150 passes auth kwargs to the engine constructor
+            # (auth_headers/auth_cookies/auth_local_storage) -- accept them
+            # or instantiation raises inside _resolve_dom_engine's try and
+            # the dynamic layer silently falls back to static-only.
             fake_engine = type("E", (), {
+                "__init__": lambda self, *a, **k: None,
                 "analyze": staticmethod(lambda url: [{
                     "sink": "Element.innerHTML", "snippet": "MARK",
                     "confidence": "high", "detail": "marker executed"}]),

@@ -2294,6 +2294,58 @@
       "difficulty": "easy",
       "aux": true,
       "note": "Phase 120: crawler-discovery endpoint (served; scored through its landing case)"
+    },
+    {
+      "id": "pos-stored-03",
+      "path": "/r/st03",
+      "view_path": "/r/st03/view",
+      "list_path": "/r/st03/list",
+      "param": "email",
+      "mode": "stored_api_user_write",
+      "view_mode": "stored_api_view",
+      "stored_dom": true,
+      "method": "POST",
+      "stored_extra": {
+        "password": "hunter2x",
+        "securityAnswer": "x"
+      },
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "stored",
+        "stored_dom"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "engines": [
+        "sync"
+      ],
+      "note": "Phase 153: user-write shape (measured live on Juice Shop POST /api/Users) -- the write API REJECTS a POST without companion fields (password), and the payload rides in an account field (email) that is stored RAW. The view fetches the list client-side and innerHTML-inserts the entries; runner passes stored_extra as --stored-extra K=V."
+    },
+    {
+      "id": "neg-stored-03",
+      "path": "/s/st03",
+      "view_path": "/s/st03/view",
+      "list_path": "/s/st03/list",
+      "param": "email",
+      "mode": "stored_api_user_write_escaped",
+      "view_mode": "stored_api_view_safe",
+      "stored_dom": true,
+      "method": "POST",
+      "stored_extra": {
+        "password": "hunter2x",
+        "securityAnswer": "x"
+      },
+      "ground_truth": "safe",
+      "finding_types": [
+        "stored",
+        "stored_dom"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "engines": [
+        "sync"
+      ],
+      "note": "Phase 153 safe twin: companion fields demanded AND the email HTML-escaped on write AND the SPA viewer inserts entries with textContent."
     }
   ]
 }

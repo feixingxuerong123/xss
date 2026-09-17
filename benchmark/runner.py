@@ -114,6 +114,12 @@ def _case_extra_args(base_url: str, case: dict) -> list | None:
         # Phase 152: verify persistence in the real browser (the view page
         # renders the stored value client-side; HTTP text matching can't).
         extra += ["--stored-dom"]
+    if case.get("stored_extra"):
+        # Phase 153: companion fields the write API demands (register/
+        # profile shape -- POST without them is rejected, so the payload
+        # can never be stored).
+        for k, v in dict(case["stored_extra"]).items():
+            extra += ["--stored-extra", f"{k}={v}"]
     # Phase 126: second-order cases drive the dedicated CLI flow -- inject at
     # A, then verify the EXPLICIT viewer B (no crawling, so the case is
     # deterministic).  The scanner still runs its normal scan of A; the

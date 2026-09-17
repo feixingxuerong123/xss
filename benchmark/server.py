@@ -801,6 +801,31 @@ def m_stored_api_list(v: str, ctx: dict) -> tuple:
             json.dumps(items))
 
 
+def m_stored_user_write(v: str, ctx: dict) -> tuple:
+    """User-write shape (Phase 153, Juice Shop POST /api/Users): a
+    register/profile API that REJECTS a POST without companion fields --
+    the payload rides in ``email`` but ``password`` must be present, so a
+    single-field submission can never complete a write (measured live:
+    scan_stored_dom needed --stored-extra to close the loop here)."""
+    fields = ctx.get("fields") or {}
+    if not fields.get("password"):
+        return (400, {"Content-Type": "text/plain; charset=utf-8"},
+                "password required")
+    _STORE.setdefault(ctx.get("path") or "", []).append(v)
+    return _page("<div>User created</div>")
+
+
+def m_stored_user_write_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: companion fields demanded AND the email HTML-escaped."""
+    fields = ctx.get("fields") or {}
+    if not fields.get("password"):
+        return (400, {"Content-Type": "text/plain; charset=utf-8"},
+                "password required")
+    _STORE.setdefault(ctx.get("path") or "", []).append(
+        html.escape(v, quote=True))
+    return _page("<div>User created</div>")
+
+
 def m_stored_api_view(v: str, ctx: dict) -> tuple:
     """Vulnerable SPA viewer: fetched entries inserted via innerHTML."""
     list_url = (ctx.get("path") or "")[:-len("/view")] + "/list"
@@ -840,6 +865,8 @@ POST_MODES: dict = {
     "stored_view": m_stored_view,
     "stored_api_write": m_stored_api_write,
     "stored_api_write_escaped": m_stored_api_write_escaped,
+    "stored_api_user_write": m_stored_user_write,
+    "stored_api_user_write_escaped": m_stored_user_write_escaped,
     "stored_api_list": m_stored_api_list,
     "stored_api_view": m_stored_api_view,
     "stored_api_view_safe": m_stored_api_view_safe,
