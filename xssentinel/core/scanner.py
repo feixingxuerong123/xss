@@ -1028,6 +1028,18 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
 
         # Try each variant.
         for tset, variant in variants:
+            # Phase 157: skip a variant whose token the transform chain
+            # destroyed.  ``verify_semantic`` matches the token with a plain
+            # ``str.find``, so such a variant can never be confirmed -- it is
+            # a request that can only ever return "not confirmed".
+            #
+            # Measured statically over the whole corpus (12 transform sets x
+            # 1074 payloads): 7218 of 12888 variants (56%) are dead this way
+            # (dom_clobber is worst: 11% survive).  Same bug family as
+            # Phase 156 in scan_stored.  Verdict-neutral by construction: a
+            # variant that cannot confirm can neither create an FN nor an FP.
+            if token not in variant:
+                continue
             probe = self._set_param(params, data, param, variant, is_body)
             try:
                 resp = req.request(method, url, params=probe["params"],
