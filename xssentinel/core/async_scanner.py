@@ -1041,8 +1041,14 @@ class AsyncScanner:
                 dom_mod.analyze, page_text, is_html=True)
             engine = await asyncio.to_thread(self._resolve_dom_engine)
             dyn_findings: list = []
+            # Phase 154 (sync parity, scanner_layers.py): page_has_client_js
+            # alone lets pages with JS but no possible sink pay for a whole
+            # browser session; page_can_run_sink keeps every external-script
+            # page (SPA bundles) so this only skips provably dead passes.
             if engine is not None and await asyncio.to_thread(
-                    dom_engine_mod.page_has_client_js, page_text):
+                    lambda t: (dom_engine_mod.page_has_client_js(t)
+                               and dom_engine_mod.page_can_run_sink(t)),
+                    page_text):
                 dyn_findings = await asyncio.to_thread(engine.analyze, url)
 
             dyn_sinks: set = set()

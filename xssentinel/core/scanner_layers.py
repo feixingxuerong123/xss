@@ -74,7 +74,13 @@ class AdvancedLayerMixin:
         # --- L6: real-browser dynamic confirmation (high confidence) ---
         dyn_findings: list = []
         engine = self._dom_engine
-        if engine is not None and dom_engine.page_has_client_js(text):
+        # Phase 154: page_has_client_js alone is too coarse -- 41 of 57
+        # slow benchmark cases had JS but no possible sink and paid ~5.6s
+        # each for nothing.  page_can_run_sink lets every external-script
+        # page through (SPA bundles), so this only skips provably dead
+        # browser sessions.
+        if (engine is not None and dom_engine.page_has_client_js(text)
+                and dom_engine.page_can_run_sink(text)):
             # Phase 20-3: record L6 DOM-dynamic layer when a real browser
             # engine is available and the page has client-side JS.
             self.coverage.touch_layer(url, "L6_dom_dynamic", "GET",

@@ -333,6 +333,48 @@ def page_has_client_js(html: str) -> bool:
     return bool(_CLIENT_JS_RE.search(html or ""))
 
 
+# Phase 154: a browser pass costs ~5.6s (9 probes x ~700ms settle).  Measured
+# on the 185-case benchmark: 57 cases paid it, but only 7 needed a DOM
+# finding for their verdict -- 41 of them were pure overhead (~25% of the
+# whole run's wall clock, see benchmark/speed_profile.py).
+#
+# A page can only reach an executable sink if it runs code that calls one.
+# Two ways that happens, and BOTH are allowed through:
+#   * an external script -- the sink lives in a bundle we cannot see
+#     (real SPAs: Juice Shop's Angular bundle), so never block those;
+#   * an inline script containing a sink pattern.
+# Everything else (inline data assignments, tracking snippets with no sink)
+# provably cannot produce a DOM hit.  Conservative by construction: anything
+# the regexes cannot parse is let through by the caller keeping the old
+# ``page_has_client_js`` check as well.
+_SINK_RE = re.compile(
+    r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|"
+    r"\.src\s*=|location\s*=|eval\(|setTimeout\(|setInterval\(|Function\(|"
+    r"createElement|appendChild|insertBefore|replaceChildren|"
+    r"setAttribute\(\s*['\"]on|\.html\(|jQuery|\$\(", re.I)
+_EXT_SCRIPT_RE = re.compile(r"<script[^>]*\ssrc\s*=", re.I)
+_INLINE_SCRIPT_RE = re.compile(
+    r"<script(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script>", re.I | re.S)
+
+
+def page_can_run_sink(html: str) -> bool:
+    """Pre-filter: does this page run code that could reach an XSS sink?
+
+    Used together with :func:`page_has_client_js` -- passing both means the
+    page is worth a real-browser pass.  Returns True for anything we cannot
+    see inside (external scripts), so the filter can only ever SKIP a
+    browser session, never silently drop coverage on a real SPA.
+    """
+    if not html:
+        return False
+    if _EXT_SCRIPT_RE.search(html):
+        return True
+    for body in _INLINE_SCRIPT_RE.findall(html):
+        if _SINK_RE.search(body or ""):
+            return True
+    return False
+
+
 # Upper bound on "swap a real query parameter for the marker" probes, so a
 # URL with dozens of parameters cannot multiply the browser cost.
 _MAX_SEARCH_PARAM_PROBES = 4
