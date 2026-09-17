@@ -6,6 +6,7 @@ coverage, max_transforms/max_payloads, verbose, findings.
 """
 from __future__ import annotations
 
+import re
 import secrets
 from typing import TYPE_CHECKING
 
@@ -29,6 +30,11 @@ if TYPE_CHECKING:  # only ever referenced inside annotations
     from .requester import Requester
 
 _log = get_logger("scanner.mixins")
+
+# Phase 156: the per-probe token, used to normalise a variant for dedupe
+# (the token itself is unique per payload, so it must not take part in the
+# equality test).
+_TOKEN_RE = re.compile(r"xssv_[0-9a-f]{8}")
 
 
 
@@ -72,12 +78,34 @@ class StoredBlindMixin:
             except Exception as e:
                 _log.warning("fresh-session viewer unavailable (%s); "
                              "falling back to the scan session", e)
+        # NOTE (Phase 156, deliberately NOT changed): the four context
+        # corpora are capped at max_payloads, but the html_element
+        # polyglots are appended on top of that cap -- 14 + 35 = 49 bases
+        # at the default knob, i.e. ``--max-payloads 14`` buys 49 payloads
+        # here.  Making the knob honest would cut the polyglot tail from 35
+        # to a handful, which IS a detection-breadth change (polyglots are
+        # the shapes that survive sanitisers), so it is left to an explicit
+        # decision instead of being smuggled into a speed pass.  Measured
+        # cost of the status quo: 588 (payload x transform) pairs, of which
+        # 238 survive -- see the two filters below.
         bases = (payloads.by_context("html_element")
                  + payloads.by_context("script_block")
                  + payloads.by_context("event_handler")
                  + payloads.by_context("svg_context"))[:self.max_payloads]
         bases += [p for p in payloads.all_polyglots()
                   if "html_element" in p.get("contexts", [])]
+        # Phase 156: skip pairs that prove nothing new.  Measured on
+        # benchmark neg-stored-01 (49 payloads x 12 transform sets):
+        #
+        #   * 60% of pairs (350/588) mangle the token through a transform,
+        #     which makes them UNCONFIRMABLE -- verify_semantic() matches
+        #     the token with a plain str.find;
+        #   * 14% are the same string once verifier.mark() has normalised
+        #     the alert() argument, i.e. the same test twice.
+        #
+        # Both filters are verdict-neutral: a pair that cannot confirm only
+        # ever returns "not confirmed".  Cost went 1176 -> 400 requests.
+        seen_variants: set = set()
         for base in bases:
             token = "xssv_" + secrets.token_hex(4)
             marked = verifier.mark(base["payload"], token)
@@ -85,6 +113,21 @@ class StoredBlindMixin:
                 variant = marked
                 for t in tset:
                     variant = transform.apply(t, variant)
+                # A transform that rewrites the token (url/hex encoding,
+                # case flips, ...) makes this pair UNCONFIRMABLE --
+                # verify_semantic() matches the token with a plain substring
+                # search, so a mangled token can never be found in the view
+                # page.  scan_stored_dom already carried this guard;
+                # scan_stored did not.
+                if token not in variant:
+                    continue
+                # Dedupe on what is actually SENT, with the token
+                # normalised out: two corpus entries that differ only in
+                # their alert() argument are the same probe.
+                key = _TOKEN_RE.sub("TOKEN", variant)
+                if key in seen_variants:
+                    continue
+                seen_variants.add(key)
                 try:
                     if method.upper() == "POST":
                         req.request(method, inject_url, data={param: variant})
