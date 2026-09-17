@@ -30,8 +30,23 @@ from xssentinel.core.oob import make_listener, oob_callback_warning
 from xssentinel.core.config import Config, save_config
 from xssentinel.core.checkpoint import Checkpoint
 from xssentinel.core.logger import configure_logging, get_logger
+from xssentinel.core import report as reportmod
 
 _log = get_logger("cli")
+
+
+def _poc_dir_for(base: str, url: str) -> str:
+    """Per-target PoC directory when one --poc-dir serves several targets.
+
+    Phase 139: without this, a multi-target run would overwrite one
+    ``reflected.html`` with the next target's.
+    """
+    import os
+    import re as _re
+    from urllib.parse import urlparse
+    host = urlparse(url).netloc or "target"
+    slug = _re.sub(r"[^A-Za-z0-9._-]+", "-", host).strip("-") or "target"
+    return os.path.join(base, slug)
 
 
 # Phase 43: sub-command + runner implementations live in cli_runner /
@@ -473,6 +488,15 @@ def build_parser():
     g_out.add_argument("-f", "--format", default="html",
                        choices=["html", "json", "csv", "sarif", "junit",
                                 "markdown", "burp", "nuclei"])
+    # Phase 139: reproducible-PoC artifacts.  Off unless asked -- a scan must
+    # not litter the filesystem by default, and PoCs are live attack strings.
+    g_out.add_argument(
+        "--poc-dir", dest="poc_dir", default=None,
+        help="Write a runnable PoC per finding into this directory "
+             "(<host>/<stem>.html + <stem>.sh + INDEX.md -- one "
+             "subdirectory per scanned host so multi-target runs do not "
+             "overwrite each other). The PoCs are live attack strings: "
+             "only use on systems you are authorized to test.")
     g_out.add_argument("-v", "--verbose", action="store_true")
     g_out.add_argument("--log-level", default=None,
                        choices=["debug", "info", "warning", "error"],
@@ -911,6 +935,15 @@ def main(argv=None):
         meta = {"target": url}
         try:
             out_path = _write_report(scanner, url, out_path, args.format, meta)
+            # Phase 139: optional PoC artifacts (opt-in; see --poc-dir).
+            if getattr(args, "poc_dir", None):
+                meta.setdefault("generated",
+                                out_path and os.path.getmtime(out_path))
+                written = reportmod.write_poc_dir(
+                    scanner.findings, url, meta,
+                    _poc_dir_for(args.poc_dir, url))
+                _log.warning("PoC artifacts: %d file(s) -> %s",
+                             len(written), args.poc_dir)
         except Exception as e:
             _log.error("Report write failed: %s", e, exc_info=args.verbose)
             failed_targets.append(url)

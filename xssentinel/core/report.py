@@ -1107,6 +1107,98 @@ def build_nuclei_yaml(findings: list, target: str, meta: dict) -> str:
     return "\n---\n".join(parts)
 
 
+def _slug(text: str) -> str:
+    """Filesystem-safe stem for a PoC artifact (Phase 139)."""
+    import re as _re
+    s = _re.sub(r"[^A-Za-z0-9._-]+", "-", text).strip("-")
+    return (s or "finding")[:60]
+
+
+def write_poc_dir(findings: list, target: str, meta: dict,
+                  out_dir: str) -> list[str]:
+    """Write one runnable PoC artifact per finding into ``out_dir``.
+
+    Phase 139 -- "reproducible PoC" was half-built: ``poc.build_poc()`` has
+    produced curl/URL/HTML PoCs for a long time (and Phase 135 even RUNS
+    them for verification), but nothing ever wrote them to disk --
+    ``replay.write_poc_file()`` existed and had **zero callers**.  A PoC you
+    cannot hand to a human, or open in a browser, is not reproducible.
+
+    Per finding:
+      * ``<stem>.html`` -- self-contained page (GET: direct URL / POST:
+        auto-submitting form / DOM XSS: hash or search carrier);
+      * ``<stem>.sh``   -- the curl replay for the same finding;
+      * ``INDEX.md``    -- one row per finding (type, severity, verified,
+        param, artifacts) so a directory of 40 files stays navigable.
+
+    Findings without a PoC (audit-style observations such as a missing
+    header) are skipped AND counted in the index: silence there would look
+    like a bug.
+    """
+    import os
+
+    os.makedirs(out_dir, exist_ok=True)
+    seen: dict[str, int] = {}
+    written: list[str] = []
+    rows: list[str] = []
+    skipped = 0
+
+    for f in findings:
+        data = f.get("data", f) if isinstance(f, dict) else {}
+        poc = data.get("poc") or {}
+        html = poc.get("html") or ""
+        curl = poc.get("curl") or ""
+        if not html and not curl:
+            skipped += 1
+            continue
+        base = _slug(str(data.get("type") or "finding"))
+        n = seen.get(base, 0)
+        seen[base] = n + 1
+        stem = f"{base}-{n + 1}" if n else base
+        links = []
+        if html:
+            path = os.path.join(out_dir, stem + ".html")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(html)
+            written.append(path)
+            links.append(f"[`{stem}.html`]({stem}.html)")
+        if curl:
+            path = os.path.join(out_dir, stem + ".sh")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("#!/bin/sh\n"
+                         "# Auto-generated PoC replay (XSSentinel).\n"
+                         + curl + "\n")
+            written.append(path)
+            links.append(f"[`{stem}.sh`]({stem}.sh)")
+        rows.append("| {t} | {s} | {v} | `{p}` | {a} |".format(
+            t=str(data.get("type") or "-"),
+            s=str(data.get("severity") or "-"),
+            v="yes" if data.get("poc_verified") else "no",
+            p=str(data.get("param") or "-"),
+            a=", ".join(links)))
+
+    index = [
+        "# PoC artifacts",
+        "",
+        f"- target: `{target}`",
+        f"- generated: {meta.get('generated', '-')}",
+        f"- findings: {len(findings)} "
+        f"(with PoC: {len(rows)}, without: {skipped})",
+        "",
+        "| type | severity | verified | param | artifacts |",
+        "|---|---|---|---|---|",
+    ] + rows
+    if skipped:
+        index += ["",
+                  f"{skipped} finding(s) carry no PoC (audit-style "
+                  f"observations, e.g. a missing header) -- expected."]
+    idx = os.path.join(out_dir, "INDEX.md")
+    with open(idx, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(index) + "\n")
+    written.append(idx)
+    return written
+
+
 def write_nuclei_dir(findings: list, target: str, meta: dict,
                      out_dir: str) -> list[str]:
     """Write one nuclei template per finding into ``out_dir`` (created if
