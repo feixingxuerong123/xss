@@ -31,6 +31,34 @@ def _scan_case_dict(detected, raw_output, elapsed, error=None):
             "time_s": elapsed, "error": error}
 
 
+def _find_tool(name: str) -> str | None:
+    """Locate an externally-installed tool, PATH first then $GOPATH/bin.
+
+    Phase 148.  ``go install`` writes to ``$GOPATH/bin``, which is not
+    necessarily on PATH -- on this host GOPATH is ``C:\\GoWorkspace`` while
+    PATH carries ``~/go/bin``, so ``dalfox`` installs perfectly and is still
+    invisible to ``shutil.which``.  An adapter that only calls which() then
+    reports "not installed", and the comparison quietly degrades to
+    XSSentinel-only -- which *looks* like agreement.  The nuclei adapter
+    already worked around this with a hardcoded ``_find_go_bin``; this
+    generalises it so both adapters (and any future one) resolve the same
+    way.
+    """
+    found = shutil.which(name)
+    if found:
+        return found
+    dirs = [os.path.join(os.path.expanduser("~"), "go", "bin")]
+    gopath = os.environ.get("GOPATH")
+    if gopath:
+        dirs.insert(0, os.path.join(gopath, "bin"))
+    for d in dirs:
+        for suffix in (".exe", ""):
+            cand = os.path.join(d, name + suffix)
+            if os.path.isfile(cand):
+                return cand
+    return None
+
+
 def _parse_dalfox_findings(stdout: str) -> list:
     """Parse dalfox `--format json` output into a list of finding dicts.
 
@@ -156,7 +184,7 @@ class DalfoxAdapter:
     name = "dalfox"
 
     def __init__(self):
-        self._binary = shutil.which("dalfox")
+        self._binary = _find_tool("dalfox")
 
     def available(self) -> bool:
         return self._binary is not None
@@ -297,20 +325,12 @@ class NucleiAdapter:
     name = "nuclei-dast-xss"
 
     def __init__(self):
-        self._binary = shutil.which("nuclei") or self._find_go_bin()
+        # Phase 148: the hardcoded _find_go_bin() is now the shared
+        # _find_tool(), so nuclei and dalfox resolve identically.
+        self._binary = _find_tool("nuclei")
         self._templates = os.path.join(
             os.path.expanduser("~"), "nuclei-templates", "dast",
             "vulnerabilities", "xss")
-
-    @staticmethod
-    def _find_go_bin():
-        for cand in (os.path.join(os.path.expanduser("~"), "go", "bin",
-                                  "nuclei.exe"),
-                     os.path.join(os.path.expanduser("~"), "go", "bin",
-                                  "nuclei")):
-            if os.path.isfile(cand):
-                return cand
-        return None
 
     def available(self) -> bool:
         return bool(self._binary) and os.path.isdir(self._templates)
