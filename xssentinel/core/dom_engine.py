@@ -612,32 +612,46 @@ class DynamicDomAnalyzer:
         return probes
 
     def _bounded_goto(self, page, url: str, deadline: float) -> None:
-        """Navigate with domcontentloaded and a budget-capped timeout.
+        """Navigate with ``commit`` and a budget-capped timeout.
 
-        Phase 148.  Two unbounded-cost holes, both exposed by the
-        importmap/SRI cases (pages referencing an unreachable CDN host):
+        Phase 148 fixed two unbounded-cost holes (see below).  Phase 155
+        replaces the *wait shape* itself, on measurement:
 
-          * ``wait_until="load"`` (Playwright's default) never fires while
-            any subresource hangs, so the goto eats its full navigation
-            timeout.  Phase 141 fixed this for the "goto" probe kind only;
-            cookie/postmsg/referer/window_name still carried the default.
-          * the probe-budget deadline is checked BETWEEN probes, so a probe
-            starting just before the deadline runs a full nav-timeout past
-            it -- window_name navigates twice, worst case +40s over budget.
-            On a degraded-loopback window that is the difference between a
-            finished scan and a killed one (observed: pos-importmap-01
-            died at the harness cap while pos-dom-07 passed).
+          pos-sri-01 / pos-importmap-01 (pages loading cdn.example) cost
+          32s each -- 27.2s of the 32.3s was inside ``page.goto``, only
+          2.1s was the settle floor.  A classic ``<script src>`` blocks
+          the parser, so DOMContentLoaded does not fire until that
+          third-party resource resolves or fails; with a nav timeout of
+          20s the 30s probe budget was spent after 2-3 probes, i.e. the
+          page shape silently decided how many probes could run at all.
 
-        The sink fires from the page's own scripts, which run by
-        domcontentloaded; the per-kind settle waits give async routes
-        their time.  The timeout never exceeds the remaining budget, so
-        a probe started near the deadline overruns it by at most ~1s.
+        ``commit`` returns as soon as the navigation commits.  The page's
+        own scripts still execute (they run while parsing, which the
+        existing per-probe settle covers -- this engine reads sink hits
+        after that settle, not at navigation completion).  Measured on 25
+        benchmark cases, domcontentloaded vs commit, same settle:
+
+          * findings identical on all 25 (pos-dom-01..08 keep their
+            dom_dynamic hits);
+          * CDN-blocked families 31.6s -> 11.3s AND 2-3 probes -> all 8;
+          * every other case unchanged (+-0.1s).
+
+        Not waiting for DOMContentLoaded has one real consequence: an
+        inline sink placed *after* a slow external script needs that
+        script to resolve first, and we no longer wait for it.  That is
+        the same trade the probe budget already makes (previously such a
+        page consumed the whole budget and skipped its remaining
+        probes); we take the bounded, uniform cost instead.
+
+        IGNORED-PREMISE NOTE: "wait for readyState instead" was measured
+        too (variant C: commit + readyState poll capped at 5s) and buys
+        nothing -- readyState stays 'loading' for exactly as long as
+        DOMContentLoaded was blocked: 27s, 6 probes.
         """
         remaining = deadline - time.monotonic()
         timeout_ms = int(max(1.0, min(self.timeout, remaining)) * 1000)
         try:
-            page.goto(url, wait_until="domcontentloaded",
-                      timeout=timeout_ms)
+            page.goto(url, wait_until="commit", timeout=timeout_ms)
         except Exception:
             pass
 
@@ -718,10 +732,12 @@ class DynamicDomAnalyzer:
                             # ``except: continue`` discards the probe WITHOUT
                             # ever reading the sink log -- the DOM engine looks
                             # like it found nothing while it never actually
-                            # looked.  domcontentloaded is enough to run the
-                            # page's own scripts, and a navigation error must
-                            # not skip the hit log either: the sink can fire
-                            # before a late subresource trips the timeout.
+                            # looked.  A navigation error must not skip the hit
+                            # log either: the sink can fire before a late
+                            # subresource trips the timeout.
+                            # Phase 155: the wait is now "commit" (see
+                            # _bounded_goto) -- even domcontentloaded can be
+                            # blocked indefinitely by one third-party script.
                             self._bounded_goto(page, probe["url"], deadline)
                             # Let the route render (see _DOM_SETTLE_MS).
                             page.wait_for_timeout(_DOM_SETTLE_MS)
