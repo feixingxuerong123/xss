@@ -43,6 +43,10 @@ class SessionManager:
         self._login_method = None
         self._oauth_refresh: dict | None = None
         self._markers: tuple[str | None, str | None] = (None, None)
+        # Phase 150: header names set by an auth method, so the session can
+        # later be replicated in clients that do NOT go through
+        # requests.Session -- currently the real-browser DOM engine.
+        self.auth_header_names: set = set()
 
     def login_form(self, login_url: str, credentials: dict,
                    method: str = "POST",
@@ -151,6 +155,7 @@ class SessionManager:
         if not self.session:
             return False
         self.session.headers.update({header_name: header_value})
+        self.auth_header_names.add(header_name)
         self.logged_in = True
         self.login_time = time.time()
         return True
@@ -189,6 +194,7 @@ class SessionManager:
             return False
         value = f"{scheme} {token}" if scheme else token
         self.session.headers.update({header_name: value})
+        self.auth_header_names.add(header_name)
         if verify_url:
             try:
                 resp = self.session.get(verify_url,
@@ -197,12 +203,15 @@ class SessionManager:
                 if success_marker and success_marker not in text:
                     # Token rejected -- roll back the header.
                     del self.session.headers[header_name]
+                    self.auth_header_names.discard(header_name)
                     return False
                 if resp.status_code >= 400:
                     del self.session.headers[header_name]
+                    self.auth_header_names.discard(header_name)
                     return False
             except Exception:
                 del self.session.headers[header_name]
+                self.auth_header_names.discard(header_name)
                 return False
         self.logged_in = True
         self.login_time = time.time()
@@ -399,6 +408,38 @@ class SessionManager:
         self.logged_in = False
         self.login_time = 0.0
         self._oauth_refresh = None
+        self.auth_header_names = set()
+
+    def auth_browser_state(self) -> tuple[dict, list]:
+        """Phase 150: replicate this session in a real browser context.
+
+        The DOM engine drives Playwright, which shares nothing with
+        ``requests.Session`` -- without this, an authenticated scan runs
+        its HTTP layers logged-in while the browser confirmation layer
+        visits the same pages ANONYMOUSLY: authenticated routes render
+        401s/login walls and every sink behind the login is invisible.
+
+        Returns ``(headers, cookies)``: headers set by an auth method
+        (tracked in ``auth_header_names``), and the session cookie jar
+        once logged in (form/cookie logins live there).  Playwright wants
+        ``{name, value, url|domain+path}`` dicts; cookies without a domain
+        get no domain here -- the consumer pairs them with the scan URL.
+        """
+        headers: dict = {}
+        if self.session:
+            for name in self.auth_header_names:
+                if name in self.session.headers:
+                    headers[name] = self.session.headers[name]
+        cookies: list = []
+        if self.session and self.logged_in:
+            for c in self.session.cookies:
+                cookies.append({
+                    "name": c.name,
+                    "value": c.value or "",
+                    "domain": c.domain or None,
+                    "path": c.path or "/",
+                })
+        return headers, cookies
 
 
 def extract_csrf_token(html: str, field_name: str = "csrf_token"

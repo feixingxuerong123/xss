@@ -259,8 +259,14 @@ def _base_url_keeping_fragment(parsed) -> str:
     return base
 
 
-def _run_scan(args, url: str, requester, oob, progress, checkpoint):
-    """Run a single-target scan and return findings."""
+def _run_scan(args, url: str, requester, oob, progress, checkpoint,
+              auth_state=None):
+    """Run a single-target scan and return findings.
+
+    ``auth_state`` is the ``(headers, cookies)`` pair replicating the
+    authenticated session inside the DOM engine's browser (Phase 150) --
+    see main() where it is computed.
+    """
     import json as _json
     from xssentinel.__main__ import _parse_kv, apply_scan_policy
 
@@ -288,6 +294,16 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
                     k, v = h.split(":", 1)
                     _req.session.headers[k.strip()] = v.strip()
             requester = _req
+            # Phase 150: the DOM browser must see THIS target's cookies,
+            # not the global jar's -- recompute the cookie half of
+            # auth_state from the clone.
+            if auth_state:
+                auth_state = (auth_state[0],
+                              [{"name": c.name, "value": c.value or "",
+                                "domain": c.domain or None,
+                                "path": c.path or "/"}
+                               for c in _req.session.cookies],
+                              *auth_state[2:])
         except Exception as e:
             _log.debug("per-target requester clone failed, using shared "
                        "requester: %s", e)
@@ -360,7 +376,10 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint):
         upload_fields=getattr(args, "upload_field", None),
         poc_include_auth=getattr(args, "poc_include_auth", False),
         poc_verify=getattr(args, "poc_verify", True),
-        xsleak_audit=getattr(args, "xsleak_audit", False))
+        xsleak_audit=getattr(args, "xsleak_audit", False),
+        auth_headers=(auth_state or (None, None, None))[0],
+        auth_cookies=(auth_state or (None, None, None))[1],
+        auth_local_storage=(auth_state or (None, None, None))[2])
     # Phase 46: JSON-carrier mode (see _run_scan docstring above).
     if json_body is not None:
         scanner.json_body = json_body
@@ -488,7 +507,8 @@ def _stealth_proxy_pool(args):
         return None
 
 
-def _run_async_scan(args, url: str, oob, progress, checkpoint):
+def _run_async_scan(args, url: str, oob, progress, checkpoint,
+                    auth_state=None):
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
     for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
@@ -599,6 +619,9 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint):
         jitter_ratio=getattr(args, "jitter_ratio", 0.0) or 0.0,
         xsleak_audit=getattr(args, "xsleak_audit", False),
         upload_fields=getattr(args, "upload_field", None),
+        auth_headers=(auth_state or (None, None, None))[0],
+        auth_cookies=(auth_state or (None, None, None))[1],
+        auth_local_storage=(auth_state or (None, None, None))[2],
     )
 
     # Blind/OOB: pending injections are batch-collected at the end of
@@ -659,7 +682,7 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint):
 
 
 def _run_async_batch(args, urls: list[str], requester, oob, progress,
-                     checkpoint) -> dict[str, object]:
+                     checkpoint, auth_state=None) -> dict[str, object]:
     """Phase 25-3: scan a batch of URLs with a SINGLE asyncio.run() call.
 
     The previous approach called ``_run_async_scan`` (and thus
@@ -755,6 +778,9 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
         jitter_ratio=getattr(args, "jitter_ratio", 0.0) or 0.0,
         xsleak_audit=getattr(args, "xsleak_audit", False),
         upload_fields=getattr(args, "upload_field", None),
+        auth_headers=(auth_state or (None, None, None))[0],
+        auth_cookies=(auth_state or (None, None, None))[1],
+        auth_local_storage=(auth_state or (None, None, None))[2],
     )
 
     # Pre-parse each URL into (base_url, method, params, data) so the

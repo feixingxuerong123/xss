@@ -196,6 +196,31 @@ class TestCliAuthWiring:
         assert req.session.headers.get("X-Auth") == "k"
         assert "Authorization" not in req.session.headers
 
+    def test_auth_browser_state_headers_and_cookies(self):
+        # Phase 150: the DOM browser needs the auth headers an auth method
+        # set plus the session cookie jar, without leaking unrelated
+        # session headers (stealth UA etc.).
+        r = _Req()
+        mgr = SessionManager(r)
+        mgr.login_header("Authorization", "Bearer jwt-abc")
+        mgr.login_cookie("sessionid", "deadbeef", domain="example.com")
+        r.session.headers["User-Agent"] = "StealthUA/1.0"
+        hdrs, cookies = mgr.auth_browser_state()
+        assert hdrs == {"Authorization": "Bearer jwt-abc"}
+        assert any(c["name"] == "sessionid" and c["value"] == "deadbeef"
+                   and c["domain"] == "example.com" for c in cookies)
+
+    def test_auth_browser_state_after_logout(self):
+        r = _Req()
+        mgr = SessionManager(r)
+        mgr.login_token("jwt-abc")
+        assert mgr.auth_browser_state()[0] == {
+            "Authorization": "Bearer jwt-abc"}
+        mgr.logout()
+        hdrs, cookies = mgr.auth_browser_state()
+        assert hdrs == {}
+        assert cookies == []
+
     def test_login_basic_flag_wired(self):
         args = self._args(["--login-basic", "admin:s3cret"])
         req = Requester(timeout=10)

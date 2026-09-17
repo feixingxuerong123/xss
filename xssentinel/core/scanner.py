@@ -138,7 +138,10 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                  bav: bool = False,
                  poc_include_auth: bool = False,
                  poc_verify: bool = True,
-                 xsleak_audit: bool = False):
+                 xsleak_audit: bool = False,
+                 auth_headers: dict | None = None,
+                 auth_cookies: list | None = None,
+                 auth_local_storage: dict | None = None):
         self.req = requester or Requester()
         self.use_headless = use_headless
         self.max_transforms = max_transforms
@@ -177,6 +180,14 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         # headers.  Opt-in so ordinary scans don't gain an info/low note on
         # every headerless site.
         self.xsleak_audit = bool(xsleak_audit)
+        # Phase 150: authenticated session state for the real-browser DOM
+        # layer.  Without it the browser confirms sinks on authenticated
+        # routes as an anonymous visitor (401/login wall), while every
+        # requests-based layer scans them logged-in -- the layers DISAGREE
+        # on what page they looked at.
+        self.auth_headers: dict = dict(auth_headers or {})
+        self.auth_cookies: list = list(auth_cookies or [])
+        self.auth_local_storage: dict = dict(auth_local_storage or {})
         # Phase 48: per-thread request context (params/data of the endpoint
         # currently being probed) -- lets the _add funnel attach the original
         # form fields (hidden CSRF tokens etc.) to confirmed findings so the
@@ -270,7 +281,10 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         if de == "auto" and not dom_engine.DynamicDomAnalyzer.available():
             return None
         try:
-            return dom_engine.DynamicDomAnalyzer()
+            return dom_engine.DynamicDomAnalyzer(
+                auth_headers=self.auth_headers,
+                auth_cookies=self.auth_cookies,
+                auth_local_storage=self.auth_local_storage)
         except Exception:
             return None
 

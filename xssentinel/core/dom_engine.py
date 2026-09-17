@@ -466,11 +466,29 @@ def _with_hash_param_value(url: str, name: str, value: str) -> str:
 class DynamicDomAnalyzer:
     """Runs a real headless browser to confirm DOM-XSS sinks execute."""
 
-    def __init__(self, timeout: int = 20, headless: bool = True):
+    def __init__(self, timeout: int = 20, headless: bool = True,
+                 auth_headers: dict | None = None,
+                 auth_cookies: list | None = None,
+                 auth_local_storage: dict | None = None):
         # `timeout` is in SECONDS (caller-facing). Playwright's goto/wait APIs
         # expect MILLISECONDS, so we multiply at the boundary below.
         self.timeout = timeout
         self.headless = headless
+        # Phase 150: replicate the authenticated session in the browser.
+        # requests.Session headers/cookies never reach Playwright on their
+        # own; without them the confirmation layer visits authenticated
+        # routes anonymously (401 / login wall) and every sink behind the
+        # login is invisible to it.
+        self.auth_headers: dict = dict(auth_headers or {})
+        self.auth_cookies: list = list(auth_cookies or [])
+        # SPA route guards commonly read the token from localStorage even
+        # when API calls authenticate via cookie/header (observed: Juice
+        # Shop renders its 403 route shell with a valid session cookie).
+        # Seeded via init script, SCOPED to the scan origin -- an init
+        # script runs in every frame, and localStorage is per-origin, so
+        # an unscoped seed would copy the session token into the storage
+        # of any third-party origin the page embeds.
+        self.auth_local_storage: dict = dict(auth_local_storage or {})
 
     @staticmethod
     def available() -> bool:
@@ -593,7 +611,48 @@ class DynamicDomAnalyzer:
         seen: set = set()
         try:
             browser = get_shared_browser()
-            page = browser.new_page()
+            # Phase 150: create the page carrying the authenticated
+            # session.  extra_http_headers applies to every request the
+            # page makes (document + XHR), which is how SPAs authenticate
+            # API calls.  Domain-less auth cookies are pinned to the scan
+            # URL's origin (Playwright requires url or domain+path).
+            page = browser.new_page(
+                extra_http_headers=self.auth_headers or None)
+            if self.auth_local_storage:
+                try:
+                    import json as _json
+                    from urllib.parse import urlparse as _up
+                    origin = "{0.scheme}://{0.netloc}".format(_up(url))
+                    pairs = "; ".join(
+                        "try { window.localStorage.setItem(%s, %s); "
+                        "} catch (e) {}"
+                        % (_json.dumps(k), _json.dumps(v))
+                        for k, v in self.auth_local_storage.items())
+                    page.add_init_script(
+                        "if (location.origin === %s) { %s }"
+                        % (_json.dumps(origin), pairs))
+                except Exception:
+                    _log.debug("dom: auth localStorage seed failed (url=%s)",
+                               url, exc_info=True)
+            if self.auth_cookies:
+                try:
+                    from urllib.parse import urlparse
+                    origin = "{0.scheme}://{0.netloc}".format(
+                        urlparse(url))
+                    cookie_dicts = []
+                    for c in self.auth_cookies:
+                        cd = {"name": c.get("name"),
+                              "value": c.get("value", ""),
+                              "path": c.get("path") or "/"}
+                        if c.get("domain"):
+                            cd["domain"] = c["domain"]
+                        else:
+                            cd["url"] = origin
+                        cookie_dicts.append(cd)
+                    page.context.add_cookies(cookie_dicts)
+                except Exception:
+                    _log.debug("dom: auth cookie apply failed (url=%s)",
+                               url, exc_info=True)
             try:
                 page.add_init_script(_init_script(marker))
                 page.on("dialog", lambda d: d.dismiss())
@@ -636,15 +695,21 @@ class DynamicDomAnalyzer:
                         elif probe["kind"] == "referer":
                             # Inject a forged Referer header on the navigation
                             # so ``document.referrer`` picks up the marker.
+                            # Phase 150: set_extra_http_headers REPLACES the
+                            # whole dict -- resetting to {} would silently
+                            # strip the authenticated session's headers from
+                            # every later probe, so always merge with them.
                             try:
-                                page.context.set_extra_http_headers(
-                                    {"Referer": probe["referer_value"]})
+                                hdrs = dict(self.auth_headers)
+                                hdrs["Referer"] = probe["referer_value"]
+                                page.context.set_extra_http_headers(hdrs)
                             except Exception:
                                 pass
                             self._bounded_goto(page, probe["url"], deadline)
                             page.wait_for_timeout(_DOM_SETTLE_MS)
                             try:
-                                page.context.set_extra_http_headers({})
+                                page.context.set_extra_http_headers(
+                                    dict(self.auth_headers))
                             except Exception:
                                 pass
                         elif probe["kind"] == "window_name":

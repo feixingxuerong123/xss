@@ -440,6 +440,14 @@ def build_parser():
     g_auth.add_argument("--login-token-scheme", default="Bearer",
                         help="Scheme prefix for --login-token; use '' for a "
                              "raw header value")
+    g_auth.add_argument("--browser-local-storage", action="append",
+                        default=None, metavar="KEY=VALUE",
+                        help="Seed the DOM engine's browser localStorage "
+                             "with this entry (repeatable). SPAs commonly "
+                             "keep the session token there for their ROUTE "
+                             "guards even when API calls authenticate via "
+                             "cookie/header -- without it the DOM layer "
+                             "renders the logged-out route shell.")
     g_auth.add_argument("--login-verify-url", default=None,
                         help="URL to GET to verify a token is accepted")
     g_auth.add_argument("--login-verify-marker", default=None,
@@ -776,6 +784,32 @@ def main(argv=None):
     # discarded and the session silently expired on long scans).
     session_mgr = _do_login(requester, args)
 
+    # Phase 150: authenticated state for the real-browser DOM layer.
+    # Headers: only the ones an auth method actually set.  Cookies: the
+    # requester's jar as built so far -- operator --cookie entries and
+    # form-login session cookies, i.e. exactly what a logged-in browser
+    # would carry.  localStorage: explicit --browser-local-storage entries
+    # (SPA route guards read the token there even when APIs authenticate
+    # via cookie -- observed on Juice Shop: cookie alone still rendered
+    # the 403 route shell).
+    auth_state = ({}, [], {})
+    try:
+        _req_session = getattr(requester, "session", None)
+        _hdrs = {}
+        if session_mgr is not None:
+            _hdrs, _ = session_mgr.auth_browser_state()
+        _ckies = [{"name": c.name, "value": c.value or "",
+                   "domain": c.domain or None, "path": c.path or "/"}
+                  for c in _req_session.cookies] if _req_session else []
+        _ls = {}
+        for _kv in (getattr(args, "browser_local_storage", None) or []):
+            _k, _, _v = _kv.partition("=")
+            if _k.strip():
+                _ls[_k.strip()] = _v
+        auth_state = (_hdrs, _ckies, _ls)
+    except Exception as e:
+        _log.debug("auth browser state unavailable: %s", e)
+
     # OOB listener.
     #
     # Phase 134: the bind address and the advertised callback host are
@@ -846,7 +880,8 @@ def main(argv=None):
             and not all(checkpoint and checkpoint.is_scanned(u) for u in urls)):
         try:
             async_results = _run_async_batch(
-                args, urls, requester, oob, progress, checkpoint)
+                args, urls, requester, oob, progress, checkpoint,
+                auth_state=auth_state)
         except Exception as e:
             _log.error("async batch failed: %s", e, exc_info=args.verbose)
             async_results = {}
@@ -900,10 +935,12 @@ def main(argv=None):
                     raise RuntimeError(
                         "async batch scan did not produce a result for this URL")
             elif getattr(args, "async_mode", False):
-                scanner = _run_async_scan(args, url, oob, progress, checkpoint)
+                scanner = _run_async_scan(args, url, oob, progress,
+                                          checkpoint, auth_state=auth_state)
             if scanner is None:
                 scanner = _run_scan(scan_args, url, requester, oob,
-                                    progress, checkpoint)
+                                    progress, checkpoint,
+                                    auth_state=auth_state)
         except Exception as e:
             _log.error("Scan failed for %s: %s", url, e, exc_info=args.verbose)
             failed_targets.append(url)

@@ -103,7 +103,10 @@ class AsyncScanner:
                  rotate_headers: bool = False,
                  jitter_ratio: float = 0.0,
                  xsleak_audit: bool = False,
-                 upload_fields: list[str] | None = None):
+                 upload_fields: list[str] | None = None,
+                 auth_headers: dict | None = None,
+                 auth_cookies: list | None = None,
+                 auth_local_storage: dict | None = None):
         self.max_concurrent = max_concurrent
         self.per_host_delay = per_host_delay
         # Phase 93: default jitter 0.0 (was 0.1).  Unlike the sync engine,
@@ -162,6 +165,11 @@ class AsyncScanner:
         # Phase 54: XS-Leaks surface audit parity with the sync Scanner
         # (opt-in; OFF keeps async scans byte-for-byte as before).
         self.xsleak_audit = bool(xsleak_audit)
+        # Phase 150: authenticated session state for the real-browser DOM
+        # layer (see sync Scanner for the full rationale).
+        self.auth_headers: dict = dict(auth_headers or {})
+        self.auth_cookies: list = list(auth_cookies or [])
+        self.auth_local_storage: dict = dict(auth_local_storage or {})
         # Phase 58: multipart upload-filename probing parity (sync Phase 48).
         self.upload_fields: list[str] = list(upload_fields or [])
         # Phase 64: blind OOB state -- sync parity (pending injections are
@@ -1010,7 +1018,10 @@ class AsyncScanner:
         if de == "auto" and not dom_engine_mod.DynamicDomAnalyzer.available():
             return None
         try:
-            return dom_engine_mod.DynamicDomAnalyzer()
+            return dom_engine_mod.DynamicDomAnalyzer(
+                auth_headers=self.auth_headers,
+                auth_cookies=self.auth_cookies,
+                auth_local_storage=self.auth_local_storage)
         except Exception:
             return None
 
