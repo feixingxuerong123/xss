@@ -788,7 +788,9 @@ class TestCliBatchFailureAggregation:
         # with zero findings.
         call_count = {"n": 0}
 
-        def fake_run_scan(args, url, requester, oob, progress, checkpoint):
+        # auth_state kwarg added in Phase 150 (SessionManager wiring).
+        def fake_run_scan(args, url, requester, oob, progress, checkpoint,
+                          auth_state=None):
             call_count["n"] += 1
             if call_count["n"] == 1:
                 raise RuntimeError("simulated scan failure")
@@ -835,7 +837,8 @@ class TestCliBatchFailureAggregation:
             "--checkpoint", ckpt_path,
         ]
 
-        def fake_run_scan(args, url, requester, oob, progress, checkpoint):
+        def fake_run_scan(args, url, requester, oob, progress, checkpoint,
+                          auth_state=None):
             raise RuntimeError("simulated scan failure")
 
         with patch.object(cli, "_run_scan", side_effect=fake_run_scan):

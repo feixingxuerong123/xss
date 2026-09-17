@@ -390,6 +390,13 @@ def build_parser():
     g_bs.add_argument("--stored-view", default=None,
                       help="Stored-XSS view URL")
     g_bs.add_argument("--stored-param", default="q")
+    g_bs.add_argument("--stored-dom", dest="stored_dom", action="store_true",
+                      help="Verify the stored payload by RENDERING the view "
+                           "page in the real browser instead of matching the "
+                           "HTTP text (SPA shape: the view fetches the stored "
+                           "value client-side, so the view HTML never "
+                           "contains it). Submits both a form-encoded and a "
+                           "JSON body variant. Requires --stored-inject.")
     # Second-order XSS (Phase 21-4): inject at A, crawl to discover B.
     g_bs.add_argument("--second-order-inject", default=None,
                       help="Second-order XSS inject URL (inject A, crawl B)")

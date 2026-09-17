@@ -154,6 +154,113 @@ class StoredBlindMixin:
                           breaker=getattr(req, "breaker", None))
         return clone
 
+    # -- L4 stored XSS, DOM-verified (SPA shape) ---------------------------
+
+    def scan_stored_dom(self, inject_url: str, view_url: str | None = None,
+                        param: str = "q", json_body: bool = False):
+        """Phase 152: stored XSS verified by the REAL BROWSER (SPA shape).
+
+        ``scan_stored`` verifies persistence by looking for the token in the
+        VIEW PAGE'S HTTP TEXT.  On a modern SPA that can never confirm: the
+        stored value is fetched client-side (XHR) and inserted by framework
+        code, so the server-rendered view HTML does not contain it (measured
+        on OWASP Juice Shop: a payload stored via ``POST /api/Feedbacks``
+        renders only inside the authenticated ``/#/administration`` route).
+
+        This method submits marker-carrying write payloads -- form-encoded
+        AND, unless ``json_body`` narrows it, a JSON body (SPA write
+        endpoints are JSON; classic guestbooks are form) -- then renders the
+        view page in the instrumented real browser.  The DOM engine's sink
+        hooks report any flow of the token into an executable sink
+        (innerHTML / outerHTML / document.write / ...), which is the same
+        marker discipline as URL probing with the marker carried by the
+        STORED payload instead of the URL.  Auth state (cookies, headers,
+        localStorage) is the scanner's configured browser session, so
+        authenticated view routes render exactly as a victim sees them.
+
+        Confidence mirrors ``scan_stored``: an explicit ``view_url`` is
+        high; a self-view (view == inject) is medium.
+        """
+        view_url = view_url or inject_url
+        explicit_view = view_url != inject_url or inject_url.rstrip(
+            "/").endswith("/view")
+        engine = self._resolve_dom_engine()
+        if engine is None or not engine.available():
+            _log.debug("stored-dom: real browser unavailable -- cannot "
+                       "verify %s", inject_url)
+            return False
+        self.coverage.touch_layer(
+            inject_url, "L4_stored_dom", "POST",
+            detail=f"inject->{view_url} param='{param}' "
+                   f"({'json' if json_body else 'form+json'})")
+
+        bases: list = []
+        for ctx_name in ("html_element", "svg_context"):
+            for base in payloads.by_context(ctx_name):
+                bases.append(base)
+                if len(bases) >= 3:
+                    break
+            if len(bases) >= 3:
+                break
+        encodings = ("json",) if json_body else ("form", "json")
+        for base in bases:
+            token = "xssv_" + secrets.token_hex(4)
+            variant = verifier.mark(base["payload"], token)
+            if token not in variant:
+                # mark() rewrites alert(...) args; a payload without one
+                # would store a token-free string the hooks can never see.
+                continue
+            stored = False
+            for enc in encodings:
+                try:
+                    if enc == "json":
+                        req2 = self.req.request("POST", inject_url,
+                                                json={param: variant})
+                    else:
+                        req2 = self.req.request("POST", inject_url,
+                                                data={param: variant})
+                    self._bump()
+                    stored = stored or (req2 is not None)
+                except Exception:
+                    continue
+            if not stored:
+                continue
+            if hasattr(self.req, "invalidate"):
+                self.req.invalidate(view_url)
+            try:
+                hits = engine.analyze(view_url, marker=token)
+            except Exception as e:  # noqa: BLE001
+                _log.debug("stored-dom: browser analyze failed (%s)", e,
+                           exc_info=self.verbose)
+                continue
+            if hits:
+                sinks = ", ".join(sorted({h.get("sink", "") for h in hits
+                                          if isinstance(h, dict)})[:3])
+                if not explicit_view and view_url == inject_url:
+                    confidence = "medium"
+                    note = ("same-session self-view: persistence for other "
+                            "viewers is NOT proven -- re-run with an "
+                            "explicit --stored-view")
+                else:
+                    confidence = "high"
+                    note = "view page rendered the stored payload in a real browser"
+                self._add(Finding(**{
+                    "url": inject_url, "method": "POST", "param": param,
+                    "type": "stored_dom", "context": "stored_dom_view",
+                    "payload": variant, "transform": [],
+                    "severity": "high", "confidence": confidence,
+                    "detail": f"stored payload rendered client-side and "
+                              f"reached executable sink(s) [{sinks}] on "
+                              f"{view_url} ({note})",
+                    "headless": None,
+                    "proof": {"view_url": view_url, "token": token,
+                              "sinks": sinks,
+                              "snippets": [str(h.get("snippet", ""))[:200]
+                                           for h in hits[:3]]},
+                }))
+                return True
+        return False
+
     # -- L4 second-order XSS (inject A, discover B by crawling) -------------
     def scan_second_order(self, inject_url: str, param: str = "q",
                           method: str = "POST", start_url: str | None = None,

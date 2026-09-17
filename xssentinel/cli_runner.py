@@ -468,10 +468,17 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint,
                            params, data, scanner.findings)
 
     if args.stored_inject:
-        scanner.scan_stored(args.stored_inject, view_url=args.stored_view,
-                            param=args.stored_param,
-                            fresh_session=getattr(
-                                args, "stored_fresh_session", False))
+        if getattr(args, "stored_dom", False):
+            # Phase 152: SPA shape -- the view page renders the stored value
+            # client-side, so verification happens in the real browser.
+            scanner.scan_stored_dom(args.stored_inject,
+                                    view_url=args.stored_view,
+                                    param=args.stored_param)
+        else:
+            scanner.scan_stored(args.stored_inject, view_url=args.stored_view,
+                                param=args.stored_param,
+                                fresh_session=getattr(
+                                    args, "stored_fresh_session", False))
 
     if args.second_order_inject:
         viewers = None
@@ -512,7 +519,7 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint,
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
     for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "second_order_inject"):
+                  "stored_dom", "second_order_inject"):
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)
@@ -817,7 +824,7 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
     for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "second_order_inject"):
+                  "stored_dom", "second_order_inject"):
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)

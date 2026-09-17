@@ -767,10 +767,82 @@ def m_json_echo(v: str, ctx: dict) -> tuple:
     return _page(f'<div>{"status": "ok", "echo": "{val}"}</div>')
 
 
+# ---------------------------------------------------------------------------
+# Phase 152: SPA-shaped stored XSS.  The write endpoint accepts form-encoded
+# AND JSON bodies (_parse_post_body handles both).  The VIEW page never
+# contains the stored value in its HTML -- it fetches a JSON list endpoint
+# client-side and inserts the entries with innerHTML (vuln) / textContent
+# (safe twin).  That is the shape HTTP-text persistence verification cannot
+# confirm (OWASP Juice Shop: POST /api/Feedbacks renders only inside the
+# authenticated /#/administration route) and only the real-browser DOM
+# engine can detect.
+# ---------------------------------------------------------------------------
+
+def m_stored_api_write(v: str, ctx: dict) -> tuple:
+    """Store the submitted value verbatim (form or JSON body)."""
+    _STORE.setdefault(ctx.get("path") or "", []).append(v)
+    return _page(f"<div>Saved: {v}</div>")
+
+
+def m_stored_api_write_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: store the HTML-escaped value."""
+    _STORE.setdefault(ctx.get("path") or "", []).append(
+        html.escape(v, quote=True))
+    return _page(f"<div>Saved: {html.escape(v, quote=True)}</div>")
+
+
+def m_stored_api_list(v: str, ctx: dict) -> tuple:
+    """JSON list of stored entries (what the SPA viewer XHRs)."""
+    key = ctx.get("path") or ""
+    if key.endswith("/list"):
+        key = key[:-len("/list")]
+    items = _STORE.get(key, [])
+    return (200, {"Content-Type": "application/json; charset=utf-8"},
+            json.dumps(items))
+
+
+def m_stored_api_view(v: str, ctx: dict) -> tuple:
+    """Vulnerable SPA viewer: fetched entries inserted via innerHTML."""
+    list_url = (ctx.get("path") or "")[:-len("/view")] + "/list"
+    return _page_raw(f"""<!DOCTYPE html><html><body>
+<div id="feed"></div>
+<script>
+fetch('{list_url}').then(function(r){{return r.json();}}).then(function(items){{
+  var out = '';
+  for (var i = 0; i < items.length; i++) {{ out += '<li>' + items[i] + '</li>'; }}
+  document.getElementById('feed').innerHTML = out;
+}});
+</script>
+</body></html>""")
+
+
+def m_stored_api_view_safe(v: str, ctx: dict) -> tuple:
+    """Safe twin: the identical SPA viewer written with textContent."""
+    list_url = (ctx.get("path") or "")[:-len("/view")] + "/list"
+    return _page_raw(f"""<!DOCTYPE html><html><body>
+<div id="feed"></div>
+<script>
+fetch('{list_url}').then(function(r){{return r.json();}}).then(function(items){{
+  var el = document.getElementById('feed');
+  for (var i = 0; i < items.length; i++) {{
+    var p = document.createElement('p');
+    p.textContent = items[i];
+    el.appendChild(p);
+  }}
+}});
+</script>
+</body></html>""")
+
+
 POST_MODES: dict = {
     "stored_write": m_stored_write,
     "stored_write_escaped": m_stored_write_escaped,
     "stored_view": m_stored_view,
+    "stored_api_write": m_stored_api_write,
+    "stored_api_write_escaped": m_stored_api_write_escaped,
+    "stored_api_list": m_stored_api_list,
+    "stored_api_view": m_stored_api_view,
+    "stored_api_view_safe": m_stored_api_view_safe,
     "upload_echo": m_upload_echo,
     "upload_echo_escaped": m_upload_echo_escaped,
     "json_echo": m_json_echo,
@@ -2044,6 +2116,11 @@ def load_routes() -> dict[str, dict]:
                 ("scenario_view_path", "sc_view"),         # Phase 127
         ):
             _register_viewer(routes, case, key, default_mode)
+        # Phase 152: SPA-shaped stored cases expose their client-fetched
+        # data as a JSON list endpoint next to the write endpoint.
+        if case.get("list_path"):
+            routes.setdefault(case["list_path"],
+                              dict(case, mode="stored_api_list"))
     # Phase 129: harness-only routes (never scored).  setdefault so a real
     # manifest case with the same path would win.
     for path, extra in EXTRA_ROUTES.items():

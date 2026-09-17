@@ -110,6 +110,10 @@ def _case_extra_args(base_url: str, case: dict) -> list | None:
             "--stored-view", f"{base_url}{case['view_path']}",
             "--stored-param", param,
         ]
+    if case.get("stored_dom"):
+        # Phase 152: verify persistence in the real browser (the view page
+        # renders the stored value client-side; HTTP text matching can't).
+        extra += ["--stored-dom"]
     # Phase 126: second-order cases drive the dedicated CLI flow -- inject at
     # A, then verify the EXPLICIT viewer B (no crawling, so the case is
     # deterministic).  The scanner still runs its normal scan of A; the

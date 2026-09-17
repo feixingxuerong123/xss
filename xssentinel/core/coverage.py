@@ -44,6 +44,7 @@ LAYERS: list[tuple[str, str, str]] = [
     ("L2_waf_evade",       "WAF evasion transforms",           "L2"),
     ("L3_dom_static",      "DOM static taint analysis",        "L3"),
     ("L4_stored",          "Stored XSS (inject -> view)",      "L4"),
+    ("L4_stored_dom",      "Stored XSS, DOM-verified (SPA shape)", "L4"),
     ("L4_second_order",    "Second-order XSS (inject -> crawl)", "L4"),
     ("L5_blind_oob",       "Blind XSS OOB injection",          "L5"),
     ("L6_dom_dynamic",     "DOM dynamic (real browser)",       "L6"),

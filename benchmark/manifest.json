@@ -696,6 +696,50 @@
       "note": "Phase 151: the safe twin of pos-dom-08 -- the identical Trusted Types wrapper shape written with textContent (not a sink, no execution)."
     },
     {
+      "id": "pos-stored-02",
+      "path": "/r/st02",
+      "view_path": "/r/st02/view",
+      "list_path": "/r/st02/list",
+      "param": "comment",
+      "mode": "stored_api_write",
+      "view_mode": "stored_api_view",
+      "stored_dom": true,
+      "method": "POST",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "stored",
+        "stored_dom"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "engines": [
+        "sync"
+      ],
+      "note": "Phase 152: SPA-shaped stored XSS -- POST (form or JSON body) stores the comment verbatim; the view page never contains it in its HTML, it fetches /r/st02/list client-side and inserts the entries with innerHTML. Exactly the OWASP Juice Shop shape (POST /api/Feedbacks -> client-rendered admin route) where HTTP-text persistence verification is structurally blind; only the real-browser DOM engine can confirm."
+    },
+    {
+      "id": "neg-stored-02",
+      "path": "/s/st02",
+      "view_path": "/s/st02/view",
+      "list_path": "/s/st02/list",
+      "param": "comment",
+      "mode": "stored_api_write_escaped",
+      "view_mode": "stored_api_view_safe",
+      "stored_dom": true,
+      "method": "POST",
+      "ground_truth": "safe",
+      "finding_types": [
+        "stored",
+        "stored_dom"
+      ],
+      "context": "html_element",
+      "difficulty": "hard",
+      "engines": [
+        "sync"
+      ],
+      "note": "Phase 152 safe twin: the value is HTML-escaped on write AND the SPA viewer inserts entries with textContent -- nothing executable is stored, nothing reaches an executable sink."
+    },
+    {
       "id": "pos-polyglot-01",
       "path": "/r/poly01",
       "param": "q",
