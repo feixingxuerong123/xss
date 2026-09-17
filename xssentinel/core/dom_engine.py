@@ -361,7 +361,11 @@ _DOM_SETTLE_MS = 700
 # page's own behaviour, and it must do so within a fixed cost.  Once the
 # budget is gone we stop probing and return whatever was already found --
 # findings are collected per-probe, so a slow tail never costs the head.
-_DOM_PROBE_BUDGET_S = 40.0
+# 30s (not more): the benchmark's per-case cap is 45s, and the scan also
+# spends time on the baseline and its own layers -- a DOM budget that eats
+# most of a case's wall clock turns "slow page" into "case timeout", which
+# reads as an error rather than a result.
+_DOM_PROBE_BUDGET_S = 30.0
 
 
 def _query_param_names(url: str) -> list:
@@ -547,6 +551,36 @@ class DynamicDomAnalyzer:
         probes.append({"kind": "postmsg", "url": url, "source": "postMessage"})
         return probes
 
+    def _bounded_goto(self, page, url: str, deadline: float) -> None:
+        """Navigate with domcontentloaded and a budget-capped timeout.
+
+        Phase 148.  Two unbounded-cost holes, both exposed by the
+        importmap/SRI cases (pages referencing an unreachable CDN host):
+
+          * ``wait_until="load"`` (Playwright's default) never fires while
+            any subresource hangs, so the goto eats its full navigation
+            timeout.  Phase 141 fixed this for the "goto" probe kind only;
+            cookie/postmsg/referer/window_name still carried the default.
+          * the probe-budget deadline is checked BETWEEN probes, so a probe
+            starting just before the deadline runs a full nav-timeout past
+            it -- window_name navigates twice, worst case +40s over budget.
+            On a degraded-loopback window that is the difference between a
+            finished scan and a killed one (observed: pos-importmap-01
+            died at the harness cap while pos-dom-07 passed).
+
+        The sink fires from the page's own scripts, which run by
+        domcontentloaded; the per-kind settle waits give async routes
+        their time.  The timeout never exceeds the remaining budget, so
+        a probe started near the deadline overruns it by at most ~1s.
+        """
+        remaining = deadline - time.monotonic()
+        timeout_ms = int(max(1.0, min(self.timeout, remaining)) * 1000)
+        try:
+            page.goto(url, wait_until="domcontentloaded",
+                      timeout=timeout_ms)
+        except Exception:
+            pass
+
     def analyze(self, url: str, marker: str | None = None) -> list:
         if not self.available():
             return []
@@ -587,21 +621,17 @@ class DynamicDomAnalyzer:
                             # page's own scripts, and a navigation error must
                             # not skip the hit log either: the sink can fire
                             # before a late subresource trips the timeout.
-                            try:
-                                page.goto(probe["url"],
-                                          wait_until="domcontentloaded",
-                                          timeout=self.timeout * 1000)
-                            except Exception:
-                                pass
+                            self._bounded_goto(page, probe["url"], deadline)
                             # Let the route render (see _DOM_SETTLE_MS).
                             page.wait_for_timeout(_DOM_SETTLE_MS)
                         elif probe["kind"] == "cookie":
                             page.context.add_cookies(
                                 [{"name": "__xss__", "value": marker,
                                   "url": probe["origin"]}])
-                            page.goto(probe["url"], timeout=self.timeout * 1000)
+                            self._bounded_goto(page, probe["url"], deadline)
+                            page.wait_for_timeout(_DOM_SETTLE_MS)
                         elif probe["kind"] == "postmsg":
-                            page.goto(probe["url"], timeout=self.timeout * 1000)
+                            self._bounded_goto(page, probe["url"], deadline)
                             page.wait_for_timeout(400)
                         elif probe["kind"] == "referer":
                             # Inject a forged Referer header on the navigation
@@ -611,24 +641,24 @@ class DynamicDomAnalyzer:
                                     {"Referer": probe["referer_value"]})
                             except Exception:
                                 pass
+                            self._bounded_goto(page, probe["url"], deadline)
+                            page.wait_for_timeout(_DOM_SETTLE_MS)
                             try:
-                                page.goto(probe["url"], timeout=self.timeout * 1000)
-                            finally:
-                                try:
-                                    page.context.set_extra_http_headers({})
-                                except Exception:
-                                    pass
+                                page.context.set_extra_http_headers({})
+                            except Exception:
+                                pass
                         elif probe["kind"] == "window_name":
                             # window.name persists across navigations within
                             # the same tab.  Set it via an intermediate page
                             # on the target origin, then navigate to the URL.
+                            self._bounded_goto(page, probe["origin"]
+                                               or probe["url"], deadline)
                             try:
-                                page.goto(probe["origin"] or probe["url"],
-                                          timeout=self.timeout * 1000)
                                 page.evaluate(
                                     f"window.name = {repr(marker)};")
-                                page.goto(probe["url"],
-                                          timeout=self.timeout * 1000)
+                                self._bounded_goto(page, probe["url"],
+                                                   deadline)
+                                page.wait_for_timeout(_DOM_SETTLE_MS)
                             except Exception:
                                 continue
                     except Exception:
