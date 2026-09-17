@@ -269,7 +269,11 @@ def _is_detected(report: dict | None, case: dict) -> tuple[bool, int, list]:
     # declare the finding type(s) it is about; those count as relevant.
     # Cases without the field keep the exact old behaviour.
     want_types = case.get("finding_types") or []
-    path_key = path.rstrip("*")
+    # Phase 146: a hash-routed case writes its payload behind a fragment
+    # ("/dom/hash-route#/route"), which no HTTP request ever carries -- so no
+    # finding's own ``url`` will contain it.  Strip it before matching, the
+    # same way the server does when registering the route.
+    path_key = path.split("#", 1)[0].rstrip("*") or "/"
     # Phase 120: a crawl case's finding lands on a DISCOVERED endpoint,
     # not on the landing page, so the case may name the paths that count.
     accept_paths = list(case.get("finding_paths") or [path_key])

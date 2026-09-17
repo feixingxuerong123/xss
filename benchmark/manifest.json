@@ -642,6 +642,33 @@
       "note": "location.hash -> setTimeout string"
     },
     {
+      "id": "pos-dom-07",
+      "path": "/dom/hash-route#/route",
+      "param": "q",
+      "mode": "dom_hash_route_innerhtml",
+      "ground_truth": "vulnerable",
+      "finding_types": [
+        "dom_dynamic"
+      ],
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "source": "OWASP",
+      "note": "Phase 146: hash-ROUTED parameter (path is '#/route', so the probe URL is /#/route?q=) reaching innerHTML. The value lives inside the fragment's own query string behind a route path, so it is reachable only by parsing the fragment -- unlike pos-dom-01, which reads the whole fragment and is satisfied by the plain location.hash probe. This is the shape that hid both official XSS challenges on OWASP Juice Shop."
+    },
+    {
+      "id": "neg-dom-07",
+      "path": "/dom/hash-route-safe#/route",
+      "param": "q",
+      "mode": "dom_hash_route_safe",
+      "ground_truth": "safe",
+      "finding_types": [
+        "dom_dynamic"
+      ],
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "note": "Phase 146: the safe twin of pos-dom-07 -- the identical router-shaped fragment written with textContent. Also the first DOM safe case in the manifest: the DOM layer previously had only vulnerable cases, so it was never checked for false positives."
+    },
+    {
       "id": "pos-polyglot-01",
       "path": "/r/poly01",
       "param": "q",

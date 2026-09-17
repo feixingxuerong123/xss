@@ -126,6 +126,50 @@ def m_dom_hash_innerhtml(v: str) -> tuple:
 <script>document.getElementById('out').innerHTML = location.hash.slice(1);</script>
 </body></html>""")
 
+# ---------------------------------------------------------------------------
+# Phase 146: hash-ROUTED parameters (``#/route?q=``)
+#
+# pos-dom-01 above reads the WHOLE fragment (``location.hash.slice(1)``), so
+# the engine's plain ``#MARKER`` probe satisfies it and it passes without ever
+# parsing a fragment query string.  A real SPA router is different: the value
+# sits inside the fragment's own query (``#/search?q=``), behind a route path
+# that must be preserved.  Both official XSS challenges on OWASP Juice Shop
+# are that shape and both went undetected -- the benchmark "had a hash case"
+# and it was testing a different shape.  These two modes are the missing one.
+# ---------------------------------------------------------------------------
+
+def m_dom_hash_route_innerhtml(v: str) -> tuple:
+    """Router-shaped fragment parameter reaching innerHTML."""
+    return _page_raw("""<!DOCTYPE html><html><body>
+<div id="out"></div>
+<script>
+function render(){
+  var qs = (location.hash.split('?')[1] || '');
+  var q = new URLSearchParams(qs).get('q');
+  if (q) { document.getElementById('out').innerHTML = q; }
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body></html>""")
+
+
+def m_dom_hash_route_safe(v: str) -> tuple:
+    """The same router shape, written as TEXT instead of HTML."""
+    return _page_raw("""<!DOCTYPE html><html><body>
+<div id="out"></div>
+<script>
+function render(){
+  var qs = (location.hash.split('?')[1] || '');
+  var q = new URLSearchParams(qs).get('q');
+  if (q) { document.getElementById('out').textContent = q; }
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body></html>""")
+
+
 def m_dom_search_eval(v: str) -> tuple:
     return _page_raw("""<!DOCTYPE html><html><body>
 <script>var p = new URLSearchParams(location.search); eval(p.get('x'));</script>
@@ -1721,6 +1765,8 @@ MODES: dict[str, callable] = {
     "raw_double_decode": m_raw_double_decode,
     # DOM-based
     "dom_hash_innerhtml": m_dom_hash_innerhtml,
+    "dom_hash_route_innerhtml": m_dom_hash_route_innerhtml,
+    "dom_hash_route_safe": m_dom_hash_route_safe,
     "dom_search_eval": m_dom_search_eval,
     "dom_postmessage": m_dom_postmessage,
     "dom_hash_docwrite": m_dom_hash_docwrite,
@@ -1902,13 +1948,26 @@ EXTRA_ROUTES: dict = {
 MODES_CTX.update({"fuzz_render": m_fuzz_render})
 
 
+def _request_path(path: str) -> str:
+    """The path a client actually requests for a manifest ``path``.
+
+    Phase 146: a case may carry its payload behind a fragment
+    (``/dom/hash-route#/route``), because that is where an SPA router keeps
+    its parameters.  An HTTP request never includes the fragment, so the
+    server only ever sees the part before the ``#`` -- registering the raw
+    string made such cases 404.  The fragment still reaches the DOM engine,
+    which is the only layer that can use it.
+    """
+    return path.split("#", 1)[0] or "/"
+
+
 def load_routes() -> dict[str, dict]:
     """Load manifest and build path -> case routing table."""
     with open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
         manifest = json.load(f)
     routes = {}
     for case in manifest["cases"]:
-        routes[case["path"]] = case
+        routes[_request_path(case["path"])] = case
         # Three capabilities need a RENDERER page that is not a manifest
         # case of its own.  Each gets its own manifest key so the flows stay
         # independent (e.g. view_path also wires --stored-inject, which a
