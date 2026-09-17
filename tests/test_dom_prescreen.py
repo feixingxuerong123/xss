@@ -68,5 +68,54 @@ def test_src_attribute_lookup_is_not_a_script_tag():
     assert page_can_run_sink(html) is False
 
 
+# --- Phase 159: the filter must not be a sink whitelist ---------------------
+#
+# Phase 154 asked "do we recognise a sink?" and skipped everything else,
+# which silently disabled real-browser verification for every sink the
+# pattern list did not name.  Measured: tests/test_async_dom_live.py
+# (iframe srcdoc) and tests/test_async_deep.py both went red.  The filter
+# must instead answer "is this page provably inert?".
+
+def test_iframe_srcdoc_sink_lets_the_browser_run():
+    """The regression this session: srcdoc is a real sink and matched
+    nothing in the Phase 154 pattern list."""
+    html = ("<iframe id=f></iframe><script>"
+            "document.getElementById('f').srcdoc = "
+            "decodeURIComponent(location.hash.slice(1));</script>")
+    assert page_can_run_sink(html) is True
+
+
+def test_unrecognised_sink_lets_the_browser_run():
+    """A sink we never heard of must still get a browser pass -- that is
+    the whole point of inverting the filter."""
+    for body in ("node.cloneNode(true);",
+                 "r.createContextualFragment(x);",
+                 "el.insertAdjacentText('beforeend', x);",
+                 "history.pushState({}, '', x);",
+                 "worker.postMessage(x);",
+                 "window['inner' + 'HTML'] = x;"):
+        html = f"<html><body><script>{body}</script></body></html>"
+        assert page_can_run_sink(html) is True, body
+
+
+def test_execution_in_markup_lets_the_browser_run():
+    # sinks reached without any <script> that looks like a sink
+    for html in ("<img src=x onerror=alert(1)>",
+                 "<a href=\"javascript:alert(1)\">x</a>",
+                 "<iframe srcdoc=\"<script>alert(1)</script>\"></iframe>",
+                 "<iframe src=\"data:text/html,<script>1</script>\"></iframe>"):
+        assert page_can_run_sink(html) is True, html
+
+
+def test_provably_inert_pages_are_still_skipped():
+    """The speed win must survive the inversion: literal/JSON declarations
+    cannot execute anything."""
+    for html in ("<script>var x = \"test\";</script>",
+                 "<script>var user = 'bob'; var cfg = {a: 1};</script>",
+                 "<script type=\"application/json\">{\"a\": 1}</script>",
+                 "<script>var a = 1, b = 2;</script>"):
+        assert page_can_run_sink(html) is False, html
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

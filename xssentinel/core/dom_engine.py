@@ -333,44 +333,70 @@ def page_has_client_js(html: str) -> bool:
     return bool(_CLIENT_JS_RE.search(html or ""))
 
 
-# Phase 154: a browser pass costs ~5.6s (9 probes x ~700ms settle).  Measured
-# on the 185-case benchmark: 57 cases paid it, but only 7 needed a DOM
-# finding for their verdict -- 41 of them were pure overhead (~25% of the
-# whole run's wall clock, see benchmark/speed_profile.py).
+# Phase 154 (as written) / Phase 159 (inverted).  A browser pass costs ~5.6s
+# (9 probes x ~700ms settle); 41 of the 57 slow benchmark cases paid it
+# without needing it (~25% of the run, see benchmark/speed_profile.py).
 #
-# A page can only reach an executable sink if it runs code that calls one.
-# Two ways that happens, and BOTH are allowed through:
-#   * an external script -- the sink lives in a bundle we cannot see
-#     (real SPAs: Juice Shop's Angular bundle), so never block those;
-#   * an inline script containing a sink pattern.
-# Everything else (inline data assignments, tracking snippets with no sink)
-# provably cannot produce a DOM hit.  Conservative by construction: anything
+# Phase 154 implemented the filter as a SINK WHITELIST: "run the browser only
+# if we can see a sink pattern in the inline script".  That is backwards --
+# every sink the regex does not name becomes unverifiable.  Measured cost
+# (this session, full regression 20260918-011159):
+#   * tests/test_async_dom_live.py went red -- its page is
+#     ``document.getElementById('f').srcdoc = decodeURIComponent(...)``.
+#     ``srcdoc`` is a real sink (an attacker-controlled srcdoc executes
+#     script) and it matches nothing in the Phase 154 pattern list.
+#   * tests/test_async_deep.py went red the same way.
+# The Phase 154 commit also claimed "conservative by construction: anything
 # the regexes cannot parse is let through by the caller keeping the old
-# ``page_has_client_js`` check as well.
-_SINK_RE = re.compile(
-    r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|"
-    r"\.src\s*=|location\s*=|eval\(|setTimeout\(|setInterval\(|Function\(|"
-    r"createElement|appendChild|insertBefore|replaceChildren|"
-    r"setAttribute\(\s*['\"]on|\.html\(|jQuery|\$\(", re.I)
+# page_has_client_js check".  That is false: the caller ANDs the two checks,
+# so combining them can only ever be NARROWER than either alone.
+#
+# Phase 159 inverts the question.  Instead of "is there evidence of a sink?"
+# it asks "can we PROVE this page cannot execute anything?"  Only provably
+# inert pages (literal/JSON declarations, no call, no member write, no DOM
+# global) are skipped.  Unknown constructs now get the browser, which is the
+# direction a recall-first scanner must err on.
+_CAN_EXEC_RE = re.compile(
+    # any call or grouping -- a sink is almost always a call
+    r"\(|\)"
+    # function bodies / dynamic code
+    r"|=>|\bfunction\b|\bclass\b|\bnew\b|\beval\b|\bFunction\b|\batob\b|"
+    r"\bimport\b|\brequire\b|\bsetTimeout\b|\bsetInterval\b"
+    # a DOM/BOM global -- the page can reach the document, so it can sink
+    r"|\b(?:document|window|location|navigator|history|screen|self|top|"
+    r"parent|frames|globalThis|localStorage|sessionStorage|alert|fetch|"
+    r"XMLHttpRequest|URLSearchParams|URL|postMessage|open|cookie|referrer|"
+    r"innerHTML|outerHTML|srcdoc|javascript)\b"
+    # member assignment:  a.b = c
+    r"|\.[A-Za-z_$][\w$]*\s*=[^=]", re.I)
 _EXT_SCRIPT_RE = re.compile(r"<script[^>]*\ssrc\s*=", re.I)
 _INLINE_SCRIPT_RE = re.compile(
     r"<script(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script>", re.I | re.S)
+# Execution that lives in markup, not in a <script> block: inline event
+# handlers, javascript: URLs, an attacker-settable srcdoc/data attribute.
+_HTML_EXEC_RE = re.compile(
+    r"\son[a-z]+\s*=|:javascript|javascript:|\ssrcdoc\s*=|data:text/html",
+    re.I)
 
 
 def page_can_run_sink(html: str) -> bool:
-    """Pre-filter: does this page run code that could reach an XSS sink?
+    """Pre-filter: can this page execute code that could reach a sink?
 
     Used together with :func:`page_has_client_js` -- passing both means the
-    page is worth a real-browser pass.  Returns True for anything we cannot
-    see inside (external scripts), so the filter can only ever SKIP a
-    browser session, never silently drop coverage on a real SPA.
+    page is worth a real-browser pass.  Phase 159: this answers "is the page
+    provably inert?", NOT "did we recognise a sink?".  True for anything we
+    cannot see inside (external scripts, unparseable script bodies, DOM
+    globals), so the filter can only ever SKIP a browser session that cannot
+    possibly produce a DOM finding.
     """
     if not html:
         return False
     if _EXT_SCRIPT_RE.search(html):
         return True
+    if _HTML_EXEC_RE.search(html):
+        return True
     for body in _INLINE_SCRIPT_RE.findall(html):
-        if _SINK_RE.search(body or ""):
+        if _CAN_EXEC_RE.search(body or ""):
             return True
     return False
 

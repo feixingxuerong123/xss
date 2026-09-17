@@ -350,8 +350,15 @@ class TestAsyncDomParity:
                        "DynamicDomAnalyzer", fake_engine), \
                  patch("xssentinel.core.async_scanner.dom_engine_mod."
                        "page_has_client_js", return_value=True):
+                # Phase 159: the page text must be one the DOM pre-screen
+                # actually lets through.  The old filler ("<script>x</script>")
+                # is provably inert, so page_can_run_sink skips the browser
+                # pass and this test only ever saw the static hint.  A real
+                # sink-bearing page is what the suppression contract is about.
                 return await _collect(asc._scan_dom_async(
-                    "http://h/", "<script>x</script>"))
+                    "http://h/",
+                    "<script>document.getElementById('f').srcdoc = "
+                    "decodeURIComponent(location.hash.slice(1));</script>"))
         findings = _run(fn)
         types = [f.data["type"] for f in findings]
         assert types == ["dom_dynamic"], types      # static hint suppressed
