@@ -246,17 +246,13 @@ class AsyncScanner:
         params = params or {}
         data = data or {}
 
-        # Phase 133: hidden-parameter mining (sync parity).  Sync enriches
-        # the endpoint's params before probing it; without this, an
-        # endpoint whose interesting parameter has no UI hint was only
-        # probed with the params already in the URL (sync TP / async FN on
-        # pos-pmmine-01).  Discoveries override existing names, matching
-        # sync's ``{**ep_params, **extra_params}`` merge.
-        if self.advanced_layers:
-            _extra = await self._mine_hidden_params_async(url, method,
-                                                          params, data)
-            if _extra:
-                params = {**params, **_extra}
+        # Phase 142: hidden-parameter mining used to run HERE, before the
+        # baseline.  It is the most request-hungry step in the scan, so at a
+        # small --max-requests it spent the whole cap before the baseline was
+        # even attempted, `_throttle` then rejected the baseline, and the
+        # scan exited without ever building `page_tasks`.  The miner does not
+        # read the baseline response, so it now runs right after it -- still
+        # before the page tasks, which is all the ordering it ever needed.
 
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         connector = aiohttp.TCPConnector(ssl=self.verify_ssl, limit=50)
@@ -300,7 +296,22 @@ class AsyncScanner:
                                  exc_info=self.verbose)
                     return
 
-                # 2) L2 WAF detection (runs in thread -- CPU light but sync API).
+                # 2) Hidden-parameter mining (Phase 133 sync parity, moved
+                #    after the baseline by Phase 142 -- see the note above).
+                #    Sync enriches the endpoint's params before probing it;
+                #    without this, an endpoint whose interesting parameter has
+                #    no UI hint was only probed with the params already in the
+                #    URL (sync TP / async FN on pos-pmmine-01).  Discoveries
+                #    override existing names, matching sync's
+                #    ``{**ep_params, **extra_params}`` merge.  It stays ahead
+                #    of the page tasks so the L1 probes see the new names.
+                if self.advanced_layers:
+                    _extra = await self._mine_hidden_params_async(url, method,
+                                                                  params, data)
+                    if _extra:
+                        params = {**params, **_extra}
+
+                # 3) L2 WAF detection (runs in thread -- CPU light but sync API).
                 waf_info = None
                 try:
                     waf_info = await asyncio.to_thread(
@@ -1203,8 +1214,17 @@ class AsyncScanner:
                 shim._mine_hidden_params, url, method, params, data, False)
             self.requests_made += shim.requests_made
             return dict(found or {})
-        except (BudgetExhausted, CircuitOpen):
-            raise        # a budget/circuit stop is NOT a miner bug
+        except (BudgetExhausted, CircuitOpen) as e:
+            # Phase 142: a budget stop while mining must NOT abort the scan.
+            # The page tasks created afterwards include layers that cost no
+            # requests at all (L6 CSP header analysis, L3 DOM static), and
+            # re-raising here meant they never ran -- a bypassable CSP went
+            # unreported purely because the miner had spent the cap first.
+            # Record the reason and fall through; the request-driven layers
+            # still raise on their own through _throttle, which propagates
+            # out of _drain_agen exactly as before.
+            _log.debug("async hidden-param mining stopped early: %s", e)
+            return {}
         except Exception as e:
             _log.warning("async hidden-param mining error: %s", e,
                          exc_info=self.verbose)
@@ -2141,6 +2161,31 @@ class _AsyncScannerShim(AdvancedLayerMixin, CrawlMixin):
             self._findings.append(finding)
 
     def _bump(self) -> None:
+        """Count one request the shim's sync layers are about to send.
+
+        Phase 142.  This traffic used to be *counted but not constrained*:
+        it sailed straight past ``--max-requests`` while inflating the scan
+        total, which then made ``_throttle`` refuse the very next async
+        request.  At a small budget the effect was that the baseline got
+        rejected, ``page_tasks`` was never built, and every zero-cost layer
+        (L6 CSP analysis, L3 DOM static) silently never ran -- so a
+        bypassable CSP went unreported.  Found via
+        tests/test_async_budget.py::test_scan_keeps_findings_collected_before_the_stop,
+        failing since Phase 133 added the miner.
+
+        The cap lives on the *scanner*, and its counter is only reconciled
+        with this shim's afterwards, so the decision uses the sum of both.
+        Check-then-count, mirroring ``_throttle``: ``requests_made`` never
+        exceeds the cap and a rejected request is never sent.
+        """
+        scanner = self._async
+        cap = getattr(scanner, "max_requests", None)
+        if cap is not None:
+            spent = getattr(scanner, "requests_made", 0) + self.requests_made
+            if spent >= cap:
+                scanner.budget_exhausted_reason = (
+                    f"total request budget exhausted (>={cap} requests)")
+                raise BudgetExhausted(scanner.budget_exhausted_reason)
         self.requests_made += 1
 
 
