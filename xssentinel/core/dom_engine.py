@@ -23,10 +23,15 @@ This is the "real DOM engine" upgrade over static taint analysis.
 from __future__ import annotations
 
 import atexit
+import logging
 import re
 import secrets
 import threading
+import time
+
 from .stealth import marker as _stem_marker
+
+_log = logging.getLogger(__name__)
 
 
 def _init_script(marker: str) -> str:
@@ -341,6 +346,23 @@ _MAX_SEARCH_PARAM_PROBES = 4
 # is actually enabled.
 _DOM_SETTLE_MS = 700
 
+# Phase 147: total wall-clock budget for probing ONE url.
+#
+# Each goto probe waits up to ``timeout`` seconds for its own navigation, so
+# a page that pulls a slow or unreachable third-party resource makes every
+# probe pay that timeout in turn -- eight probes times twenty seconds is far
+# past any scan-level cap, and the whole scan dies with it.  Measured on
+# benchmark pos-sri-01 and pos-importmap-01 (pages referencing
+# cdn.example): both hit the 90s scan timeout with zero requests recorded,
+# and both do so identically on the pre-Phase-144 code, so this is not a
+# regression from that work -- it is the DOM engine waiting without bound.
+#
+# Same reasoning as _DOM_SETTLE_MS: the engine's job is to observe the
+# page's own behaviour, and it must do so within a fixed cost.  Once the
+# budget is gone we stop probing and return whatever was already found --
+# findings are collected per-probe, so a slow tail never costs the head.
+_DOM_PROBE_BUDGET_S = 40.0
+
 
 def _query_param_names(url: str) -> list:
     """Ordered, de-duplicated query parameter names of ``url``."""
@@ -541,7 +563,17 @@ class DynamicDomAnalyzer:
             try:
                 page.add_init_script(_init_script(marker))
                 page.on("dialog", lambda d: d.dismiss())
+                # Phase 147: bound the total cost of probing this url (see
+                # _DOM_PROBE_BUDGET_S).  Findings are collected per probe, so
+                # stopping early keeps everything already confirmed.
+                deadline = time.monotonic() + _DOM_PROBE_BUDGET_S
                 for probe in self._probes(url, marker):
+                    if time.monotonic() > deadline:
+                        _log.debug(
+                            "dom: probe budget %.0fs spent for %s -- stopping "
+                            "with %d finding(s)",
+                            _DOM_PROBE_BUDGET_S, url, len(findings))
+                        break
                     try:
                         if probe["kind"] == "goto":
                             # Phase 141: wait_until="load" (the old default)
