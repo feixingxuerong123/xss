@@ -54,7 +54,17 @@ def test_path_finding_with_prefix_path_matches():
 
 
 def test_wrong_type_is_not_counted_for_a_declared_case():
-    case = {"path": "/r/ck01", "param": "q", "ground_truth": "safe",
+    """The narrowing is a CREDIT rule, so it only applies to positives.
+
+    Phase 160 split the two directions: on a POSITIVE case a finding of
+    another type must not be credited as the vector the case is about (this
+    test).  On a SAFE case the rule inverts -- any high/medium finding is a
+    false positive, whatever type it is, because the scanner is claiming XSS
+    on a page the manifest says is clean (test_benchmark_fp_scoring.py).
+    This case used to say "safe" while its assertion only made sense for a
+    positive; the premise was wrong, not the expectation.
+    """
+    case = {"path": "/r/ck01", "param": "q", "ground_truth": "vulnerable",
             "finding_types": ["cookie_xss"]}
     # a reflected finding on the same path is a DIFFERENT vector and must
     # not be scored against this case

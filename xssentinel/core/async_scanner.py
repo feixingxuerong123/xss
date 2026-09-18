@@ -1045,6 +1045,10 @@ class AsyncScanner:
             # alone lets pages with JS but no possible sink pay for a whole
             # browser session; page_can_run_sink keeps every external-script
             # page (SPA bundles) so this only skips provably dead passes.
+            # Phase 159: that function is "is the page provably inert?", not
+            # "did we recognise a sink" -- the whitelist version silently
+            # disabled browser verification for unlisted sinks (srcdoc).
+            # Keep both call sites identical: this is a sync/async parity pair.
             if engine is not None and await asyncio.to_thread(
                     lambda t: (dom_engine_mod.page_has_client_js(t)
                                and dom_engine_mod.page_can_run_sink(t)),

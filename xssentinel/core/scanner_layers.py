@@ -76,9 +76,10 @@ class AdvancedLayerMixin:
         engine = self._dom_engine
         # Phase 154: page_has_client_js alone is too coarse -- 41 of 57
         # slow benchmark cases had JS but no possible sink and paid ~5.6s
-        # each for nothing.  page_can_run_sink lets every external-script
-        # page through (SPA bundles), so this only skips provably dead
-        # browser sessions.
+        # each for nothing.  Phase 159: page_can_run_sink is NOT a sink
+        # whitelist (its first version was, and that cost real coverage --
+        # see dom_engine.py).  It answers "is this page provably inert?", so
+        # the pair skips ONLY pages that cannot execute anything at all.
         if (engine is not None and dom_engine.page_has_client_js(text)
                 and dom_engine.page_can_run_sink(text)):
             # Phase 20-3: record L6 DOM-dynamic layer when a real browser
