@@ -1,0 +1,62 @@
+[
+ {
+  "shape": "iframe.src = javascript:CODE",
+  "executes": true,
+  "note": ""
+ },
+ {
+  "shape": "iframe.srcdoc = <script>CODE",
+  "executes": true,
+  "note": ""
+ },
+ {
+  "shape": "embed.src = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "object.data = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "embed.src = data:text/html,<script>CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "object.data = data:text/html,<script>CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "iframe.src = data:text/html,<script>CODE",
+  "executes": null,
+  "note": "opaque origin: the sentinel cannot report from a data: document"
+ },
+ {
+  "shape": "a.href = javascript:CODE (no activation)",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "a.href = javascript:CODE (trusted click)",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "a.href = javascript:CODE (synthetic click)",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "script.text = SENT (control)",
+  "executes": true,
+  "note": ""
+ },
+ {
+  "shape": "div.innerHTML = <img onerror=SENT (control)",
+  "executes": true,
+  "note": ""
+ }
+]

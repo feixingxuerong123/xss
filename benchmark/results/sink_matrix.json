@@ -7,7 +7,7 @@
   "hit_sinks": [
    "Element.innerHTML"
   ],
-  "elapsed": 6.0
+  "elapsed": 6.1
  },
  {
   "sink": "outerHTML",
@@ -17,7 +17,7 @@
   "hit_sinks": [
    "Element.outerHTML"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "insertAdjacentHTML",
@@ -27,7 +27,7 @@
   "hit_sinks": [
    "insertAdjacentHTML"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "iframe.srcdoc",
@@ -47,7 +47,7 @@
   "hit_sinks": [
    "document.write"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "eval",
@@ -57,7 +57,7 @@
   "hit_sinks": [
    "eval"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "new Function",
@@ -77,7 +77,7 @@
   "hit_sinks": [
    "setTimeout"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "Range.createContextualFragment",
@@ -87,7 +87,7 @@
   "hit_sinks": [
    "Range.createContextualFragment"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "iframe.src = 'javascript:' + x",
@@ -101,23 +101,19 @@
  },
  {
   "sink": "embed.src = 'javascript:' + x",
-  "expect": "confirm",
-  "confirmed": true,
+  "expect": "no-exec",
+  "confirmed": false,
   "verdict": "ok",
-  "hit_sinks": [
-   "embed.src(javascript)"
-  ],
+  "hit_sinks": [],
   "elapsed": 5.5
  },
  {
   "sink": "object.data = 'data:text/html,...'",
-  "expect": "confirm",
-  "confirmed": true,
+  "expect": "no-exec",
+  "confirmed": false,
   "verdict": "ok",
-  "hit_sinks": [
-   "object.data(data:text/html)"
-  ],
-  "elapsed": 5.5
+  "hit_sinks": [],
+  "elapsed": 5.6
  },
  {
   "sink": "el.setAttribute('onclick', x)",
@@ -147,7 +143,7 @@
   "hit_sinks": [
    "Element.innerHTML"
   ],
-  "elapsed": 5.5
+  "elapsed": 5.6
  },
  {
   "sink": "a.href = 'javascript:' + x",
@@ -163,6 +159,6 @@
   "confirmed": false,
   "verdict": "ok",
   "hit_sinks": [],
-  "elapsed": 5.5
+  "elapsed": 5.6
  }
 ]

@@ -63,14 +63,19 @@ SINKS = {
         "var f = document.createElement('iframe');"
         " f.src = 'javascript:' + location.hash.slice(1);"
         " document.body.appendChild(f);", "confirm"),
+    # --- measured NOT to execute (Phase 167): the engine must stay silent ----
+    # marker reaching these attributes is a FLOW observation, not execution:
+    # benchmark/sink_execution.py measured embed.src / object.data (both
+    # javascript: and data:text/html) as non-executing in Chromium, while
+    # iframe.src=javascript: does execute.
     "embed.src = 'javascript:' + x": (
         "var e = document.createElement('embed');"
         " e.src = 'javascript:' + location.hash.slice(1);"
-        " document.body.appendChild(e);", "confirm"),
+        " document.body.appendChild(e);", "no-exec"),
     "object.data = 'data:text/html,...'": (
         "var o = document.createElement('object');"
         " o.data = 'data:text/html,' + location.hash.slice(1);"
-        " document.body.appendChild(o);", "confirm"),
+        " document.body.appendChild(o);", "no-exec"),
     "el.setAttribute('onclick', x)": (
         "document.getElementById('o').setAttribute("
         "'onclick', location.hash.slice(1));", "confirm"),

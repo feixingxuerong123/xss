@@ -84,26 +84,25 @@ def _init_script(marker: str) -> str:
     };
   }
 
-  // Phase 163: URL property sinks.  setAttribute() was hooked, but
-  // ``el.src = ...`` is a different code path and one of these executes
-  // WITHOUT any activation.  Measured in Chromium (Playwright, headless):
+  // Phase 163: URL property sinks.  Phase 167 CORRECTED the list by MEASURING
+  // executability instead of assuming it (benchmark/sink_execution.py, headless
+  // Chromium; the sentinel is document.title and every shape below runs in the
+  // SAME document, so a silent sentinel is real evidence):
   //
-  //   iframe.src = 'javascript:...'  -> executes immediately
-  //   a.href     = 'javascript:...'  -> does NOT execute, not even on a
-  //                                     trusted click in this harness; it is
-  //                                     activation-dependent, so it is NOT
-  //                                     claimed as confirmed here
-  //   el.onerror = 'code' (string)   -> does NOT execute at all: the
-  //                                     event-handler PROPERTY path is not a
-  //                                     sink (the content attribute is, and
-  //                                     setAttribute is already hooked)
+  //   iframe.src = 'javascript:...'    -> EXECUTES
+  //   iframe.src = 'data:text/html,...'-> inconclusive (opaque origin cannot
+  //                                       report), so not claimed here
+  //   embed.src / object.data, javascript: or data:text/html -> does NOT
+  //                                       execute
+  //   a.href = 'javascript:...'        -> does NOT execute, not even on a
+  //                                       trusted click in this harness
   //
-  // Guarded by URL scheme, not by the marker alone: a plain http src that
-  // happens to carry the marker is not a vulnerability.
+  // Phase 163 shipped embed/object in this list labelled "executes with no
+  // activation", having measured only iframe.src; the engine then reported
+  // "(marker executed)" for shapes that execute nothing.  Guarded by URL scheme
+  // as well: a plain http src carrying the marker is not a vulnerability.
   var URL_SINKS = [
-    [window.HTMLIFrameElement, 'src', 'iframe.src'],
-    [window.HTMLEmbedElement, 'src', 'embed.src'],
-    [window.HTMLObjectElement, 'data', 'object.data']
+    [window.HTMLIFrameElement, 'src', 'iframe.src']
   ];
   URL_SINKS.forEach(function(pair){
     var Ctor = pair[0], prop = pair[1], label = pair[2];

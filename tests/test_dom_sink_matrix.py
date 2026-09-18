@@ -48,10 +48,10 @@ REQUIRED = [
     "Range.createContextualFragment",   # Phase 162: listed HIGH, not hooked
     "window.name -> innerHTML",         # Phase 162: probe never navigated
     # Phase 163: the URL *property* path (setAttribute was hooked, el.src was
-    # not) -- and these execute with no activation at all.
+    # not).  Phase 167 narrowed this to the ONE shape measured to execute:
+    # benchmark/sink_execution.py found iframe.src=javascript: executing while
+    # embed.src / object.data (and a.href, in every activation mode) do not.
     "iframe.src = 'javascript:' + x",
-    "embed.src = 'javascript:' + x",
-    "object.data = 'data:text/html,...'",
 ]
 
 # Measured in Chromium (Playwright, headless, 2026-09-18) NOT to execute:
@@ -64,6 +64,11 @@ REQUIRED = [
 MEASURED_NOT_A_SINK = [
     "a.href = 'javascript:' + x",
     "el.onerror = x (string)",
+    # Phase 167: measured by benchmark/sink_execution.py -- the sentinel runs in
+    # the SAME document for these shapes, so a silent sentinel is evidence, not
+    # an artefact.  Phase 163 claimed "executes with no activation" for them.
+    "embed.src = 'javascript:' + x",
+    "object.data = 'data:text/html,...'",
 ]
 
 
