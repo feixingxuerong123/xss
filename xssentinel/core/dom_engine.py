@@ -84,6 +84,48 @@ def _init_script(marker: str) -> str:
     };
   }
 
+  // Phase 163: URL property sinks.  setAttribute() was hooked, but
+  // ``el.src = ...`` is a different code path and one of these executes
+  // WITHOUT any activation.  Measured in Chromium (Playwright, headless):
+  //
+  //   iframe.src = 'javascript:...'  -> executes immediately
+  //   a.href     = 'javascript:...'  -> does NOT execute, not even on a
+  //                                     trusted click in this harness; it is
+  //                                     activation-dependent, so it is NOT
+  //                                     claimed as confirmed here
+  //   el.onerror = 'code' (string)   -> does NOT execute at all: the
+  //                                     event-handler PROPERTY path is not a
+  //                                     sink (the content attribute is, and
+  //                                     setAttribute is already hooked)
+  //
+  // Guarded by URL scheme, not by the marker alone: a plain http src that
+  // happens to carry the marker is not a vulnerability.
+  var URL_SINKS = [
+    [window.HTMLIFrameElement, 'src', 'iframe.src'],
+    [window.HTMLEmbedElement, 'src', 'embed.src'],
+    [window.HTMLObjectElement, 'data', 'object.data']
+  ];
+  URL_SINKS.forEach(function(pair){
+    var Ctor = pair[0], prop = pair[1], label = pair[2];
+    try {
+      if (!Ctor || !Ctor.prototype) return;
+      var d = Object.getOwnPropertyDescriptor(Ctor.prototype, prop);
+      if (!d || !d.set) return;
+      var o = d.set;
+      Object.defineProperty(Ctor.prototype, prop, {
+        configurable: true, enumerable: d.enumerable, get: d.get,
+        set: function(v){
+          try {
+            var s = String(v);
+            var m = /^\s*(javascript|data:text\/html)/i.exec(s);
+            if (m && has(s)) hit(label + '(' + m[1].toLowerCase() + ')', s);
+          } catch(e){}
+          return o.call(this, v);
+        }
+      });
+    } catch(e) { /* leave the native accessor alone rather than break the page */ }
+  });
+
   // Phase 162: Range.createContextualFragment.  The static analyzer lists it
   // as a HIGH sink, but the engine never hooked it -- measured with
   // benchmark/sink_matrix.py: a page that parses attacker HTML through a

@@ -1,7 +1,9 @@
 [
  {
   "sink": "innerHTML (control)",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Element.innerHTML"
   ],
@@ -9,7 +11,9 @@
  },
  {
   "sink": "outerHTML",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Element.outerHTML"
   ],
@@ -17,7 +21,9 @@
  },
  {
   "sink": "insertAdjacentHTML",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "insertAdjacentHTML"
   ],
@@ -25,7 +31,9 @@
  },
  {
   "sink": "iframe.srcdoc",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "iframe.srcdoc"
   ],
@@ -33,7 +41,9 @@
  },
  {
   "sink": "document.write",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "document.write"
   ],
@@ -41,7 +51,9 @@
  },
  {
   "sink": "eval",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "eval"
   ],
@@ -49,7 +61,9 @@
  },
  {
   "sink": "new Function",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Function"
   ],
@@ -57,7 +71,9 @@
  },
  {
   "sink": "setTimeout(string)",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "setTimeout"
   ],
@@ -65,35 +81,59 @@
  },
  {
   "sink": "Range.createContextualFragment",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Range.createContextualFragment"
   ],
   "elapsed": 5.5
  },
  {
-  "sink": "a.href = 'javascript:' + x",
-  "confirmed": false,
-  "hit_sinks": [],
+  "sink": "iframe.src = 'javascript:' + x",
+  "expect": "confirm",
+  "confirmed": true,
+  "verdict": "ok",
+  "hit_sinks": [
+   "iframe.src(javascript)"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "embed.src = 'javascript:' + x",
+  "expect": "confirm",
+  "confirmed": true,
+  "verdict": "ok",
+  "hit_sinks": [
+   "embed.src(javascript)"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "object.data = 'data:text/html,...'",
+  "expect": "confirm",
+  "confirmed": true,
+  "verdict": "ok",
+  "hit_sinks": [
+   "object.data(data:text/html)"
+  ],
   "elapsed": 5.5
  },
  {
   "sink": "el.setAttribute('onclick', x)",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "setAttribute(onclick)"
   ],
   "elapsed": 5.5
  },
  {
-  "sink": "el.onerror = x (string)",
-  "confirmed": false,
-  "hit_sinks": [],
-  "elapsed": 5.5
- },
- {
   "sink": "window.name -> innerHTML",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Element.innerHTML"
   ],
@@ -101,10 +141,28 @@
  },
  {
   "sink": "document.cookie -> innerHTML",
+  "expect": "confirm",
   "confirmed": true,
+  "verdict": "ok",
   "hit_sinks": [
    "Element.innerHTML"
   ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "a.href = 'javascript:' + x",
+  "expect": "no-exec",
+  "confirmed": false,
+  "verdict": "ok",
+  "hit_sinks": [],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "el.onerror = x (string)",
+  "expect": "no-exec",
+  "confirmed": false,
+  "verdict": "ok",
+  "hit_sinks": [],
   "elapsed": 5.5
  }
 ]

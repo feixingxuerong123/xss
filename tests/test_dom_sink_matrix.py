@@ -47,6 +47,23 @@ REQUIRED = [
     "new Function",                     # the Proxy hook must keep working
     "Range.createContextualFragment",   # Phase 162: listed HIGH, not hooked
     "window.name -> innerHTML",         # Phase 162: probe never navigated
+    # Phase 163: the URL *property* path (setAttribute was hooked, el.src was
+    # not) -- and these execute with no activation at all.
+    "iframe.src = 'javascript:' + x",
+    "embed.src = 'javascript:' + x",
+    "object.data = 'data:text/html,...'",
+]
+
+# Measured in Chromium (Playwright, headless, 2026-09-18) NOT to execute:
+#   * a.href = 'javascript:...'  -- not on load, not even on a trusted click
+#     in this harness; activation-dependent, so reporting it would over-claim.
+#   * el.onerror = 'code' (string) -- the event-handler PROPERTY path is not
+#     a sink; the content attribute is, and setAttribute is already hooked.
+# If the engine ever reports these, it is over-claiming -- fail loudly rather
+# than let a non-gap get "fixed" into a false positive.
+MEASURED_NOT_A_SINK = [
+    "a.href = 'javascript:' + x",
+    "el.onerror = x (string)",
 ]
 
 
@@ -73,3 +90,12 @@ def test_sink_is_confirmed_in_a_real_browser(sink_server, shape):
         f"marker into that sink, so a miss means the hook (or the probe that "
         f"delivers the marker) is not installed")
     assert sinks, f"{shape!r} reported a finding with no sink name"
+
+
+@pytest.mark.parametrize("shape", MEASURED_NOT_A_SINK)
+def test_measured_non_sink_stays_silent(sink_server, shape):
+    engine = dom_engine.DynamicDomAnalyzer(timeout=10)
+    found = engine.analyze(sink_server[shape])
+    assert not found, (
+        f"{shape!r} was measured NOT to execute on 2026-09-18, so a finding "
+        f"here is an over-claim, not a detection: {found}")
