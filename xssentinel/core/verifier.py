@@ -38,14 +38,63 @@ _CSP_BLOCK_RE = re.compile(
     re.I)
 
 
-def mark(payload: str, token: str) -> str:
+# Phase 166: the concatenated callable.  A keyword filter typically rewrites a
+# LITERAL callable -- benchmark filter_keywords rewrites
+# alert|prompt|confirm|eval|function|setTimeout|setInterval|fetch|XMLHttpRequest
+# followed by "(" into "blocked(" -- while letting this form through, which is
+# exactly why the payloads that survived such a filter could never carry the
+# marker: stamping required a literal callable.
+_CONCAT_CALL = "window['ale'+'rt']"
+# An on*= attribute value / a javascript: URI code section, so an unarmed
+# payload's own execution point can be armed with the concat stamp.
+_ON_HANDLER_RE = re.compile(
+    r"(\son[a-z]+\s*=\s*)(?:\"([^\"]*)\"|'([^']*)'|([^\s>]+))", re.I)
+_JS_URI_RE = re.compile(r"javascript\s*:[^\s\"'>]*", re.I)
+
+
+def mark(payload: str, token: str, style: str = "plain") -> str:
     """Inject `token` into the payload's alert() call so we can track it.
 
     Replaces the first alert(...) call's argument with the token so the
     verifier can confirm the payload executed (not just echoed).  Handles
     alert(1), alert(document.domain), alert('msg'), and the paren-free
     tagged-template form alert`1` (Phase 32).
+
+    ``style="concat"`` stamps with ``window['ale'+'rt']('token')`` instead: a
+    keyword filter cannot rewrite that (there is no literal callable followed
+    by a paren), so it is the only way to confirm a target that neuters
+    literal callables.  When the payload carries no callable at all, the
+    stamp is appended to its own execution point (an on*= handler value or a
+    javascript: URI) -- the structural gate only needs the token INSIDE the
+    handler/URI value, not inside a call.
     """
+    if style == "concat":
+        if _ALERT_CALL_RE.search(payload):
+            return _ALERT_CALL_RE.sub(
+                lambda m: (f"{_CONCAT_CALL}('{token}')"
+                           if m.group(1) is not None
+                           else f"{_CONCAT_CALL}`{token}`"),
+                payload, count=1)
+        stamp = f";{_CONCAT_CALL}('{token}')"
+
+        def _arm_handler(m):
+            # Append INSIDE a quoted value: appending after the closing quote
+            # leaves a stray statement in the tag, so the token would sit
+            # outside the handler value and prove nothing.
+            val = m.group(2) or m.group(3) or m.group(4) or ""
+            if val[:1] in ("'", '"') and val[-1:] == val[:1]:
+                return f"{m.group(1)}{val[:-1]}{stamp}{val[-1]}"
+            return f"{m.group(1)}{val}{stamp}"
+
+        out, n_on = _ON_HANDLER_RE.subn(_arm_handler, payload, count=1)
+        if n_on:
+            return out
+        out, n_js = _JS_URI_RE.subn(
+            lambda m: m.group(0).rstrip() + stamp, payload, count=1)
+        if n_js:
+            return out
+        return payload
+
     def _sub(m):
         if m.group(1) is not None:
             return f"alert('{token}')"

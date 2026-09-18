@@ -62,8 +62,17 @@ def _run(payload: str, context: str) -> list[str]:
 
 
 def _stampable(payload: str) -> bool:
+    """Can ANY stamp style carry a token into this payload?
+
+    Phase 166 added the concat style (``window['ale'+'rt']('token')``), which
+    arms payloads the plain ``alert(`` stamp cannot touch -- so "unstampable"
+    must mean "both styles fail", or the cost assertion below would flag the
+    new, correct behaviour of trying the concat stamp on a target that
+    rewrites literal callables.
+    """
     tok = "xssv_" + "a" * 8
-    return tok in verifier.mark(payload, tok)
+    return any(tok in verifier.mark(payload, tok, style=st)
+               for st in ("plain", "concat"))
 
 
 def test_every_reflected_variant_carries_an_intact_token():

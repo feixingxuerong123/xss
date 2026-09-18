@@ -1070,6 +1070,42 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                 self._record(req, url, method, param, is_body, "reflected",
                              context, variant, tset, v, resp, token)
                 return True
+        # Phase 166: nothing confirmed with the plain stamp.  A keyword filter
+        # rewrites a LITERAL callable while letting the concatenated form
+        # through, so the payloads that survive are exactly the ones the old
+        # marker could not carry -- the target was structurally unprovable
+        # (measured: benchmark filter_keywords rewrites
+        # alert|prompt|confirm|eval|function|setTimeout|setInterval|fetch|
+        # XMLHttpRequest followed by "(" AND strips <script> and on*= tags).
+        # Retry with the concat stamp.  Bounded to two requests and only
+        # reached when everything above failed, so a target that confirms
+        # normally pays nothing.
+        concat_marked = verifier.mark(payload, token, style="concat")
+        if concat_marked != marked:
+            retry: list[tuple[list[str], str]] = [([], concat_marked)]
+            for tset, _v in variants[:1]:
+                v2 = concat_marked
+                for t in tset:
+                    v2 = transform.apply(t, v2)
+                retry.append((list(tset) + ["concat_stamp"], v2))
+            for tset, variant in retry:
+                if token not in variant:
+                    continue
+                probe = self._set_param(params, data, param, variant, is_body)
+                try:
+                    resp = req.request(method, url, params=probe["params"],
+                                       data=probe["data"])
+                    self._bump()
+                except Exception:
+                    continue
+                v = verifier.verify_semantic(
+                    resp.text, token, response_headers=dict(resp.headers))
+                if v["confirmed"] and verifier.payload_survived(resp.text,
+                                                                variant):
+                    self._record(req, url, method, param, is_body,
+                                 "reflected", context, variant, tset, v, resp,
+                                 token)
+                    return True
         # Phase 22-3: time-based fallback.  When the marker IS reflected
         # (we got here past the early return) but none of the standard
         # payloads confirmed execution, the target may have a strict CSP

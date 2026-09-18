@@ -80,3 +80,33 @@ def test_base64_container_decoded_by_the_app_survives():
     inner = f"<script>alert('{TOK}')</script>"
     enc = base64.b64encode(inner.encode()).decode().rstrip("=")
     assert payload_survived(f"<div>{inner}</div>", enc) is True
+
+
+# --- Phase 166: the CONCAT stamp -------------------------------------------
+
+def test_concat_stamp_avoids_a_literal_callable():
+    """A keyword filter rewrites `alert|confirm|prompt|eval|function|...`
+    followed by `(`, so the stamp itself must not contain one -- otherwise the
+    payloads that survive such a filter can never carry the marker."""
+    from xssentinel.core.verifier import mark
+    out = mark("<embed src=javascript:alert(1)>", TOK, style="concat")
+    assert "window['ale'+'rt']" in out
+    assert "'xssv_1234abcd'" in out
+    import re as _re
+    assert not _re.search(r"(?i)(alert|confirm|prompt)\s*\(", out), out
+
+
+def test_concat_stamp_arms_an_unarmed_payload():
+    """A payload with no callable at all (a bare handler / javascript: URI)
+    gets the stamp appended at its own execution point -- the structural gate
+    only needs the token inside the handler/URI value."""
+    from xssentinel.core.verifier import mark
+    out = mark("<img src=x onerror=window['ale'+'rt'](1)>", TOK, style="concat")
+    assert out.count("window['ale'+'rt']") == 2 and TOK in out
+    out = mark("<a href=javascript:fetch(1)>", TOK, style="concat")
+    assert out.endswith("')>") and TOK in out
+
+
+def test_plain_stamp_is_unchanged_by_default():
+    from xssentinel.core.verifier import mark
+    assert mark("<svg onload=alert(1)>", TOK) == f"<svg onload=alert('{TOK}')>"

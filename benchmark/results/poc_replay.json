@@ -4,8 +4,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_aed647e4')</script>",
-    "expect_payload": "<script>alert('xssv_aed647e4')</script>",
+    "payload": "<script>alert('xssv_9b062acb')</script>",
+    "expect_payload": "<script>alert('xssv_9b062acb')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -20,8 +20,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_a1a88aac')</script>",
-    "expect_payload": "<script>alert('xssv_a1a88aac')</script>",
+    "payload": "<script>alert('xssv_9b2bcf77')</script>",
+    "expect_payload": "<script>alert('xssv_9b2bcf77')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -36,8 +36,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_d1fd5aef')</script>",
-    "expect_payload": "<script>alert('xssv_d1fd5aef')</script>",
+    "payload": "<script>alert('xssv_ab3d9845')</script>",
+    "expect_payload": "<script>alert('xssv_ab3d9845')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -52,8 +52,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_7c5c478d')</script>",
-    "expect_payload": "<script>alert('xssv_7c5c478d')</script>",
+    "payload": "<script>alert('xssv_57fc0b77')</script>",
+    "expect_payload": "<script>alert('xssv_57fc0b77')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -68,8 +68,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_fb1428c5')</script>",
-    "expect_payload": "<script>alert('xssv_fb1428c5')</script>",
+    "payload": "<script>alert('xssv_9cce30d5')</script>",
+    "expect_payload": "<script>alert('xssv_9cce30d5')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -84,8 +84,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_c07561eb')</script",
-    "expect_payload": "\"><script>alert('xssv_c07561eb')</script",
+    "payload": "\"><script>alert('xssv_6deb0b27')</script",
+    "expect_payload": "\"><script>alert('xssv_6deb0b27')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -100,8 +100,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "'><script>alert('xssv_5272d934')</script",
-    "expect_payload": "'><script>alert('xssv_5272d934')</script",
+    "payload": "'><script>alert('xssv_e8eac47c')</script",
+    "expect_payload": "'><script>alert('xssv_e8eac47c')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -116,8 +116,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_41559af6')",
-    "expect_payload": "javascript:alert('xssv_41559af6')",
+    "payload": "javascript:alert('xssv_f8714545')",
+    "expect_payload": "javascript:alert('xssv_f8714545')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -132,8 +132,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_a5979f34')",
-    "expect_payload": "javascript:alert('xssv_a5979f34')",
+    "payload": "javascript:alert('xssv_49a88e2f')",
+    "expect_payload": "javascript:alert('xssv_49a88e2f')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -142,8 +142,8 @@
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_f5a192\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_f5a192\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_79acb9\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_79acb9\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -157,8 +157,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_808faa8e')",
-    "expect_payload": "javascript:alert('xssv_808faa8e')",
+    "payload": "javascript:alert('xssv_abc163f6')",
+    "expect_payload": "javascript:alert('xssv_abc163f6')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -173,8 +173,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_b527be7b')</script",
-    "expect_payload": "\"><script>alert('xssv_b527be7b')</script",
+    "payload": "\"><script>alert('xssv_0b90da99')</script",
+    "expect_payload": "\"><script>alert('xssv_0b90da99')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -189,8 +189,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_0bd612ec')",
-    "expect_payload": "alert('xssv_0bd612ec')",
+    "payload": "alert('xssv_d0fd6a47')",
+    "expect_payload": "alert('xssv_d0fd6a47')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -205,8 +205,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "background:url(javascript:alert('xssv_db",
-    "expect_payload": "background:url(javascript:alert('xssv_db",
+    "payload": "background:url(javascript:alert('xssv_c4",
+    "expect_payload": "background:url(javascript:alert('xssv_c4",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -221,8 +221,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_c594e809')</script",
-    "expect_payload": "\"><script>alert('xssv_c594e809')</script",
+    "payload": "\"><script>alert('xssv_bb3bf2db')</script",
+    "expect_payload": "\"><script>alert('xssv_bb3bf2db')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -237,8 +237,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_1a0cee73')</script",
-    "expect_payload": "\"><script>alert('xssv_1a0cee73')</script",
+    "payload": "\"><script>alert('xssv_db68021e')</script",
+    "expect_payload": "\"><script>alert('xssv_db68021e')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -253,8 +253,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_769fcc89'",
-    "expect_payload": "\"></script><script>alert('xssv_769fcc89'",
+    "payload": "\"></script><script>alert('xssv_690e4c6d'",
+    "expect_payload": "\"></script><script>alert('xssv_690e4c6d'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -269,8 +269,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "';alert('xssv_40933ed4');//",
-    "expect_payload": "';alert('xssv_40933ed4');//",
+    "payload": "';alert('xssv_940101f0');//",
+    "expect_payload": "';alert('xssv_940101f0');//",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -285,8 +285,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_22cd70c0')",
-    "expect_payload": "alert('xssv_22cd70c0')",
+    "payload": "alert('xssv_4dbeea8c')",
+    "expect_payload": "alert('xssv_4dbeea8c')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -301,8 +301,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "${alert('xssv_4becf502')}",
-    "expect_payload": "${alert('xssv_4becf502')}",
+    "payload": "${alert('xssv_9625a012')}",
+    "expect_payload": "${alert('xssv_9625a012')}",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -317,8 +317,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_8a7e8abc')",
-    "expect_payload": "alert('xssv_8a7e8abc')",
+    "payload": "alert('xssv_f18abd4e')",
+    "expect_payload": "alert('xssv_f18abd4e')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -333,8 +333,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_298d91d0'",
-    "expect_payload": "\"></script><script>alert('xssv_298d91d0'",
+    "payload": "\"></script><script>alert('xssv_68b2df2c'",
+    "expect_payload": "\"></script><script>alert('xssv_68b2df2c'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -349,8 +349,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_62b7520d')>",
-    "expect_payload": "<svg/onload=alert('xssv_62b7520d')>",
+    "payload": "<svg/onload=alert('xssv_1680c6fc')>",
+    "expect_payload": "<svg/onload=alert('xssv_1680c6fc')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -365,8 +365,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_db11bf5f')</script",
-    "expect_payload": "\"><script>alert('xssv_db11bf5f')</script",
+    "payload": "\"><script>alert('xssv_8aa0ce56')</script",
+    "expect_payload": "\"><script>alert('xssv_8aa0ce56')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -381,8 +381,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_d84f515d')",
-    "expect_payload": "alert('xssv_d84f515d')",
+    "payload": "alert('xssv_e461e2da')",
+    "expect_payload": "alert('xssv_e461e2da')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -397,8 +397,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_05c5087e')>",
-    "expect_payload": "<svg/onload=alert('xssv_05c5087e')>",
+    "payload": "<svg/onload=alert('xssv_a4bdbd3b')>",
+    "expect_payload": "<svg/onload=alert('xssv_a4bdbd3b')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -429,8 +429,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_bcbe2923')</script",
-    "expect_payload": "\"><script>alert('xssv_bcbe2923')</script",
+    "payload": "\"><script>alert('xssv_365cf9e7')</script",
+    "expect_payload": "\"><script>alert('xssv_365cf9e7')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -445,8 +445,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_32f370cf')",
-    "expect_payload": "javascript:alert('xssv_32f370cf')",
+    "payload": "javascript:alert('xssv_a90e125d')",
+    "expect_payload": "javascript:alert('xssv_a90e125d')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -455,8 +455,8 @@
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_2b5758\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_2b5758\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_a6cec5\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_a6cec5\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -470,8 +470,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_6329b6fe')",
-    "expect_payload": "javascript:alert('xssv_6329b6fe')",
+    "payload": "javascript:alert('xssv_29aac61e')",
+    "expect_payload": "javascript:alert('xssv_29aac61e')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -480,8 +480,8 @@
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_d078c0\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_d078c0\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_4f2df2\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_4f2df2\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -495,8 +495,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "0;url=javascript:alert('xssv_4b74a6e4')",
-    "expect_payload": "0;url=javascript:alert('xssv_4b74a6e4')",
+    "payload": "0;url=javascript:alert('xssv_11fcf524')",
+    "expect_payload": "0;url=javascript:alert('xssv_11fcf524')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -511,8 +511,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_8fc53772')",
-    "expect_payload": "javascript:alert('xssv_8fc53772')",
+    "payload": "javascript:alert('xssv_716bb96e')",
+    "expect_payload": "javascript:alert('xssv_716bb96e')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -527,8 +527,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_825846dd')</script",
-    "expect_payload": "\"><script>alert('xssv_825846dd')</script",
+    "payload": "\"><script>alert('xssv_8fe0f34a')</script",
+    "expect_payload": "\"><script>alert('xssv_8fe0f34a')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -543,8 +543,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_38f110d4')",
-    "expect_payload": "javascript:alert('xssv_38f110d4')",
+    "payload": "javascript:alert('xssv_12e4b8b4')",
+    "expect_payload": "javascript:alert('xssv_12e4b8b4')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -559,8 +559,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "background:url(javascript:alert('xssv_0b",
-    "expect_payload": "background:url(javascript:alert('xssv_0b",
+    "payload": "background:url(javascript:alert('xssv_c2",
+    "expect_payload": "background:url(javascript:alert('xssv_c2",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -575,8 +575,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "--><script>alert('xssv_cc1754b6')</scrip",
-    "expect_payload": "--><script>alert('xssv_cc1754b6')</scrip",
+    "payload": "--><script>alert('xssv_0831bde8')</scrip",
+    "expect_payload": "--><script>alert('xssv_0831bde8')</scrip",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -591,8 +591,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "]]></script><script>alert('xssv_e9919444",
-    "expect_payload": "]]></script><script>alert('xssv_e9919444",
+    "payload": "]]></script><script>alert('xssv_a70c3cba",
+    "expect_payload": "]]></script><script>alert('xssv_a70c3cba",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -607,8 +607,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "{{constructor.constructor('alert('xssv_2",
-    "expect_payload": "{{constructor.constructor('alert('xssv_2",
+    "payload": "{{constructor.constructor('alert('xssv_5",
+    "expect_payload": "{{constructor.constructor('alert('xssv_5",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -623,8 +623,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "{{constructor.constructor('alert('xssv_8",
-    "expect_payload": "{{constructor.constructor('alert('xssv_8",
+    "payload": "{{constructor.constructor('alert('xssv_c",
+    "expect_payload": "{{constructor.constructor('alert('xssv_c",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -639,8 +639,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_b02854dd')</script>",
-    "expect_payload": "<script>alert('xssv_b02854dd')</script>",
+    "payload": "<script>alert('xssv_751d6ba9')</script>",
+    "expect_payload": "<script>alert('xssv_751d6ba9')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -655,8 +655,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_97e08d3f')</script>",
-    "expect_payload": "<script>alert('xssv_97e08d3f')</script>",
+    "payload": "<script>alert('xssv_76e0c6d0')</script>",
+    "expect_payload": "<script>alert('xssv_76e0c6d0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -671,8 +671,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_77dc195c')</script>",
-    "expect_payload": "<script>alert('xssv_77dc195c')</script>",
+    "payload": "<script>alert('xssv_7f8c8241')</script>",
+    "expect_payload": "<script>alert('xssv_7f8c8241')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -687,8 +687,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_903f2565')</script>",
-    "expect_payload": "<script>alert('xssv_903f2565')</script>",
+    "payload": "<script>alert('xssv_25941e5a')</script>",
+    "expect_payload": "<script>alert('xssv_25941e5a')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -703,8 +703,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_cfbefb29')</script>",
-    "expect_payload": "<script>alert('xssv_cfbefb29')</script>",
+    "payload": "<script>alert('xssv_4c68eac1')</script>",
+    "expect_payload": "<script>alert('xssv_4c68eac1')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -719,8 +719,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_fe5523c0')</script>",
-    "expect_payload": "<script>alert('xssv_fe5523c0')</script>",
+    "payload": "<script>alert('xssv_b264bfea')</script>",
+    "expect_payload": "<script>alert('xssv_b264bfea')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -735,8 +735,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_d9eec717')</script>",
-    "expect_payload": "<script>alert('xssv_d9eec717')</script>",
+    "payload": "<script>alert('xssv_aae23647')</script>",
+    "expect_payload": "<script>alert('xssv_aae23647')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -751,8 +751,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_5110969c')</script>",
-    "expect_payload": "<script>alert('xssv_5110969c')</script>",
+    "payload": "<script>alert('xssv_3a5e92d0')</script>",
+    "expect_payload": "<script>alert('xssv_3a5e92d0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -767,8 +767,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_ee9b99f8')</script>",
-    "expect_payload": "<script>alert('xssv_ee9b99f8')</script>",
+    "payload": "<script>alert('xssv_52cf9f87')</script>",
+    "expect_payload": "<script>alert('xssv_52cf9f87')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -783,8 +783,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_e3f90272')>",
-    "expect_payload": "<svg/onload=alert('xssv_e3f90272')>",
+    "payload": "<svg/onload=alert('xssv_9bbe8ab7')>",
+    "expect_payload": "<svg/onload=alert('xssv_9bbe8ab7')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -799,8 +799,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_802c5a57')</script>",
-    "expect_payload": "<script>alert('xssv_802c5a57')</script>",
+    "payload": "<script>alert('xssv_e277c002')</script>",
+    "expect_payload": "<script>alert('xssv_e277c002')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -815,8 +815,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_5169cebb')</script>",
-    "expect_payload": "<script>alert('xssv_5169cebb')</script>",
+    "payload": "<script>alert('xssv_3f4c581d')</script>",
+    "expect_payload": "<script>alert('xssv_3f4c581d')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -831,7 +831,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_40468461",
+    "payload": "xssentinel_dom_5bb9ebaa",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -846,7 +846,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_27773b5d",
+    "payload": "xssentinel_dom_11b0abf3",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -861,7 +861,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_f5f06dab",
+    "payload": "xssentinel_dom_60b815f2",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -876,7 +876,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_cfb0e206",
+    "payload": "xssentinel_dom_63b84004",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -906,7 +906,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_020405c1",
+    "payload": "xssentinel_dom_b48ecb5f",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -921,7 +921,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_6bc194fe",
+    "payload": "xssentinel_dom_f856ac0c",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -936,7 +936,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_dcdc3632",
+    "payload": "xssentinel_dom_2ad09b12",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -951,8 +951,8 @@
   "findings": [
    {
     "type": "stored_dom",
-    "payload": "<script>alert('xssv_728c91b4')</script>",
-    "expect_payload": "<script>alert('xssv_728c91b4')</script>",
+    "payload": "<script>alert('xssv_60c297f5')</script>",
+    "expect_payload": "<script>alert('xssv_60c297f5')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -966,8 +966,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_b7dcc872')</script>",
-    "expect_payload": "<script>alert('xssv_b7dcc872')</script>",
+    "payload": "<script>alert('xssv_8cb98849')</script>",
+    "expect_payload": "<script>alert('xssv_8cb98849')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -982,8 +982,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_3d231afb')</script>",
-    "expect_payload": "<script>alert('xssv_3d231afb')</script>",
+    "payload": "<script>alert('xssv_46c219f0')</script>",
+    "expect_payload": "<script>alert('xssv_46c219f0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -998,8 +998,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_f093f3d0')</script>",
-    "expect_payload": "<script>alert('xssv_f093f3d0')</script>",
+    "payload": "<script>alert('xssv_15a142ca')</script>",
+    "expect_payload": "<script>alert('xssv_15a142ca')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1014,8 +1014,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_ac1f4af3'",
-    "expect_payload": "</textarea><script>alert('xssv_ac1f4af3'",
+    "payload": "</textarea><script>alert('xssv_4106123d'",
+    "expect_payload": "</textarea><script>alert('xssv_4106123d'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1030,8 +1030,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</title><script>alert('xssv_055b7c0b')</",
-    "expect_payload": "</title><script>alert('xssv_055b7c0b')</",
+    "payload": "</title><script>alert('xssv_d8bfb55b')</",
+    "expect_payload": "</title><script>alert('xssv_d8bfb55b')</",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1046,8 +1046,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</xmp><script>alert('xssv_ee0b0e5b')</sc",
-    "expect_payload": "</xmp><script>alert('xssv_ee0b0e5b')</sc",
+    "payload": "</xmp><script>alert('xssv_fbc39d50')</sc",
+    "expect_payload": "</xmp><script>alert('xssv_fbc39d50')</sc",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1062,8 +1062,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_7c3fd843'",
-    "expect_payload": "</textarea><script>alert('xssv_7c3fd843'",
+    "payload": "</textarea><script>alert('xssv_9a84dc86'",
+    "expect_payload": "</textarea><script>alert('xssv_9a84dc86'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1078,8 +1078,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<a id=x href=javascript:alert('xssv_175f",
-    "expect_payload": "<a id=x href=javascript:alert('xssv_175f",
+    "payload": "<a id=x href=javascript:alert('xssv_540b",
+    "expect_payload": "<a id=x href=javascript:alert('xssv_540b",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1094,8 +1094,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<embed src=javascript:alert('xssv_a874c2",
-    "expect_payload": "<embed src=javascript:alert('xssv_a874c2",
+    "payload": "<embed src=javascript:alert('xssv_997e9b",
+    "expect_payload": "<embed src=javascript:alert('xssv_997e9b",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1110,8 +1110,8 @@
   "findings": [
    {
     "type": "polyglot_reflection",
-    "payload": "\">\"</script></style>-->><body onload=ale",
-    "expect_payload": "\">\"</script></style>-->><body onload=ale",
+    "payload": "\">\"</script></style>-->><svg/onload=aler",
+    "expect_payload": "\">\"</script></style>-->><svg/onload=aler",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1119,8 +1119,8 @@
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_7ef3f7\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_7ef3f7\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_45ef1e\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_45ef1e\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1131,16 +1131,27 @@
  },
  {
   "case_id": "neg-filter-05",
-  "findings": [],
-  "verdict": "NO FINDING"
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<embed src=javascript:window['ale'+'rt']",
+    "expect_payload": "<embed src=javascript:window['ale'+'rt']",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": "",
+    "payload_intact": true
+   }
+  ],
+  "verdict": "ok"
  },
  {
   "case_id": "neg-filter-06",
   "findings": [
    {
     "type": "reflected",
-    "payload": "<embed src=javascript:alert('xssv_4fb0c2",
-    "expect_payload": "<embed src=javascript:alert('xssv_4fb0c2",
+    "payload": "<embed src=javascript:alert('xssv_f6e370",
+    "expect_payload": "<embed src=javascript:alert('xssv_f6e370",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1171,8 +1182,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_c96709bf')</script>",
-    "expect_payload": "<script>alert('xssv_c96709bf')</script>",
+    "payload": "<script>alert('xssv_099a5c98')</script>",
+    "expect_payload": "<script>alert('xssv_099a5c98')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1187,8 +1198,8 @@
   "findings": [
    {
     "type": "polyglot_reflection",
-    "payload": "\">\"</script></style>-->><img src=x onerr",
-    "expect_payload": "\">\"</script></style>-->><img src=x onerr",
+    "payload": "\">\"</script></style>-->><video src=x one",
+    "expect_payload": "\">\"</script></style>-->><video src=x one",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1202,8 +1213,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_811e0072'",
-    "expect_payload": "</textarea><script>alert('xssv_811e0072'",
+    "payload": "</textarea><script>alert('xssv_04de9a9e'",
+    "expect_payload": "</textarea><script>alert('xssv_04de9a9e'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1218,8 +1229,8 @@
   "findings": [
    {
     "type": "cookie_xss",
-    "payload": "<svg/onload=alert('xsck_853b30')>",
-    "expect_payload": "<svg/onload=alert('xsck_853b30')>",
+    "payload": "<svg/onload=alert('xsck_a3782e')>",
+    "expect_payload": "<svg/onload=alert('xsck_a3782e')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1234,8 +1245,8 @@
   "findings": [
    {
     "type": "path_xss",
-    "payload": "<script>alert('xspath_ea6f51')</script>",
-    "expect_payload": "<script>alert('xspath_ea6f51')</script>",
+    "payload": "<script>alert('xspath_4b7c1a')</script>",
+    "expect_payload": "<script>alert('xspath_4b7c1a')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1249,8 +1260,8 @@
   "findings": [
    {
     "type": "error_page_xss",
-    "payload": "<svg/onload=alert('xserr_52374d')>",
-    "expect_payload": "<svg/onload=alert('xserr_52374d')>",
+    "payload": "<svg/onload=alert('xserr_835937')>",
+    "expect_payload": "<svg/onload=alert('xserr_835937')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1279,8 +1290,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_44ac6dfe')</script>",
-    "expect_payload": "<script>alert('xssv_44ac6dfe')</script>",
+    "payload": "<script>alert('xssv_4667a7a4')</script>",
+    "expect_payload": "<script>alert('xssv_4667a7a4')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1295,8 +1306,8 @@
   "findings": [
    {
     "type": "stored",
-    "payload": "<script>alert('xssv_7d399f9e')</script>",
-    "expect_payload": "<script>alert('xssv_7d399f9e')</script>",
+    "payload": "<script>alert('xssv_fbe02a79')</script>",
+    "expect_payload": "<script>alert('xssv_fbe02a79')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1310,8 +1321,8 @@
   "findings": [
    {
     "type": "upload_xss",
-    "payload": "<svg/onload=alert('xssup_e00e')>.svg",
-    "expect_payload": "<svg/onload=alert('xssup_e00e')>.svg",
+    "payload": "<svg/onload=alert('xssup_ecac')>.svg",
+    "expect_payload": "<svg/onload=alert('xssup_ecac')>.svg",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1498,13 +1509,14 @@
   "case_id": "pos-waf-01",
   "findings": [
    {
-    "type": "polyglot_reflection",
-    "payload": "\">\"</script></style>-->><body onload=ale",
-    "expect_payload": "\">\"</script></style>-->><body onload=ale",
+    "type": "reflected",
+    "payload": "<embed src=javascript:window['ale'+'rt']",
+    "expect_payload": "<embed src=javascript:window['ale'+'rt']",
     "has_payload": true,
     "path_ok": true,
-    "replay": "n/a (carrier not replayable)",
-    "note": ""
+    "replay": "ok",
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1514,8 +1526,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_c6df9a24')</script>",
-    "expect_payload": "<script>alert('xssv_c6df9a24')</script>",
+    "payload": "<script>alert('xssv_56b4263f')</script>",
+    "expect_payload": "<script>alert('xssv_56b4263f')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1530,8 +1542,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_f900b212')</script>",
-    "expect_payload": "<script>alert('xssv_f900b212')</script>",
+    "payload": "<script>alert('xssv_a7ff1afa')</script>",
+    "expect_payload": "<script>alert('xssv_a7ff1afa')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1546,8 +1558,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_ffa8b5dd'",
-    "expect_payload": "\"></script><script>alert('xssv_ffa8b5dd'",
+    "payload": "\"></script><script>alert('xssv_bcc6b7dd'",
+    "expect_payload": "\"></script><script>alert('xssv_bcc6b7dd'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1593,8 +1605,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_3f22e93a')</script>",
-    "expect_payload": "<script>alert('xssv_3f22e93a')</script>",
+    "payload": "<script>alert('xssv_36768d88')</script>",
+    "expect_payload": "<script>alert('xssv_36768d88')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1609,8 +1621,8 @@
   "findings": [
    {
     "type": "dom_clobber",
-    "payload": "<a id=xclob_b8c432 name=xclob_b8c432 hre",
-    "expect_payload": "<a id=xclob_b8c432 name=xclob_b8c432 hre",
+    "payload": "<a id=xclob_5756e0 name=xclob_5756e0 hre",
+    "expect_payload": "<a id=xclob_5756e0 name=xclob_5756e0 hre",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1654,8 +1666,8 @@
   "findings": [
    {
     "type": "second_order",
-    "payload": "<img src=x onerror=alert('xsso_2471417a'",
-    "expect_payload": "<img src=x onerror=alert('xsso_2471417a'",
+    "payload": "<img src=x onerror=alert('xsso_7dcc1de1'",
+    "expect_payload": "<img src=x onerror=alert('xsso_7dcc1de1'",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1669,8 +1681,8 @@
   "findings": [
    {
     "type": "scenario",
-    "payload": "xssv_096f9739",
-    "expect_payload": "xssv_096f9739",
+    "payload": "xssv_275bfefd",
+    "expect_payload": "xssv_275bfefd",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1714,8 +1726,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_580ec8e0')</script>",
-    "expect_payload": "<script>alert('xssv_580ec8e0')</script>",
+    "payload": "<script>alert('xssv_cabf6687')</script>",
+    "expect_payload": "<script>alert('xssv_cabf6687')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1730,8 +1742,8 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_eed591bd')</script>",
-    "expect_payload": "<script>alert('xssv_eed591bd')</script>",
+    "payload": "<script>alert('xssv_669f054e')</script>",
+    "expect_payload": "<script>alert('xssv_669f054e')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -1746,8 +1758,8 @@
   "findings": [
    {
     "type": "stored_dom",
-    "payload": "<script>alert('xssv_07b59ab0')</script>",
-    "expect_payload": "<script>alert('xssv_07b59ab0')</script>",
+    "payload": "<script>alert('xssv_fd620457')</script>",
+    "expect_payload": "<script>alert('xssv_fd620457')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
