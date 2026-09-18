@@ -1,0 +1,1706 @@
+[
+ {
+  "case_id": "pos-elem-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_bde811ae')</script>",
+    "expect_payload": "<script>alert('xssv_bde811ae')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-elem-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_1a4a6ee1')</script>",
+    "expect_payload": "<script>alert('xssv_1a4a6ee1')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-elem-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_7d2b4cc8')</script>",
+    "expect_payload": "<script>alert('xssv_7d2b4cc8')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-elem-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_8c5791e7')</script>",
+    "expect_payload": "<script>alert('xssv_8c5791e7')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-elem-05",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_86cde176')</script>",
+    "expect_payload": "<script>alert('xssv_86cde176')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_e980e25d')</script",
+    "expect_payload": "\"><script>alert('xssv_e980e25d')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "'><script>alert('xssv_be61e84d')</script",
+    "expect_payload": "'><script>alert('xssv_be61e84d')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_82382390')",
+    "expect_payload": "javascript:alert('xssv_82382390')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_89f3cd90')",
+    "expect_payload": "javascript:alert('xssv_89f3cd90')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   },
+   {
+    "type": "markdown_xss",
+    "payload": "![x](x\" onerror=alert(\"xsmd_a5bea9\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_a5bea9\"))",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-05",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_523758f3')",
+    "expect_payload": "javascript:alert('xssv_523758f3')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-06",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_3fb52f80')</script",
+    "expect_payload": "\"><script>alert('xssv_3fb52f80')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-07",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "alert('xssv_2bdd2846')",
+    "expect_payload": "alert('xssv_2bdd2846')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-08",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "background:url(javascript:alert('xssv_6a",
+    "expect_payload": "background:url(javascript:alert('xssv_6a",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-09",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_d5c74320')</script",
+    "expect_payload": "\"><script>alert('xssv_d5c74320')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-attr-10",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_8eef3cd8')</script",
+    "expect_payload": "\"><script>alert('xssv_8eef3cd8')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"></script><script>alert('xssv_94fb3e10'",
+    "expect_payload": "\"></script><script>alert('xssv_94fb3e10'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "';alert('xssv_3a052536');//",
+    "expect_payload": "';alert('xssv_3a052536');//",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "alert('xssv_1cffb225')",
+    "expect_payload": "alert('xssv_1cffb225')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "${alert('xssv_834ebf13')}",
+    "expect_payload": "${alert('xssv_834ebf13')}",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-05",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "alert('xssv_12f50637')",
+    "expect_payload": "alert('xssv_12f50637')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-script-06",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"></script><script>alert('xssv_4bb51fde'",
+    "expect_payload": "\"></script><script>alert('xssv_4bb51fde'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-svg-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<svg/onload=alert('xssv_0e8bc436')>",
+    "expect_payload": "<svg/onload=alert('xssv_0e8bc436')>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-svg-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_1bc792ca')</script",
+    "expect_payload": "\"><script>alert('xssv_1bc792ca')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-svg-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "alert('xssv_4f9b2f86')",
+    "expect_payload": "alert('xssv_4f9b2f86')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-svg-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<svg/onload=alert('xssv_2445e7b3')>",
+    "expect_payload": "<svg/onload=alert('xssv_2445e7b3')>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-math-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<math><mtext><img src=x onerror=alert('x",
+    "expect_payload": "<math><mtext><img src=x onerror=alert('x",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-math-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_c43d0490')</script",
+    "expect_payload": "\"><script>alert('xssv_c43d0490')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_800051cd')",
+    "expect_payload": "javascript:alert('xssv_800051cd')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   },
+   {
+    "type": "markdown_xss",
+    "payload": "![x](x\" onerror=alert(\"xsmd_f46b51\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_f46b51\"))",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_09877cda')",
+    "expect_payload": "javascript:alert('xssv_09877cda')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   },
+   {
+    "type": "markdown_xss",
+    "payload": "![x](x\" onerror=alert(\"xsmd_0662f0\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_0662f0\"))",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "0;url=javascript:alert('xssv_e5be38a3')",
+    "expect_payload": "0;url=javascript:alert('xssv_e5be38a3')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_5c3cbfb4')",
+    "expect_payload": "javascript:alert('xssv_5c3cbfb4')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-05",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"><script>alert('xssv_fbe04bb8')</script",
+    "expect_payload": "\"><script>alert('xssv_fbe04bb8')</script",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-url-06",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "javascript:alert('xssv_0cf6f829')",
+    "expect_payload": "javascript:alert('xssv_0cf6f829')",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-style-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "background:url(javascript:alert('xssv_fa",
+    "expect_payload": "background:url(javascript:alert('xssv_fa",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-comment-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "--><script>alert('xssv_4956cea0')</scrip",
+    "expect_payload": "--><script>alert('xssv_4956cea0')</scrip",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-cdata-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "]]></script><script>alert('xssv_9461241c",
+    "expect_payload": "]]></script><script>alert('xssv_9461241c",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-tpl-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "{{constructor.constructor('alert('xssv_1",
+    "expect_payload": "{{constructor.constructor('alert('xssv_1",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-tpl-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "{{constructor.constructor('alert('xssv_b",
+    "expect_payload": "{{constructor.constructor('alert('xssv_b",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-embed-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_1d9798e7')</script>",
+    "expect_payload": "<script>alert('xssv_1d9798e7')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-form-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_bbd4e915')</script>",
+    "expect_payload": "<script>alert('xssv_bbd4e915')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-input-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_5fb7a354')</script>",
+    "expect_payload": "<script>alert('xssv_5fb7a354')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-select-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_b6476395')</script>",
+    "expect_payload": "<script>alert('xssv_b6476395')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-details-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_7ddb1c39')</script>",
+    "expect_payload": "<script>alert('xssv_7ddb1c39')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-video-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_73682a8f')</script>",
+    "expect_payload": "<script>alert('xssv_73682a8f')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-body-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_c5774274')</script>",
+    "expect_payload": "<script>alert('xssv_c5774274')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-a-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_1a255f2b')</script>",
+    "expect_payload": "<script>alert('xssv_1a255f2b')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-div-tab-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_bf8a8421')</script>",
+    "expect_payload": "<script>alert('xssv_bf8a8421')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-foreign-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<svg/onload=alert('xssv_1f5e51a9')>",
+    "expect_payload": "<svg/onload=alert('xssv_1f5e51a9')>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-encode-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_93a2faf1')</script>",
+    "expect_payload": "<script>alert('xssv_93a2faf1')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-encode-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_4c526f48')</script>",
+    "expect_payload": "<script>alert('xssv_4c526f48')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-01",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_9f8148ed",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-02",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_2b6e8616",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-03",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_6b7c2127",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-04",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_b4d6f67f",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-05",
+  "findings": [
+   {
+    "type": "dom",
+    "payload": "$('#out').html(location.hash.slice(1));",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   },
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_9a8154d8",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-06",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_b2a14cfd",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-07",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_3222bceb",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dom-08",
+  "findings": [
+   {
+    "type": "dom_dynamic",
+    "payload": "xssentinel_dom_3ba648cc",
+    "expect_payload": "<img src=x onerror=alert(document.domain",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-stored-02",
+  "findings": [
+   {
+    "type": "stored_dom",
+    "payload": "<script>alert('xssv_6c8d7ed9')</script>",
+    "expect_payload": "<script>alert('xssv_6c8d7ed9')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-polyglot-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_5d5763f2')</script>",
+    "expect_payload": "<script>alert('xssv_5d5763f2')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-marquee-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_6b82ba54')</script>",
+    "expect_payload": "<script>alert('xssv_6b82ba54')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-audio-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_998a793b')</script>",
+    "expect_payload": "<script>alert('xssv_998a793b')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-rcdata-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "</textarea><script>alert('xssv_2f5cfa91'",
+    "expect_payload": "</textarea><script>alert('xssv_2f5cfa91'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-rcdata-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "</title><script>alert('xssv_14f2d3f6')</",
+    "expect_payload": "</title><script>alert('xssv_14f2d3f6')</",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-rcdata-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "</xmp><script>alert('xssv_37a5bec9')</sc",
+    "expect_payload": "</xmp><script>alert('xssv_37a5bec9')</sc",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-rcdata-04",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "</textarea><script>alert('xssv_0fd8f716'",
+    "expect_payload": "</textarea><script>alert('xssv_0fd8f716'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-filter-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<a id=x href=javascript:alert('xssv_7964",
+    "expect_payload": "<a id=x href=javascript:alert('xssv_7964",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-filter-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<embed src=javascript:alert('xssv_b22206",
+    "expect_payload": "<embed src=javascript:alert('xssv_b22206",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "neg-filter-03",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "data:text/html,<script>alert('xssv_55200",
+    "expect_payload": "data:text/html,<script>alert('xssv_55200",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "payload NOT in replayed response",
+    "note": ""
+   },
+   {
+    "type": "markdown_xss",
+    "payload": "![x](x\" onerror=alert(\"xsmd_c25ddc\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_c25ddc\"))",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "DEFECT"
+ },
+ {
+  "case_id": "neg-filter-05",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<embed src=javascript:alert('xssv_b31274",
+    "expect_payload": "<embed src=javascript:alert('xssv_b31274",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "payload NOT in replayed response",
+    "note": ""
+   }
+  ],
+  "verdict": "DEFECT"
+ },
+ {
+  "case_id": "neg-filter-06",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<embed src=javascript:alert('xssv_edbdee",
+    "expect_payload": "<embed src=javascript:alert('xssv_edbdee",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-csp-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script nonce='k8Fj3x9Qm2Rw7Yp4'>alert('",
+    "expect_payload": "<script nonce='k8Fj3x9Qm2Rw7Yp4'>alert('",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-csp-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_e7a30504')</script>",
+    "expect_payload": "<script>alert('xssv_e7a30504')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-multi-01",
+  "findings": [
+   {
+    "type": "polyglot_reflection",
+    "payload": "</script></style>\">'>><svg/onload=alert(",
+    "expect_payload": "</script></style>\">'>><svg/onload=alert(",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-multi-02",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "</textarea><script>alert('xssv_9fa44501'",
+    "expect_payload": "</textarea><script>alert('xssv_9fa44501'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-cookie-01",
+  "findings": [
+   {
+    "type": "cookie_xss",
+    "payload": "<svg/onload=alert('xsck_9c3b94')>",
+    "expect_payload": "<svg/onload=alert('xsck_9c3b94')>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-path-01",
+  "findings": [
+   {
+    "type": "path_xss",
+    "payload": "<script>alert('xspath_857a83')</script>",
+    "expect_payload": "<script>alert('xspath_857a83')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-error-01",
+  "findings": [
+   {
+    "type": "error_page_xss",
+    "payload": "<svg/onload=alert('xserr_a9b3f4')>",
+    "expect_payload": "<svg/onload=alert('xserr_a9b3f4')>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-cors-01",
+  "findings": [
+   {
+    "type": "cors_misconfig",
+    "payload": "https://xssentinel-cors.invalid",
+    "expect_payload": "https://xssentinel-cors.invalid",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-markdown-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_3488122e')</script>",
+    "expect_payload": "<script>alert('xssv_3488122e')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-stored-01",
+  "findings": [
+   {
+    "type": "stored",
+    "payload": "<script>alert('xssv_0f511cfc')</script>",
+    "expect_payload": "<script>alert('xssv_0f511cfc')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-upload-01",
+  "findings": [
+   {
+    "type": "upload_xss",
+    "payload": "<svg/onload=alert('xssup_6607')>.svg",
+    "expect_payload": "<svg/onload=alert('xssup_6607')>.svg",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-redirect-01",
+  "findings": [
+   {
+    "type": "open_redirect_xss",
+    "payload": "javascript:alert(1)//",
+    "expect_payload": "javascript:alert(1)//",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-proto-01",
+  "findings": [
+   {
+    "type": "prototype_pollution",
+    "payload": "(prototype pollution)",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-sw-01",
+  "findings": [
+   {
+    "type": "service_worker_xss",
+    "payload": "(SW register: )",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-worker-01",
+  "findings": [
+   {
+    "type": "web_worker_xss",
+    "payload": "(new Worker: )",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-dangle-01",
+  "findings": [
+   {
+    "type": "dangling_markup_potential",
+    "payload": "(DanglingMarkup: dangling_markup_potenti",
+    "expect_payload": "(DanglingMarkup: dangling_markup_potenti",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-importmap-01",
+  "findings": [
+   {
+    "type": "import_map_cross_origin",
+    "payload": "(ImportMap: import_map_cross_origin)",
+    "expect_payload": "(ImportMap: import_map_cross_origin)",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-sri-01",
+  "findings": [
+   {
+    "type": "sri_missing_script",
+    "payload": "(SRI: sri_missing_script)",
+    "expect_payload": "(SRI: sri_missing_script)",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-tt-01",
+  "findings": [
+   {
+    "type": "trusted_types_policy_bypass",
+    "payload": "(TT: tt_policy_bypass)",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-ws-01",
+  "findings": [
+   {
+    "type": "websocket_xss",
+    "payload": "(WebSocket onmessage sink)",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-sanitizer-01",
+  "findings": [
+   {
+    "type": "sanitizer_vulnerable_version",
+    "payload": "(Sanitizer: sanitizer_vulnerable_version",
+    "expect_payload": "(Sanitizer: sanitizer_vulnerable_version",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   },
+   {
+    "type": "sanitizer_output_to_innerhtml",
+    "payload": "(Sanitizer: sanitizer_output_to_innerhtm",
+    "expect_payload": "(Sanitizer: sanitizer_output_to_innerhtm",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-graphql-01",
+  "findings": [
+   {
+    "type": "graphql_xss",
+    "payload": "(GraphQL data sink)",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-waf-01",
+  "findings": [
+   {
+    "type": "polyglot_reflection",
+    "payload": "\">\"</script></style>-->><video src=x one",
+    "expect_payload": "\">\"</script></style>-->><video src=x one",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-formmine-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_67185314')</script>",
+    "expect_payload": "<script>alert('xssv_67185314')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-jsmine-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_e47d3ba3')</script>",
+    "expect_payload": "<script>alert('xssv_e47d3ba3')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-pmmine-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "\"></script><script>alert('xssv_79244498'",
+    "expect_payload": "\"></script><script>alert('xssv_79244498'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-cssi-01",
+  "findings": [
+   {
+    "type": "css_import_injection",
+    "payload": "(CSSI: css_import_injection)",
+    "expect_payload": "(CSSI: css_import_injection)",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-preenc-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "eyJwYWdlIjogInByb2ZpbGUiLCAieHNzZW50aW5l",
+    "expect_payload": "eyJwYWdlIjogInByb2ZpbGUiLCAieHNzZW50aW5l",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-pshift-01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_71b445cd')</script>",
+    "expect_payload": "<script>alert('xssv_71b445cd')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-clobber-01",
+  "findings": [
+   {
+    "type": "dom_clobber",
+    "payload": "<a id=xclob_56207c name=xclob_56207c hre",
+    "expect_payload": "<a id=xclob_56207c name=xclob_56207c hre",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-blind-01",
+  "findings": [
+   {
+    "type": "blind",
+    "payload": "<script>new Image().src='http://127.0.0.",
+    "expect_payload": "<script>new Image().src='http://127.0.0.",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-tb-01",
+  "findings": [
+   {
+    "type": "time_based_xss",
+    "payload": "<style>@import url('http://127.0.0.1:890",
+    "expect_payload": "<style>@import url('http://127.0.0.1:890",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-so2-01",
+  "findings": [
+   {
+    "type": "second_order",
+    "payload": "<img src=x onerror=alert('xsso_37dabb12'",
+    "expect_payload": "<img src=x onerror=alert('xsso_37dabb12'",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-scn-01",
+  "findings": [
+   {
+    "type": "scenario",
+    "payload": "xssv_3eed5ae7",
+    "expect_payload": "xssv_3eed5ae7",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-xs-01",
+  "findings": [
+   {
+    "type": "xs_leak_surface",
+    "payload": "",
+    "expect_payload": "",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (descriptor finding)",
+    "note": "payload field describes the sink, not a value"
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-mx-01",
+  "findings": [
+   {
+    "type": "mutation_xss",
+    "payload": "<svg><style><img src=x onerror=alert(1)>",
+    "expect_payload": "<svg><style><img src=x onerror=alert(1)>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "n/a (carrier not replayable)",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "aux-r-formecho01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_58de5d56')</script>",
+    "expect_payload": "<script>alert('xssv_58de5d56')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "aux-r-jsecho01",
+  "findings": [
+   {
+    "type": "reflected",
+    "payload": "<script>alert('xssv_3a414358')</script>",
+    "expect_payload": "<script>alert('xssv_3a414358')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ },
+ {
+  "case_id": "pos-stored-03",
+  "findings": [
+   {
+    "type": "stored_dom",
+    "payload": "<script>alert('xssv_0db79380')</script>",
+    "expect_payload": "<script>alert('xssv_0db79380')</script>",
+    "has_payload": true,
+    "path_ok": true,
+    "replay": "ok",
+    "note": ""
+   }
+  ],
+  "verdict": "ok"
+ }
+]

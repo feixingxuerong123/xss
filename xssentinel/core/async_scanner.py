@@ -740,6 +740,10 @@ class AsyncScanner:
                         type="reflected",
                         confidence="high",
                         transform=tchain,
+                        # Phase 164 (sync parity, scanner._record): record
+                        # WHERE the payload rode so the PoC replays the same
+                        # carrier instead of guessing it from the method.
+                        param_in="body" if is_body else "query",
                     )
                     param_confirmed = True
                     break  # leave the variant loop; outer loop re-checks
@@ -788,6 +792,10 @@ class AsyncScanner:
                         type="reflected",
                         confidence="high",
                         transform=["position_shift"],
+                        # Phase 164: the shift re-fires the parameter into the
+                        # OTHER location, so the carrier here is the FLIPPED
+                        # one -- exactly the value the PoC needs.
+                        param_in="query" if is_body else "body",
                     )
                     param_confirmed = True
                     break
@@ -865,6 +873,7 @@ class AsyncScanner:
                                 type="reflected",
                                 confidence="high",
                                 transform=["csp_nonce"],
+                                param_in="body" if is_body else "query",
                             )
 
         # Phase 132: L7 parameter layers (mutation / DOM clobber / template
@@ -1007,6 +1016,7 @@ class AsyncScanner:
                     type="reflected",
                     confidence="high",
                     transform=[f"pre_encode:{struct}"],
+                    param_in="body" if is_body else "query",
                 )
                 return
 

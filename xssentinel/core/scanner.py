@@ -1264,6 +1264,15 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             "type": ftype, "context": context, "payload": payload,
             "transform": tset, "severity": severity,
             "confidence": confidence, "detail": detail,
+            # Phase 164: WHERE the payload actually rode.  The PoC generator
+            # used to infer this from the method ("POST -> body"), which is
+            # wrong for every position-shift finding: _try_position_shift
+            # re-fires the parameter into the OTHER location, so a POST whose
+            # payload rode the query shipped a curl with the payload in the
+            # body -- the one place the WAF inspects.  Measured on
+            # pos-pshift-01: the shipped PoC replayed into "Sorry, you have
+            # been blocked", while the query carrier returns 200 and reflects.
+            "param_in": "body" if is_body else "query",
             "headless": headless, "proof": _proof(resp, method, param, payload),
         }))
 

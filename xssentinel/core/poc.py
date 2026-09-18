@@ -132,34 +132,67 @@ def build_poc(finding, csrf_fields: dict | None = None,
             f"<pre>{_html_escape(poc['curl'])}</pre>\n</body></html>")
         return poc
 
+    # Phase 164: honour the carrier the scanner recorded.  Inferring it from
+    # the method ("POST -> body") is wrong for every position-shift finding:
+    # scanner._try_position_shift re-fires the payload into the OTHER location
+    # to slip past a WAF that guards only the original one, so the shipped
+    # curl put the payload in the one place the WAF inspects.  Measured on
+    # pos-pshift-01: the PoC replayed into "Sorry, you have been blocked",
+    # while `-X POST '<url>?q=<payload>'` returns 200 and reflects.
+    param_in = str(d.get("param_in") or "").lower()
     if param:
-        if method == "GET":
+        if param_in == "query" or method == "GET":
             p = urlparse(url)
             q = dict(parse_qsl(p.query, keep_blank_values=True))
             q[param] = poc_payload
             url_poc = urlunparse(p._replace(query=urlencode(q)))
             poc["url"] = url_poc
-            poc["curl"] = f"curl -i{cookie_arg}{hdr_args} '{url_poc}'"
-        else:  # POST / other
-            if ftype in ("upload_xss", "stored_upload") and param:
-                # Multipart upload finding: the payload lives in the FILE
-                # NAME, so the curl replay must send a real multipart part
-                # with that filename (@/dev/null = empty file content, the
-                # server only cares about the name).  A browser cannot
-                # preset a filename, so the HTML PoC (below) is a note.
-                fld = param.replace("[filename]", "")
-                poc["curl"] = (
-                    f"curl -i{cookie_arg}{hdr_args} -X POST '{url}' "
-                    f"-F '{fld}=@/dev/null;filename={_enc(poc_payload)}'")
+            if method == "GET":
+                poc["curl"] = f"curl -i{cookie_arg}{hdr_args} '{url_poc}'"
             else:
-                # Full body: the CSRF/hidden fields the endpoint required +
-                # the injected parameter.  urlencode makes it shell-safe
-                # inside single quotes (no raw quotes survive).
-                body = dict(csrf_fields)
-                body[param] = poc_payload
-                body_qs = urlencode(body)
+                # POST whose payload rode the query: keep the method (the
+                # endpoint may require it), send no body at all.
                 poc["curl"] = (f"curl -i{cookie_arg}{hdr_args} -X {method} "
-                               f"'{url}' --data '{body_qs}'")
+                               f"'{url_poc}'")
+        elif (ftype in ("upload_xss", "stored_upload")):
+            # Multipart upload finding: the payload lives in the FILE NAME,
+            # so the curl replay must send a real multipart part with that
+            # filename (@/dev/null = empty file content, the server only cares
+            # about the name).  A browser cannot preset a filename, so the
+            # HTML PoC (below) is a note.
+            fld = param.replace("[filename]", "")
+            poc["curl"] = (
+                f"curl -i{cookie_arg}{hdr_args} -X POST '{url}' "
+                f"-F '{fld}=@/dev/null;filename={_enc(poc_payload)}'")
+        else:  # POST / other, payload in the body
+            # Full body: the CSRF/hidden fields the endpoint required +
+            # the injected parameter.  urlencode makes it shell-safe
+            # inside single quotes (no raw quotes survive).
+            body = dict(csrf_fields)
+            body[param] = poc_payload
+            body_qs = urlencode(body)
+            poc["curl"] = (f"curl -i{cookie_arg}{hdr_args} -X {method} "
+                           f"'{url}' --data '{body_qs}'")
+    elif ftype == "cors_misconfig" and payload:
+        # Phase 164: this finding has no injectable PARAMETER -- its carrier is
+        # a request header -- so it fell into the "no parameter" branch and the
+        # PoC was a placeholder ("no injectable parameter; open the HTML PoC
+        # below") that reproduces nothing.  Measured on pos-cors-01: the
+        # payload is the attacker Origin and the evidence already carries the
+        # exact request, so ship that as the curl.
+        poc["url"] = url
+        # A HEADER value is not URL-encoded (the scanner sent it raw -- see
+        # the finding's evidence), so percent-encoding it here would put a
+        # mangled origin on the wire and a validating server would reject it.
+        safe_origin = str(payload).replace("'", "")
+        poc["curl"] = (f"curl -i{cookie_arg}{hdr_args} '{url}' "
+                       f"-H 'Origin: {safe_origin}'")
+        poc["html"] = (
+            f"<html><body>\n"
+            f"<!-- CORS misconfiguration: the server echoes the attacker "
+            f"Origin in Access-Control-Allow-Origin -->\n"
+            f"<pre>{_html_escape(poc['curl'])}</pre>\n</body></html>")
+        return poc
     else:
         # No parameter (pure DOM sink via hash/cookie): the PoC is the HTML page.
         poc["curl"] = (f"# No injectable parameter; open the HTML PoC below "
@@ -185,6 +218,19 @@ def _html_poc(d, url, method, param, payload, ftype,
         return (f'<html><body>\n'
                 f'<!-- DOM-XSS PoC: navigates the vulnerable page with the '
                 f'payload in the taint source -->\n'
+                f'<script>window.location.href="{esc(target)}";</script>\n'
+                f'</body></html>')
+    if str(d.get("param_in") or "").lower() == "query" and param:
+        # Phase 164: the payload rode the QUERY (position-shift finding).  A
+        # form would put it back in the body -- the one place the WAF guards,
+        # which is why the shift exists.  Navigate with it in the URL instead.
+        p = urlparse(url)
+        q = dict(parse_qsl(p.query, keep_blank_values=True))
+        q[param] = payload
+        target = urlunparse(p._replace(query=urlencode(q)))
+        return (f'<html><body>\n'
+                f'<!-- payload rides the QUERY (position shift): a form would '
+                f'put it back in the body the WAF inspects -->\n'
                 f'<script>window.location.href="{esc(target)}";</script>\n'
                 f'</body></html>')
     if ftype in ("upload_xss", "stored_upload"):
