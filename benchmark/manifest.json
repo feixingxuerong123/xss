@@ -584,18 +584,20 @@
       "context": "dom_xss",
       "difficulty": "easy",
       "source": "OWASP",
-      "note": "location.hash -> innerHTML"
+      "finding_types": ["dom_dynamic"],
+      "note": "location.hash -> innerHTML. Phase 161: declares dom_dynamic so this case can only be credited by the REAL BROWSER. Measured before: removing every DOM-family finding still left it TP via a trusted_types_taint_flow note, so a dead browser engine was invisible to the benchmark."
     },
     {
       "id": "pos-dom-02",
       "path": "/dom/search-eval",
-      "param": "",
+      "param": "x",
       "mode": "dom_search_eval",
       "ground_truth": "vulnerable",
       "context": "dom_xss",
       "difficulty": "medium",
       "source": "OWASP",
-      "note": "location.search -> eval"
+      "finding_types": ["dom_dynamic"],
+      "note": "location.search -> eval. Phase 161: (a) param was empty, so the URL carried no query at all and the engine had no real parameter to swap -- the page reads a specific name, so the generic __xss__ probe could not reach it; the vector was unreachable and the case passed on static hints alone. Declaring the parameter the page actually consumes makes the flow testable. (b) The engine only hooked the Function constructor, never a direct eval(), so even with the right parameter it could not be confirmed -- fixed in dom_engine.py (Phase 161)."
     },
     {
       "id": "pos-dom-03",
@@ -606,7 +608,8 @@
       "context": "dom_xss",
       "difficulty": "medium",
       "source": "OWASP",
-      "note": "postMessage event.data -> innerHTML"
+      "finding_types": ["dom_dynamic"],
+      "note": "postMessage event.data -> innerHTML. Phase 161: declares dom_dynamic -- before, this case was also credited by a websocket_xss and a trusted_types note, so the browser engine was not what earned the verdict."
     },
     {
       "id": "pos-dom-04",
@@ -617,7 +620,8 @@
       "context": "dom_xss",
       "difficulty": "easy",
       "source": "OWASP",
-      "note": "location.hash -> document.write"
+      "finding_types": ["dom_dynamic"],
+      "note": "location.hash -> document.write. Phase 161: declares dom_dynamic (the browser is the only layer that proves it; a Trusted Types note used to credit it as well)."
     },
     {
       "id": "pos-dom-05",
@@ -628,7 +632,8 @@
       "context": "dom_xss",
       "difficulty": "medium",
       "source": "OWASP",
-      "note": "location.hash -> jQuery .html()"
+      "finding_types": ["dom_dynamic", "dom"],
+      "note": "location.hash -> jQuery .html(). Phase 161: the page loads jQuery from code.jquery.com, so with no egress the library never arrives and the browser cannot run .html() -- requiring dom_dynamic here would make the case depend on the network. It therefore requires DOM-FAMILY evidence (dynamic confirmation OR the L3 static DOM hint) instead of the SRI/Trusted-Types collateral that used to credit it."
     },
     {
       "id": "pos-dom-06",
@@ -639,7 +644,8 @@
       "context": "dom_xss",
       "difficulty": "hard",
       "source": "OWASP",
-      "note": "location.hash -> setTimeout string"
+      "finding_types": ["dom_dynamic"],
+      "note": "location.hash -> setTimeout string. Phase 161: declares dom_dynamic. Worth noting how this one hid a dead browser: with the engine ON the static L3 hint is SUPPRESSED by the dynamic confirmation, so the credited type is dom_dynamic; with the engine OFF the static `dom` hint surfaces and still credits the case -- the fallback masks the failure."
     },
     {
       "id": "pos-dom-07",

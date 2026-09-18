@@ -1,0 +1,2327 @@
+[
+ {
+  "case_id": "pos-elem-01",
+  "mode": "raw_element",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.4,
+  "error": ""
+ },
+ {
+  "case_id": "pos-elem-02",
+  "mode": "raw_element_table",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-elem-03",
+  "mode": "raw_element_nested",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-elem-04",
+  "mode": "raw_element_span",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-elem-05",
+  "mode": "raw_element_li",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-01",
+  "mode": "raw_attr_dq",
+  "context": "html_attribute_dq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-02",
+  "mode": "raw_attr_sq",
+  "context": "html_attribute_sq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-03",
+  "mode": "raw_attr_nq",
+  "context": "html_attribute_noquote",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-04",
+  "mode": "raw_attr_dq_href",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "bound_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-05",
+  "mode": "raw_attr_dq_src",
+  "context": "html_attribute_dq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-06",
+  "mode": "raw_attr_dq_action",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.0,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-07",
+  "mode": "raw_attr_dq_event",
+  "context": "event_handler",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-08",
+  "mode": "raw_attr_dq_style",
+  "context": "css_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-09",
+  "mode": "raw_attr_dq_formaction",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-attr-10",
+  "mode": "raw_attr_dq_data",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-01",
+  "mode": "raw_script_string_dq",
+  "context": "script_string_dq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-02",
+  "mode": "raw_script_string_sq",
+  "context": "script_string_sq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-03",
+  "mode": "raw_script_block",
+  "context": "script_block",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-04",
+  "mode": "raw_script_template",
+  "context": "script_template",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-05",
+  "mode": "raw_script_comment",
+  "context": "script_block",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-script-06",
+  "mode": "raw_script_close",
+  "context": "script_block",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-svg-01",
+  "mode": "raw_svg",
+  "context": "svg_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-svg-02",
+  "mode": "raw_svg_attr",
+  "context": "html_attribute_dq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-svg-03",
+  "mode": "raw_svg_onload",
+  "context": "event_handler",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-svg-04",
+  "mode": "raw_svg_animate",
+  "context": "svg_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-math-01",
+  "mode": "raw_math",
+  "context": "math_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.4,
+  "error": ""
+ },
+ {
+  "case_id": "pos-math-02",
+  "mode": "raw_math_href",
+  "context": "math_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-01",
+  "mode": "raw_href_js",
+  "context": "url_javascript",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "bound_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-02",
+  "mode": "raw_href_data",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "bound_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-03",
+  "mode": "raw_meta_refresh",
+  "context": "meta_refresh",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-04",
+  "mode": "raw_iframe_src",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-05",
+  "mode": "raw_iframe_srcdoc",
+  "context": "html_attribute_dq",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-url-06",
+  "mode": "raw_base_href",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-style-01",
+  "mode": "raw_style_block",
+  "context": "css_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-comment-01",
+  "mode": "raw_comment",
+  "context": "html_comment",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-cdata-01",
+  "mode": "raw_cdata",
+  "context": "cdata",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-tpl-01",
+  "mode": "raw_template",
+  "context": "template_angular",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-tpl-02",
+  "mode": "raw_template_vue",
+  "context": "template_angular",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-embed-01",
+  "mode": "raw_element_embed",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-form-01",
+  "mode": "raw_element_form",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-input-01",
+  "mode": "raw_element_input",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-select-01",
+  "mode": "raw_element_select",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-details-01",
+  "mode": "raw_element_details",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-video-01",
+  "mode": "raw_element_video",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-body-01",
+  "mode": "raw_element_body",
+  "context": "event_handler",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-a-01",
+  "mode": "raw_element_a",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-div-tab-01",
+  "mode": "raw_element_div_tabindex",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-foreign-01",
+  "mode": "raw_svg_foreignobject",
+  "context": "svg_context",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-encode-01",
+  "mode": "raw_url_decode",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-encode-02",
+  "mode": "raw_double_decode",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-01",
+  "mode": "dom_hash_innerhtml",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 4,
+  "credited_types": [
+   "dom",
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow",
+   "unsanitized_innerhtml_user_source"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow",
+   "unsanitized_innerhtml_user_source"
+  ],
+  "dom_dependent": false,
+  "flags": [
+   "MOSTLY-COLLATERAL"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-02",
+  "mode": "dom_search_eval",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 3,
+  "credited_types": [
+   "dom",
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow"
+  ],
+  "dom_dependent": false,
+  "flags": [
+   "MOSTLY-COLLATERAL"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-03",
+  "mode": "dom_postmessage",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 6,
+  "credited_types": [
+   "dom",
+   "postmessage_xss",
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow",
+   "websocket_xss"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [
+   "postmessage_xss",
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow",
+   "websocket_xss"
+  ],
+  "dom_dependent": false,
+  "flags": [
+   "MOSTLY-COLLATERAL"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-04",
+  "mode": "dom_hash_docwrite",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 3,
+  "credited_types": [
+   "dom",
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [
+   "trusted_types_no_policy",
+   "trusted_types_taint_flow"
+  ],
+  "dom_dependent": false,
+  "flags": [
+   "MOSTLY-COLLATERAL"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-05",
+  "mode": "dom_jquery_html",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "dom",
+   "sri_missing_script"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [
+   "sri_missing_script"
+  ],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-06",
+  "mode": "dom_hash_settimeout",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [],
+  "dom_dependent": true,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-07",
+  "mode": "dom_hash_route_innerhtml",
+  "context": "dom_xss",
+  "case_param": "q",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": false,
+  "credited": 0,
+  "credited_types": [],
+  "bound_types": [],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "NO-CREDIT"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-08",
+  "mode": "dom_tt_wrapper_innerhtml",
+  "context": "dom_xss",
+  "case_param": "q",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": false,
+  "credited": 0,
+  "credited_types": [],
+  "bound_types": [],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "NO-CREDIT"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-stored-02",
+  "mode": "stored_api_write",
+  "context": "html_element",
+  "case_param": "comment",
+  "declared_types": [
+   "stored",
+   "stored_dom"
+  ],
+  "detected": false,
+  "credited": 0,
+  "credited_types": [],
+  "bound_types": [],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "NO-CREDIT"
+  ],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-polyglot-01",
+  "mode": "raw_element",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-marquee-01",
+  "mode": "raw_element_marquee",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-audio-01",
+  "mode": "raw_element_audio",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-01",
+  "mode": "rcdata_textarea",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-02",
+  "mode": "rcdata_title",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-03",
+  "mode": "rcdata_xmp",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-04",
+  "mode": "rcdata_textarea_script",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-01",
+  "mode": "filter_script_tag",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 2.0,
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-02",
+  "mode": "filter_event_handlers",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.5,
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-03",
+  "mode": "filter_javascript_uri",
+  "context": "url_href",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "bound_types": [
+   "markdown_xss",
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-05",
+  "mode": "filter_keywords",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.5,
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-06",
+  "mode": "filter_recursive_script",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.4,
+  "error": ""
+ },
+ {
+  "case_id": "pos-csp-01",
+  "mode": "csp_nonce_ui_leak",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.8,
+  "error": ""
+ },
+ {
+  "case_id": "pos-csp-02",
+  "mode": "csp_ui_element",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-multi-01",
+  "mode": "multi_escaped_then_raw",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "polyglot_reflection"
+  ],
+  "bound_types": [
+   "polyglot_reflection"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-multi-02",
+  "mode": "multi_textarea_then_raw",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-cookie-01",
+  "mode": "cookie_echo",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "cookie_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "cookie_xss"
+  ],
+  "bound_types": [
+   "cookie_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-path-01",
+  "mode": "path_echo",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "path_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "path_xss"
+  ],
+  "bound_types": [
+   "path_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.0,
+  "error": ""
+ },
+ {
+  "case_id": "pos-error-01",
+  "mode": "error_echo",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "error_page_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "error_page_xss"
+  ],
+  "bound_types": [
+   "error_page_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 0.9,
+  "error": ""
+ },
+ {
+  "case_id": "pos-cors-01",
+  "mode": "cors_reflect",
+  "context": "header",
+  "case_param": "q",
+  "declared_types": [
+   "cors_misconfig"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "cors_misconfig"
+  ],
+  "bound_types": [
+   "cors_misconfig"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-markdown-01",
+  "mode": "markdown_raw",
+  "context": "html_attribute",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-stored-01",
+  "mode": "stored_write",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "stored",
+   "stored_upload"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "stored"
+  ],
+  "bound_types": [
+   "stored"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-upload-01",
+  "mode": "upload_echo",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "upload_xss",
+   "stored_upload"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "upload_xss"
+  ],
+  "bound_types": [
+   "upload_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "PARAM-MISMATCH"
+  ],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-redirect-01",
+  "mode": "redirect_vuln",
+  "context": "redirect",
+  "case_param": "q",
+  "declared_types": [
+   "open_redirect_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "open_redirect_xss"
+  ],
+  "bound_types": [
+   "open_redirect_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "PARAM-MISMATCH"
+  ],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-proto-01",
+  "mode": "prototype_vuln",
+  "context": "dom_prototype",
+  "case_param": "q",
+  "declared_types": [
+   "prototype_pollution"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "prototype_pollution"
+  ],
+  "bound_types": [
+   "prototype_pollution"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-sw-01",
+  "mode": "sw_vuln",
+  "context": "service_worker",
+  "case_param": "q",
+  "declared_types": [
+   "service_worker_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "service_worker_xss"
+  ],
+  "bound_types": [
+   "service_worker_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-worker-01",
+  "mode": "worker_vuln",
+  "context": "web_worker",
+  "case_param": "q",
+  "declared_types": [
+   "web_worker_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "web_worker_xss"
+  ],
+  "bound_types": [
+   "web_worker_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.3,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dangle-01",
+  "mode": "dangling_vuln",
+  "context": "attribute",
+  "case_param": "q",
+  "declared_types": [
+   "dangling_markup_potential"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dangling_markup_potential"
+  ],
+  "bound_types": [
+   "dangling_markup_potential"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-importmap-01",
+  "mode": "importmap_vuln",
+  "context": "import_map",
+  "case_param": "q",
+  "declared_types": [
+   "import_map_cross_origin"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "import_map_cross_origin"
+  ],
+  "bound_types": [
+   "import_map_cross_origin"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-sri-01",
+  "mode": "sri_vuln",
+  "context": "sri",
+  "case_param": "q",
+  "declared_types": [
+   "sri_missing_script"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "sri_missing_script"
+  ],
+  "bound_types": [
+   "sri_missing_script"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-tt-01",
+  "mode": "tt_vuln",
+  "context": "trusted_types",
+  "case_param": "q",
+  "declared_types": [
+   "trusted_types_policy_bypass"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "trusted_types_policy_bypass"
+  ],
+  "bound_types": [
+   "trusted_types_policy_bypass"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-ws-01",
+  "mode": "ws_vuln",
+  "context": "websocket",
+  "case_param": "q",
+  "declared_types": [
+   "websocket_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "websocket_xss"
+  ],
+  "bound_types": [
+   "websocket_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-sanitizer-01",
+  "mode": "sanitizer_vuln",
+  "context": "sanitizer",
+  "case_param": "q",
+  "declared_types": [
+   "sanitizer_vulnerable_version",
+   "sanitizer_output_to_innerhtml"
+  ],
+  "detected": true,
+  "credited": 2,
+  "credited_types": [
+   "sanitizer_output_to_innerhtml",
+   "sanitizer_vulnerable_version"
+  ],
+  "bound_types": [
+   "sanitizer_output_to_innerhtml",
+   "sanitizer_vulnerable_version"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-graphql-01",
+  "mode": "graphql_vuln",
+  "context": "graphql",
+  "case_param": "q",
+  "declared_types": [
+   "graphql_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "graphql_xss"
+  ],
+  "bound_types": [
+   "graphql_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.8,
+  "error": ""
+ },
+ {
+  "case_id": "pos-waf-01",
+  "mode": "waf_naive",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "polyglot_reflection",
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "polyglot_reflection"
+  ],
+  "bound_types": [
+   "polyglot_reflection"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.9,
+  "error": ""
+ },
+ {
+  "case_id": "pos-formmine-01",
+  "mode": "crawl_form_vuln",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 4.6,
+  "error": ""
+ },
+ {
+  "case_id": "pos-jsmine-01",
+  "mode": "crawl_js_vuln",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 3.4,
+  "error": ""
+ },
+ {
+  "case_id": "pos-pmmine-01",
+  "mode": "pm_vuln",
+  "context": "script_string_dq",
+  "case_param": "",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-cssi-01",
+  "mode": "cssi_vuln",
+  "context": "css_context",
+  "case_param": "",
+  "declared_types": [
+   "css_import_injection"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "css_import_injection"
+  ],
+  "bound_types": [
+   "css_import_injection"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-preenc-01",
+  "mode": "pe_vuln",
+  "context": "html_element",
+  "case_param": "data",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-pshift-01",
+  "mode": "pshift_vuln",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 2.4,
+  "error": ""
+ },
+ {
+  "case_id": "pos-clobber-01",
+  "mode": "clobber_vuln",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "dom_clobber"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom_clobber"
+  ],
+  "bound_types": [
+   "dom_clobber"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.8,
+  "error": ""
+ },
+ {
+  "case_id": "pos-blind-01",
+  "mode": "blind_vuln",
+  "context": "blind_oob",
+  "case_param": "q",
+  "declared_types": [
+   "blind"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "blind"
+  ],
+  "bound_types": [
+   "blind"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 3.7,
+  "error": ""
+ },
+ {
+  "case_id": "pos-tb-01",
+  "mode": "tb_vuln",
+  "context": "time_based_css_import",
+  "case_param": "q",
+  "declared_types": [
+   "time_based_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "time_based_xss"
+  ],
+  "bound_types": [
+   "time_based_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 6.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-so2-01",
+  "mode": "so2_write",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "second_order"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "second_order"
+  ],
+  "bound_types": [
+   "second_order"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-scn-01",
+  "mode": "sc_write",
+  "context": "html_element",
+  "case_param": "comment",
+  "declared_types": [
+   "scenario"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "scenario"
+  ],
+  "bound_types": [
+   "scenario"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-xs-01",
+  "mode": "xs_vuln",
+  "context": "response_headers",
+  "case_param": "q",
+  "declared_types": [
+   "xs_leak_surface"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "xs_leak_surface"
+  ],
+  "bound_types": [
+   "xs_leak_surface"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.1,
+  "error": ""
+ },
+ {
+  "case_id": "pos-mx-01",
+  "mode": "mx_vuln",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "mutation_xss"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "mutation_xss"
+  ],
+  "bound_types": [
+   "mutation_xss"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.7,
+  "error": ""
+ },
+ {
+  "case_id": "aux-r-formecho01",
+  "mode": "formecho_raw",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "aux-r-jsecho01",
+  "mode": "formecho_raw",
+  "context": "html_element",
+  "case_param": "q",
+  "declared_types": [
+   "reflected"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "reflected"
+  ],
+  "bound_types": [
+   "reflected"
+  ],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [],
+  "elapsed": 1.2,
+  "error": ""
+ },
+ {
+  "case_id": "pos-stored-03",
+  "mode": "stored_api_user_write",
+  "context": "html_element",
+  "case_param": "email",
+  "declared_types": [
+   "stored",
+   "stored_dom"
+  ],
+  "detected": false,
+  "credited": 0,
+  "credited_types": [],
+  "bound_types": [],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "NO-CREDIT"
+  ],
+  "elapsed": 1.2,
+  "error": ""
+ }
+]

@@ -138,6 +138,28 @@ def _init_script(marker: str) -> str:
     });
   } catch(e) { /* leave the native Function alone rather than break the page */ }
 
+  // Phase 161: a direct ``eval(code)`` is NOT covered by the Function hook
+  // above -- eval is its own global, it never routes through the Function
+  // constructor.  The comment there said "covers eval-like dynamic code",
+  // which was an assumption, not a measurement: it is false for eval.
+  // Measured cost: the benchmark vector dom_search_eval
+  // (``eval(new URLSearchParams(location.search).get('x'))``) never produced
+  // a dom_dynamic finding, while its setTimeout twin dom_hash_settimeout
+  // did -- same page shape, same marker, same probe.  So a page whose only
+  // sink is eval() was unverifiable by the browser engine.
+  //
+  // The marker check runs BEFORE the call so the hit is recorded even when
+  // the evaluated marker is not valid JavaScript (it usually is not: the
+  // marker is a bare identifier, so eval throws a ReferenceError -- which is
+  // precisely why the payload's *value* must be observed, not its result).
+  try {
+    var origEval = window.eval;
+    window.eval = function(code){
+      try { if (has(code)) hit('eval', String(code)); } catch(e){}
+      return origEval.call(window, code);
+    };
+  } catch(e) { /* leave the native eval alone rather than break the page */ }
+
   // setTimeout / setInterval with string body
   ['setTimeout','setInterval'].forEach(function(m){
     var o = window[m];
