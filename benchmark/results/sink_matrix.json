@@ -1,0 +1,110 @@
+[
+ {
+  "sink": "innerHTML (control)",
+  "confirmed": true,
+  "hit_sinks": [
+   "Element.innerHTML"
+  ],
+  "elapsed": 6.0
+ },
+ {
+  "sink": "outerHTML",
+  "confirmed": true,
+  "hit_sinks": [
+   "Element.outerHTML"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "insertAdjacentHTML",
+  "confirmed": true,
+  "hit_sinks": [
+   "insertAdjacentHTML"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "iframe.srcdoc",
+  "confirmed": true,
+  "hit_sinks": [
+   "iframe.srcdoc"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "document.write",
+  "confirmed": true,
+  "hit_sinks": [
+   "document.write"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "eval",
+  "confirmed": true,
+  "hit_sinks": [
+   "eval"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "new Function",
+  "confirmed": true,
+  "hit_sinks": [
+   "Function"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "setTimeout(string)",
+  "confirmed": true,
+  "hit_sinks": [
+   "setTimeout"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "Range.createContextualFragment",
+  "confirmed": true,
+  "hit_sinks": [
+   "Range.createContextualFragment"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "a.href = 'javascript:' + x",
+  "confirmed": false,
+  "hit_sinks": [],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "el.setAttribute('onclick', x)",
+  "confirmed": true,
+  "hit_sinks": [
+   "setAttribute(onclick)"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "el.onerror = x (string)",
+  "confirmed": false,
+  "hit_sinks": [],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "window.name -> innerHTML",
+  "confirmed": true,
+  "hit_sinks": [
+   "Element.innerHTML"
+  ],
+  "elapsed": 5.5
+ },
+ {
+  "sink": "document.cookie -> innerHTML",
+  "confirmed": true,
+  "hit_sinks": [
+   "Element.innerHTML"
+  ],
+  "elapsed": 5.5
+ }
+]

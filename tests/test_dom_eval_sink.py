@@ -53,6 +53,53 @@ def test_init_script_hooks_direct_eval():
     assert js.index("var origEval") < js.index("['setTimeout','setInterval']")
 
 
+def test_eval_hook_ignores_the_engines_own_evaluations():
+    """The harness flag must be in the hook, or the engine detects itself.
+
+    page.evaluate() sends a source string, which the page compiles through the
+    GLOBAL eval -- so the window_name probe's ``window.name = 'xssentinel_..'``
+    arrived at the hook looking exactly like the page evaling attacker data.
+    Measured cost before the flag: two SAFE benchmark cases scored as "DOM XSS
+    CONFIRMED" (neg-dom-07/08), diagnosed from the finding's payload field,
+    which was the probe's own source.
+    """
+    js = dom_engine._init_script("MARKER")
+    assert "__xss_dom_harness" in js
+    assert "!window.__xss_dom_harness" in js, (
+        "the eval hook must check the harness flag before recording a hit")
+
+
+@pytest.mark.skipif(not _HAS_PW, reason="Playwright not installed")
+def test_safe_page_that_writes_through_textcontent_stays_clean():
+    """The end-to-end shape of that regression, on the real corpus page."""
+    if not loopback_healthy():
+        pytest.skip("loopback degraded")
+
+    from benchmark.server import BenchmarkHandler, load_routes
+    BenchmarkHandler.routes = load_routes()
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), BenchmarkHandler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    port = srv.server_port
+    time.sleep(0.2)
+    try:
+        from xssentinel.core.scanner import Scanner
+        from xssentinel.core.requester import Requester
+
+        # neg-dom-08's shape: a hash route whose value lands in textContent.
+        url = f"http://127.0.0.1:{port}/dom/tt-innerhtml-safe#/route"
+        scanner = Scanner(requester=Requester(timeout=10), max_payloads=8,
+                          max_transforms=4, dom_engine="auto", verbose=False)
+        scanner.scan_target(url, method="GET", params={"q": "probe"},
+                            data={}, oob_collect=False)
+        scanner.dedup()
+        bad = [f.data for f in scanner.findings
+               if f.data.get("type") == "dom_dynamic"]
+        assert not bad, (
+            f"a safe page must not be confirmed: {bad}")
+    finally:
+        srv.shutdown()
+
+
 @pytest.mark.skipif(not _HAS_PW, reason="Playwright not installed")
 def test_eval_sink_is_confirmed_live():
     """The real browser must observe the marker reaching eval()."""

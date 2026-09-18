@@ -23,6 +23,7 @@ This is the "real DOM engine" upgrade over static taint analysis.
 from __future__ import annotations
 
 import atexit
+import json
 import logging
 import re
 import secrets
@@ -82,6 +83,22 @@ def _init_script(marker: str) -> str:
       return oIAH.call(this, p, t);
     };
   }
+
+  // Phase 162: Range.createContextualFragment.  The static analyzer lists it
+  // as a HIGH sink, but the engine never hooked it -- measured with
+  // benchmark/sink_matrix.py: a page that parses attacker HTML through a
+  // Range was MISS before this hook and HIT after.  Wrapped on the prototype
+  // so every Range instance is covered.
+  try {
+    if (window.Range && Range.prototype.createContextualFragment){
+      var oCCF = Range.prototype.createContextualFragment;
+      Range.prototype.createContextualFragment = function(html){
+        try { if (has(html)) hit('Range.createContextualFragment', html); }
+        catch(e){}
+        return oCCF.call(this, html);
+      };
+    }
+  } catch(e) { /* leave the native method alone rather than break the page */ }
 
   // iframe.srcdoc (property assignment parses the value as a document)
   try {
@@ -152,10 +169,22 @@ def _init_script(marker: str) -> str:
   // the evaluated marker is not valid JavaScript (it usually is not: the
   // marker is a bare identifier, so eval throws a ReferenceError -- which is
   // precisely why the payload's *value* must be observed, not its result).
+  // Phase 162: the engine's OWN probe code is compiled through this global
+  // eval -- page.evaluate() sends a source string -- so a probe that carries
+  // the marker (the window_name probe's ``window.name = 'xssentinel_dom_..'``)
+  // was indistinguishable from the page evaling attacker data.  Measured
+  // cost: two SAFE cases scored as "DOM XSS CONFIRMED" (their payload field
+  // was the probe's own source, which is how it was diagnosed).  The harness
+  // raises __xss_dom_harness around its own evaluations, synchronously, so
+  // page code can never be inside that window.
   try {
     var origEval = window.eval;
     window.eval = function(code){
-      try { if (has(code)) hit('eval', String(code)); } catch(e){}
+      try {
+        if (!window.__xss_dom_harness && has(code)) {
+          hit('eval', String(code));
+        }
+      } catch(e){}
       return origEval.call(window, code);
     };
   } catch(e) { /* leave the native eval alone rather than break the page */ }
@@ -822,17 +851,53 @@ class DynamicDomAnalyzer:
                             # window.name persists across navigations within
                             # the same tab.  Set it via an intermediate page
                             # on the target origin, then navigate to the URL.
-                            self._bounded_goto(page, probe["origin"]
+                            #
+                            # Phase 162: this read ``probe["origin"]``
+                            # unconditionally, but _probes() builds the
+                            # window_name probe WITHOUT that key, so it raised
+                            # KeyError, the surrounding ``except Exception:
+                            # continue`` swallowed it, and the probe never
+                            # navigated once.  Measured on a page whose only
+                            # sink is ``innerHTML = window.name``: zero
+                            # navigations, no finding -- a whole advertised
+                            # probe kind that had never run.  ``.get`` keeps a
+                            # future probe shape from costing a silent skip.
+                            self._bounded_goto(page, probe.get("origin")
                                                or probe["url"], deadline)
                             try:
-                                page.evaluate(
-                                    f"window.name = {repr(marker)};")
+                                # Phase 162: the eval hook must not treat the
+                                # marker WE inject here as a page-initiated
+                                # eval -- it did, and two SAFE cases scored as
+                                # "DOM XSS CONFIRMED" (diagnosed from the
+                                # finding's payload field, which was this very
+                                # source string).
+                                #
+                                # The flag has to be raised in its OWN
+                                # evaluation: the hook runs when eval is
+                                # CALLED, i.e. before the evaluated body
+                                # executes, so setting it inside the same
+                                # expression is too late.  Cleared right after,
+                                # before the reload, so the page's own eval of
+                                # window.name is still detected.
+                                page.evaluate("window.__xss_dom_harness = 1;")
+                                try:
+                                    page.evaluate("window.name = %s;"
+                                                  % json.dumps(marker))
+                                finally:
+                                    page.evaluate(
+                                        "window.__xss_dom_harness = 0;")
                                 self._bounded_goto(page, probe["url"],
                                                    deadline)
                                 page.wait_for_timeout(_DOM_SETTLE_MS)
                             except Exception:
                                 continue
                     except Exception:
+                        # Phase 162: a probe that raises is skipped, which is
+                        # right (one bad probe must not kill the scan) but was
+                        # INVISIBLE -- that is exactly how the window_name
+                        # KeyError above went unnoticed for so long.  Log it.
+                        _log.debug("dom: probe %r skipped for %s",
+                                   probe.get("kind"), url, exc_info=True)
                         continue
                     try:
                         hits = page.evaluate("window.__xss_dom_hits || []")
