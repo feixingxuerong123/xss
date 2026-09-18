@@ -227,7 +227,33 @@ def _check(finding: dict, case: dict) -> dict:
         return res
     hit = any(v and v in resp for v in _variants(expect))
     res["replay"] = "ok" if hit else "payload NOT in replayed response"
+    res["payload_intact"] = _payload_survived(expect, resp)
     return res
+
+
+def _payload_survived(payload: str, resp: str) -> bool:
+    """Did the PAYLOAD survive, or only the token?
+
+    Phase 165: verify_semantic confirms on the token plus a structural
+    context, so a filter that rewrites the payload's dangerous part --
+    ``alert(`` -> ``blocked(``, or dropping a ``data:text/html,`` prefix --
+    still passes that check while the shipped PoC stops reproducing and a
+    human replaying it sees the neutered result.
+
+    The test is the payload with the TOKEN wildcarded, in any benign
+    encoding: re-encoding the token must not count as mangling, a rewritten
+    callable or a dropped scheme must.
+    """
+    if not resp:
+        return False
+    for v in _variants(payload):
+        pat = re.sub(r"xssv_[0-9a-f]{8}", "xssv_[0-9a-f]{8}", re.escape(v))
+        try:
+            if re.search(pat, resp):
+                return True
+        except Exception:
+            return True
+    return False
 
 
 def _is_defect(c: dict) -> bool:
@@ -288,6 +314,13 @@ def main() -> int:
     for c in failed:
         print(f"    !! {c['type']} payload={c['payload'][:34]!r} "
               f"{c['replay']}")
+    mangled = [c for r in rows for c in r["findings"]
+               if c.get("payload_intact") is False
+               and c["type"] in _REPLAYABLE]
+    print(f"replayable findings whose PAYLOAD was rewritten (token-only "
+          f"confirmation): {len(mangled)}")
+    for c in mangled:
+        print(f"    ?? {c['type']} payload={c['payload'][:40]!r}")
     out = os.path.join("benchmark", "results", "poc_replay.json")
     json.dump(rows, open(out, "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
