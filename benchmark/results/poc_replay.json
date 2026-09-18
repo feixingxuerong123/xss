@@ -4,12 +4,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_bde811ae')</script>",
-    "expect_payload": "<script>alert('xssv_bde811ae')</script>",
+    "payload": "<script>alert('xssv_aed647e4')</script>",
+    "expect_payload": "<script>alert('xssv_aed647e4')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -19,12 +20,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_1a4a6ee1')</script>",
-    "expect_payload": "<script>alert('xssv_1a4a6ee1')</script>",
+    "payload": "<script>alert('xssv_a1a88aac')</script>",
+    "expect_payload": "<script>alert('xssv_a1a88aac')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -34,12 +36,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_7d2b4cc8')</script>",
-    "expect_payload": "<script>alert('xssv_7d2b4cc8')</script>",
+    "payload": "<script>alert('xssv_d1fd5aef')</script>",
+    "expect_payload": "<script>alert('xssv_d1fd5aef')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -49,12 +52,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_8c5791e7')</script>",
-    "expect_payload": "<script>alert('xssv_8c5791e7')</script>",
+    "payload": "<script>alert('xssv_7c5c478d')</script>",
+    "expect_payload": "<script>alert('xssv_7c5c478d')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -64,12 +68,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_86cde176')</script>",
-    "expect_payload": "<script>alert('xssv_86cde176')</script>",
+    "payload": "<script>alert('xssv_fb1428c5')</script>",
+    "expect_payload": "<script>alert('xssv_fb1428c5')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -79,12 +84,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_e980e25d')</script",
-    "expect_payload": "\"><script>alert('xssv_e980e25d')</script",
+    "payload": "\"><script>alert('xssv_c07561eb')</script",
+    "expect_payload": "\"><script>alert('xssv_c07561eb')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -94,12 +100,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "'><script>alert('xssv_be61e84d')</script",
-    "expect_payload": "'><script>alert('xssv_be61e84d')</script",
+    "payload": "'><script>alert('xssv_5272d934')</script",
+    "expect_payload": "'><script>alert('xssv_5272d934')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -109,12 +116,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_82382390')",
-    "expect_payload": "javascript:alert('xssv_82382390')",
+    "payload": "javascript:alert('xssv_41559af6')",
+    "expect_payload": "javascript:alert('xssv_41559af6')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -124,17 +132,18 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_89f3cd90')",
-    "expect_payload": "javascript:alert('xssv_89f3cd90')",
+    "payload": "javascript:alert('xssv_a5979f34')",
+    "expect_payload": "javascript:alert('xssv_a5979f34')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_a5bea9\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_a5bea9\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_f5a192\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_f5a192\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -148,12 +157,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_523758f3')",
-    "expect_payload": "javascript:alert('xssv_523758f3')",
+    "payload": "javascript:alert('xssv_808faa8e')",
+    "expect_payload": "javascript:alert('xssv_808faa8e')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -163,12 +173,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_3fb52f80')</script",
-    "expect_payload": "\"><script>alert('xssv_3fb52f80')</script",
+    "payload": "\"><script>alert('xssv_b527be7b')</script",
+    "expect_payload": "\"><script>alert('xssv_b527be7b')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -178,12 +189,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_2bdd2846')",
-    "expect_payload": "alert('xssv_2bdd2846')",
+    "payload": "alert('xssv_0bd612ec')",
+    "expect_payload": "alert('xssv_0bd612ec')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -193,12 +205,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "background:url(javascript:alert('xssv_6a",
-    "expect_payload": "background:url(javascript:alert('xssv_6a",
+    "payload": "background:url(javascript:alert('xssv_db",
+    "expect_payload": "background:url(javascript:alert('xssv_db",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -208,12 +221,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_d5c74320')</script",
-    "expect_payload": "\"><script>alert('xssv_d5c74320')</script",
+    "payload": "\"><script>alert('xssv_c594e809')</script",
+    "expect_payload": "\"><script>alert('xssv_c594e809')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -223,12 +237,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_8eef3cd8')</script",
-    "expect_payload": "\"><script>alert('xssv_8eef3cd8')</script",
+    "payload": "\"><script>alert('xssv_1a0cee73')</script",
+    "expect_payload": "\"><script>alert('xssv_1a0cee73')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -238,12 +253,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_94fb3e10'",
-    "expect_payload": "\"></script><script>alert('xssv_94fb3e10'",
+    "payload": "\"></script><script>alert('xssv_769fcc89'",
+    "expect_payload": "\"></script><script>alert('xssv_769fcc89'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -253,12 +269,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "';alert('xssv_3a052536');//",
-    "expect_payload": "';alert('xssv_3a052536');//",
+    "payload": "';alert('xssv_40933ed4');//",
+    "expect_payload": "';alert('xssv_40933ed4');//",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -268,12 +285,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_1cffb225')",
-    "expect_payload": "alert('xssv_1cffb225')",
+    "payload": "alert('xssv_22cd70c0')",
+    "expect_payload": "alert('xssv_22cd70c0')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -283,12 +301,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "${alert('xssv_834ebf13')}",
-    "expect_payload": "${alert('xssv_834ebf13')}",
+    "payload": "${alert('xssv_4becf502')}",
+    "expect_payload": "${alert('xssv_4becf502')}",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -298,12 +317,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_12f50637')",
-    "expect_payload": "alert('xssv_12f50637')",
+    "payload": "alert('xssv_8a7e8abc')",
+    "expect_payload": "alert('xssv_8a7e8abc')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -313,12 +333,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_4bb51fde'",
-    "expect_payload": "\"></script><script>alert('xssv_4bb51fde'",
+    "payload": "\"></script><script>alert('xssv_298d91d0'",
+    "expect_payload": "\"></script><script>alert('xssv_298d91d0'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -328,12 +349,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_0e8bc436')>",
-    "expect_payload": "<svg/onload=alert('xssv_0e8bc436')>",
+    "payload": "<svg/onload=alert('xssv_62b7520d')>",
+    "expect_payload": "<svg/onload=alert('xssv_62b7520d')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -343,12 +365,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_1bc792ca')</script",
-    "expect_payload": "\"><script>alert('xssv_1bc792ca')</script",
+    "payload": "\"><script>alert('xssv_db11bf5f')</script",
+    "expect_payload": "\"><script>alert('xssv_db11bf5f')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -358,12 +381,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "alert('xssv_4f9b2f86')",
-    "expect_payload": "alert('xssv_4f9b2f86')",
+    "payload": "alert('xssv_d84f515d')",
+    "expect_payload": "alert('xssv_d84f515d')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -373,12 +397,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_2445e7b3')>",
-    "expect_payload": "<svg/onload=alert('xssv_2445e7b3')>",
+    "payload": "<svg/onload=alert('xssv_05c5087e')>",
+    "expect_payload": "<svg/onload=alert('xssv_05c5087e')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -393,7 +418,8 @@
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -403,12 +429,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_c43d0490')</script",
-    "expect_payload": "\"><script>alert('xssv_c43d0490')</script",
+    "payload": "\"><script>alert('xssv_bcbe2923')</script",
+    "expect_payload": "\"><script>alert('xssv_bcbe2923')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -418,17 +445,18 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_800051cd')",
-    "expect_payload": "javascript:alert('xssv_800051cd')",
+    "payload": "javascript:alert('xssv_32f370cf')",
+    "expect_payload": "javascript:alert('xssv_32f370cf')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_f46b51\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_f46b51\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_2b5758\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_2b5758\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -442,17 +470,18 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_09877cda')",
-    "expect_payload": "javascript:alert('xssv_09877cda')",
+    "payload": "javascript:alert('xssv_6329b6fe')",
+    "expect_payload": "javascript:alert('xssv_6329b6fe')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_0662f0\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_0662f0\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_d078c0\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_d078c0\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -466,12 +495,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "0;url=javascript:alert('xssv_e5be38a3')",
-    "expect_payload": "0;url=javascript:alert('xssv_e5be38a3')",
+    "payload": "0;url=javascript:alert('xssv_4b74a6e4')",
+    "expect_payload": "0;url=javascript:alert('xssv_4b74a6e4')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -481,12 +511,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_5c3cbfb4')",
-    "expect_payload": "javascript:alert('xssv_5c3cbfb4')",
+    "payload": "javascript:alert('xssv_8fc53772')",
+    "expect_payload": "javascript:alert('xssv_8fc53772')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -496,12 +527,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"><script>alert('xssv_fbe04bb8')</script",
-    "expect_payload": "\"><script>alert('xssv_fbe04bb8')</script",
+    "payload": "\"><script>alert('xssv_825846dd')</script",
+    "expect_payload": "\"><script>alert('xssv_825846dd')</script",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -511,12 +543,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "javascript:alert('xssv_0cf6f829')",
-    "expect_payload": "javascript:alert('xssv_0cf6f829')",
+    "payload": "javascript:alert('xssv_38f110d4')",
+    "expect_payload": "javascript:alert('xssv_38f110d4')",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -526,12 +559,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "background:url(javascript:alert('xssv_fa",
-    "expect_payload": "background:url(javascript:alert('xssv_fa",
+    "payload": "background:url(javascript:alert('xssv_0b",
+    "expect_payload": "background:url(javascript:alert('xssv_0b",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -541,12 +575,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "--><script>alert('xssv_4956cea0')</scrip",
-    "expect_payload": "--><script>alert('xssv_4956cea0')</scrip",
+    "payload": "--><script>alert('xssv_cc1754b6')</scrip",
+    "expect_payload": "--><script>alert('xssv_cc1754b6')</scrip",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -556,12 +591,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "]]></script><script>alert('xssv_9461241c",
-    "expect_payload": "]]></script><script>alert('xssv_9461241c",
+    "payload": "]]></script><script>alert('xssv_e9919444",
+    "expect_payload": "]]></script><script>alert('xssv_e9919444",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -571,12 +607,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "{{constructor.constructor('alert('xssv_1",
-    "expect_payload": "{{constructor.constructor('alert('xssv_1",
+    "payload": "{{constructor.constructor('alert('xssv_2",
+    "expect_payload": "{{constructor.constructor('alert('xssv_2",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -586,12 +623,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "{{constructor.constructor('alert('xssv_b",
-    "expect_payload": "{{constructor.constructor('alert('xssv_b",
+    "payload": "{{constructor.constructor('alert('xssv_8",
+    "expect_payload": "{{constructor.constructor('alert('xssv_8",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -601,12 +639,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_1d9798e7')</script>",
-    "expect_payload": "<script>alert('xssv_1d9798e7')</script>",
+    "payload": "<script>alert('xssv_b02854dd')</script>",
+    "expect_payload": "<script>alert('xssv_b02854dd')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -616,12 +655,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_bbd4e915')</script>",
-    "expect_payload": "<script>alert('xssv_bbd4e915')</script>",
+    "payload": "<script>alert('xssv_97e08d3f')</script>",
+    "expect_payload": "<script>alert('xssv_97e08d3f')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -631,12 +671,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_5fb7a354')</script>",
-    "expect_payload": "<script>alert('xssv_5fb7a354')</script>",
+    "payload": "<script>alert('xssv_77dc195c')</script>",
+    "expect_payload": "<script>alert('xssv_77dc195c')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -646,12 +687,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_b6476395')</script>",
-    "expect_payload": "<script>alert('xssv_b6476395')</script>",
+    "payload": "<script>alert('xssv_903f2565')</script>",
+    "expect_payload": "<script>alert('xssv_903f2565')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -661,12 +703,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_7ddb1c39')</script>",
-    "expect_payload": "<script>alert('xssv_7ddb1c39')</script>",
+    "payload": "<script>alert('xssv_cfbefb29')</script>",
+    "expect_payload": "<script>alert('xssv_cfbefb29')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -676,12 +719,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_73682a8f')</script>",
-    "expect_payload": "<script>alert('xssv_73682a8f')</script>",
+    "payload": "<script>alert('xssv_fe5523c0')</script>",
+    "expect_payload": "<script>alert('xssv_fe5523c0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -691,12 +735,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_c5774274')</script>",
-    "expect_payload": "<script>alert('xssv_c5774274')</script>",
+    "payload": "<script>alert('xssv_d9eec717')</script>",
+    "expect_payload": "<script>alert('xssv_d9eec717')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -706,12 +751,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_1a255f2b')</script>",
-    "expect_payload": "<script>alert('xssv_1a255f2b')</script>",
+    "payload": "<script>alert('xssv_5110969c')</script>",
+    "expect_payload": "<script>alert('xssv_5110969c')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -721,12 +767,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_bf8a8421')</script>",
-    "expect_payload": "<script>alert('xssv_bf8a8421')</script>",
+    "payload": "<script>alert('xssv_ee9b99f8')</script>",
+    "expect_payload": "<script>alert('xssv_ee9b99f8')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -736,12 +783,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<svg/onload=alert('xssv_1f5e51a9')>",
-    "expect_payload": "<svg/onload=alert('xssv_1f5e51a9')>",
+    "payload": "<svg/onload=alert('xssv_e3f90272')>",
+    "expect_payload": "<svg/onload=alert('xssv_e3f90272')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -751,12 +799,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_93a2faf1')</script>",
-    "expect_payload": "<script>alert('xssv_93a2faf1')</script>",
+    "payload": "<script>alert('xssv_802c5a57')</script>",
+    "expect_payload": "<script>alert('xssv_802c5a57')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -766,12 +815,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_4c526f48')</script>",
-    "expect_payload": "<script>alert('xssv_4c526f48')</script>",
+    "payload": "<script>alert('xssv_5169cebb')</script>",
+    "expect_payload": "<script>alert('xssv_5169cebb')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -781,7 +831,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_9f8148ed",
+    "payload": "xssentinel_dom_40468461",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -796,7 +846,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_2b6e8616",
+    "payload": "xssentinel_dom_27773b5d",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -811,7 +861,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_6b7c2127",
+    "payload": "xssentinel_dom_f5f06dab",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -826,7 +876,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_b4d6f67f",
+    "payload": "xssentinel_dom_cfb0e206",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -847,15 +897,6 @@
     "path_ok": true,
     "replay": "ok",
     "note": ""
-   },
-   {
-    "type": "dom_dynamic",
-    "payload": "xssentinel_dom_9a8154d8",
-    "expect_payload": "<img src=x onerror=alert(document.domain",
-    "has_payload": true,
-    "path_ok": true,
-    "replay": "ok",
-    "note": ""
    }
   ],
   "verdict": "ok"
@@ -865,7 +906,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_b2a14cfd",
+    "payload": "xssentinel_dom_020405c1",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -880,7 +921,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_3222bceb",
+    "payload": "xssentinel_dom_6bc194fe",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -895,7 +936,7 @@
   "findings": [
    {
     "type": "dom_dynamic",
-    "payload": "xssentinel_dom_3ba648cc",
+    "payload": "xssentinel_dom_dcdc3632",
     "expect_payload": "<img src=x onerror=alert(document.domain",
     "has_payload": true,
     "path_ok": true,
@@ -910,8 +951,8 @@
   "findings": [
    {
     "type": "stored_dom",
-    "payload": "<script>alert('xssv_6c8d7ed9')</script>",
-    "expect_payload": "<script>alert('xssv_6c8d7ed9')</script>",
+    "payload": "<script>alert('xssv_728c91b4')</script>",
+    "expect_payload": "<script>alert('xssv_728c91b4')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
@@ -925,12 +966,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_5d5763f2')</script>",
-    "expect_payload": "<script>alert('xssv_5d5763f2')</script>",
+    "payload": "<script>alert('xssv_b7dcc872')</script>",
+    "expect_payload": "<script>alert('xssv_b7dcc872')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -940,12 +982,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_6b82ba54')</script>",
-    "expect_payload": "<script>alert('xssv_6b82ba54')</script>",
+    "payload": "<script>alert('xssv_3d231afb')</script>",
+    "expect_payload": "<script>alert('xssv_3d231afb')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -955,12 +998,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_998a793b')</script>",
-    "expect_payload": "<script>alert('xssv_998a793b')</script>",
+    "payload": "<script>alert('xssv_f093f3d0')</script>",
+    "expect_payload": "<script>alert('xssv_f093f3d0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -970,12 +1014,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_2f5cfa91'",
-    "expect_payload": "</textarea><script>alert('xssv_2f5cfa91'",
+    "payload": "</textarea><script>alert('xssv_ac1f4af3'",
+    "expect_payload": "</textarea><script>alert('xssv_ac1f4af3'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -985,12 +1030,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</title><script>alert('xssv_14f2d3f6')</",
-    "expect_payload": "</title><script>alert('xssv_14f2d3f6')</",
+    "payload": "</title><script>alert('xssv_055b7c0b')</",
+    "expect_payload": "</title><script>alert('xssv_055b7c0b')</",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1000,12 +1046,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</xmp><script>alert('xssv_37a5bec9')</sc",
-    "expect_payload": "</xmp><script>alert('xssv_37a5bec9')</sc",
+    "payload": "</xmp><script>alert('xssv_ee0b0e5b')</sc",
+    "expect_payload": "</xmp><script>alert('xssv_ee0b0e5b')</sc",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1015,12 +1062,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_0fd8f716'",
-    "expect_payload": "</textarea><script>alert('xssv_0fd8f716'",
+    "payload": "</textarea><script>alert('xssv_7c3fd843'",
+    "expect_payload": "</textarea><script>alert('xssv_7c3fd843'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1030,12 +1078,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<a id=x href=javascript:alert('xssv_7964",
-    "expect_payload": "<a id=x href=javascript:alert('xssv_7964",
+    "payload": "<a id=x href=javascript:alert('xssv_175f",
+    "expect_payload": "<a id=x href=javascript:alert('xssv_175f",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1045,12 +1094,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<embed src=javascript:alert('xssv_b22206",
-    "expect_payload": "<embed src=javascript:alert('xssv_b22206",
+    "payload": "<embed src=javascript:alert('xssv_a874c2",
+    "expect_payload": "<embed src=javascript:alert('xssv_a874c2",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1059,52 +1109,43 @@
   "case_id": "neg-filter-03",
   "findings": [
    {
-    "type": "reflected",
-    "payload": "data:text/html,<script>alert('xssv_55200",
-    "expect_payload": "data:text/html,<script>alert('xssv_55200",
+    "type": "polyglot_reflection",
+    "payload": "\">\"</script></style>-->><body onload=ale",
+    "expect_payload": "\">\"</script></style>-->><body onload=ale",
     "has_payload": true,
     "path_ok": true,
-    "replay": "payload NOT in replayed response",
+    "replay": "n/a (carrier not replayable)",
     "note": ""
    },
    {
     "type": "markdown_xss",
-    "payload": "![x](x\" onerror=alert(\"xsmd_c25ddc\"))",
-    "expect_payload": "![x](x\" onerror=alert(\"xsmd_c25ddc\"))",
+    "payload": "![x](x\" onerror=alert(\"xsmd_7ef3f7\"))",
+    "expect_payload": "![x](x\" onerror=alert(\"xsmd_7ef3f7\"))",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
     "note": ""
    }
   ],
-  "verdict": "DEFECT"
+  "verdict": "ok"
  },
  {
   "case_id": "neg-filter-05",
-  "findings": [
-   {
-    "type": "reflected",
-    "payload": "<embed src=javascript:alert('xssv_b31274",
-    "expect_payload": "<embed src=javascript:alert('xssv_b31274",
-    "has_payload": true,
-    "path_ok": true,
-    "replay": "payload NOT in replayed response",
-    "note": ""
-   }
-  ],
-  "verdict": "DEFECT"
+  "findings": [],
+  "verdict": "NO FINDING"
  },
  {
   "case_id": "neg-filter-06",
   "findings": [
    {
     "type": "reflected",
-    "payload": "<embed src=javascript:alert('xssv_edbdee",
-    "expect_payload": "<embed src=javascript:alert('xssv_edbdee",
+    "payload": "<embed src=javascript:alert('xssv_4fb0c2",
+    "expect_payload": "<embed src=javascript:alert('xssv_4fb0c2",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1119,7 +1160,8 @@
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1129,12 +1171,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_e7a30504')</script>",
-    "expect_payload": "<script>alert('xssv_e7a30504')</script>",
+    "payload": "<script>alert('xssv_c96709bf')</script>",
+    "expect_payload": "<script>alert('xssv_c96709bf')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1144,8 +1187,8 @@
   "findings": [
    {
     "type": "polyglot_reflection",
-    "payload": "</script></style>\">'>><svg/onload=alert(",
-    "expect_payload": "</script></style>\">'>><svg/onload=alert(",
+    "payload": "\">\"</script></style>-->><img src=x onerr",
+    "expect_payload": "\">\"</script></style>-->><img src=x onerr",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1159,12 +1202,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "</textarea><script>alert('xssv_9fa44501'",
-    "expect_payload": "</textarea><script>alert('xssv_9fa44501'",
+    "payload": "</textarea><script>alert('xssv_811e0072'",
+    "expect_payload": "</textarea><script>alert('xssv_811e0072'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1174,12 +1218,13 @@
   "findings": [
    {
     "type": "cookie_xss",
-    "payload": "<svg/onload=alert('xsck_9c3b94')>",
-    "expect_payload": "<svg/onload=alert('xsck_9c3b94')>",
+    "payload": "<svg/onload=alert('xsck_853b30')>",
+    "expect_payload": "<svg/onload=alert('xsck_853b30')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1189,8 +1234,8 @@
   "findings": [
    {
     "type": "path_xss",
-    "payload": "<script>alert('xspath_857a83')</script>",
-    "expect_payload": "<script>alert('xspath_857a83')</script>",
+    "payload": "<script>alert('xspath_ea6f51')</script>",
+    "expect_payload": "<script>alert('xspath_ea6f51')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1204,8 +1249,8 @@
   "findings": [
    {
     "type": "error_page_xss",
-    "payload": "<svg/onload=alert('xserr_a9b3f4')>",
-    "expect_payload": "<svg/onload=alert('xserr_a9b3f4')>",
+    "payload": "<svg/onload=alert('xserr_52374d')>",
+    "expect_payload": "<svg/onload=alert('xserr_52374d')>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1234,12 +1279,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_3488122e')</script>",
-    "expect_payload": "<script>alert('xssv_3488122e')</script>",
+    "payload": "<script>alert('xssv_44ac6dfe')</script>",
+    "expect_payload": "<script>alert('xssv_44ac6dfe')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1249,8 +1295,8 @@
   "findings": [
    {
     "type": "stored",
-    "payload": "<script>alert('xssv_0f511cfc')</script>",
-    "expect_payload": "<script>alert('xssv_0f511cfc')</script>",
+    "payload": "<script>alert('xssv_7d399f9e')</script>",
+    "expect_payload": "<script>alert('xssv_7d399f9e')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1264,8 +1310,8 @@
   "findings": [
    {
     "type": "upload_xss",
-    "payload": "<svg/onload=alert('xssup_6607')>.svg",
-    "expect_payload": "<svg/onload=alert('xssup_6607')>.svg",
+    "payload": "<svg/onload=alert('xssup_e00e')>.svg",
+    "expect_payload": "<svg/onload=alert('xssup_e00e')>.svg",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1453,8 +1499,8 @@
   "findings": [
    {
     "type": "polyglot_reflection",
-    "payload": "\">\"</script></style>-->><video src=x one",
-    "expect_payload": "\">\"</script></style>-->><video src=x one",
+    "payload": "\">\"</script></style>-->><body onload=ale",
+    "expect_payload": "\">\"</script></style>-->><body onload=ale",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1468,12 +1514,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_67185314')</script>",
-    "expect_payload": "<script>alert('xssv_67185314')</script>",
+    "payload": "<script>alert('xssv_c6df9a24')</script>",
+    "expect_payload": "<script>alert('xssv_c6df9a24')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1483,12 +1530,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_e47d3ba3')</script>",
-    "expect_payload": "<script>alert('xssv_e47d3ba3')</script>",
+    "payload": "<script>alert('xssv_f900b212')</script>",
+    "expect_payload": "<script>alert('xssv_f900b212')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1498,12 +1546,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "\"></script><script>alert('xssv_79244498'",
-    "expect_payload": "\"></script><script>alert('xssv_79244498'",
+    "payload": "\"></script><script>alert('xssv_ffa8b5dd'",
+    "expect_payload": "\"></script><script>alert('xssv_ffa8b5dd'",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1533,7 +1582,8 @@
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1543,12 +1593,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_71b445cd')</script>",
-    "expect_payload": "<script>alert('xssv_71b445cd')</script>",
+    "payload": "<script>alert('xssv_3f22e93a')</script>",
+    "expect_payload": "<script>alert('xssv_3f22e93a')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1558,8 +1609,8 @@
   "findings": [
    {
     "type": "dom_clobber",
-    "payload": "<a id=xclob_56207c name=xclob_56207c hre",
-    "expect_payload": "<a id=xclob_56207c name=xclob_56207c hre",
+    "payload": "<a id=xclob_b8c432 name=xclob_b8c432 hre",
+    "expect_payload": "<a id=xclob_b8c432 name=xclob_b8c432 hre",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1603,8 +1654,8 @@
   "findings": [
    {
     "type": "second_order",
-    "payload": "<img src=x onerror=alert('xsso_37dabb12'",
-    "expect_payload": "<img src=x onerror=alert('xsso_37dabb12'",
+    "payload": "<img src=x onerror=alert('xsso_2471417a'",
+    "expect_payload": "<img src=x onerror=alert('xsso_2471417a'",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1618,8 +1669,8 @@
   "findings": [
    {
     "type": "scenario",
-    "payload": "xssv_3eed5ae7",
-    "expect_payload": "xssv_3eed5ae7",
+    "payload": "xssv_096f9739",
+    "expect_payload": "xssv_096f9739",
     "has_payload": true,
     "path_ok": true,
     "replay": "n/a (carrier not replayable)",
@@ -1663,12 +1714,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_58de5d56')</script>",
-    "expect_payload": "<script>alert('xssv_58de5d56')</script>",
+    "payload": "<script>alert('xssv_580ec8e0')</script>",
+    "expect_payload": "<script>alert('xssv_580ec8e0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1678,12 +1730,13 @@
   "findings": [
    {
     "type": "reflected",
-    "payload": "<script>alert('xssv_3a414358')</script>",
-    "expect_payload": "<script>alert('xssv_3a414358')</script>",
+    "payload": "<script>alert('xssv_eed591bd')</script>",
+    "expect_payload": "<script>alert('xssv_eed591bd')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",
-    "note": ""
+    "note": "",
+    "payload_intact": true
    }
   ],
   "verdict": "ok"
@@ -1693,8 +1746,8 @@
   "findings": [
    {
     "type": "stored_dom",
-    "payload": "<script>alert('xssv_0db79380')</script>",
-    "expect_payload": "<script>alert('xssv_0db79380')</script>",
+    "payload": "<script>alert('xssv_07b59ab0')</script>",
+    "expect_payload": "<script>alert('xssv_07b59ab0')</script>",
     "has_payload": true,
     "path_ok": true,
     "replay": "ok",

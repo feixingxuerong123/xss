@@ -1057,6 +1057,16 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             v = verifier.verify_semantic(resp.text, token,
                                          response_headers=dict(resp.headers))
             if v["confirmed"]:
+                # Phase 165: the token survived -- but did the PAYLOAD?  A
+                # filter that rewrites the dangerous part while leaving the
+                # token byte-identical (alert( -> blocked(, or stripping a
+                # `data:text/html,` prefix) passes verify_semantic and proves
+                # nothing: the shipped PoC then cannot reproduce, and a human
+                # replaying it sees the neutered result.  Keep looking for a
+                # variant that does survive instead of reporting one that does
+                # not.  Measured on benchmark neg-filter-03/05.
+                if not verifier.payload_survived(resp.text, variant):
+                    continue
                 self._record(req, url, method, param, is_body, "reflected",
                              context, variant, tset, v, resp, token)
                 return True

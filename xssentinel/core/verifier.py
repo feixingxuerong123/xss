@@ -11,7 +11,10 @@ Two layers:
 """
 from __future__ import annotations
 
+import base64
+import binascii
 import re
+import urllib.parse
 
 from . import context as ctx
 from .parser_utils import bs_parser as _bs_parser
@@ -302,6 +305,87 @@ def _script_nonce_allowed(script_tag, headers) -> bool:
                       for n in csp_mod.extract_nonces_from_csp(csp)]
     except Exception:
         return False
+
+
+_TOKEN_IN_PAYLOAD_RE = re.compile(r"xssv_[0-9a-f]{8}")
+
+
+def payload_survived(response_text: str, payload: str) -> bool:
+    """Did the payload survive the round trip, or only its token?
+
+    Phase 165.  ``verify_semantic`` confirms on the token plus a structural
+    context, which is the right question for "did this land somewhere
+    executable" -- but it is blind to a server that REWRITES the payload while
+    leaving the token alone.  Measured on two benchmark cases:
+
+      * ``filter_keywords`` rewrites ``alert(`` into ``blocked(``: the finding
+        was credited, and a human replaying the shipped PoC saw
+        ``javascript:blocked(...)`` -- no alert, nothing to reproduce;
+      * ``filter_javascript_uri`` strips a ``data:text/html,`` prefix: the
+        claimed URL carrier is gone from the response.
+
+    Neither is provable XSS.  This answers the narrower question so callers can
+    keep looking for a payload that DOES survive instead of reporting one that
+    does not.  The token is wildcarded: benign re-encodings of the token must
+    not read as mangling, while a rewritten callable or a dropped scheme must.
+    """
+    if not response_text or not payload:
+        return False
+    for cand in _survival_candidates(payload):
+        pat = _TOKEN_IN_PAYLOAD_RE.sub("xssv_[0-9a-f]{8}", re.escape(cand))
+        try:
+            if re.search(pat, response_text):
+                return True
+        except re.error:                                  # pragma: no cover
+            return True
+    return False
+
+
+def _survival_candidates(payload: str) -> list:
+    """The forms a payload may legitimately come back in.
+
+    The TRANSPORT encoding is not the reflected form: a transform that
+    percent-encodes the payload to slip past a naive filter is decoded by the
+    app and reflected DECODED (measured: tests/test_async_budget.py's
+    "naivewaf" fixture), and a pre-encoded base64 container is decoded and
+    reflected as its inner payload (tests/test_async_pipeline.py).  Comparing
+    only the sent form rejected both -- the gate was too strict, not the
+    targets safe.
+    """
+    out = {payload,
+           urllib.parse.quote(payload, safe=""),
+           urllib.parse.quote_plus(payload, safe="")}
+    try:
+        once = urllib.parse.unquote(payload)
+        out.add(once)
+        out.add(urllib.parse.unquote(once))
+    except Exception:
+        pass
+    # base64 containers, in BOTH alphabets and up to two rounds: the
+    # pre-encoded layer and its fixtures use the URL-safe alphabet without
+    # padding (see tests/test_async_pipeline.py's decode fixture), which the
+    # standard alphabet cannot read.
+    for cur in (payload, payload.replace("-", "+").replace("_", "/")):
+        dec = cur
+        for _ in range(2):
+            try:
+                pad = dec + "=" * (-len(dec) % 4)
+                nxt = base64.b64decode(pad, validate=True).decode(
+                    "utf-8", "replace")
+            except (ValueError, binascii.Error, UnicodeDecodeError):
+                # Narrow on purpose: a broad except here swallowed a NameError
+                # (this module only imported base64 locally back then) and the
+                # helper silently produced no base64 candidates at all --
+                # measured as test_async_pipeline's pre-encode failure.
+                break
+            if not nxt or nxt == dec or not nxt.isprintable():
+                break
+            dec = nxt
+            out.add(dec)
+            for part in re.findall(r'"[^"]*?<[^"]*?"', dec):
+                out.add(part.strip('"'))
+    return [c for c in out if c]
+    return False
 
 
 def verify_semantic(response_text: str, token: str,

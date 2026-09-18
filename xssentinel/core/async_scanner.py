@@ -729,7 +729,9 @@ class AsyncScanner:
                 v = await asyncio.to_thread(verifier.verify_semantic,
                                             text, marker,
                                             response_headers=resp_headers)
-                if v["confirmed"]:
+                # Phase 165 (sync parity, scanner._try_payload): the token
+                # survived -- did the PAYLOAD?  Keep looking otherwise.
+                if v["confirmed"] and verifier.payload_survived(text, variant):
                     yield Finding(
                         url=url, method=method, param=param,
                         context=v.get("context") or context,
@@ -781,7 +783,8 @@ class AsyncScanner:
                 v = await asyncio.to_thread(verifier.verify_semantic,
                                             text, marker,
                                             response_headers=resp_headers)
-                if v["confirmed"]:
+                if (v["confirmed"]
+                        and verifier.payload_survived(text, marked)):
                     idx = text.find(marker)
                     yield Finding(
                         url=url, method=method, param=param,
@@ -861,7 +864,8 @@ class AsyncScanner:
                         _nv = await asyncio.to_thread(
                             verifier.verify_semantic, _ntext, _ntok,
                             response_headers=_nhdrs)
-                        if _nv.get("confirmed"):
+                        if (_nv.get("confirmed") and
+                                verifier.payload_survived(_ntext, _npay)):
                             _idx = _ntext.find(_ntok)
                             yield Finding(
                                 url=url, method=method, param=param,
@@ -1005,7 +1009,7 @@ class AsyncScanner:
             v = await asyncio.to_thread(verifier.verify_semantic,
                                         text, marker,
                                         response_headers=resp_headers)
-            if v["confirmed"]:
+            if v["confirmed"] and verifier.payload_survived(text, enc):
                 idx = text.find(marker)
                 yield Finding(
                     url=url, method=method, param=param,
