@@ -288,6 +288,28 @@ def _is_detected(report: dict | None, case: dict) -> tuple[bool, int, list]:
     # not on the landing page, so the case may name the paths that count.
     accept_paths = list(case.get("finding_paths") or [path_key])
 
+    # Phase 160: on a SAFE case, any high/medium/critical finding is a false
+    # positive -- of ANY type.  Narrowing to the declared ``finding_types``
+    # hid a real one for good: neg-dom-08 (safe twin of pos-dom-08) carried a
+    # high-severity trusted_types_policy_bypass while the benchmark scored it
+    # TN, because the case only declares dom_dynamic.  Measured with
+    # _p160_fp_scan.py: 5 of 75 safe cases carried a finding the scorer could
+    # not see.
+    #
+    # Positives keep the narrowing -- an unrelated noisy finding must not be
+    # credited as the vector the case is actually about.  low/info stay out:
+    # a static DOM hint or an unused-policy note is hygiene, not an XSS claim
+    # (verified: the 4 surviving `dom` findings are all low).
+    if case.get("ground_truth") == "safe":
+        relevant = [
+            f for f in findings
+            if f.get("severity", "") in ("high", "medium", "critical")
+            and not str(f.get("type", "")).startswith("csp_")
+            and f.get("type", "") != "fuzzer_triage"
+            and any(p in f.get("url", "") for p in accept_paths)
+        ]
+        return len(relevant) > 0, len(relevant), relevant
+
     # Filter findings relevant to this case
     relevant = []
     for f in findings:

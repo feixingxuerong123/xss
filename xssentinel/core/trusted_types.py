@@ -164,6 +164,11 @@ TRUSTED_TYPES_DIRECTIVE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Phase 160: a script we cannot see inside may hold the sink the no-op policy
+# feeds.  Same rule as the Phase 159 DOM pre-screen -- prove-dead, never
+# prove-alive: only skip when the page provably cannot consume the policy.
+_EXT_SCRIPT_RE = re.compile(r"<script[^>]*\ssrc\s*=", re.IGNORECASE)
+
 
 # ---------------------------------------------------------------------------
 # User-controlled data sources (DOM taint sources)
@@ -459,7 +464,15 @@ def analyze_page(html: str | None, csp_header: str | None = None) -> dict:
         })
 
     # Violation 2: identity/no-op policy registered (bypass).
-    if has_bypass:
+    #
+    # Phase 160: a no-op policy is only a BYPASS if the page can actually feed
+    # it to an HTML sink.  Measured false positive: neg-dom-08, the safe twin
+    # of pos-dom-08.  It registers the very same identity policy but writes
+    # through ``textContent``, and this layer still reported a high-severity
+    # XSS.  The benchmark never saw it: its scorer only counts finding types
+    # the case declared.  Can't see inside an external bundle?  Keep the
+    # finding -- prove-dead, not prove-alive.
+    if has_bypass and (sinks or _EXT_SCRIPT_RE.search(html or "")):
         for p in policies:
             if not p["is_bypass"]:
                 continue
