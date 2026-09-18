@@ -1,0 +1,613 @@
+[
+ {
+  "case_id": "neg-dom-07",
+  "mode": "dom_hash_route_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-dom-08",
+  "mode": "dom_tt_wrapper_safe",
+  "all": 1,
+  "hidden": 1,
+  "types": [
+   "trusted_types_policy_bypass"
+  ],
+  "error": ""
+ },
+ {
+  "case_id": "neg-stored-02",
+  "mode": "stored_api_write_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-01",
+  "mode": "escape_element",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-02",
+  "mode": "escape_attr_dq",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-03",
+  "mode": "escape_attr_sq",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-04",
+  "mode": "escape_script_string",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-05",
+  "mode": "escape_href",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-escape-06",
+  "mode": "escape_attr_nq",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-comment-01",
+  "mode": "comment_stripped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-comment-02",
+  "mode": "comment_encoded",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-attr-01",
+  "mode": "attr_quotes_stripped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-attr-02",
+  "mode": "attr_alnum_whitelist",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-attr-03",
+  "mode": "attr_data_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-attr-04",
+  "mode": "attr_angle_stripped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-csp-01",
+  "mode": "csp_strict_element",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-csp-02",
+  "mode": "csp_strict_href",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-csp-03",
+  "mode": "csp_nonce_element",
+  "all": 1,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-csp-04",
+  "mode": "csp_strict_attr",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-jsonp-01",
+  "mode": "jsonp_whitelist",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-jsonp-02",
+  "mode": "jsonp_wrapped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-filter-04",
+  "mode": "filter_angle_brackets",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-encode-01",
+  "mode": "output_urlencoded",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-encode-02",
+  "mode": "output_base64",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-encode-03",
+  "mode": "double_encode_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-encode-04",
+  "mode": "case_lower_strip",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-json-01",
+  "mode": "json_string_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-json-02",
+  "mode": "json_object_value",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-header-01",
+  "mode": "header_only",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-js-01",
+  "mode": "js_textcontent",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-js-02",
+  "mode": "js_console_log",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-select-01",
+  "mode": "select_option_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-null-01",
+  "mode": "null_byte_strip",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-05",
+  "mode": "escape_rcdata_textarea",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-06",
+  "mode": "escape_rcdata_title",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-07",
+  "mode": "escape_rcdata_xmp",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-rcdata-08",
+  "mode": "escape_rcdata_textarea_script",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-csp-05",
+  "mode": "csp_nonce_ui_element",
+  "all": 1,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-cookie-01",
+  "mode": "cookie_echo_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-path-01",
+  "mode": "path_echo_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-error-01",
+  "mode": "error_echo_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-cors-01",
+  "mode": "cors_whitelist",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-markdown-01",
+  "mode": "markdown_filtered",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-stored-01",
+  "mode": "stored_write_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-upload-01",
+  "mode": "upload_echo_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-redirect-01",
+  "mode": "redirect_safe",
+  "all": 1,
+  "hidden": 1,
+  "types": [
+   "dom"
+  ],
+  "error": ""
+ },
+ {
+  "case_id": "neg-proto-01",
+  "mode": "prototype_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-sw-01",
+  "mode": "sw_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-worker-01",
+  "mode": "worker_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-dangle-01",
+  "mode": "dangling_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-importmap-01",
+  "mode": "importmap_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-sri-01",
+  "mode": "sri_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-tt-01",
+  "mode": "tt_safe",
+  "all": 2,
+  "hidden": 2,
+  "types": [
+   "dom",
+   "trusted_types_policy_unused"
+  ],
+  "error": ""
+ },
+ {
+  "case_id": "neg-ws-01",
+  "mode": "ws_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-sanitizer-01",
+  "mode": "sanitizer_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-graphql-01",
+  "mode": "graphql_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-waf-01",
+  "mode": "waf_strict",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-formmine-01",
+  "mode": "crawl_form_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-jsmine-01",
+  "mode": "crawl_js_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-pmmine-01",
+  "mode": "pm_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-cssi-01",
+  "mode": "cssi_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-cssi-02",
+  "mode": "cssi_gfonts_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-preenc-01",
+  "mode": "pe_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-pshift-01",
+  "mode": "pshift_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-clobber-01",
+  "mode": "clobber_safe",
+  "all": 1,
+  "hidden": 1,
+  "types": [
+   "dom"
+  ],
+  "error": ""
+ },
+ {
+  "case_id": "neg-clobber-02",
+  "mode": "clobber_escaped",
+  "all": 1,
+  "hidden": 1,
+  "types": [
+   "dom"
+  ],
+  "error": ""
+ },
+ {
+  "case_id": "neg-blind-01",
+  "mode": "blind_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-tb-01",
+  "mode": "tb_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-so2-01",
+  "mode": "so2_write_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-scn-01",
+  "mode": "sc_write_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-xs-01",
+  "mode": "xs_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-mx-01",
+  "mode": "mx_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "aux-s-formecho01",
+  "mode": "formecho_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "aux-s-jsecho01",
+  "mode": "formecho_safe",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
+  "case_id": "neg-stored-03",
+  "mode": "stored_api_user_write_escaped",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ }
+]
