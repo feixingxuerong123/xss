@@ -1,0 +1,42 @@
+[
+ {
+  "case": "neg-redirect-01",
+  "type": "dom",
+  "severity": "low",
+  "declared": false,
+  "param": null,
+  "detail": "sink 'location.href =' found (no obvious source in window)"
+ },
+ {
+  "case": "neg-tt-01",
+  "type": "dom",
+  "severity": "low",
+  "declared": false,
+  "param": null,
+  "detail": "sink '.innerHTML' found (no obvious source in window)"
+ },
+ {
+  "case": "neg-tt-01",
+  "type": "trusted_types_policy_unused",
+  "severity": "low",
+  "declared": false,
+  "param": null,
+  "detail": "Trusted Types policy registered but never called via policy.createHTML() -- sinks still re"
+ },
+ {
+  "case": "neg-clobber-01",
+  "type": "dom",
+  "severity": "low",
+  "declared": false,
+  "param": null,
+  "detail": "sink '.href =' found (no obvious source in window)"
+ },
+ {
+  "case": "neg-clobber-02",
+  "type": "dom",
+  "severity": "low",
+  "declared": false,
+  "param": null,
+  "detail": "sink '.href =' found (no obvious source in window)"
+ }
+]

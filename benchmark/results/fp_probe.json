@@ -1,5 +1,13 @@
 [
  {
+  "case_id": "neg-url-03",
+  "mode": "escape_meta_refresh_js",
+  "all": 0,
+  "hidden": 0,
+  "types": [],
+  "error": ""
+ },
+ {
   "case_id": "neg-dom-07",
   "mode": "dom_hash_route_safe",
   "all": 0,
@@ -10,11 +18,9 @@
  {
   "case_id": "neg-dom-08",
   "mode": "dom_tt_wrapper_safe",
-  "all": 1,
-  "hidden": 1,
-  "types": [
-   "trusted_types_policy_bypass"
-  ],
+  "all": 0,
+  "hidden": 0,
+  "types": [],
   "error": ""
  },
  {

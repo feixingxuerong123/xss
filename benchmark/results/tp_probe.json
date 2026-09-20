@@ -16,7 +16,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -36,7 +36,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -56,7 +56,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -76,7 +76,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -96,7 +96,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -116,7 +116,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -136,7 +136,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -156,7 +156,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.6,
   "error": ""
  },
  {
@@ -178,7 +178,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -190,15 +190,15 @@
   "detected": true,
   "credited": 1,
   "credited_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "bound_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 3.0,
   "error": ""
  },
  {
@@ -218,7 +218,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -238,7 +238,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 7.8,
+  "elapsed": 9.6,
   "error": ""
  },
  {
@@ -258,7 +258,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -278,7 +278,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -298,7 +298,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -318,7 +318,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.8,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -338,7 +338,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.7,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -358,7 +358,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.8,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -378,7 +378,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.7,
+  "elapsed": 13.0,
   "error": ""
  },
  {
@@ -390,15 +390,15 @@
   "detected": true,
   "credited": 1,
   "credited_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "bound_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.7,
+  "elapsed": 3.8,
   "error": ""
  },
  {
@@ -418,7 +418,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.6,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -438,7 +438,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -458,7 +458,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -478,7 +478,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 7.8,
+  "elapsed": 9.7,
   "error": ""
  },
  {
@@ -498,7 +498,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -518,7 +518,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.4,
+  "elapsed": 2.4,
   "error": ""
  },
  {
@@ -538,7 +538,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -560,7 +560,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 19.3,
   "error": ""
  },
  {
@@ -582,7 +582,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 37.0,
   "error": ""
  },
  {
@@ -594,15 +594,15 @@
   "detected": true,
   "credited": 1,
   "credited_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "bound_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 3.7,
   "error": ""
  },
  {
@@ -622,7 +622,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -642,7 +642,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -654,15 +654,15 @@
   "detected": true,
   "credited": 1,
   "credited_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "bound_types": [
-   "reflected"
+   "polyglot_reflection"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.8,
   "error": ""
  },
  {
@@ -682,7 +682,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -702,7 +702,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -722,7 +722,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -742,7 +742,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -762,7 +762,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -782,7 +782,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -802,7 +802,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -822,7 +822,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -842,7 +842,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -862,7 +862,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -882,7 +882,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -902,7 +902,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.2,
   "error": ""
  },
  {
@@ -922,7 +922,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -942,7 +942,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -962,7 +962,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -982,7 +982,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -1002,7 +1002,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1010,146 +1010,9 @@
   "mode": "dom_hash_innerhtml",
   "context": "dom_xss",
   "case_param": "",
-  "declared_types": [],
-  "detected": true,
-  "credited": 4,
-  "credited_types": [
-   "dom_dynamic",
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow",
-   "unsanitized_innerhtml_user_source"
-  ],
-  "bound_types": [
+  "declared_types": [
    "dom_dynamic"
   ],
-  "collateral_types": [
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow",
-   "unsanitized_innerhtml_user_source"
-  ],
-  "dom_dependent": false,
-  "flags": [
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 7.5,
-  "error": ""
- },
- {
-  "case_id": "pos-dom-02",
-  "mode": "dom_search_eval",
-  "context": "dom_xss",
-  "case_param": "",
-  "declared_types": [],
-  "detected": true,
-  "credited": 3,
-  "credited_types": [
-   "dom",
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow"
-  ],
-  "bound_types": [
-   "dom"
-  ],
-  "collateral_types": [
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow"
-  ],
-  "dom_dependent": false,
-  "flags": [
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 7.5,
-  "error": ""
- },
- {
-  "case_id": "pos-dom-03",
-  "mode": "dom_postmessage",
-  "context": "dom_xss",
-  "case_param": "",
-  "declared_types": [],
-  "detected": true,
-  "credited": 6,
-  "credited_types": [
-   "dom",
-   "dom_dynamic",
-   "postmessage_xss",
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow",
-   "websocket_xss"
-  ],
-  "bound_types": [
-   "dom",
-   "dom_dynamic"
-  ],
-  "collateral_types": [
-   "postmessage_xss",
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow",
-   "websocket_xss"
-  ],
-  "dom_dependent": false,
-  "flags": [
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 7.4,
-  "error": ""
- },
- {
-  "case_id": "pos-dom-04",
-  "mode": "dom_hash_docwrite",
-  "context": "dom_xss",
-  "case_param": "",
-  "declared_types": [],
-  "detected": true,
-  "credited": 3,
-  "credited_types": [
-   "dom_dynamic",
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow"
-  ],
-  "bound_types": [
-   "dom_dynamic"
-  ],
-  "collateral_types": [
-   "trusted_types_no_policy",
-   "trusted_types_taint_flow"
-  ],
-  "dom_dependent": false,
-  "flags": [
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 7.5,
-  "error": ""
- },
- {
-  "case_id": "pos-dom-05",
-  "mode": "dom_jquery_html",
-  "context": "dom_xss",
-  "case_param": "",
-  "declared_types": [],
-  "detected": true,
-  "credited": 2,
-  "credited_types": [
-   "dom",
-   "sri_missing_script"
-  ],
-  "bound_types": [
-   "dom"
-  ],
-  "collateral_types": [
-   "sri_missing_script"
-  ],
-  "dom_dependent": false,
-  "flags": [],
-  "elapsed": 7.5,
-  "error": ""
- },
- {
-  "case_id": "pos-dom-06",
-  "mode": "dom_hash_settimeout",
-  "context": "dom_xss",
-  "case_param": "",
-  "declared_types": [],
   "detected": true,
   "credited": 1,
   "credited_types": [
@@ -1161,7 +1024,116 @@
   "collateral_types": [],
   "dom_dependent": true,
   "flags": [],
-  "elapsed": 7.5,
+  "elapsed": 8.8,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-02",
+  "mode": "dom_search_eval",
+  "context": "dom_xss",
+  "case_param": "x",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom_dynamic"
+  ],
+  "bound_types": [
+   "dom_dynamic"
+  ],
+  "collateral_types": [],
+  "dom_dependent": true,
+  "flags": [],
+  "elapsed": 9.5,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-03",
+  "mode": "dom_postmessage",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom_dynamic"
+  ],
+  "bound_types": [
+   "dom_dynamic"
+  ],
+  "collateral_types": [],
+  "dom_dependent": true,
+  "flags": [],
+  "elapsed": 22.0,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-04",
+  "mode": "dom_hash_docwrite",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": false,
+  "credited": 0,
+  "credited_types": [],
+  "bound_types": [],
+  "collateral_types": [],
+  "dom_dependent": false,
+  "flags": [
+   "NO-CREDIT"
+  ],
+  "elapsed": 90.0,
+  "error": "timeout after 90s"
+ },
+ {
+  "case_id": "pos-dom-05",
+  "mode": "dom_jquery_html",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [
+   "dom_dynamic",
+   "dom"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom"
+  ],
+  "bound_types": [
+   "dom"
+  ],
+  "collateral_types": [],
+  "dom_dependent": true,
+  "flags": [],
+  "elapsed": 8.8,
+  "error": ""
+ },
+ {
+  "case_id": "pos-dom-06",
+  "mode": "dom_hash_settimeout",
+  "context": "dom_xss",
+  "case_param": "",
+  "declared_types": [
+   "dom_dynamic"
+  ],
+  "detected": true,
+  "credited": 1,
+  "credited_types": [
+   "dom_dynamic"
+  ],
+  "bound_types": [
+   "dom_dynamic"
+  ],
+  "collateral_types": [],
+  "dom_dependent": true,
+  "flags": [],
+  "elapsed": 8.7,
   "error": ""
  },
  {
@@ -1177,16 +1149,13 @@
   "credited_types": [
    "dom_dynamic"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "dom_dynamic"
   ],
+  "collateral_types": [],
   "dom_dependent": true,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.2,
+  "flags": [],
+  "elapsed": 9.4,
   "error": ""
  },
  {
@@ -1202,16 +1171,13 @@
   "credited_types": [
    "dom_dynamic"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "dom_dynamic"
   ],
+  "collateral_types": [],
   "dom_dependent": true,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.2,
+  "flags": [],
+  "elapsed": 9.5,
   "error": ""
  },
  {
@@ -1234,7 +1200,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 7.2,
+  "elapsed": 8.9,
   "error": ""
  },
  {
@@ -1254,7 +1220,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1274,7 +1240,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1294,7 +1260,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1314,7 +1280,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1334,7 +1300,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -1354,7 +1320,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1374,7 +1340,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -1394,7 +1360,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 2.0,
+  "elapsed": 3.1,
   "error": ""
  },
  {
@@ -1414,7 +1380,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.4,
+  "elapsed": 13.6,
   "error": ""
  },
  {
@@ -1427,16 +1393,16 @@
   "credited": 2,
   "credited_types": [
    "markdown_xss",
-   "reflected"
+   "polyglot_reflection"
   ],
   "bound_types": [
    "markdown_xss",
-   "reflected"
+   "polyglot_reflection"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.6,
+  "elapsed": 64.6,
   "error": ""
  },
  {
@@ -1456,7 +1422,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.4,
+  "elapsed": 3.2,
   "error": ""
  },
  {
@@ -1476,7 +1442,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.4,
+  "elapsed": 3.0,
   "error": ""
  },
  {
@@ -1496,7 +1462,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.7,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -1516,7 +1482,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -1536,7 +1502,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -1556,7 +1522,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1572,16 +1538,13 @@
   "credited_types": [
    "cookie_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "cookie_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.1,
+  "flags": [],
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -1597,16 +1560,13 @@
   "credited_types": [
    "path_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "path_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.0,
+  "flags": [],
+  "elapsed": 1.6,
   "error": ""
  },
  {
@@ -1622,16 +1582,13 @@
   "credited_types": [
    "error_page_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "error_page_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.0,
+  "flags": [],
+  "elapsed": 1.7,
   "error": ""
  },
  {
@@ -1647,16 +1604,13 @@
   "credited_types": [
    "cors_misconfig"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "cors_misconfig"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.1,
+  "flags": [],
+  "elapsed": 1.3,
   "error": ""
  },
  {
@@ -1678,7 +1632,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1701,7 +1655,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -1718,17 +1672,15 @@
   "credited_types": [
    "upload_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "upload_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
   "flags": [
-   "COLLATERAL-ONLY",
-   "PARAM-MISMATCH",
-   "MOSTLY-COLLATERAL"
+   "PARAM-MISMATCH"
   ],
-  "elapsed": 1.2,
+  "elapsed": 1.8,
   "error": ""
  },
  {
@@ -1744,17 +1696,15 @@
   "credited_types": [
    "open_redirect_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "open_redirect_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
   "flags": [
-   "COLLATERAL-ONLY",
-   "PARAM-MISMATCH",
-   "MOSTLY-COLLATERAL"
+   "PARAM-MISMATCH"
   ],
-  "elapsed": 8.3,
+  "elapsed": 9.6,
   "error": ""
  },
  {
@@ -1770,16 +1720,13 @@
   "credited_types": [
    "prototype_pollution"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "prototype_pollution"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.3,
+  "flags": [],
+  "elapsed": 9.5,
   "error": ""
  },
  {
@@ -1795,16 +1742,13 @@
   "credited_types": [
    "service_worker_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "service_worker_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.2,
+  "flags": [],
+  "elapsed": 9.5,
   "error": ""
  },
  {
@@ -1820,16 +1764,13 @@
   "credited_types": [
    "web_worker_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "web_worker_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.2,
+  "flags": [],
+  "elapsed": 9.5,
   "error": ""
  },
  {
@@ -1845,16 +1786,13 @@
   "credited_types": [
    "dangling_markup_potential"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "dangling_markup_potential"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.2,
+  "flags": [],
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -1870,16 +1808,13 @@
   "credited_types": [
    "import_map_cross_origin"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "import_map_cross_origin"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.3,
+  "flags": [],
+  "elapsed": 9.6,
   "error": ""
  },
  {
@@ -1895,16 +1830,13 @@
   "credited_types": [
    "sri_missing_script"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "sri_missing_script"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.3,
+  "flags": [],
+  "elapsed": 9.7,
   "error": ""
  },
  {
@@ -1920,16 +1852,13 @@
   "credited_types": [
    "trusted_types_policy_bypass"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "trusted_types_policy_bypass"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.4,
+  "flags": [],
+  "elapsed": 9.8,
   "error": ""
  },
  {
@@ -1945,16 +1874,13 @@
   "credited_types": [
    "websocket_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "websocket_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.3,
+  "flags": [],
+  "elapsed": 12.2,
   "error": ""
  },
  {
@@ -1972,17 +1898,14 @@
    "sanitizer_output_to_innerhtml",
    "sanitizer_vulnerable_version"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "sanitizer_output_to_innerhtml",
    "sanitizer_vulnerable_version"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.4,
+  "flags": [],
+  "elapsed": 9.3,
   "error": ""
  },
  {
@@ -1998,16 +1921,13 @@
   "credited_types": [
    "graphql_xss"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "graphql_xss"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 8.3,
+  "flags": [],
+  "elapsed": 9.7,
   "error": ""
  },
  {
@@ -2022,15 +1942,15 @@
   "detected": true,
   "credited": 1,
   "credited_types": [
-   "polyglot_reflection"
+   "reflected"
   ],
   "bound_types": [
-   "polyglot_reflection"
+   "reflected"
   ],
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 2.5,
+  "elapsed": 2.2,
   "error": ""
  },
  {
@@ -2052,7 +1972,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 3.7,
+  "elapsed": 5.6,
   "error": ""
  },
  {
@@ -2074,7 +1994,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 9.7,
+  "elapsed": 11.5,
   "error": ""
  },
  {
@@ -2090,16 +2010,13 @@
   "credited_types": [
    "reflected"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "reflected"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.7,
+  "flags": [],
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -2115,16 +2032,13 @@
   "credited_types": [
    "css_import_injection"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "css_import_injection"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.2,
+  "flags": [],
+  "elapsed": 1.3,
   "error": ""
  },
  {
@@ -2146,7 +2060,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.2,
+  "elapsed": 2.0,
   "error": ""
  },
  {
@@ -2168,7 +2082,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 2.2,
+  "elapsed": 3.5,
   "error": ""
  },
  {
@@ -2190,7 +2104,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 7.7,
+  "elapsed": 9.7,
   "error": ""
  },
  {
@@ -2212,7 +2126,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 3.7,
+  "elapsed": 4.2,
   "error": ""
  },
  {
@@ -2234,7 +2148,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 6.2,
+  "elapsed": 7.1,
   "error": ""
  },
  {
@@ -2256,7 +2170,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 70.4,
   "error": ""
  },
  {
@@ -2278,7 +2192,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.3,
+  "elapsed": 1.5,
   "error": ""
  },
  {
@@ -2294,16 +2208,13 @@
   "credited_types": [
    "xs_leak_surface"
   ],
-  "bound_types": [],
-  "collateral_types": [
+  "bound_types": [
    "xs_leak_surface"
   ],
+  "collateral_types": [],
   "dom_dependent": false,
-  "flags": [
-   "COLLATERAL-ONLY",
-   "MOSTLY-COLLATERAL"
-  ],
-  "elapsed": 1.1,
+  "flags": [],
+  "elapsed": 1.4,
   "error": ""
  },
  {
@@ -2325,7 +2236,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 8.3,
+  "elapsed": 9.6,
   "error": ""
  },
  {
@@ -2347,7 +2258,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -2369,7 +2280,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 1.1,
+  "elapsed": 1.9,
   "error": ""
  },
  {
@@ -2392,7 +2303,7 @@
   "collateral_types": [],
   "dom_dependent": false,
   "flags": [],
-  "elapsed": 7.0,
+  "elapsed": 8.5,
   "error": ""
  }
 ]
