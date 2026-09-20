@@ -21,6 +21,13 @@ aiohttp>=3.9
 # Headless real-browser confirmation (--headless).
 playwright>=1.40
 
+# JavaScript data-flow channel and the sandbox's "does this even compile?"
+# gate (xssentinel/core/js_ast.py, core/sandbox.py).  Both degrade without it
+# -- js_ast falls back to regex taint, and the sandbox stops being able to tell
+# a broken-out script payload from a syntax error that never executes -- so this
+# is the one optional dependency worth always installing.
+esprima>=4.0
+
 # REST API service mode (--serve).  The stdlib backend (http.server) is
 # always available with zero extra dependencies; install Flask to use the
 # Flask backend instead (--use-flask flag).

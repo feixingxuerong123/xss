@@ -1,0 +1,687 @@
+[
+ {
+  "case": "svg:attributename->attributeName",
+  "input": "<svg><animate attributename=\"v\"></animate></svg>",
+  "chromium": "<svg><animate attributeName=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:attributetype->attributeType",
+  "input": "<svg><animate attributetype=\"v\"></animate></svg>",
+  "chromium": "<svg><animate attributeType=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:basefrequency->baseFrequency",
+  "input": "<svg><animate basefrequency=\"v\"></animate></svg>",
+  "chromium": "<svg><animate baseFrequency=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:baseprofile->baseProfile",
+  "input": "<svg><animate baseprofile=\"v\"></animate></svg>",
+  "chromium": "<svg><animate baseProfile=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:calcmode->calcMode",
+  "input": "<svg><animate calcmode=\"v\"></animate></svg>",
+  "chromium": "<svg><animate calcMode=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:clippathunits->clipPathUnits",
+  "input": "<svg><animate clippathunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate clipPathUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:diffuseconstant->diffuseConstant",
+  "input": "<svg><animate diffuseconstant=\"v\"></animate></svg>",
+  "chromium": "<svg><animate diffuseConstant=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:edgemode->edgeMode",
+  "input": "<svg><animate edgemode=\"v\"></animate></svg>",
+  "chromium": "<svg><animate edgeMode=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:filterunits->filterUnits",
+  "input": "<svg><animate filterunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate filterUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:glyphref->glyphRef",
+  "input": "<svg><animate glyphref=\"v\"></animate></svg>",
+  "chromium": "<svg><animate glyphRef=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:gradienttransform->gradientTransform",
+  "input": "<svg><animate gradienttransform=\"v\"></animate></svg>",
+  "chromium": "<svg><animate gradientTransform=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:gradientunits->gradientUnits",
+  "input": "<svg><animate gradientunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate gradientUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:kernelmatrix->kernelMatrix",
+  "input": "<svg><animate kernelmatrix=\"v\"></animate></svg>",
+  "chromium": "<svg><animate kernelMatrix=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:kernelunitlength->kernelUnitLength",
+  "input": "<svg><animate kernelunitlength=\"v\"></animate></svg>",
+  "chromium": "<svg><animate kernelUnitLength=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:keypoints->keyPoints",
+  "input": "<svg><animate keypoints=\"v\"></animate></svg>",
+  "chromium": "<svg><animate keyPoints=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:keysplines->keySplines",
+  "input": "<svg><animate keysplines=\"v\"></animate></svg>",
+  "chromium": "<svg><animate keySplines=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:keytimes->keyTimes",
+  "input": "<svg><animate keytimes=\"v\"></animate></svg>",
+  "chromium": "<svg><animate keyTimes=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:lengthadjust->lengthAdjust",
+  "input": "<svg><animate lengthadjust=\"v\"></animate></svg>",
+  "chromium": "<svg><animate lengthAdjust=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:limitingconeangle->limitingConeAngle",
+  "input": "<svg><animate limitingconeangle=\"v\"></animate></svg>",
+  "chromium": "<svg><animate limitingConeAngle=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:markerheight->markerHeight",
+  "input": "<svg><animate markerheight=\"v\"></animate></svg>",
+  "chromium": "<svg><animate markerHeight=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:markerunits->markerUnits",
+  "input": "<svg><animate markerunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate markerUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:markerwidth->markerWidth",
+  "input": "<svg><animate markerwidth=\"v\"></animate></svg>",
+  "chromium": "<svg><animate markerWidth=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:maskcontentunits->maskContentUnits",
+  "input": "<svg><animate maskcontentunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate maskContentUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:maskunits->maskUnits",
+  "input": "<svg><animate maskunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate maskUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:numoctaves->numOctaves",
+  "input": "<svg><animate numoctaves=\"v\"></animate></svg>",
+  "chromium": "<svg><animate numOctaves=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:pathlength->pathLength",
+  "input": "<svg><animate pathlength=\"v\"></animate></svg>",
+  "chromium": "<svg><animate pathLength=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:patterncontentunits->patternContentUnits",
+  "input": "<svg><animate patterncontentunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate patternContentUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:patterntransform->patternTransform",
+  "input": "<svg><animate patterntransform=\"v\"></animate></svg>",
+  "chromium": "<svg><animate patternTransform=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:patternunits->patternUnits",
+  "input": "<svg><animate patternunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate patternUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:pointsatx->pointsAtX",
+  "input": "<svg><animate pointsatx=\"v\"></animate></svg>",
+  "chromium": "<svg><animate pointsAtX=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:pointsaty->pointsAtY",
+  "input": "<svg><animate pointsaty=\"v\"></animate></svg>",
+  "chromium": "<svg><animate pointsAtY=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:pointsatz->pointsAtZ",
+  "input": "<svg><animate pointsatz=\"v\"></animate></svg>",
+  "chromium": "<svg><animate pointsAtZ=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:preservealpha->preserveAlpha",
+  "input": "<svg><animate preservealpha=\"v\"></animate></svg>",
+  "chromium": "<svg><animate preserveAlpha=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:preserveaspectratio->preserveAspectRatio",
+  "input": "<svg><animate preserveaspectratio=\"v\"></animate></svg>",
+  "chromium": "<svg><animate preserveAspectRatio=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:primitiveunits->primitiveUnits",
+  "input": "<svg><animate primitiveunits=\"v\"></animate></svg>",
+  "chromium": "<svg><animate primitiveUnits=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:refx->refX",
+  "input": "<svg><animate refx=\"v\"></animate></svg>",
+  "chromium": "<svg><animate refX=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:refy->refY",
+  "input": "<svg><animate refy=\"v\"></animate></svg>",
+  "chromium": "<svg><animate refY=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:repeatcount->repeatCount",
+  "input": "<svg><animate repeatcount=\"v\"></animate></svg>",
+  "chromium": "<svg><animate repeatCount=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:repeatdur->repeatDur",
+  "input": "<svg><animate repeatdur=\"v\"></animate></svg>",
+  "chromium": "<svg><animate repeatDur=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:requiredextensions->requiredExtensions",
+  "input": "<svg><animate requiredextensions=\"v\"></animate></svg>",
+  "chromium": "<svg><animate requiredExtensions=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:requiredfeatures->requiredFeatures",
+  "input": "<svg><animate requiredfeatures=\"v\"></animate></svg>",
+  "chromium": "<svg><animate requiredFeatures=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:specularconstant->specularConstant",
+  "input": "<svg><animate specularconstant=\"v\"></animate></svg>",
+  "chromium": "<svg><animate specularConstant=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:specularexponent->specularExponent",
+  "input": "<svg><animate specularexponent=\"v\"></animate></svg>",
+  "chromium": "<svg><animate specularExponent=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:spreadmethod->spreadMethod",
+  "input": "<svg><animate spreadmethod=\"v\"></animate></svg>",
+  "chromium": "<svg><animate spreadMethod=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:startoffset->startOffset",
+  "input": "<svg><animate startoffset=\"v\"></animate></svg>",
+  "chromium": "<svg><animate startOffset=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:stddeviation->stdDeviation",
+  "input": "<svg><animate stddeviation=\"v\"></animate></svg>",
+  "chromium": "<svg><animate stdDeviation=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:stitchtiles->stitchTiles",
+  "input": "<svg><animate stitchtiles=\"v\"></animate></svg>",
+  "chromium": "<svg><animate stitchTiles=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:surfacescale->surfaceScale",
+  "input": "<svg><animate surfacescale=\"v\"></animate></svg>",
+  "chromium": "<svg><animate surfaceScale=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:systemlanguage->systemLanguage",
+  "input": "<svg><animate systemlanguage=\"v\"></animate></svg>",
+  "chromium": "<svg><animate systemLanguage=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:tablevalues->tableValues",
+  "input": "<svg><animate tablevalues=\"v\"></animate></svg>",
+  "chromium": "<svg><animate tableValues=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:targetx->targetX",
+  "input": "<svg><animate targetx=\"v\"></animate></svg>",
+  "chromium": "<svg><animate targetX=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:targety->targetY",
+  "input": "<svg><animate targety=\"v\"></animate></svg>",
+  "chromium": "<svg><animate targetY=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:textlength->textLength",
+  "input": "<svg><animate textlength=\"v\"></animate></svg>",
+  "chromium": "<svg><animate textLength=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:viewbox->viewBox",
+  "input": "<svg><animate viewbox=\"v\"></animate></svg>",
+  "chromium": "<svg><animate viewBox=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:viewtarget->viewTarget",
+  "input": "<svg><animate viewtarget=\"v\"></animate></svg>",
+  "chromium": "<svg><animate viewTarget=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:xchannelselector->xChannelSelector",
+  "input": "<svg><animate xchannelselector=\"v\"></animate></svg>",
+  "chromium": "<svg><animate xChannelSelector=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:ychannelselector->yChannelSelector",
+  "input": "<svg><animate ychannelselector=\"v\"></animate></svg>",
+  "chromium": "<svg><animate yChannelSelector=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:zoomandpan->zoomAndPan",
+  "input": "<svg><animate zoomandpan=\"v\"></animate></svg>",
+  "chromium": "<svg><animate zoomAndPan=\"v\"></animate></svg>"
+ },
+ {
+  "case": "math:definitionurl->definitionURL",
+  "input": "<math><annotation-xml definitionurl=\"v\"></annotation-xml></math>",
+  "chromium": "<math><annotation-xml definitionURL=\"v\"></annotation-xml></math>"
+ },
+ {
+  "case": "svg:ATTRIBUTENAME-upper",
+  "input": "<svg><animate ATTRIBUTENAME=\"v\"></animate></svg>",
+  "chromium": "<svg><animate attributeName=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:attributeName-as-is",
+  "input": "<svg><animate attributeName=\"v\"></animate></svg>",
+  "chromium": "<svg><animate attributeName=\"v\"></animate></svg>"
+ },
+ {
+  "case": "svg:viewbox-on-root",
+  "input": "<svg viewbox=\"0 0 1 1\"><rect/></svg>",
+  "chromium": "<svg viewBox=\"0 0 1 1\"><rect></rect></svg>"
+ },
+ {
+  "case": "svg:xlink-href-prefix",
+  "input": "<svg><use xlink:href=\"#a\"></use></svg>",
+  "chromium": "<svg><use xlink:href=\"#a\"></use></svg>"
+ },
+ {
+  "case": "svg:xmlns-xlink-decl",
+  "input": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><use/></svg>",
+  "chromium": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><use></use></svg>"
+ },
+ {
+  "case": "svg:xml-space-prefix",
+  "input": "<svg><text xml:space=\"preserve\">t</text></svg>",
+  "chromium": "<svg><text xml:space=\"preserve\">t</text></svg>"
+ },
+ {
+  "case": "svg:href-untouched",
+  "input": "<svg><a href=\"/x\">t</a></svg>",
+  "chromium": "<svg><a href=\"/x\">t</a></svg>"
+ },
+ {
+  "case": "svg:onerror-untouched",
+  "input": "<svg><img onerror=\"__x()\" src=x></svg>",
+  "chromium": "<svg></svg><img onerror=\"__x()\" src=\"x\">"
+ },
+ {
+  "case": "svg-integration-html-attr",
+  "input": "<svg><foreignObject><div attributename=\"v\">t</div></foreignObject></svg>",
+  "chromium": "<svg><foreignObject><div attributename=\"v\">t</div></foreignObject></svg>"
+ },
+ {
+  "case": "math-integration-html-attr",
+  "input": "<math><mtext><span attributename=\"v\">t</span></mtext></math>",
+  "chromium": "<math><mtext><span attributename=\"v\">t</span></mtext></math>"
+ },
+ {
+  "case": "elem:a",
+  "input": "<svg><a id=\"x\"></a></svg>",
+  "chromium": "<svg><a id=\"x\"></a></svg>"
+ },
+ {
+  "case": "elem:animate",
+  "input": "<svg><animate id=\"x\"></animate></svg>",
+  "chromium": "<svg><animate id=\"x\"></animate></svg>"
+ },
+ {
+  "case": "elem:animatecolor",
+  "input": "<svg><animatecolor id=\"x\"></animatecolor></svg>",
+  "chromium": "<svg><animateColor id=\"x\"></animateColor></svg>"
+ },
+ {
+  "case": "elem:animatemotion",
+  "input": "<svg><animatemotion id=\"x\"></animatemotion></svg>",
+  "chromium": "<svg><animateMotion id=\"x\"></animateMotion></svg>"
+ },
+ {
+  "case": "elem:animatetransform",
+  "input": "<svg><animatetransform id=\"x\"></animatetransform></svg>",
+  "chromium": "<svg><animateTransform id=\"x\"></animateTransform></svg>"
+ },
+ {
+  "case": "elem:circle",
+  "input": "<svg><circle id=\"x\"></circle></svg>",
+  "chromium": "<svg><circle id=\"x\"></circle></svg>"
+ },
+ {
+  "case": "elem:clippath",
+  "input": "<svg><clippath id=\"x\"></clippath></svg>",
+  "chromium": "<svg><clipPath id=\"x\"></clipPath></svg>"
+ },
+ {
+  "case": "elem:defs",
+  "input": "<svg><defs id=\"x\"></defs></svg>",
+  "chromium": "<svg><defs id=\"x\"></defs></svg>"
+ },
+ {
+  "case": "elem:desc",
+  "input": "<svg><desc id=\"x\"></desc></svg>",
+  "chromium": "<svg><desc id=\"x\"></desc></svg>"
+ },
+ {
+  "case": "elem:discard",
+  "input": "<svg><discard id=\"x\"></discard></svg>",
+  "chromium": "<svg><discard id=\"x\"></discard></svg>"
+ },
+ {
+  "case": "elem:ellipse",
+  "input": "<svg><ellipse id=\"x\"></ellipse></svg>",
+  "chromium": "<svg><ellipse id=\"x\"></ellipse></svg>"
+ },
+ {
+  "case": "elem:feblend",
+  "input": "<svg><feblend id=\"x\"></feblend></svg>",
+  "chromium": "<svg><feBlend id=\"x\"></feBlend></svg>"
+ },
+ {
+  "case": "elem:fecolormatrix",
+  "input": "<svg><fecolormatrix id=\"x\"></fecolormatrix></svg>",
+  "chromium": "<svg><feColorMatrix id=\"x\"></feColorMatrix></svg>"
+ },
+ {
+  "case": "elem:fecomponenttransfer",
+  "input": "<svg><fecomponenttransfer id=\"x\"></fecomponenttransfer></svg>",
+  "chromium": "<svg><feComponentTransfer id=\"x\"></feComponentTransfer></svg>"
+ },
+ {
+  "case": "elem:fecomposite",
+  "input": "<svg><fecomposite id=\"x\"></fecomposite></svg>",
+  "chromium": "<svg><feComposite id=\"x\"></feComposite></svg>"
+ },
+ {
+  "case": "elem:feconvolvematrix",
+  "input": "<svg><feconvolvematrix id=\"x\"></feconvolvematrix></svg>",
+  "chromium": "<svg><feConvolveMatrix id=\"x\"></feConvolveMatrix></svg>"
+ },
+ {
+  "case": "elem:fediffuselighting",
+  "input": "<svg><fediffuselighting id=\"x\"></fediffuselighting></svg>",
+  "chromium": "<svg><feDiffuseLighting id=\"x\"></feDiffuseLighting></svg>"
+ },
+ {
+  "case": "elem:fedisplacementmap",
+  "input": "<svg><fedisplacementmap id=\"x\"></fedisplacementmap></svg>",
+  "chromium": "<svg><feDisplacementMap id=\"x\"></feDisplacementMap></svg>"
+ },
+ {
+  "case": "elem:fedistantlight",
+  "input": "<svg><fedistantlight id=\"x\"></fedistantlight></svg>",
+  "chromium": "<svg><feDistantLight id=\"x\"></feDistantLight></svg>"
+ },
+ {
+  "case": "elem:fedropshadow",
+  "input": "<svg><fedropshadow id=\"x\"></fedropshadow></svg>",
+  "chromium": "<svg><feDropShadow id=\"x\"></feDropShadow></svg>"
+ },
+ {
+  "case": "elem:feflood",
+  "input": "<svg><feflood id=\"x\"></feflood></svg>",
+  "chromium": "<svg><feFlood id=\"x\"></feFlood></svg>"
+ },
+ {
+  "case": "elem:fefunca",
+  "input": "<svg><fefunca id=\"x\"></fefunca></svg>",
+  "chromium": "<svg><feFuncA id=\"x\"></feFuncA></svg>"
+ },
+ {
+  "case": "elem:fefuncb",
+  "input": "<svg><fefuncb id=\"x\"></fefuncb></svg>",
+  "chromium": "<svg><feFuncB id=\"x\"></feFuncB></svg>"
+ },
+ {
+  "case": "elem:fefuncg",
+  "input": "<svg><fefuncg id=\"x\"></fefuncg></svg>",
+  "chromium": "<svg><feFuncG id=\"x\"></feFuncG></svg>"
+ },
+ {
+  "case": "elem:fefuncr",
+  "input": "<svg><fefuncr id=\"x\"></fefuncr></svg>",
+  "chromium": "<svg><feFuncR id=\"x\"></feFuncR></svg>"
+ },
+ {
+  "case": "elem:fegaussianblur",
+  "input": "<svg><fegaussianblur id=\"x\"></fegaussianblur></svg>",
+  "chromium": "<svg><feGaussianBlur id=\"x\"></feGaussianBlur></svg>"
+ },
+ {
+  "case": "elem:feimage",
+  "input": "<svg><feimage id=\"x\"></feimage></svg>",
+  "chromium": "<svg><feImage id=\"x\"></feImage></svg>"
+ },
+ {
+  "case": "elem:femerge",
+  "input": "<svg><femerge id=\"x\"></femerge></svg>",
+  "chromium": "<svg><feMerge id=\"x\"></feMerge></svg>"
+ },
+ {
+  "case": "elem:femergenode",
+  "input": "<svg><femergenode id=\"x\"></femergenode></svg>",
+  "chromium": "<svg><feMergeNode id=\"x\"></feMergeNode></svg>"
+ },
+ {
+  "case": "elem:femorphology",
+  "input": "<svg><femorphology id=\"x\"></femorphology></svg>",
+  "chromium": "<svg><feMorphology id=\"x\"></feMorphology></svg>"
+ },
+ {
+  "case": "elem:feoffset",
+  "input": "<svg><feoffset id=\"x\"></feoffset></svg>",
+  "chromium": "<svg><feOffset id=\"x\"></feOffset></svg>"
+ },
+ {
+  "case": "elem:fepointlight",
+  "input": "<svg><fepointlight id=\"x\"></fepointlight></svg>",
+  "chromium": "<svg><fePointLight id=\"x\"></fePointLight></svg>"
+ },
+ {
+  "case": "elem:fespecularlighting",
+  "input": "<svg><fespecularlighting id=\"x\"></fespecularlighting></svg>",
+  "chromium": "<svg><feSpecularLighting id=\"x\"></feSpecularLighting></svg>"
+ },
+ {
+  "case": "elem:fespotlight",
+  "input": "<svg><fespotlight id=\"x\"></fespotlight></svg>",
+  "chromium": "<svg><feSpotLight id=\"x\"></feSpotLight></svg>"
+ },
+ {
+  "case": "elem:fetile",
+  "input": "<svg><fetile id=\"x\"></fetile></svg>",
+  "chromium": "<svg><feTile id=\"x\"></feTile></svg>"
+ },
+ {
+  "case": "elem:feturbulence",
+  "input": "<svg><feturbulence id=\"x\"></feturbulence></svg>",
+  "chromium": "<svg><feTurbulence id=\"x\"></feTurbulence></svg>"
+ },
+ {
+  "case": "elem:filter",
+  "input": "<svg><filter id=\"x\"></filter></svg>",
+  "chromium": "<svg><filter id=\"x\"></filter></svg>"
+ },
+ {
+  "case": "elem:foreignobject",
+  "input": "<svg><foreignobject id=\"x\"></foreignobject></svg>",
+  "chromium": "<svg><foreignObject id=\"x\"></foreignObject></svg>"
+ },
+ {
+  "case": "elem:g",
+  "input": "<svg><g id=\"x\"></g></svg>",
+  "chromium": "<svg><g id=\"x\"></g></svg>"
+ },
+ {
+  "case": "elem:hatch",
+  "input": "<svg><hatch id=\"x\"></hatch></svg>",
+  "chromium": "<svg><hatch id=\"x\"></hatch></svg>"
+ },
+ {
+  "case": "elem:hatchpath",
+  "input": "<svg><hatchpath id=\"x\"></hatchpath></svg>",
+  "chromium": "<svg><hatchpath id=\"x\"></hatchpath></svg>"
+ },
+ {
+  "case": "elem:image",
+  "input": "<svg><image id=\"x\"></image></svg>",
+  "chromium": "<svg><image id=\"x\"></image></svg>"
+ },
+ {
+  "case": "elem:line",
+  "input": "<svg><line id=\"x\"></line></svg>",
+  "chromium": "<svg><line id=\"x\"></line></svg>"
+ },
+ {
+  "case": "elem:lineargradient",
+  "input": "<svg><lineargradient id=\"x\"></lineargradient></svg>",
+  "chromium": "<svg><linearGradient id=\"x\"></linearGradient></svg>"
+ },
+ {
+  "case": "elem:marker",
+  "input": "<svg><marker id=\"x\"></marker></svg>",
+  "chromium": "<svg><marker id=\"x\"></marker></svg>"
+ },
+ {
+  "case": "elem:mask",
+  "input": "<svg><mask id=\"x\"></mask></svg>",
+  "chromium": "<svg><mask id=\"x\"></mask></svg>"
+ },
+ {
+  "case": "elem:metadata",
+  "input": "<svg><metadata id=\"x\"></metadata></svg>",
+  "chromium": "<svg><metadata id=\"x\"></metadata></svg>"
+ },
+ {
+  "case": "elem:mpath",
+  "input": "<svg><mpath id=\"x\"></mpath></svg>",
+  "chromium": "<svg><mpath id=\"x\"></mpath></svg>"
+ },
+ {
+  "case": "elem:path",
+  "input": "<svg><path id=\"x\"></path></svg>",
+  "chromium": "<svg><path id=\"x\"></path></svg>"
+ },
+ {
+  "case": "elem:pattern",
+  "input": "<svg><pattern id=\"x\"></pattern></svg>",
+  "chromium": "<svg><pattern id=\"x\"></pattern></svg>"
+ },
+ {
+  "case": "elem:polygon",
+  "input": "<svg><polygon id=\"x\"></polygon></svg>",
+  "chromium": "<svg><polygon id=\"x\"></polygon></svg>"
+ },
+ {
+  "case": "elem:polyline",
+  "input": "<svg><polyline id=\"x\"></polyline></svg>",
+  "chromium": "<svg><polyline id=\"x\"></polyline></svg>"
+ },
+ {
+  "case": "elem:radialgradient",
+  "input": "<svg><radialgradient id=\"x\"></radialgradient></svg>",
+  "chromium": "<svg><radialGradient id=\"x\"></radialGradient></svg>"
+ },
+ {
+  "case": "elem:rect",
+  "input": "<svg><rect id=\"x\"></rect></svg>",
+  "chromium": "<svg><rect id=\"x\"></rect></svg>"
+ },
+ {
+  "case": "elem:set",
+  "input": "<svg><set id=\"x\"></set></svg>",
+  "chromium": "<svg><set id=\"x\"></set></svg>"
+ },
+ {
+  "case": "elem:stop",
+  "input": "<svg><stop id=\"x\"></stop></svg>",
+  "chromium": "<svg><stop id=\"x\"></stop></svg>"
+ },
+ {
+  "case": "elem:svg",
+  "input": "<svg><svg id=\"x\"></svg></svg>",
+  "chromium": "<svg><svg id=\"x\"></svg></svg>"
+ },
+ {
+  "case": "elem:switch",
+  "input": "<svg><switch id=\"x\"></switch></svg>",
+  "chromium": "<svg><switch id=\"x\"></switch></svg>"
+ },
+ {
+  "case": "elem:symbol",
+  "input": "<svg><symbol id=\"x\"></symbol></svg>",
+  "chromium": "<svg><symbol id=\"x\"></symbol></svg>"
+ },
+ {
+  "case": "elem:text",
+  "input": "<svg><text id=\"x\"></text></svg>",
+  "chromium": "<svg><text id=\"x\"></text></svg>"
+ },
+ {
+  "case": "elem:textpath",
+  "input": "<svg><textpath id=\"x\"></textpath></svg>",
+  "chromium": "<svg><textPath id=\"x\"></textPath></svg>"
+ },
+ {
+  "case": "elem:tspan",
+  "input": "<svg><tspan id=\"x\"></tspan></svg>",
+  "chromium": "<svg><tspan id=\"x\"></tspan></svg>"
+ },
+ {
+  "case": "elem:use",
+  "input": "<svg><use id=\"x\"></use></svg>",
+  "chromium": "<svg><use id=\"x\"></use></svg>"
+ },
+ {
+  "case": "elem:view",
+  "input": "<svg><view id=\"x\"></view></svg>",
+  "chromium": "<svg><view id=\"x\"></view></svg>"
+ },
+ {
+  "case": "elem:animateAttributeSet",
+  "input": "<svg><animateAttributeSet id=\"x\"></animateAttributeSet></svg>",
+  "chromium": "<svg><animateattributeset id=\"x\"></animateattributeset></svg>"
+ },
+ {
+  "case": "elem:viewBox",
+  "input": "<svg><viewBox id=\"x\"></viewBox></svg>",
+  "chromium": "<svg><viewbox id=\"x\"></viewbox></svg>"
+ },
+ {
+  "case": "elem:FEgaussianBlur",
+  "input": "<svg><FEgaussianBlur id=\"x\"></FEgaussianBlur></svg>",
+  "chromium": "<svg><feGaussianBlur id=\"x\"></feGaussianBlur></svg>"
+ },
+ {
+  "case": "elem:ForeignObject",
+  "input": "<svg><ForeignObject id=\"x\"></ForeignObject></svg>",
+  "chromium": "<svg><foreignObject id=\"x\"></foreignObject></svg>"
+ }
+]

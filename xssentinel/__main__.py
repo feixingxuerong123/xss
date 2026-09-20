@@ -57,7 +57,7 @@ from .cli_runner import (  # noqa: F401
     _run_async_batch, _write_report)
 from .cli_commands import (  # noqa: F401
     _run_self_test, _run_serve, _run_verify_fix, _run_diff,
-    _run_passive_proxy, _run_marker_fuzz)
+    _run_passive_proxy, _run_marker_fuzz, _run_sandbox)
 
 
 # Phase 33: scan-policy presets (ZAP-style Threshold/Strength analogue).
@@ -144,6 +144,37 @@ def build_parser():
                        help="Marker token in --fuzz-body (default FUZZ)")
     g_tgt.add_argument("--fuzz-max", dest="fuzz_max", type=int, default=20,
                        help="Max payloads to send in marker-fuzz mode")
+    # Phase 169: offline HTML sandbox -- answer "does this payload actually
+    # execute, and in which reflection context" without a target or a browser.
+    g_tgt.add_argument("--sandbox", dest="sandbox", default=None, metavar="PAYLOAD",
+                       help="Offline payload trial: run PAYLOAD through the "
+                            "pure-Python HTML sandbox across every reflection "
+                            "context and report live / inert / unknown.  No "
+                            "network, no browser, ~microseconds per case.")
+    g_tgt.add_argument("--sandbox-host", dest="sandbox_host", default="all",
+                       help="Reflection context for --sandbox: one of the "
+                            "context names (text, attr_dq, title, svg_style, "
+                            "script_block, ...) or 'all' for the full matrix "
+                            "(--sandbox-hosts lists them)")
+    g_tgt.add_argument("--sandbox-hosts", dest="sandbox_hosts", action="store_true",
+                       help="List the available --sandbox-host context names and exit")
+    g_tgt.add_argument("--sandbox-response", dest="sandbox_response", default=None,
+                       help="Judge a saved response body (file, or - for stdin) "
+                            "instead of a synthetic host: was the token that "
+                            "came back actually executable?")
+    g_tgt.add_argument("--sandbox-token", dest="sandbox_token", default="",
+                       help="Marker to look for in --sandbox-response "
+                            "(default: the payload itself)")
+    g_tgt.add_argument("--sandbox-roundtrip", dest="sandbox_roundtrip",
+                       action="store_true",
+                       help="Also parse -> serialise -> re-parse, i.e. ask "
+                            "whether the payload becomes live only after the "
+                            "browser mutates it (mutation XSS)")
+    g_tgt.add_argument("--sandbox-sink", dest="sandbox_sink", default="both",
+                       choices=["parser", "innerhtml", "both"],
+                       help="Which sink to ask about: the parser (bytes the "
+                            "server reflected) or innerHTML (a client-side "
+                            "template re-parsing them).  Default both.")
     g_tgt.add_argument("--raw-request", dest="raw_request", default=None,
                        help="Scan a raw HTTP request file (Burp/ZAP "
                             "'copy as raw' format).  Method, URL (from "
@@ -581,6 +612,11 @@ def main(argv=None):
     # Phase 80: --fuzz-body marker injection mode.
     if getattr(args, "fuzz_body", None):
         return _run_marker_fuzz(args)
+
+    # Phase 169: --sandbox offline payload trial (no target, no browser).
+    if getattr(args, "sandbox", None) or getattr(args, "sandbox_hosts", False) \
+            or getattr(args, "sandbox_response", None):
+        return _run_sandbox(args)
 
     # Phase 44: --passive -- run as a passive proxy scanner (xray-style).
     if getattr(args, "passive", False):

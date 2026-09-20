@@ -1,0 +1,272 @@
+[
+ {
+  "case": "tab-dq",
+  "input": "<table x=\"\ty\"></table>",
+  "chromium": "<table x=\"\ty\"></table>",
+  "sandbox": "<table x=\"\ty\"></table>"
+ },
+ {
+  "case": "newline-dq",
+  "input": "<table x=\"\ny\"></table>",
+  "chromium": "<table x=\"\ny\"></table>",
+  "sandbox": "<table x=\"\ny\"></table>"
+ },
+ {
+  "case": "carriage-dq",
+  "input": "<table x=\"\ry\"></table>",
+  "chromium": "<table x=\"\ny\"></table>",
+  "sandbox": "<table x=\"\ny\"></table>"
+ },
+ {
+  "case": "formfeed-dq",
+  "input": "<table x=\"\fy\"></table>",
+  "chromium": "<table x=\"\fy\"></table>",
+  "sandbox": "<table x=\"\fy\"></table>"
+ },
+ {
+  "case": "nul-dq",
+  "input": "<table x=\"\u0000y\"></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "ctrl01-dq",
+  "input": "<table x=\"\u0001y\"></table>",
+  "chromium": "<table x=\"\u0001y\"></table>",
+  "sandbox": "<table x=\"\u0001y\"></table>"
+ },
+ {
+  "case": "ctrl1f-dq",
+  "input": "<table x=\"\u001fy\"></table>",
+  "chromium": "<table x=\"\u001fy\"></table>",
+  "sandbox": "<table x=\"\u001fy\"></table>"
+ },
+ {
+  "case": "nbsp-dq",
+  "input": "<table x=\" y\"></table>",
+  "chromium": "<table x=\"&nbsp;y\"></table>",
+  "sandbox": "<table x=\"&nbsp;y\"></table>"
+ },
+ {
+  "case": "amp-dq",
+  "input": "<table x=\"&y\"></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "amp-entity-dq",
+  "input": "<table x=\"&amp;y\"></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "lt-dq",
+  "input": "<table x=\"<y\"></table>",
+  "chromium": "<table x=\"&lt;y\"></table>",
+  "sandbox": "<table x=\"&lt;y\"></table>"
+ },
+ {
+  "case": "gt-dq",
+  "input": "<table x=\">y\"></table>",
+  "chromium": "<table x=\"&gt;y\"></table>",
+  "sandbox": "<table x=\"&gt;y\"></table>"
+ },
+ {
+  "case": "dquote-dq",
+  "input": "<table x=\"\"y\"></table>",
+  "chromium": "<table x=\"\" y\"=\"\"></table>",
+  "sandbox": "<table x=\"\" y\"=\"\"></table>"
+ },
+ {
+  "case": "squote-dq",
+  "input": "<table x=\"'y\"></table>",
+  "chromium": "<table x=\"'y\"></table>",
+  "sandbox": "<table x=\"'y\"></table>"
+ },
+ {
+  "case": "fffd-dq",
+  "input": "<table x=\"�y\"></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "space-dq",
+  "input": "<table x=\" y\"></table>",
+  "chromium": "<table x=\" y\"></table>",
+  "sandbox": "<table x=\" y\"></table>"
+ },
+ {
+  "case": "slash-dq",
+  "input": "<table x=\"/y\"></table>",
+  "chromium": "<table x=\"/y\"></table>",
+  "sandbox": "<table x=\"/y\"></table>"
+ },
+ {
+  "case": "backslash-dq",
+  "input": "<table x=\"\\y\"></table>",
+  "chromium": "<table x=\"\\y\"></table>",
+  "sandbox": "<table x=\"\\y\"></table>"
+ },
+ {
+  "case": "tab-sq",
+  "input": "<table x='\ty'></table>",
+  "chromium": "<table x=\"\ty\"></table>",
+  "sandbox": "<table x=\"\ty\"></table>"
+ },
+ {
+  "case": "newline-sq",
+  "input": "<table x='\ny'></table>",
+  "chromium": "<table x=\"\ny\"></table>",
+  "sandbox": "<table x=\"\ny\"></table>"
+ },
+ {
+  "case": "carriage-sq",
+  "input": "<table x='\ry'></table>",
+  "chromium": "<table x=\"\ny\"></table>",
+  "sandbox": "<table x=\"\ny\"></table>"
+ },
+ {
+  "case": "formfeed-sq",
+  "input": "<table x='\fy'></table>",
+  "chromium": "<table x=\"\fy\"></table>",
+  "sandbox": "<table x=\"\fy\"></table>"
+ },
+ {
+  "case": "nul-sq",
+  "input": "<table x='\u0000y'></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "ctrl01-sq",
+  "input": "<table x='\u0001y'></table>",
+  "chromium": "<table x=\"\u0001y\"></table>",
+  "sandbox": "<table x=\"\u0001y\"></table>"
+ },
+ {
+  "case": "ctrl1f-sq",
+  "input": "<table x='\u001fy'></table>",
+  "chromium": "<table x=\"\u001fy\"></table>",
+  "sandbox": "<table x=\"\u001fy\"></table>"
+ },
+ {
+  "case": "nbsp-sq",
+  "input": "<table x=' y'></table>",
+  "chromium": "<table x=\"&nbsp;y\"></table>",
+  "sandbox": "<table x=\"&nbsp;y\"></table>"
+ },
+ {
+  "case": "amp-sq",
+  "input": "<table x='&y'></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "amp-entity-sq",
+  "input": "<table x='&amp;y'></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "lt-sq",
+  "input": "<table x='<y'></table>",
+  "chromium": "<table x=\"&lt;y\"></table>",
+  "sandbox": "<table x=\"&lt;y\"></table>"
+ },
+ {
+  "case": "gt-sq",
+  "input": "<table x='>y'></table>",
+  "chromium": "<table x=\"&gt;y\"></table>",
+  "sandbox": "<table x=\"&gt;y\"></table>"
+ },
+ {
+  "case": "dquote-sq",
+  "input": "<table x='\"y'></table>",
+  "chromium": "<table x=\"&quot;y\"></table>",
+  "sandbox": "<table x=\"&quot;y\"></table>"
+ },
+ {
+  "case": "squote-sq",
+  "input": "<table x=''y'></table>",
+  "chromium": "<table x=\"\" y'=\"\"></table>",
+  "sandbox": "<table x=\"\" y'=\"\"></table>"
+ },
+ {
+  "case": "fffd-sq",
+  "input": "<table x='�y'></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "space-sq",
+  "input": "<table x=' y'></table>",
+  "chromium": "<table x=\" y\"></table>",
+  "sandbox": "<table x=\" y\"></table>"
+ },
+ {
+  "case": "slash-sq",
+  "input": "<table x='/y'></table>",
+  "chromium": "<table x=\"/y\"></table>",
+  "sandbox": "<table x=\"/y\"></table>"
+ },
+ {
+  "case": "backslash-sq",
+  "input": "<table x='\\y'></table>",
+  "chromium": "<table x=\"\\y\"></table>",
+  "sandbox": "<table x=\"\\y\"></table>"
+ },
+ {
+  "case": "nul-uq",
+  "input": "<table x=\u0000y></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "ctrl01-uq",
+  "input": "<table x=\u0001y></table>",
+  "chromium": "<table x=\"\u0001y\"></table>",
+  "sandbox": "<table x=\"\u0001y\"></table>"
+ },
+ {
+  "case": "ctrl1f-uq",
+  "input": "<table x=\u001fy></table>",
+  "chromium": "<table x=\"\u001fy\"></table>",
+  "sandbox": "<table x=\"\u001fy\"></table>"
+ },
+ {
+  "case": "nbsp-uq",
+  "input": "<table x= y></table>",
+  "chromium": "<table x=\"&nbsp;y\"></table>",
+  "sandbox": "<table x=\"&nbsp;y\"></table>"
+ },
+ {
+  "case": "amp-uq",
+  "input": "<table x=&y></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "amp-entity-uq",
+  "input": "<table x=&amp;y></table>",
+  "chromium": "<table x=\"&amp;y\"></table>",
+  "sandbox": "<table x=\"&amp;y\"></table>"
+ },
+ {
+  "case": "fffd-uq",
+  "input": "<table x=�y></table>",
+  "chromium": "<table x=\"�y\"></table>",
+  "sandbox": "<table x=\"�y\"></table>"
+ },
+ {
+  "case": "slash-uq",
+  "input": "<table x=/y></table>",
+  "chromium": "<table x=\"/y\"></table>",
+  "sandbox": "<table x=\"/y\"></table>"
+ },
+ {
+  "case": "backslash-uq",
+  "input": "<table x=\\y></table>",
+  "chromium": "<table x=\"\\y\"></table>",
+  "sandbox": "<table x=\"\\y\"></table>"
+ }
+]

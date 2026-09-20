@@ -1,0 +1,1154 @@
+[
+ {
+  "case": "text:audio-loadstart",
+  "context": "text",
+  "shape": "audio-loadstart",
+  "document": "<html><body><div><audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-canplay",
+  "context": "text",
+  "shape": "audio-canplay",
+  "document": "<html><body><div><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-loadedmetadata",
+  "context": "text",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><div><audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-loadeddata",
+  "context": "text",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><div><audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-canplaythrough",
+  "context": "text",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><div><audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-durationchange",
+  "context": "text",
+  "shape": "audio-durationchange",
+  "document": "<html><body><div><audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-error-missing",
+  "context": "text",
+  "shape": "audio-error-missing",
+  "document": "<html><body><div><audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-canplay-nosrc",
+  "context": "text",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><div><audio oncanplay=\"__x()\"></audio></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:audio-canplay-broken-src",
+  "context": "text",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><div><audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:audio-canplay-empty-src",
+  "context": "text",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><div><audio oncanplay=\"__x()\" src=\"\"></audio></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:audio-canplay-invalid-data",
+  "context": "text",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><div><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:audio-loadstart-broken-src",
+  "context": "text",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><div><audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:audio-onplaying-valid",
+  "context": "text",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><div><audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:video-timeupdate",
+  "context": "text",
+  "shape": "video-timeupdate",
+  "document": "<html><body><div><video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:track-error",
+  "context": "text",
+  "shape": "track-error",
+  "document": "<html><body><div><video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "text:svg-image-href",
+  "context": "text",
+  "shape": "svg-image-href",
+  "document": "<html><body><div><svg><image href=\"javascript:__x()\"></image></svg></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:svg-image-xlink",
+  "context": "text",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><div><svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:math-maction-xlink",
+  "context": "text",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><div><math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:feimage-href",
+  "context": "text",
+  "shape": "feimage-href",
+  "document": "<html><body><div><svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:isindex-action",
+  "context": "text",
+  "shape": "isindex-action",
+  "document": "<html><body><div><isindex action=\"javascript:__x()\" type=\"submit\"></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:foreignobject-onload",
+  "context": "text",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><div><svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:svg-desc-onload",
+  "context": "text",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><div><svg><desc onload=\"__x()\">d</desc></svg></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:canvas-onload",
+  "context": "text",
+  "shape": "canvas-onload",
+  "document": "<html><body><div><canvas onload=\"__x()\"></canvas></div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "text:body-background",
+  "context": "text",
+  "shape": "body-background",
+  "document": "<html><body><div><img background=\"/nope.png\" src=x onerror=\"__x()\"></div></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "attr_unq:audio-loadstart",
+  "context": "attr_unq",
+  "shape": "audio-loadstart",
+  "document": "<html><body><div class=<audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplay",
+  "context": "attr_unq",
+  "shape": "audio-canplay",
+  "document": "<html><body><div class=<audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-loadedmetadata",
+  "context": "attr_unq",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><div class=<audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-loadeddata",
+  "context": "attr_unq",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><div class=<audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplaythrough",
+  "context": "attr_unq",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><div class=<audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-durationchange",
+  "context": "attr_unq",
+  "shape": "audio-durationchange",
+  "document": "<html><body><div class=<audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-error-missing",
+  "context": "attr_unq",
+  "shape": "audio-error-missing",
+  "document": "<html><body><div class=<audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplay-nosrc",
+  "context": "attr_unq",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><div class=<audio oncanplay=\"__x()\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplay-broken-src",
+  "context": "attr_unq",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><div class=<audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplay-empty-src",
+  "context": "attr_unq",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><div class=<audio oncanplay=\"__x()\" src=\"\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-canplay-invalid-data",
+  "context": "attr_unq",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><div class=<audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-loadstart-broken-src",
+  "context": "attr_unq",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><div class=<audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:audio-onplaying-valid",
+  "context": "attr_unq",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><div class=<audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:video-timeupdate",
+  "context": "attr_unq",
+  "shape": "video-timeupdate",
+  "document": "<html><body><div class=<video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:track-error",
+  "context": "attr_unq",
+  "shape": "track-error",
+  "document": "<html><body><div class=<video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:svg-image-href",
+  "context": "attr_unq",
+  "shape": "svg-image-href",
+  "document": "<html><body><div class=<svg><image href=\"javascript:__x()\"></image></svg>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:svg-image-xlink",
+  "context": "attr_unq",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><div class=<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:math-maction-xlink",
+  "context": "attr_unq",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><div class=<math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:feimage-href",
+  "context": "attr_unq",
+  "shape": "feimage-href",
+  "document": "<html><body><div class=<svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:isindex-action",
+  "context": "attr_unq",
+  "shape": "isindex-action",
+  "document": "<html><body><div class=<isindex action=\"javascript:__x()\" type=\"submit\">>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:foreignobject-onload",
+  "context": "attr_unq",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><div class=<svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:svg-desc-onload",
+  "context": "attr_unq",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><div class=<svg><desc onload=\"__x()\">d</desc></svg>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:canvas-onload",
+  "context": "attr_unq",
+  "shape": "canvas-onload",
+  "document": "<html><body><div class=<canvas onload=\"__x()\"></canvas>>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "attr_unq:body-background",
+  "context": "attr_unq",
+  "shape": "body-background",
+  "document": "<html><body><div class=<img background=\"/nope.png\" src=x onerror=\"__x()\">>t</div></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:audio-loadstart",
+  "context": "select",
+  "shape": "audio-loadstart",
+  "document": "<html><body><select><option><audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-canplay",
+  "context": "select",
+  "shape": "audio-canplay",
+  "document": "<html><body><select><option><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-loadedmetadata",
+  "context": "select",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><select><option><audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-loadeddata",
+  "context": "select",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><select><option><audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-canplaythrough",
+  "context": "select",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><select><option><audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-durationchange",
+  "context": "select",
+  "shape": "audio-durationchange",
+  "document": "<html><body><select><option><audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-error-missing",
+  "context": "select",
+  "shape": "audio-error-missing",
+  "document": "<html><body><select><option><audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-canplay-nosrc",
+  "context": "select",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><select><option><audio oncanplay=\"__x()\"></audio></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:audio-canplay-broken-src",
+  "context": "select",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><select><option><audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:audio-canplay-empty-src",
+  "context": "select",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><select><option><audio oncanplay=\"__x()\" src=\"\"></audio></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:audio-canplay-invalid-data",
+  "context": "select",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><select><option><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:audio-loadstart-broken-src",
+  "context": "select",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><select><option><audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:audio-onplaying-valid",
+  "context": "select",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><select><option><audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:video-timeupdate",
+  "context": "select",
+  "shape": "video-timeupdate",
+  "document": "<html><body><select><option><video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:track-error",
+  "context": "select",
+  "shape": "track-error",
+  "document": "<html><body><select><option><video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "select:svg-image-href",
+  "context": "select",
+  "shape": "svg-image-href",
+  "document": "<html><body><select><option><svg><image href=\"javascript:__x()\"></image></svg></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:svg-image-xlink",
+  "context": "select",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><select><option><svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:math-maction-xlink",
+  "context": "select",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><select><option><math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:feimage-href",
+  "context": "select",
+  "shape": "feimage-href",
+  "document": "<html><body><select><option><svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:isindex-action",
+  "context": "select",
+  "shape": "isindex-action",
+  "document": "<html><body><select><option><isindex action=\"javascript:__x()\" type=\"submit\"></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:foreignobject-onload",
+  "context": "select",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><select><option><svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:svg-desc-onload",
+  "context": "select",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><select><option><svg><desc onload=\"__x()\">d</desc></svg></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:canvas-onload",
+  "context": "select",
+  "shape": "canvas-onload",
+  "document": "<html><body><select><option><canvas onload=\"__x()\"></canvas></option></select></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "select:body-background",
+  "context": "select",
+  "shape": "body-background",
+  "document": "<html><body><select><option><img background=\"/nope.png\" src=x onerror=\"__x()\"></option></select></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "template:audio-loadstart",
+  "context": "template",
+  "shape": "audio-loadstart",
+  "document": "<html><body><template><audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplay",
+  "context": "template",
+  "shape": "audio-canplay",
+  "document": "<html><body><template><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-loadedmetadata",
+  "context": "template",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><template><audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-loadeddata",
+  "context": "template",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><template><audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplaythrough",
+  "context": "template",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><template><audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-durationchange",
+  "context": "template",
+  "shape": "audio-durationchange",
+  "document": "<html><body><template><audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-error-missing",
+  "context": "template",
+  "shape": "audio-error-missing",
+  "document": "<html><body><template><audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplay-nosrc",
+  "context": "template",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><template><audio oncanplay=\"__x()\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplay-broken-src",
+  "context": "template",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><template><audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplay-empty-src",
+  "context": "template",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><template><audio oncanplay=\"__x()\" src=\"\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-canplay-invalid-data",
+  "context": "template",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><template><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-loadstart-broken-src",
+  "context": "template",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><template><audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:audio-onplaying-valid",
+  "context": "template",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><template><audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:video-timeupdate",
+  "context": "template",
+  "shape": "video-timeupdate",
+  "document": "<html><body><template><video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:track-error",
+  "context": "template",
+  "shape": "track-error",
+  "document": "<html><body><template><video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:svg-image-href",
+  "context": "template",
+  "shape": "svg-image-href",
+  "document": "<html><body><template><svg><image href=\"javascript:__x()\"></image></svg></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:svg-image-xlink",
+  "context": "template",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><template><svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:math-maction-xlink",
+  "context": "template",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><template><math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:feimage-href",
+  "context": "template",
+  "shape": "feimage-href",
+  "document": "<html><body><template><svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:isindex-action",
+  "context": "template",
+  "shape": "isindex-action",
+  "document": "<html><body><template><isindex action=\"javascript:__x()\" type=\"submit\"></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:foreignobject-onload",
+  "context": "template",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><template><svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:svg-desc-onload",
+  "context": "template",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><template><svg><desc onload=\"__x()\">d</desc></svg></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:canvas-onload",
+  "context": "template",
+  "shape": "canvas-onload",
+  "document": "<html><body><template><canvas onload=\"__x()\"></canvas></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "template:body-background",
+  "context": "template",
+  "shape": "body-background",
+  "document": "<html><body><template><img background=\"/nope.png\" src=x onerror=\"__x()\"></template></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:audio-loadstart",
+  "context": "table_td",
+  "shape": "audio-loadstart",
+  "document": "<html><body><table><tr><td><audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-canplay",
+  "context": "table_td",
+  "shape": "audio-canplay",
+  "document": "<html><body><table><tr><td><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-loadedmetadata",
+  "context": "table_td",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><table><tr><td><audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-loadeddata",
+  "context": "table_td",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><table><tr><td><audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-canplaythrough",
+  "context": "table_td",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><table><tr><td><audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-durationchange",
+  "context": "table_td",
+  "shape": "audio-durationchange",
+  "document": "<html><body><table><tr><td><audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-error-missing",
+  "context": "table_td",
+  "shape": "audio-error-missing",
+  "document": "<html><body><table><tr><td><audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-canplay-nosrc",
+  "context": "table_td",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><table><tr><td><audio oncanplay=\"__x()\"></audio></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:audio-canplay-broken-src",
+  "context": "table_td",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><table><tr><td><audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:audio-canplay-empty-src",
+  "context": "table_td",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><table><tr><td><audio oncanplay=\"__x()\" src=\"\"></audio></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:audio-canplay-invalid-data",
+  "context": "table_td",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><table><tr><td><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:audio-loadstart-broken-src",
+  "context": "table_td",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><table><tr><td><audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:audio-onplaying-valid",
+  "context": "table_td",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><table><tr><td><audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:video-timeupdate",
+  "context": "table_td",
+  "shape": "video-timeupdate",
+  "document": "<html><body><table><tr><td><video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:track-error",
+  "context": "table_td",
+  "shape": "track-error",
+  "document": "<html><body><table><tr><td><video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "table_td:svg-image-href",
+  "context": "table_td",
+  "shape": "svg-image-href",
+  "document": "<html><body><table><tr><td><svg><image href=\"javascript:__x()\"></image></svg></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:svg-image-xlink",
+  "context": "table_td",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><table><tr><td><svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:math-maction-xlink",
+  "context": "table_td",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><table><tr><td><math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:feimage-href",
+  "context": "table_td",
+  "shape": "feimage-href",
+  "document": "<html><body><table><tr><td><svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:isindex-action",
+  "context": "table_td",
+  "shape": "isindex-action",
+  "document": "<html><body><table><tr><td><isindex action=\"javascript:__x()\" type=\"submit\"></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:foreignobject-onload",
+  "context": "table_td",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><table><tr><td><svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:svg-desc-onload",
+  "context": "table_td",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><table><tr><td><svg><desc onload=\"__x()\">d</desc></svg></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:canvas-onload",
+  "context": "table_td",
+  "shape": "canvas-onload",
+  "document": "<html><body><table><tr><td><canvas onload=\"__x()\"></canvas></td></tr></table></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "table_td:body-background",
+  "context": "table_td",
+  "shape": "body-background",
+  "document": "<html><body><table><tr><td><img background=\"/nope.png\" src=x onerror=\"__x()\"></td></tr></table></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-loadstart",
+  "context": "svg_fo",
+  "shape": "audio-loadstart",
+  "document": "<html><body><svg><foreignObject><audio onloadstart=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-canplay",
+  "context": "svg_fo",
+  "shape": "audio-canplay",
+  "document": "<html><body><svg><foreignObject><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-loadedmetadata",
+  "context": "svg_fo",
+  "shape": "audio-loadedmetadata",
+  "document": "<html><body><svg><foreignObject><audio onloadedmetadata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-loadeddata",
+  "context": "svg_fo",
+  "shape": "audio-loadeddata",
+  "document": "<html><body><svg><foreignObject><audio onloadeddata=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-canplaythrough",
+  "context": "svg_fo",
+  "shape": "audio-canplaythrough",
+  "document": "<html><body><svg><foreignObject><audio oncanplaythrough=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-durationchange",
+  "context": "svg_fo",
+  "shape": "audio-durationchange",
+  "document": "<html><body><svg><foreignObject><audio ondurationchange=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-error-missing",
+  "context": "svg_fo",
+  "shape": "audio-error-missing",
+  "document": "<html><body><svg><foreignObject><audio onerror=\"__x()\" src=\"/no-such-file.wav\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-canplay-nosrc",
+  "context": "svg_fo",
+  "shape": "audio-canplay-nosrc",
+  "document": "<html><body><svg><foreignObject><audio oncanplay=\"__x()\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:audio-canplay-broken-src",
+  "context": "svg_fo",
+  "shape": "audio-canplay-broken-src",
+  "document": "<html><body><svg><foreignObject><audio oncanplay=\"__x()\" src=\"/no-such-file.wav\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:audio-canplay-empty-src",
+  "context": "svg_fo",
+  "shape": "audio-canplay-empty-src",
+  "document": "<html><body><svg><foreignObject><audio oncanplay=\"__x()\" src=\"\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:audio-canplay-invalid-data",
+  "context": "svg_fo",
+  "shape": "audio-canplay-invalid-data",
+  "document": "<html><body><svg><foreignObject><audio oncanplay=\"__x()\" src=\"data:audio/wav;base64,###notb64\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:audio-loadstart-broken-src",
+  "context": "svg_fo",
+  "shape": "audio-loadstart-broken-src",
+  "document": "<html><body><svg><foreignObject><audio onloadstart=\"__x()\" src=\"/no-such-file.wav\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:audio-onplaying-valid",
+  "context": "svg_fo",
+  "shape": "audio-onplaying-valid",
+  "document": "<html><body><svg><foreignObject><audio onplaying=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></audio></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:video-timeupdate",
+  "context": "svg_fo",
+  "shape": "video-timeupdate",
+  "document": "<html><body><svg><foreignObject><video ontimeupdate=\"__x()\" src=\"data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==\"></video></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:track-error",
+  "context": "svg_fo",
+  "shape": "track-error",
+  "document": "<html><body><svg><foreignObject><video><track onerror=\"__x()\" src=\"/nope.vtt\" kind=\"captions\" default></video></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ },
+ {
+  "case": "svg_fo:svg-image-href",
+  "context": "svg_fo",
+  "shape": "svg-image-href",
+  "document": "<html><body><svg><foreignObject><svg><image href=\"javascript:__x()\"></image></svg></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:svg-image-xlink",
+  "context": "svg_fo",
+  "shape": "svg-image-xlink",
+  "document": "<html><body><svg><foreignObject><svg xmlns:xlink=\"http://www.w3.org/1999/xlink\"><image xlink:href=\"javascript:__x()\"></image></svg></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:math-maction-xlink",
+  "context": "svg_fo",
+  "shape": "math-maction-xlink",
+  "document": "<html><body><svg><foreignObject><math><maction actiontype=\"statusline#\" xlink:href=\"javascript:__x()\">x</maction></math></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:feimage-href",
+  "context": "svg_fo",
+  "shape": "feimage-href",
+  "document": "<html><body><svg><foreignObject><svg><filter id=\"f\"><feImage href=\"javascript:__x()\"></feImage></filter><rect filter=\"url(#f)\"></rect></svg></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:isindex-action",
+  "context": "svg_fo",
+  "shape": "isindex-action",
+  "document": "<html><body><svg><foreignObject><isindex action=\"javascript:__x()\" type=\"submit\"></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:foreignobject-onload",
+  "context": "svg_fo",
+  "shape": "foreignobject-onload",
+  "document": "<html><body><svg><foreignObject><svg><foreignObject onload=\"__x()\"><div xmlns=\"http://www.w3.org/1999/xhtml\">t</div></foreignObject></svg></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:svg-desc-onload",
+  "context": "svg_fo",
+  "shape": "svg-desc-onload",
+  "document": "<html><body><svg><foreignObject><svg><desc onload=\"__x()\">d</desc></svg></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:canvas-onload",
+  "context": "svg_fo",
+  "shape": "canvas-onload",
+  "document": "<html><body><svg><foreignObject><canvas onload=\"__x()\"></canvas></foreignObject></svg></body></html>",
+  "exec_parser": false,
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg_fo:body-background",
+  "context": "svg_fo",
+  "shape": "body-background",
+  "document": "<html><body><svg><foreignObject><img background=\"/nope.png\" src=x onerror=\"__x()\"></foreignObject></svg></body></html>",
+  "exec_parser": true,
+  "exec_ihn1": true
+ }
+]

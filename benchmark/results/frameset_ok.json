@@ -1,0 +1,1289 @@
+[
+ {
+  "case": "open:html",
+  "path": "/o0",
+  "expect": "o0",
+  "document": "<html><script>window.__nonce=\"o0\"</script><html><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o0",
+  "exec": true
+ },
+ {
+  "case": "open:head",
+  "path": "/o1",
+  "expect": "o1",
+  "document": "<html><script>window.__nonce=\"o1\"</script><head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o1",
+  "exec": true
+ },
+ {
+  "case": "open:body",
+  "path": "/o2",
+  "expect": "o2",
+  "document": "<html><script>window.__nonce=\"o2\"</script><body><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:frameset",
+  "path": "/o3",
+  "expect": "o3",
+  "document": "<html><script>window.__nonce=\"o3\"</script><frameset><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o3",
+  "exec": true
+ },
+ {
+  "case": "open:frame",
+  "path": "/o4",
+  "expect": "o4",
+  "document": "<html><script>window.__nonce=\"o4\"</script><frame><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o4",
+  "exec": true
+ },
+ {
+  "case": "open:div",
+  "path": "/o5",
+  "expect": "o5",
+  "document": "<html><script>window.__nonce=\"o5\"</script><div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o5",
+  "exec": true
+ },
+ {
+  "case": "open:span",
+  "path": "/o6",
+  "expect": "o6",
+  "document": "<html><script>window.__nonce=\"o6\"</script><span><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o6",
+  "exec": true
+ },
+ {
+  "case": "open:p",
+  "path": "/o7",
+  "expect": "o7",
+  "document": "<html><script>window.__nonce=\"o7\"</script><p><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o7",
+  "exec": true
+ },
+ {
+  "case": "open:br",
+  "path": "/o8",
+  "expect": "o8",
+  "document": "<html><script>window.__nonce=\"o8\"</script><br><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:hr",
+  "path": "/o9",
+  "expect": "o9",
+  "document": "<html><script>window.__nonce=\"o9\"</script><hr><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:article",
+  "path": "/o10",
+  "expect": "o10",
+  "document": "<html><script>window.__nonce=\"o10\"</script><article><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o10",
+  "exec": true
+ },
+ {
+  "case": "open:section",
+  "path": "/o11",
+  "expect": "o11",
+  "document": "<html><script>window.__nonce=\"o11\"</script><section><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o11",
+  "exec": true
+ },
+ {
+  "case": "open:nav",
+  "path": "/o12",
+  "expect": "o12",
+  "document": "<html><script>window.__nonce=\"o12\"</script><nav><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o12",
+  "exec": true
+ },
+ {
+  "case": "open:aside",
+  "path": "/o13",
+  "expect": "o13",
+  "document": "<html><script>window.__nonce=\"o13\"</script><aside><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o13",
+  "exec": true
+ },
+ {
+  "case": "open:header",
+  "path": "/o14",
+  "expect": "o14",
+  "document": "<html><script>window.__nonce=\"o14\"</script><header><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o14",
+  "exec": true
+ },
+ {
+  "case": "open:footer",
+  "path": "/o15",
+  "expect": "o15",
+  "document": "<html><script>window.__nonce=\"o15\"</script><footer><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o15",
+  "exec": true
+ },
+ {
+  "case": "open:main",
+  "path": "/o16",
+  "expect": "o16",
+  "document": "<html><script>window.__nonce=\"o16\"</script><main><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o16",
+  "exec": true
+ },
+ {
+  "case": "open:h1",
+  "path": "/o17",
+  "expect": "o17",
+  "document": "<html><script>window.__nonce=\"o17\"</script><h1><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o17",
+  "exec": true
+ },
+ {
+  "case": "open:h6",
+  "path": "/o18",
+  "expect": "o18",
+  "document": "<html><script>window.__nonce=\"o18\"</script><h6><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o18",
+  "exec": true
+ },
+ {
+  "case": "open:hgroup",
+  "path": "/o19",
+  "expect": "o19",
+  "document": "<html><script>window.__nonce=\"o19\"</script><hgroup><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o19",
+  "exec": true
+ },
+ {
+  "case": "open:address",
+  "path": "/o20",
+  "expect": "o20",
+  "document": "<html><script>window.__nonce=\"o20\"</script><address><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o20",
+  "exec": true
+ },
+ {
+  "case": "open:pre",
+  "path": "/o21",
+  "expect": "o21",
+  "document": "<html><script>window.__nonce=\"o21\"</script><pre><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:listing",
+  "path": "/o22",
+  "expect": "o22",
+  "document": "<html><script>window.__nonce=\"o22\"</script><listing><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:xmp",
+  "path": "/o23",
+  "expect": "o23",
+  "document": "<html><script>window.__nonce=\"o23\"</script><xmp><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:plaintext",
+  "path": "/o24",
+  "expect": "o24",
+  "document": "<html><script>window.__nonce=\"o24\"</script><plaintext><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:menu",
+  "path": "/o25",
+  "expect": "o25",
+  "document": "<html><script>window.__nonce=\"o25\"</script><menu><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o25",
+  "exec": true
+ },
+ {
+  "case": "open:ul",
+  "path": "/o26",
+  "expect": "o26",
+  "document": "<html><script>window.__nonce=\"o26\"</script><ul><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o26",
+  "exec": true
+ },
+ {
+  "case": "open:ol",
+  "path": "/o27",
+  "expect": "o27",
+  "document": "<html><script>window.__nonce=\"o27\"</script><ol><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o27",
+  "exec": true
+ },
+ {
+  "case": "open:li",
+  "path": "/o28",
+  "expect": "o28",
+  "document": "<html><script>window.__nonce=\"o28\"</script><li><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:dl",
+  "path": "/o29",
+  "expect": "o29",
+  "document": "<html><script>window.__nonce=\"o29\"</script><dl><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o29",
+  "exec": true
+ },
+ {
+  "case": "open:dt",
+  "path": "/o30",
+  "expect": "o30",
+  "document": "<html><script>window.__nonce=\"o30\"</script><dt><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:dd",
+  "path": "/o31",
+  "expect": "o31",
+  "document": "<html><script>window.__nonce=\"o31\"</script><dd><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:a",
+  "path": "/o32",
+  "expect": "o32",
+  "document": "<html><script>window.__nonce=\"o32\"</script><a><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o32",
+  "exec": true
+ },
+ {
+  "case": "open:em",
+  "path": "/o33",
+  "expect": "o33",
+  "document": "<html><script>window.__nonce=\"o33\"</script><em><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o33",
+  "exec": true
+ },
+ {
+  "case": "open:strong",
+  "path": "/o34",
+  "expect": "o34",
+  "document": "<html><script>window.__nonce=\"o34\"</script><strong><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o34",
+  "exec": true
+ },
+ {
+  "case": "open:small",
+  "path": "/o35",
+  "expect": "o35",
+  "document": "<html><script>window.__nonce=\"o35\"</script><small><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o35",
+  "exec": true
+ },
+ {
+  "case": "open:s",
+  "path": "/o36",
+  "expect": "o36",
+  "document": "<html><script>window.__nonce=\"o36\"</script><s><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o36",
+  "exec": true
+ },
+ {
+  "case": "open:cite",
+  "path": "/o37",
+  "expect": "o37",
+  "document": "<html><script>window.__nonce=\"o37\"</script><cite><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o37",
+  "exec": true
+ },
+ {
+  "case": "open:q",
+  "path": "/o38",
+  "expect": "o38",
+  "document": "<html><script>window.__nonce=\"o38\"</script><q><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o38",
+  "exec": true
+ },
+ {
+  "case": "open:dfn",
+  "path": "/o39",
+  "expect": "o39",
+  "document": "<html><script>window.__nonce=\"o39\"</script><dfn><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o39",
+  "exec": true
+ },
+ {
+  "case": "open:abbr",
+  "path": "/o40",
+  "expect": "o40",
+  "document": "<html><script>window.__nonce=\"o40\"</script><abbr><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o40",
+  "exec": true
+ },
+ {
+  "case": "open:code",
+  "path": "/o41",
+  "expect": "o41",
+  "document": "<html><script>window.__nonce=\"o41\"</script><code><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o41",
+  "exec": true
+ },
+ {
+  "case": "open:var",
+  "path": "/o42",
+  "expect": "o42",
+  "document": "<html><script>window.__nonce=\"o42\"</script><var><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o42",
+  "exec": true
+ },
+ {
+  "case": "open:samp",
+  "path": "/o43",
+  "expect": "o43",
+  "document": "<html><script>window.__nonce=\"o43\"</script><samp><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o43",
+  "exec": true
+ },
+ {
+  "case": "open:kbd",
+  "path": "/o44",
+  "expect": "o44",
+  "document": "<html><script>window.__nonce=\"o44\"</script><kbd><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o44",
+  "exec": true
+ },
+ {
+  "case": "open:sub",
+  "path": "/o45",
+  "expect": "o45",
+  "document": "<html><script>window.__nonce=\"o45\"</script><sub><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o45",
+  "exec": true
+ },
+ {
+  "case": "open:sup",
+  "path": "/o46",
+  "expect": "o46",
+  "document": "<html><script>window.__nonce=\"o46\"</script><sup><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o46",
+  "exec": true
+ },
+ {
+  "case": "open:i",
+  "path": "/o47",
+  "expect": "o47",
+  "document": "<html><script>window.__nonce=\"o47\"</script><i><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o47",
+  "exec": true
+ },
+ {
+  "case": "open:b",
+  "path": "/o48",
+  "expect": "o48",
+  "document": "<html><script>window.__nonce=\"o48\"</script><b><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o48",
+  "exec": true
+ },
+ {
+  "case": "open:u",
+  "path": "/o49",
+  "expect": "o49",
+  "document": "<html><script>window.__nonce=\"o49\"</script><u><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o49",
+  "exec": true
+ },
+ {
+  "case": "open:mark",
+  "path": "/o50",
+  "expect": "o50",
+  "document": "<html><script>window.__nonce=\"o50\"</script><mark><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o50",
+  "exec": true
+ },
+ {
+  "case": "open:ruby",
+  "path": "/o51",
+  "expect": "o51",
+  "document": "<html><script>window.__nonce=\"o51\"</script><ruby><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o51",
+  "exec": true
+ },
+ {
+  "case": "open:rt",
+  "path": "/o52",
+  "expect": "o52",
+  "document": "<html><script>window.__nonce=\"o52\"</script><rt><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o52",
+  "exec": true
+ },
+ {
+  "case": "open:rp",
+  "path": "/o53",
+  "expect": "o53",
+  "document": "<html><script>window.__nonce=\"o53\"</script><rp><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o53",
+  "exec": true
+ },
+ {
+  "case": "open:bdi",
+  "path": "/o54",
+  "expect": "o54",
+  "document": "<html><script>window.__nonce=\"o54\"</script><bdi><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o54",
+  "exec": true
+ },
+ {
+  "case": "open:bdo",
+  "path": "/o55",
+  "expect": "o55",
+  "document": "<html><script>window.__nonce=\"o55\"</script><bdo><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o55",
+  "exec": true
+ },
+ {
+  "case": "open:wbr",
+  "path": "/o56",
+  "expect": "o56",
+  "document": "<html><script>window.__nonce=\"o56\"</script><wbr><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:nobr",
+  "path": "/o57",
+  "expect": "o57",
+  "document": "<html><script>window.__nonce=\"o57\"</script><nobr><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o57",
+  "exec": true
+ },
+ {
+  "case": "open:font",
+  "path": "/o58",
+  "expect": "o58",
+  "document": "<html><script>window.__nonce=\"o58\"</script><font><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o58",
+  "exec": true
+ },
+ {
+  "case": "open:big",
+  "path": "/o59",
+  "expect": "o59",
+  "document": "<html><script>window.__nonce=\"o59\"</script><big><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o59",
+  "exec": true
+ },
+ {
+  "case": "open:strike",
+  "path": "/o60",
+  "expect": "o60",
+  "document": "<html><script>window.__nonce=\"o60\"</script><strike><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o60",
+  "exec": true
+ },
+ {
+  "case": "open:tt",
+  "path": "/o61",
+  "expect": "o61",
+  "document": "<html><script>window.__nonce=\"o61\"</script><tt><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o61",
+  "exec": true
+ },
+ {
+  "case": "open:img",
+  "path": "/o62",
+  "expect": "o62",
+  "document": "<html><script>window.__nonce=\"o62\"</script><img><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:image",
+  "path": "/o63",
+  "expect": "o63",
+  "document": "<html><script>window.__nonce=\"o63\"</script><image><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:iframe",
+  "path": "/o64",
+  "expect": "o64",
+  "document": "<html><script>window.__nonce=\"o64\"</script><iframe><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:embed",
+  "path": "/o65",
+  "expect": "o65",
+  "document": "<html><script>window.__nonce=\"o65\"</script><embed><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:object",
+  "path": "/o66",
+  "expect": "o66",
+  "document": "<html><script>window.__nonce=\"o66\"</script><object><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:param",
+  "path": "/o67",
+  "expect": "o67",
+  "document": "<html><script>window.__nonce=\"o67\"</script><param><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o67",
+  "exec": true
+ },
+ {
+  "case": "open:video",
+  "path": "/o68",
+  "expect": "o68",
+  "document": "<html><script>window.__nonce=\"o68\"</script><video><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o68",
+  "exec": true
+ },
+ {
+  "case": "open:audio",
+  "path": "/o69",
+  "expect": "o69",
+  "document": "<html><script>window.__nonce=\"o69\"</script><audio><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o69",
+  "exec": true
+ },
+ {
+  "case": "open:source",
+  "path": "/o70",
+  "expect": "o70",
+  "document": "<html><script>window.__nonce=\"o70\"</script><source><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o70",
+  "exec": true
+ },
+ {
+  "case": "open:track",
+  "path": "/o71",
+  "expect": "o71",
+  "document": "<html><script>window.__nonce=\"o71\"</script><track><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o71",
+  "exec": true
+ },
+ {
+  "case": "open:canvas",
+  "path": "/o72",
+  "expect": "o72",
+  "document": "<html><script>window.__nonce=\"o72\"</script><canvas><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o72",
+  "exec": true
+ },
+ {
+  "case": "open:map",
+  "path": "/o73",
+  "expect": "o73",
+  "document": "<html><script>window.__nonce=\"o73\"</script><map><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o73",
+  "exec": true
+ },
+ {
+  "case": "open:area",
+  "path": "/o74",
+  "expect": "o74",
+  "document": "<html><script>window.__nonce=\"o74\"</script><area><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:svg",
+  "path": "/o75",
+  "expect": "o75",
+  "document": "<html><script>window.__nonce=\"o75\"</script><svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:math",
+  "path": "/o76",
+  "expect": "o76",
+  "document": "<html><script>window.__nonce=\"o76\"</script><math><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:picture",
+  "path": "/o77",
+  "expect": "o77",
+  "document": "<html><script>window.__nonce=\"o77\"</script><picture><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o77",
+  "exec": true
+ },
+ {
+  "case": "open:form",
+  "path": "/o78",
+  "expect": "o78",
+  "document": "<html><script>window.__nonce=\"o78\"</script><form><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o78",
+  "exec": true
+ },
+ {
+  "case": "open:label",
+  "path": "/o79",
+  "expect": "o79",
+  "document": "<html><script>window.__nonce=\"o79\"</script><label><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o79",
+  "exec": true
+ },
+ {
+  "case": "open:input",
+  "path": "/o80",
+  "expect": "o80",
+  "document": "<html><script>window.__nonce=\"o80\"</script><input><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:button",
+  "path": "/o81",
+  "expect": "o81",
+  "document": "<html><script>window.__nonce=\"o81\"</script><button><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:select",
+  "path": "/o82",
+  "expect": "o82",
+  "document": "<html><script>window.__nonce=\"o82\"</script><select><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:datalist",
+  "path": "/o83",
+  "expect": "o83",
+  "document": "<html><script>window.__nonce=\"o83\"</script><datalist><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o83",
+  "exec": true
+ },
+ {
+  "case": "open:optgroup",
+  "path": "/o84",
+  "expect": "o84",
+  "document": "<html><script>window.__nonce=\"o84\"</script><optgroup><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o84",
+  "exec": true
+ },
+ {
+  "case": "open:option",
+  "path": "/o85",
+  "expect": "o85",
+  "document": "<html><script>window.__nonce=\"o85\"</script><option><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o85",
+  "exec": true
+ },
+ {
+  "case": "open:textarea",
+  "path": "/o86",
+  "expect": "o86",
+  "document": "<html><script>window.__nonce=\"o86\"</script><textarea><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:output",
+  "path": "/o87",
+  "expect": "o87",
+  "document": "<html><script>window.__nonce=\"o87\"</script><output><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o87",
+  "exec": true
+ },
+ {
+  "case": "open:progress",
+  "path": "/o88",
+  "expect": "o88",
+  "document": "<html><script>window.__nonce=\"o88\"</script><progress><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o88",
+  "exec": true
+ },
+ {
+  "case": "open:meter",
+  "path": "/o89",
+  "expect": "o89",
+  "document": "<html><script>window.__nonce=\"o89\"</script><meter><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o89",
+  "exec": true
+ },
+ {
+  "case": "open:fieldset",
+  "path": "/o90",
+  "expect": "o90",
+  "document": "<html><script>window.__nonce=\"o90\"</script><fieldset><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o90",
+  "exec": true
+ },
+ {
+  "case": "open:legend",
+  "path": "/o91",
+  "expect": "o91",
+  "document": "<html><script>window.__nonce=\"o91\"</script><legend><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o91",
+  "exec": true
+ },
+ {
+  "case": "open:search",
+  "path": "/o92",
+  "expect": "o92",
+  "document": "<html><script>window.__nonce=\"o92\"</script><search><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o92",
+  "exec": true
+ },
+ {
+  "case": "open:table",
+  "path": "/o93",
+  "expect": "o93",
+  "document": "<html><script>window.__nonce=\"o93\"</script><table><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:caption",
+  "path": "/o94",
+  "expect": "o94",
+  "document": "<html><script>window.__nonce=\"o94\"</script><caption><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o94",
+  "exec": true
+ },
+ {
+  "case": "open:colgroup",
+  "path": "/o95",
+  "expect": "o95",
+  "document": "<html><script>window.__nonce=\"o95\"</script><colgroup><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o95",
+  "exec": true
+ },
+ {
+  "case": "open:col",
+  "path": "/o96",
+  "expect": "o96",
+  "document": "<html><script>window.__nonce=\"o96\"</script><col><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o96",
+  "exec": true
+ },
+ {
+  "case": "open:tbody",
+  "path": "/o97",
+  "expect": "o97",
+  "document": "<html><script>window.__nonce=\"o97\"</script><tbody><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o97",
+  "exec": true
+ },
+ {
+  "case": "open:tfoot",
+  "path": "/o98",
+  "expect": "o98",
+  "document": "<html><script>window.__nonce=\"o98\"</script><tfoot><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o98",
+  "exec": true
+ },
+ {
+  "case": "open:thead",
+  "path": "/o99",
+  "expect": "o99",
+  "document": "<html><script>window.__nonce=\"o99\"</script><thead><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o99",
+  "exec": true
+ },
+ {
+  "case": "open:tr",
+  "path": "/o100",
+  "expect": "o100",
+  "document": "<html><script>window.__nonce=\"o100\"</script><tr><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o100",
+  "exec": true
+ },
+ {
+  "case": "open:td",
+  "path": "/o101",
+  "expect": "o101",
+  "document": "<html><script>window.__nonce=\"o101\"</script><td><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o101",
+  "exec": true
+ },
+ {
+  "case": "open:th",
+  "path": "/o102",
+  "expect": "o102",
+  "document": "<html><script>window.__nonce=\"o102\"</script><th><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o102",
+  "exec": true
+ },
+ {
+  "case": "open:title",
+  "path": "/o103",
+  "expect": "o103",
+  "document": "<html><script>window.__nonce=\"o103\"</script><title><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:link",
+  "path": "/o104",
+  "expect": "o104",
+  "document": "<html><script>window.__nonce=\"o104\"</script><link><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o104",
+  "exec": true
+ },
+ {
+  "case": "open:meta",
+  "path": "/o105",
+  "expect": "o105",
+  "document": "<html><script>window.__nonce=\"o105\"</script><meta><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o105",
+  "exec": true
+ },
+ {
+  "case": "open:base",
+  "path": "/o106",
+  "expect": "o106",
+  "document": "<html><script>window.__nonce=\"o106\"</script><base><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o106",
+  "exec": true
+ },
+ {
+  "case": "open:script",
+  "path": "/o107",
+  "expect": "o107",
+  "document": "<html><script>window.__nonce=\"o107\"</script><script><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:noscript",
+  "path": "/o108",
+  "expect": "o108",
+  "document": "<html><script>window.__nonce=\"o108\"</script><noscript><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:style",
+  "path": "/o109",
+  "expect": "o109",
+  "document": "<html><script>window.__nonce=\"o109\"</script><style><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:template",
+  "path": "/o110",
+  "expect": "o110",
+  "document": "<html><script>window.__nonce=\"o110\"</script><template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:slot",
+  "path": "/o111",
+  "expect": "o111",
+  "document": "<html><script>window.__nonce=\"o111\"</script><slot><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o111",
+  "exec": true
+ },
+ {
+  "case": "open:dialog",
+  "path": "/o112",
+  "expect": "o112",
+  "document": "<html><script>window.__nonce=\"o112\"</script><dialog><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o112",
+  "exec": true
+ },
+ {
+  "case": "open:details",
+  "path": "/o113",
+  "expect": "o113",
+  "document": "<html><script>window.__nonce=\"o113\"</script><details><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o113",
+  "exec": true
+ },
+ {
+  "case": "open:summary",
+  "path": "/o114",
+  "expect": "o114",
+  "document": "<html><script>window.__nonce=\"o114\"</script><summary><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o114",
+  "exec": true
+ },
+ {
+  "case": "open:marquee",
+  "path": "/o115",
+  "expect": "o115",
+  "document": "<html><script>window.__nonce=\"o115\"</script><marquee><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:basefont",
+  "path": "/o116",
+  "expect": "o116",
+  "document": "<html><script>window.__nonce=\"o116\"</script><basefont><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o116",
+  "exec": true
+ },
+ {
+  "case": "open:bgsound",
+  "path": "/o117",
+  "expect": "o117",
+  "document": "<html><script>window.__nonce=\"o117\"</script><bgsound><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o117",
+  "exec": true
+ },
+ {
+  "case": "open:isindex",
+  "path": "/o118",
+  "expect": "o118",
+  "document": "<html><script>window.__nonce=\"o118\"</script><isindex><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o118",
+  "exec": true
+ },
+ {
+  "case": "open:noembed",
+  "path": "/o119",
+  "expect": "o119",
+  "document": "<html><script>window.__nonce=\"o119\"</script><noembed><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:noframes",
+  "path": "/o120",
+  "expect": "o120",
+  "document": "<html><script>window.__nonce=\"o120\"</script><noframes><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:keygen",
+  "path": "/o121",
+  "expect": "o121",
+  "document": "<html><script>window.__nonce=\"o121\"</script><keygen><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "open:portal",
+  "path": "/o122",
+  "expect": "o122",
+  "document": "<html><script>window.__nonce=\"o122\"</script><portal><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o122",
+  "exec": true
+ },
+ {
+  "case": "open:fencedframe",
+  "path": "/o123",
+  "expect": "o123",
+  "document": "<html><script>window.__nonce=\"o123\"</script><fencedframe><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o123",
+  "exec": true
+ },
+ {
+  "case": "open:custom-element",
+  "path": "/o124",
+  "expect": "o124",
+  "document": "<html><script>window.__nonce=\"o124\"</script><custom-element><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "o124",
+  "exec": true
+ },
+ {
+  "case": "closed:style",
+  "path": "/c0",
+  "expect": "c0",
+  "document": "<html><script>window.__nonce=\"c0\"</script><style></style><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c0",
+  "exec": true
+ },
+ {
+  "case": "closed:script",
+  "path": "/c1",
+  "expect": "c1",
+  "document": "<html><script>window.__nonce=\"c1\"</script><script></script><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c1",
+  "exec": true
+ },
+ {
+  "case": "closed:title",
+  "path": "/c2",
+  "expect": "c2",
+  "document": "<html><script>window.__nonce=\"c2\"</script><title></title><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c2",
+  "exec": true
+ },
+ {
+  "case": "closed:textarea",
+  "path": "/c3",
+  "expect": "c3",
+  "document": "<html><script>window.__nonce=\"c3\"</script><textarea></textarea><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:xmp",
+  "path": "/c4",
+  "expect": "c4",
+  "document": "<html><script>window.__nonce=\"c4\"</script><xmp></xmp><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:plaintext",
+  "path": "/c5",
+  "expect": "c5",
+  "document": "<html><script>window.__nonce=\"c5\"</script><plaintext></plaintext><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:iframe",
+  "path": "/c6",
+  "expect": "c6",
+  "document": "<html><script>window.__nonce=\"c6\"</script><iframe></iframe><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:noembed",
+  "path": "/c7",
+  "expect": "c7",
+  "document": "<html><script>window.__nonce=\"c7\"</script><noembed></noembed><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c7",
+  "exec": true
+ },
+ {
+  "case": "closed:noframes",
+  "path": "/c8",
+  "expect": "c8",
+  "document": "<html><script>window.__nonce=\"c8\"</script><noframes></noframes><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c8",
+  "exec": true
+ },
+ {
+  "case": "closed:noscript",
+  "path": "/c9",
+  "expect": "c9",
+  "document": "<html><script>window.__nonce=\"c9\"</script><noscript></noscript><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c9",
+  "exec": true
+ },
+ {
+  "case": "closed:template",
+  "path": "/c10",
+  "expect": "c10",
+  "document": "<html><script>window.__nonce=\"c10\"</script><template></template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c10",
+  "exec": true
+ },
+ {
+  "case": "closed:table",
+  "path": "/c11",
+  "expect": "c11",
+  "document": "<html><script>window.__nonce=\"c11\"</script><table></table><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:select",
+  "path": "/c12",
+  "expect": "c12",
+  "document": "<html><script>window.__nonce=\"c12\"</script><select></select><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:object",
+  "path": "/c13",
+  "expect": "c13",
+  "document": "<html><script>window.__nonce=\"c13\"</script><object></object><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:svg",
+  "path": "/c14",
+  "expect": "c14",
+  "document": "<html><script>window.__nonce=\"c14\"</script><svg></svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c14",
+  "exec": true
+ },
+ {
+  "case": "closed:math",
+  "path": "/c15",
+  "expect": "c15",
+  "document": "<html><script>window.__nonce=\"c15\"</script><math></math><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c15",
+  "exec": true
+ },
+ {
+  "case": "closed:frameset",
+  "path": "/c16",
+  "expect": "c16",
+  "document": "<html><script>window.__nonce=\"c16\"</script><frameset></frameset><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": null,
+  "exec": false
+ },
+ {
+  "case": "closed:div",
+  "path": "/c17",
+  "expect": "c17",
+  "document": "<html><script>window.__nonce=\"c17\"</script><div></div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "complete": true,
+  "raw": "c17",
+  "exec": true
+ }
+]

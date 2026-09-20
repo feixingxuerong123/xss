@@ -62,27 +62,36 @@ def test_executing_shapes_confirm():
         assert not r.get("requires_activation"), markup
 
 
-def test_frame_in_a_frameset_confirms():
-    """``<frame>`` is a sink only where the parser actually keeps it.
+def test_frame_in_a_frameset_confirms_but_a_bare_frame_does_not():
+    """``<frame>`` is only a sink where the parser actually keeps it.
 
-    Measured over a real HTTP origin (``probe_frame_parse.py``), reporting the
+    An earlier version of this file asserted that a bare ``<frame
+    src=javascript:>`` confirms.  It does not, and the sandbox gate is what
+    caught the difference -- so both halves are pinned here, because a "this
+    shape is inert" verdict is exactly the kind someone later "fixes" back into
+    an over-claim.
+
+    Measured over a real HTTP origin (``_p168_frame_probe.py``), reporting the
     nodes the parser actually built next to each result:
 
         <iframe src=javascript:>                    EXEC   built=[iframe]
+        <frame src=javascript:>           (bare)    no     built=[]  <- dropped
         <frameset><frame src=javascript:>           EXEC   built=[frameset,frame]
         createElement('frame') + appendChild        EXEC   built=[frame]
 
-    The frameset form needs a full document: an enclosing ``<body>`` switches
-    the parser's frameset-ok flag off, so the frameset *and* the frame inside it
-    are both dropped -- that is what ``_doc`` is for.
-
-    ``benchmark/results/sink_execution.json`` reports ``frame.src`` as
-    executing: that shape builds the element with ``createElement``, so it never
-    goes through the parser.
+    A bare ``<frame>`` start tag never becomes a node, so nothing can execute
+    from it.  Inside a frameset it does execute, and the structural rule plus
+    the sandbox agree with both.  (``benchmark/results/sink_execution.json``
+    reports ``frame.src`` as executing: that shape builds the element with
+    ``createElement``, so it never goes through the parser.)
     """
     r = _vd(f'<frameset><frame src="{JS}"></frameset>')
     assert r["confirmed"], r
     assert not r.get("requires_activation"), r
+
+    bare = _v(f'<frame src="{JS}">')
+    assert not bare["confirmed"], bare
+    assert bare.get("sandbox_state") == "inert", bare
 
 
 def test_activation_gated_shapes_confirm_and_say_so():

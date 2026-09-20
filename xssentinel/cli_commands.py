@@ -17,6 +17,125 @@ from .core.logger import get_logger
 
 _log = get_logger("cli")
 
+def _run_sandbox(args) -> int:
+    """Phase 169: offline HTML sandbox -- try a payload before you send it.
+
+    The point is the loop a scanner cannot offer: you are writing a payload for
+    a reflection you have found, and you want to know *which* of the ~20 ways a
+    server can reflect it the payload actually escapes, in microseconds, with no
+    target and no browser.  Each cell says live / activation / inert / unknown
+    and the interesting ones carry the parser's reason, so a "no" is explainable
+    instead of mysterious.
+
+    Exit code is informational (0), like --fuzz-body: the answer is the product.
+    """
+    from .core import sandbox
+
+    if getattr(args, "sandbox_hosts", False):
+        print("reflection contexts available to --sandbox-host:")
+        for name, tpl in sorted(sandbox.HOSTS.items()):
+            print(f"  {name:14s} {tpl}")
+        return 0
+
+    payload = getattr(args, "sandbox", None)
+    response = getattr(args, "sandbox_response", None)
+    if not payload and not response:
+        print("--sandbox needs a PAYLOAD, or --sandbox-response <file|->",
+              file=sys.stderr)
+        return 1
+
+    sinks = (["parser", "innerhtml"] if getattr(args, "sandbox_sink", "both") == "both"
+             else [args.sandbox_sink])
+
+    if response:
+        if response == "-":
+            html = sys.stdin.read()
+        else:
+            if not os.path.isfile(response):
+                print(f"response file not found: {response}", file=sys.stderr)
+                return 1
+            with open(response, "r", encoding="utf-8", errors="replace") as fh:
+                html = fh.read()
+        token = getattr(args, "sandbox_token", "") or (payload or "")
+        if not token:
+            print("--sandbox-response needs --sandbox-token (or a --payload "
+                  "to search for)", file=sys.stderr)
+            return 1
+        print(f"judging {len(html)} bytes of {response} for token "
+              f"{token[:32]!r}\n")
+        for sink in sinks:
+            v = sandbox.judge(html, token, sink=sink)
+            _print_verdict(f"sink={sink}", v)
+            if getattr(args, "sandbox_roundtrip", False):
+                r = sandbox.judge_roundtrip(html, token, sink=sink)
+                _print_verdict(f"sink={sink} round-trip", r)
+        return 0
+
+    host = getattr(args, "sandbox_host", "all") or "all"
+    hosts = sorted(sandbox.HOSTS) if host == "all" else [host]
+    if host != "all" and host not in sandbox.HOSTS:
+        print(f"unknown --sandbox-host {host!r}; --sandbox-hosts lists them",
+              file=sys.stderr)
+        return 1
+
+    # The token is the part the server has to echo for anything to be
+    # attributable to this payload.  A payload with no call syntax gets its own
+    # text, which is what a real reflection would carry.
+    token = getattr(args, "sandbox_token", "") or _default_token(payload)
+    print(f"payload: {payload}")
+    print(f"token  : {token!r}\n")
+    header = "  {:<16s}".format("context") + "".join(
+        f"{s[:11]:>12s}" for s in sinks)
+    print(header)
+    print("  " + "-" * (len(header) - 2))
+    interesting = []
+    for h in hosts:
+        row = f"  {h:<16s}"
+        for sink in sinks:
+            html = sandbox.HOSTS[h].replace("__P__", payload)
+            v = sandbox.judge(html, token, sink=sink)
+            if getattr(args, "sandbox_roundtrip", False) and v.state != "live":
+                r = sandbox.judge_roundtrip(html, token, sink=sink)
+                if r.state == "live":
+                    v = r
+            row += f"{_CELL.get(v.state + ('A' if v.activation else ''), '?'):>12s}"
+            if v.state == "live" or v.state == "unknown":
+                interesting.append((h, sink, v))
+        print(row)
+    print("\n  " + "  ".join(f"{k}={v}" for k, v in sorted(_CELL.items())))
+    if interesting:
+        print("\nwhy:")
+        for h, sink, v in interesting:
+            gate = " (needs user activation)" if v.activation else ""
+            print(f"  {h}/{sink}{gate}\n      {v.reason}")
+            if v.evidence:
+                print(f"      {v.evidence[:200]}")
+    else:
+        print("\nno context executed this payload. Either it does not escape the "
+              "containers above, or the token never reaches an attribute value.")
+    return 0
+
+
+def _default_token(payload: str) -> str:
+    """The payload's own observable marker: the argument of its first call."""
+    import re as _re
+    m = _re.search(r"(?:alert|prompt|confirm|eval|fetch|document\.\w+)\s*\("
+                   r"\s*([^)]{1,40})", payload, _re.I)
+    if m:
+        return m.group(1).strip("'\"` ") or payload[:24]
+    return payload[:24]
+
+
+def _print_verdict(label: str, v) -> None:
+    gate = "  requires user activation" if v.activation else ""
+    print(f"  {label:<24s} {v.state.upper():9s} {v.reason}{gate}")
+    if v.evidence:
+        print(f"  {'':<24s} evidence: {v.evidence[:220]}")
+
+
+_CELL = {"live": "LIVE", "liveA": "LIVE*", "inert": "inert", "unknown": "?"}
+
+
 def _run_marker_fuzz(args) -> int:
     """Phase 80: --fuzz-body marker injection (DalFox FUZZ style).
 

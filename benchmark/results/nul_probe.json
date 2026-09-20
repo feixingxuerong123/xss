@@ -1,0 +1,353 @@
+[
+ {
+  "case": "attr-dq",
+  "input": "<img alt=\"a\u0000b\" src=x>",
+  "browser": "<img alt=\"a�b\" src=\"x\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "alt=61 fffd 62",
+     "src=78"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img alt=\"a�b\" src=\"x\">"
+ },
+ {
+  "case": "attr-sq",
+  "input": "<img alt='a\u0000b' src=x>",
+  "browser": "<img alt=\"a�b\" src=\"x\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "alt=61 fffd 62",
+     "src=78"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img alt=\"a�b\" src=\"x\">"
+ },
+ {
+  "case": "attr-uq",
+  "input": "<img alt=a\u0000b src=x>",
+  "browser": "<img alt=\"a�b\" src=\"x\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "alt=61 fffd 62",
+     "src=78"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img alt=\"a�b\" src=\"x\">"
+ },
+ {
+  "case": "attr-name",
+  "input": "<img \u0000alt=x src=y>",
+  "browser": "<img �alt=\"x\" src=\"y\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "�alt=78",
+     "src=79"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img �alt=\"x\" src=\"y\">"
+ },
+ {
+  "case": "text-p",
+  "input": "<p>a\u0000b</p>",
+  "browser": "<p>ab</p>",
+  "dom": [
+   {
+    "tag": "p",
+    "taghex": "70",
+    "attrs": [],
+    "text": "61 62"
+   }
+  ],
+  "sandbox": "<p>ab</p>"
+ },
+ {
+  "case": "text-div",
+  "input": "<div>a\u0000b</div>",
+  "browser": "<div>ab</div>",
+  "dom": [
+   {
+    "tag": "div",
+    "taghex": "64 69 76",
+    "attrs": [],
+    "text": "61 62"
+   }
+  ],
+  "sandbox": "<div>ab</div>"
+ },
+ {
+  "case": "textarea-nul",
+  "input": "<textarea>a\u0000b</textarea>",
+  "browser": "<textarea>a�b</textarea>",
+  "dom": [
+   {
+    "tag": "textarea",
+    "taghex": "74 65 78 74 61 72 65 61",
+    "attrs": [],
+    "text": "61 fffd 62"
+   }
+  ],
+  "sandbox": "<textarea>a�b</textarea>"
+ },
+ {
+  "case": "script-nul",
+  "input": "<script>var a='x\u0000y'</script>",
+  "browser": "<script>var a='x�y'</script>",
+  "dom": [
+   {
+    "tag": "script",
+    "taghex": "73 63 72 69 70 74",
+    "attrs": [],
+    "text": "76 61 72 20 61 3d 27 78 fffd 79 27"
+   }
+  ],
+  "sandbox": "<script>var a='x�y'</script>"
+ },
+ {
+  "case": "jsuri-in-scheme",
+  "input": "<a href=\"javascript\u0000:__x()\">c</a>",
+  "browser": "<a href=\"javascript�:__x()\">c</a>",
+  "dom": [
+   {
+    "tag": "a",
+    "taghex": "61",
+    "attrs": [
+     "href=6a 61 76 61 73 63 72 69 70 74 fffd 3a 5f 5f 78 28 29"
+    ],
+    "text": "63",
+    "href": "http://127.0.0.1:58146/javascript%EF%BF%BD:__x()"
+   }
+  ],
+  "sandbox": "<a href=\"javascript�:__x()\">c</a>"
+ },
+ {
+  "case": "jsuri-mid",
+  "input": "<a href=\"java\u0000script:__x()\">c</a>",
+  "browser": "<a href=\"java�script:__x()\">c</a>",
+  "dom": [
+   {
+    "tag": "a",
+    "taghex": "61",
+    "attrs": [
+     "href=6a 61 76 61 fffd 73 63 72 69 70 74 3a 5f 5f 78 28 29"
+    ],
+    "text": "63",
+    "href": "http://127.0.0.1:58146/java%EF%BF%BDscript:__x()"
+   }
+  ],
+  "sandbox": "<a href=\"java�script:__x()\">c</a>"
+ },
+ {
+  "case": "jsuri-entity",
+  "input": "<a href=\"jav&#x00;ascript:__x()\">c</a>",
+  "browser": "<a href=\"jav�ascript:__x()\">c</a>",
+  "dom": [
+   {
+    "tag": "a",
+    "taghex": "61",
+    "attrs": [
+     "href=6a 61 76 fffd 61 73 63 72 69 70 74 3a 5f 5f 78 28 29"
+    ],
+    "text": "63",
+    "href": "http://127.0.0.1:58146/jav%EF%BF%BDascript:__x()"
+   }
+  ],
+  "sandbox": "<a href=\"jav�ascript:__x()\">c</a>"
+ },
+ {
+  "case": "jsuri-leading-ws",
+  "input": "<a href=\" javascript:__x()\">c</a>",
+  "browser": "<a href=\" javascript:__x()\">c</a>",
+  "dom": [
+   {
+    "tag": "a",
+    "taghex": "61",
+    "attrs": [
+     "href=20 6a 61 76 61 73 63 72 69 70 74 3a 5f 5f 78 28 29"
+    ],
+    "text": "63",
+    "href": "javascript:__x()"
+   }
+  ],
+  "sandbox": "<a href=\" javascript:__x()\">c</a>"
+ },
+ {
+  "case": "src-trailing",
+  "input": "<img src=\"x\u0000\" onerror=\"__x()\">",
+  "browser": "<img src=\"x�\" onerror=\"__x()\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "src=78 fffd",
+     "onerror=5f 5f 78 28 29"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img src=\"x�\" onerror=\"__x()\">"
+ },
+ {
+  "case": "handler-nul",
+  "input": "<img src=x onerror=\"ale\u0000rt(1)\">",
+  "browser": "<img src=\"x\" onerror=\"ale�rt(1)\">",
+  "dom": [
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "src=78",
+     "onerror=61 6c 65 fffd 72 74 28 31 29"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<img src=\"x\" onerror=\"ale�rt(1)\">"
+ },
+ {
+  "case": "srcdoc-nul",
+  "input": "<iframe srcdoc='<img src=x onerror=\"top.a\u0000b\">'></iframe>",
+  "browser": "<iframe srcdoc=\"&lt;img src=x onerror=&quot;top.a�b&quot;&gt;\"></iframe>",
+  "dom": [
+   {
+    "tag": "iframe",
+    "taghex": "69 66 72 61 6d 65",
+    "attrs": [
+     "srcdoc=3c 69 6d 67 20 73 72 63 3d 78 20 6f 6e 65 72 72 6f 72 3d 22 74 6f 70 2e 61 fffd 62 22 3e"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<iframe srcdoc=\"&lt;img src=x onerror=&quot;top.a�b&quot;&gt;\"></iframe>"
+ },
+ {
+  "case": "title-nul",
+  "input": "<title>a\u0000b</title>",
+  "browser": "<title>a�b</title>",
+  "dom": [
+   {
+    "tag": "title",
+    "taghex": "74 69 74 6c 65",
+    "attrs": [],
+    "text": "61 fffd 62"
+   }
+  ],
+  "sandbox": "<title>a�b</title>"
+ },
+ {
+  "case": "comment-nul",
+  "input": "<p><!--a\u0000b--></p>",
+  "browser": "<p><!--a�b--></p>",
+  "dom": [
+   {
+    "tag": "p",
+    "taghex": "70",
+    "attrs": [],
+    "text": ""
+   }
+  ],
+  "sandbox": "<p><!--a�b--></p>"
+ },
+ {
+  "case": "rawtext-nul",
+  "input": "<style>a\u0000{color:red}</style><img src=x onerror=__x()>",
+  "browser": "<style>a�{color:red}</style><img src=\"x\" onerror=\"__x()\">",
+  "dom": [
+   {
+    "tag": "style",
+    "taghex": "73 74 79 6c 65",
+    "attrs": [],
+    "text": "61 fffd 7b 63 6f 6c 6f 72 3a 72 65 64 7d"
+   },
+   {
+    "tag": "img",
+    "taghex": "69 6d 67",
+    "attrs": [
+     "src=78",
+     "onerror=5f 5f 78 28 29"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<style>a�{color:red}</style><img src=\"x\" onerror=\"__x()\">"
+ },
+ {
+  "case": "tagname-script-nul",
+  "input": "<scr\u0000ipt>alert(1)</scr\u0000ipt>",
+  "browser": "<scr�ipt>alert(1)</scr�ipt>",
+  "dom": [
+   {
+    "tag": "scr�ipt",
+    "taghex": "73 63 72 fffd 69 70 74",
+    "attrs": [],
+    "text": "61 6c 65 72 74 28 31 29"
+   }
+  ],
+  "sandbox": "<scr�ipt>alert(1)</scr�ipt>"
+ },
+ {
+  "case": "tagname-unknown-nul",
+  "input": "<div\u0000x>a</div\u0000x>",
+  "browser": "<div�x>a</div�x>",
+  "dom": [
+   {
+    "tag": "div�x",
+    "taghex": "64 69 76 fffd 78",
+    "attrs": [],
+    "text": "61"
+   }
+  ],
+  "sandbox": "<div�x>a</div�x>"
+ },
+ {
+  "case": "endtag-nul",
+  "input": "<p>a</p\u0000>",
+  "browser": "<p>a</p>",
+  "dom": [
+   {
+    "tag": "p",
+    "taghex": "70",
+    "attrs": [],
+    "text": "61"
+   }
+  ],
+  "sandbox": "<p>a</p>"
+ },
+ {
+  "case": "svg-handler-leading-nul",
+  "input": "<svg onload=\u0000top.__x()></svg>",
+  "browser": "<svg onload=\"�top.__x()\"></svg>",
+  "dom": [
+   {
+    "tag": "svg",
+    "taghex": "73 76 67",
+    "attrs": [
+     "onload=fffd 74 6f 70 2e 5f 5f 78 28 29"
+    ],
+    "text": ""
+   }
+  ],
+  "sandbox": "<svg onload=\"�top.__x()\"></svg>"
+ }
+]

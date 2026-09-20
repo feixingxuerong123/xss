@@ -13,11 +13,20 @@ from __future__ import annotations
 
 import base64
 import binascii
+import os
 import re
 import urllib.parse
 
 from . import context as ctx
+from .logger import get_logger
 from .parser_utils import bs_parser as _bs_parser
+
+_log = get_logger("verifier")
+
+#: Every exception the sandbox gate has swallowed, kept visible on purpose.
+#: A gate that throws silently is a gate that is off -- so this is both the
+#: log line and the thing `tests/test_sandbox_gate.py` asserts stays empty.
+SANDBOX_GATE_ERRORS: list[str] = []
 
 _TOKEN_RE = re.compile(r"alert\((?:1|0|)\)")
 
@@ -469,19 +478,128 @@ def _survival_candidates(payload: str) -> list:
     return False
 
 
+#: Contexts the HTML sandbox is NOT allowed to veto.  `mutation_xss` is decided
+#: by a parse->serialise->re-parse that depends on a sanitizer in the middle,
+#: `template_angular` by a framework compiler, `css_context` by a CSS parser --
+#: none of which `sandbox.py` models, so "inert" from it would be an opinion the
+#: sandbox is not qualified to hold.
+_SANDBOX_EXEMPT_CONTEXTS = frozenset({
+    "mutation_xss", "template_angular", "css_context",
+})
+
+
 def verify_semantic(response_text: str, token: str,
                     response_headers: dict | None = None) -> dict:
     """Return confirmation based on where the token reflected.
 
-    Uses a real HTML parser (not naive regex) so a transform that merely
-    *breaks the tag name* to slip past a string-WAF is NOT counted as a real
-    execution: e.g. `<\\tscript>` is parsed as text, not a script element, so
-    it is reported as non-executable. This keeps confirmation meaningful.
+    Wraps `_verify_semantic_impl` with the Phase 169 HTML sandbox, which may
+    change the verdict in either direction, under **different guards in each**:
+
+      veto    confirmed -> not confirmed, when the sandbox proves no executable
+              node carries the token.  Allowed regardless of CSP (a policy can
+              only make markup *less* able to run, so "nothing in this tree
+              runs" survives any policy) but skipped when the confirmation came
+              from a mechanism the sandbox does not model -- `_SANDBOX_EXEMPT_
+              CONTEXTS`.
+      promote not confirmed -> confirmed, when the sandbox finds a live node and
+              this module's own context model mis-read the shape (the
+              `<svg><style>` family).  Requires the CSP to be *known absent*,
+              because claiming execution is the direction a policy can refute.
+
+    `response_headers=None` means the caller never looked, which is not the same
+    evidence as `{}`; promotion needs one of the two, the veto needs neither.
+
+    The measurement behind all of this is
+    `benchmark/results/browser_dom_oracle.json` -- 900 browser-recorded
+    (payload x context x sink) cases, replayed by
+    `tests/test_sandbox_fidelity.py`, where the sandbox's inert verdict has
+    never contradicted Chromium and its live verdict has never over-claimed.
+
+    Set XSS_SANDBOX_GATE=0 to get the pre-sandbox behaviour exactly, which is
+    how a benchmark regression gets bisected.
+
     Args:
         response_text: The HTTP response body.
         token: The unique verification token injected into the payload.
         response_headers: Optional dict of HTTP response headers. Used to
             detect CSP policies that block inline script execution.
+    """
+    verdict = _verify_semantic_impl(response_text, token, response_headers)
+    if os.environ.get("XSS_SANDBOX_GATE", "1") == "0":
+        return verdict
+    headers = response_headers or {}
+    csp_known = response_headers is not None
+    csp_present = any(str(k).lower() in ("content-security-policy",
+                                         "x-content-security-policy",
+                                         "content-security-policy-report-only")
+                      for k in headers)
+    try:
+        from .sandbox import judge
+        sv = judge(response_text, token, sink="parser")
+    except Exception as exc:                # noqa: BLE001
+        # Keep the pre-sandbox verdict -- a scan must not die on one response.
+        # But say so, loudly and once: a gate that silently throws is a gate
+        # that has stopped working while every number still looks green.
+        # `SANDBOX_GATE_ERRORS` is asserted on in the tests.
+        SANDBOX_GATE_ERRORS.append(f"{type(exc).__name__}: {exc}")
+        if len(SANDBOX_GATE_ERRORS) <= 3:
+            _log.error("sandbox gate raised %s: %s -- verdict left un-gated for "
+                       "this response; the gate is effectively off",
+                       type(exc).__name__, exc)
+        return verdict
+
+    if verdict.get("confirmed"):
+        # The veto side.  Skipped where the confirmation rests on a mechanism
+        # the sandbox does not model -- then "inert" from it is an opinion it is
+        # not qualified to hold.
+        if verdict.get("context") in _SANDBOX_EXEMPT_CONTEXTS:
+            return verdict
+        # A CSP header does NOT block this veto.  A policy can only make markup
+        # *less* able to execute, never turn a node the parser made inert into a
+        # live one, so "no executable node carries the token" stands regardless.
+        if sv.state == "inert":
+            return {"confirmed": False, "context": verdict.get("context"),
+                    "detail": f"sandbox: {sv.reason}",
+                    "sandbox_state": sv.state,
+                    "sandbox_evidence": sv.evidence}
+        return verdict
+
+    # The mirror case, and the reason the gate runs both ways.  This module's
+    # context model reads the *content* of `<svg><style>` as CSS, so a payload
+    # that broke out of foreign content and is live in the tree comes back not
+    # confirmed -- `<svg><style><img onerror=...>`, one of the most-pasted
+    # vectors there is, was a false negative.  The sandbox decides that case on
+    # namespace and break-out rules instead of on the enclosing tag name, and it
+    # is measured to over-claim nothing, so where it reports live with no
+    # activation gate the not-confirmed verdict is the one to distrust.
+    # `_SANDBOX_EXEMPT_CONTEXTS` guards only the veto: a not-confirmed
+    # `css_context` reading is precisely what this branch exists to correct.
+    #
+    # Promotion, unlike veto, is gated on the CSP being *known*.  CSP can only
+    # remove execution, so an absent-or-unread policy is a precondition of
+    # claiming execution -- and a caller that passed no headers at all tells us
+    # nothing, which is why `csp_known` is not the same test as `csp_present`.
+    # (Measured: promoting with `{}` headers "confirms" the three defended
+    # `neg-csp-*` cases, whose strict policy is exactly why they are defended.)
+    if csp_present or not csp_known:
+        return verdict
+    if sv.state == "live" and not sv.activation:
+        return {"confirmed": True, "context": sv.node.name if sv.node
+                else "html_element",
+                "detail": f"sandbox: {sv.reason}",
+                "sandbox_state": sv.state,
+                "sandbox_evidence": sv.evidence}
+    return verdict
+
+
+def _verify_semantic_impl(response_text: str, token: str,
+                          response_headers: dict | None = None) -> dict:
+    """Confirmation based on where the token reflected, before the sandbox gate.
+
+    Uses a real HTML parser (not naive regex) so a transform that merely
+    *breaks the tag name* to slip past a string-WAF is NOT counted as a real
+    execution: e.g. `<\\tscript>` is parsed as text, not a script element, so
+    it is reported as non-executable. This keeps confirmation meaningful.
     """
     idx = response_text.find(token)
     if idx == -1:

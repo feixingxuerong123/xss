@@ -1,0 +1,16 @@
+{
+ "div tabindex=1 autofocus": false,
+ "div autofocus (no tabindex)": false,
+ "span tabindex=1 autofocus": true,
+ "a tabindex=1 autofocus": true,
+ "input autofocus": true,
+ "input tabindex=1 autofocus": true,
+ "img tabindex=1 autofocus": true,
+ "button autofocus": true,
+ "li tabindex=1 autofocus": true,
+ "textarea autofocus": true,
+ "video tabindex=1 autofocus": true,
+ "details open ontoggle": true,
+ "div tabindex=1 onclick": false,
+ "span autofocus (no tabindex)": false
+}

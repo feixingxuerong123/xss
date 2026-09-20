@@ -1,0 +1,415 @@
+[
+ {
+  "case": "svg-a-xlink-js",
+  "payload": "<svg width=60 height=30><a xlink:href=\"javascript:__x()\"><text y=\"12\">g</text></a></svg>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 3,
+   "width": 10.234375,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "svg-a-xlink-js-declared",
+  "payload": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=60 height=30><a xlink:href=\"javascript:__x()\"><text y=\"12\">g</text></a></svg>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 3,
+   "width": 10.234375,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "svg-a-href-js",
+  "payload": "<svg width=60 height=30><a href=\"javascript:__x()\"><text y=\"12\">g</text></a></svg>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 3,
+   "width": 10.234375,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "svg-image-href-js",
+  "payload": "<svg width=40 height=40><image href=\"javascript:__x()\"></image></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-image-xlink-js",
+  "payload": "<svg width=40 height=40><image xlink:href=\"javascript:__x()\"></image></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-use-xlink-js",
+  "payload": "<svg><use xlink:href=\"javascript:__x()\"></use></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-feimage-href-js",
+  "payload": "<svg><feImage href=\"javascript:__x()\"></feImage></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "math-maction-xlink-js",
+  "payload": "<math><maction xlink:href=\"javascript:__x()\">g</maction></math>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "math-a-href-js",
+  "payload": "<math><a href=\"javascript:__x()\"><semantics>g</semantics></a></math>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "box": {
+   "x": 8,
+   "y": 8,
+   "width": 0,
+   "height": 0
+  },
+  "click_note": "no clickable box: {'x': 8, 'y': 8, 'width': 0, 'height': 0}",
+  "ihn": false
+ },
+ {
+  "case": "svg-a-xlink-fragment",
+  "payload": "<svg width=60 height=30><a xlink:href=\"#x\" target=\"_top\"><text y=\"12\">g</text></a></svg>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": false,
+  "box": {
+   "x": 8,
+   "y": 3,
+   "width": 10.234375,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "svg-root-onload",
+  "payload": "<svg onload=\"__x()\"></svg>",
+  "click": "",
+  "complete": true,
+  "auto": true,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-foreignobject-onload",
+  "payload": "<svg><foreignObject onload=\"__x()\"></foreignObject></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-desc-onload",
+  "payload": "<svg><desc onload=\"__x()\"></desc></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-clippath-onload",
+  "payload": "<svg><clipPath onload=\"__x()\"></clipPath></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-ellipse-onload",
+  "payload": "<svg><ellipse onload=\"__x()\"></ellipse></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-filter-onload",
+  "payload": "<svg><filter onload=\"__x()\"></filter></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-lineargradient-onload",
+  "payload": "<svg><linearGradient onload=\"__x()\"></linearGradient></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-path-onload",
+  "payload": "<svg><path d=\"M0 0\" onload=\"__x()\"></path></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-use-onload",
+  "payload": "<svg><use xlink:href=\"#nope\" onload=\"__x()\"></use></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-image-onload",
+  "payload": "<svg><image href=\"/nope\" onload=\"__x()\"></image></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-g-onload",
+  "payload": "<svg><style>.x{}</style><g onload=\"__x()\"></g></svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-root-onload-sized",
+  "payload": "<svg width=40 height=40 onload=\"__x()\"><rect width=4 height=4></svg>",
+  "click": "",
+  "complete": true,
+  "auto": true,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-onmouseover",
+  "payload": "<svg onmouseover=\"__x()\">t</svg>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "svg-rect-onmouseover",
+  "payload": "<svg width=40 height=40><rect width=40 height=40 onmouseover=\"__x()\"></rect></svg>",
+  "click": "rect",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 8,
+   "width": 40,
+   "height": 40
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "svg-animate-onbegin",
+  "payload": "<svg><animate onbegin=\"__x()\" attributeName=\"x\" dur=\"1s\"></animate></svg>",
+  "click": "",
+  "complete": true,
+  "auto": true,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": true
+ },
+ {
+  "case": "button-onclick",
+  "payload": "<button onclick=\"__x()\">x</button>",
+  "click": "button",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 8,
+   "width": 22.671875,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "div-onclick",
+  "payload": "<div onclick=\"__x()\">x</div>",
+  "click": "div",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 8,
+   "width": 1264,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "html-a-js",
+  "payload": "<a href=\"javascript:__x()\">g</a>",
+  "click": "a",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": true,
+  "box": {
+   "x": 8,
+   "y": 8,
+   "width": 10.234375,
+   "height": 21
+  },
+  "click_hit": "hit",
+  "ihn": false
+ },
+ {
+  "case": "dialog-onclose",
+  "payload": "<dialog open onclose=\"__x()\"></dialog>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "canvas-onload",
+  "payload": "<canvas onload=\"__x()\"></canvas>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "details-after-ontoggle",
+  "payload": "<details open><summary>x</summary><p>y</p></details ontoggle=\"__x()\">",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "keygen-autofocus",
+  "payload": "<keygen onfocus=\"__x()\" autofocus>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "isindex-action-js",
+  "payload": "<isindex action=\"javascript:__x()\" type=submit>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "body-background",
+  "payload": "<body background=\"http://127.0.0.1:9/nope\">b</body>",
+  "click": "",
+  "complete": true,
+  "auto": false,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ },
+ {
+  "case": "dom-module-script",
+  "payload": "<dom-module id=\"x-foo\"><script>__x()</script></dom-module>",
+  "click": "",
+  "complete": true,
+  "auto": true,
+  "ready": "complete",
+  "clicked": null,
+  "ihn": false
+ }
+]

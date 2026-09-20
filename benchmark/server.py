@@ -17,7 +17,7 @@ import os
 import re
 import sys
 from html.parser import HTMLParser   # Phase 124: parser-aware resource unfurl
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote, quote
 import urllib.request               # Phase 124: resolve unfurled resources
 
@@ -108,7 +108,7 @@ def m_escape_meta_refresh_js(v: str) -> tuple:
     isolates the "meta refresh is a javascript: sink" claim: everything else the
     scanner sends here cannot break out, so a finding can only come from a
     detector still treating that scheme as execution.  Measured non-executing in
-    Chromium -- see ``probe_meta_refresh_scheme.py`` and
+    Chromium -- see ``_p168_meta_probe.py`` and
     ``tests/test_phase35.py::test_meta_refresh_javascript_is_not_a_sink``.
     """
     return _page('<meta http-equiv="refresh" content="0;url='
@@ -2203,6 +2203,14 @@ def _register_viewer(routes: dict, case: dict, key: str,
 class BenchmarkHandler(BaseHTTPRequestHandler):
     routes: dict[str, dict] = {}
 
+    # HTTPServer accepts one connection at a time, and a client that is killed
+    # mid-run (the runner's `subprocess.run(timeout=60)` does exactly that)
+    # leaves its keep-alive socket open.  With the default `timeout = None` the
+    # accept loop then sits in `readinto` forever and every later case "times
+    # out" -- the reason a full 185-case run never returned.  Measured with
+    # faulthandler: server thread in socket.py:704 readinto, 0.2 CPU-s in 20 min.
+    timeout = 5
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -2346,7 +2354,13 @@ def run_server(port: int = DEFAULT_PORT, ready_callback=None):
     routes = load_routes()
     BenchmarkHandler.routes = routes
 
-    server = HTTPServer(("127.0.0.1", port), BenchmarkHandler)
+    # Threading, not HTTPServer: an abandoned client connection (the runner
+    # kills a scanner subprocess on its per-case timeout, which leaves the
+    # socket half-open) holds a single-threaded accept loop until `timeout`
+    # expires.  Measured: next request 5.01s behind one abandoned connection
+    # with HTTPServer, 0.01s with ThreadingHTTPServer.  Every other probe that
+    # serves this handler already uses ThreadingHTTPServer.
+    server = ThreadingHTTPServer(("127.0.0.1", port), BenchmarkHandler)
     print(f"[*] Benchmark server on http://127.0.0.1:{port} "
           f"({len(routes)} endpoints, {len(MODES)} modes)")
 

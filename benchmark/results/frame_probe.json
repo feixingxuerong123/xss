@@ -1,0 +1,425 @@
+[
+ {
+  "case": "frameset-frame-jsuri",
+  "document": "<html><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-rows0-jsuri",
+  "document": "<html><frameset rows=\"0\"><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset rows=\"0\"><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-cols0-jsuri",
+  "document": "<html><frameset cols=\"0\"><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset cols=\"0\"><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-nested-jsuri",
+  "document": "<html><frameset rows=\"100\"><frameset><frame src=\"javascript:__x()\"></frameset></frameset>",
+  "fragment": "<frameset rows=\"100\"><frameset><frame src=\"javascript:__x()\"></frameset></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-two-jsuri",
+  "document": "<html><frameset cols=\"50,50\"><frame src=\"javascript:__x()\"><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset cols=\"50,50\"><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-onload-js",
+  "document": "<html><frameset onload=\"__x()\"></frameset>",
+  "fragment": "<frameset onload=\"__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "body-frame-jsuri",
+  "document": "<html><body><frame src=\"javascript:__x()\"></body></html>",
+  "fragment": "<frame src=\"javascript:__x()\">",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-frame-jsuri",
+  "document": "<html><head><frame src=\"javascript:__x()\"></head><body></body></html>",
+  "fragment": "<frame src=\"javascript:__x()\">",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "body-frameset-frame-jsuri",
+  "document": "<html><body><frameset><frame src=\"javascript:__x()\"></frameset></body></html>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-frameset-frame-jsuri",
+  "document": "<html><head><frameset><frame src=\"javascript:__x()\"></frameset></head>",
+  "fragment": "<head><frameset><frame src=\"javascript:__x()\"></frameset></head>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "text-then-frameset-jsuri",
+  "document": "<html>x<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "x<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "comment-then-frameset-jsuri",
+  "document": "<html><!--c--><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<!--c--><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "ws-then-frameset-jsuri",
+  "document": "<html>\n  <frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "\n  <frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "closed-body-then-frameset-jsuri",
+  "document": "<html><body>b</body><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<body>b</body><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "noscript-frameset-jsuri",
+  "document": "<html><noscript><frameset><frame src=\"javascript:__x()\"></frameset></noscript>",
+  "fragment": "<noscript><frameset><frame src=\"javascript:__x()\"></frameset></noscript>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-script-then-frameset-jsuri",
+  "document": "<html><head><script>var a=1</script></head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<head><script>var a=1</script></head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-link-then-frameset-jsuri",
+  "document": "<html><head><link rel=stylesheet href=/nope></head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-style-then-frameset-jsuri",
+  "document": "<html><head><style>p{}</style></head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-title-then-frameset-jsuri",
+  "document": "<html><head><title>t</title></head><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "div-then-frameset-jsuri",
+  "document": "<html><div>d</div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<div>d</div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-then-frameset-jsuri",
+  "document": "<html><frameset><frame src=\"/blank\"><frameset><frame src=\"javascript:__x()\"></frameset></frameset>",
+  "fragment": "<frameset><frame src=\"/blank\"><frameset><frame src=\"javascript:__x()\"></frameset></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "doctype-frameset-jsuri",
+  "document": "<!doctype html><html><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-base-then-frameset-jsuri",
+  "document": "<html><head><base href=\"/\"><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<base href=\"/\"><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-basefont-then-frameset-jsuri",
+  "document": "<html><head><basefont size=1><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<basefont size=1><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-bgsound-then-frameset-jsuri",
+  "document": "<html><head><bgsound src=/nope><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<bgsound src=/nope><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-meta-then-frameset-jsuri",
+  "document": "<html><head><meta charset=utf-8><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<meta charset=utf-8><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-noframes-then-frameset-jsuri",
+  "document": "<html><head><noframes></noframes><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<noframes></noframes><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "head-template-then-frameset-jsuri",
+  "document": "<html><head><template><p>x</p></template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<template><p>x</p></template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg-then-frameset-jsuri",
+  "document": "<html><svg></svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<svg></svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "empty-div-then-frameset-jsuri",
+  "document": "<html><div></div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<div></div><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "empty-p-then-frameset-jsuri",
+  "document": "<html><p><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<p><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "empty-span-then-frameset-jsuri",
+  "document": "<html><span><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<span><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "img-then-frameset-jsuri",
+  "document": "<html><img src=x><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<img src=x><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "table-then-frameset-jsuri",
+  "document": "<html><table></table><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<table></table><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "empty-body-then-frameset-jsuri",
+  "document": "<html><body><frameset><frame src=\"javascript:__x()\"></frameset></body>",
+  "fragment": "<body><frameset><frame src=\"javascript:__x()\"></frameset></body>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "open-div-text-frameset-jsuri",
+  "document": "<html><div>d<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<div>d<frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "math-then-frameset-jsuri",
+  "document": "<html><math><mi></mi></math><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<math><mi></mi></math><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "svg-text-then-frameset-jsuri",
+  "document": "<html><svg>text</svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<svg>text</svg><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "style-inbody-text-then-frameset-jsuri",
+  "document": "<html><style>p{}</style><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<style>p{}</style><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "title-inbody-text-then-frameset-jsuri",
+  "document": "<html><title>t</title><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<title>t</title><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "template-text-then-frameset-jsuri",
+  "document": "<html><template>t</template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<template>t</template><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "textarea-text-then-frameset-jsuri",
+  "document": "<html><textarea>t</textarea><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "fragment": "<textarea>t</textarea><frameset><frame src=\"javascript:__x()\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-frame-child-doc",
+  "document": "<html><frameset><frame src=\"/child\"></frameset>",
+  "fragment": "<frameset><frame src=\"/child\"></frameset>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "frameset-frame-srcdoc",
+  "document": "<html><frameset><frame srcdoc=\"&lt;img src=x onerror=__x()&gt;\"></frameset>",
+  "fragment": "<frameset><frame srcdoc=\"&lt;img src=x onerror=__x()&gt;\"></frameset>",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "body-frame-child-doc",
+  "document": "<html><body><frame src=\"/child\"></body></html>",
+  "fragment": "<frame src=\"/child\">",
+  "load_complete": true,
+  "exec_parser": false,
+  "ready": "complete",
+  "exec_ihn1": false
+ },
+ {
+  "case": "iframe-jsuri",
+  "document": "<html><body><iframe src=\"javascript:__x()\"></iframe></body></html>",
+  "fragment": "<iframe src=\"javascript:__x()\"></iframe>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": true
+ },
+ {
+  "case": "iframe-srcdoc-jsuri",
+  "document": "<html><body><iframe srcdoc=\"&lt;script&gt;__x()&lt;/script&gt;\"></iframe></body></html>",
+  "fragment": "<iframe srcdoc=\"&lt;script&gt;__x()&lt;/script&gt;\"></iframe>",
+  "load_complete": true,
+  "exec_parser": true,
+  "ready": "complete",
+  "exec_ihn1": true
+ }
+]

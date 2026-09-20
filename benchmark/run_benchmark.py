@@ -42,6 +42,14 @@ def main():
                         help="Max payloads per case (default: 10)")
     parser.add_argument("--max-transforms", type=int, default=6,
                         help="Max transforms per case (default: 6)")
+    # There was no --timeout here at all, so the sweep ran on `run_benchmark()`'s
+    # 60 s default while `runner.py`'s own CLI advertised 90.  Two full sweeps
+    # this session each lost 1-2 negative cases to that budget and then -- because
+    # the runner only retries errored *vulnerable* cases -- reported recall and
+    # FPR over 183 of 185.  On a loaded host a safe case measured at 10 s took
+    # 94 s, so the budget, not the case, was the binding constraint.
+    parser.add_argument("--timeout", type=int, default=90,
+                        help="Per-case scanner timeout in seconds (default: 90)")
     args = parser.parse_args()
 
     # --- Run XSSentinel evaluation via runner ---
@@ -49,6 +57,7 @@ def main():
 
     result = run_benchmark(
         port=args.port,
+        timeout=args.timeout,
         max_payloads=args.max_payloads,
         max_transforms=args.max_transforms,
         quick=args.quick,
@@ -59,7 +68,7 @@ def main():
     if args.compare:
         print("\n[*] Running横向对比 (dalfox / XSStrike)...")
         from benchmark.adapters import get_adapters, run_comparison
-        from benchmark.server import load_routes, BenchmarkHandler, run_server
+        from benchmark.server import load_routes, BenchmarkHandler
         from http.server import HTTPServer
         import threading
 
@@ -151,6 +160,12 @@ def main():
         "by_context": result.by_context,
         "false_positives": result.false_positives,
         "false_negatives": result.false_negatives,
+        # Per-case rows, minus the finding bodies.  An aggregate that says
+        # `errors: 1` without saying WHICH case forces a full re-run -- 18 minutes
+        # on this machine -- to answer a question the runner already had in
+        # memory; the last sweep had two such cases and both were hunted by hand.
+        "cases": [{k: v for k, v in c.items() if k != "finding_details"}
+                  for c in result.cases],
     }
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(result_dict, f, indent=2, ensure_ascii=False)
@@ -171,10 +186,10 @@ def main():
 
     # --- Quality gate ---
     if result.fpr > 0.20 or result.recall < 0.50:
-        print(f"\n[!] Quality gate FAILED (FPR>20% or Recall<50%)")
+        print("\n[!] Quality gate FAILED (FPR>20% or Recall<50%)")
         return 1
     else:
-        print(f"\n[+] Quality gate PASSED")
+        print("\n[+] Quality gate PASSED")
     return 0
 
 

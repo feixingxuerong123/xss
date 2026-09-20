@@ -45,11 +45,15 @@ def benchmark_server():
     from tests.conftest import loopback_healthy
     if not loopback_healthy():
         pytest.skip("loopback degraded mid-session (security software/TCP state)")
-    from http.server import HTTPServer
+    from http.server import ThreadingHTTPServer
     port = 18877  # Use a non-standard port to avoid conflicts
     routes = load_routes()
     BenchmarkHandler.routes = routes
-    server = HTTPServer(("127.0.0.1", port), BenchmarkHandler)
+    # Threading, matching benchmark.server.run_server: this scanner holds a
+    # requests.Session pool, and every connection it discards leaves the
+    # handler blocked in readinto for `BenchmarkHandler.timeout` seconds on a
+    # single-threaded server.  Measured as a ~15x slowdown of this file.
+    server = ThreadingHTTPServer(("127.0.0.1", port), BenchmarkHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     # Wait for readiness

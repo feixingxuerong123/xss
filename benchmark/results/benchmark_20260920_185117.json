@@ -1,0 +1,307 @@
+{
+  "tool": "XSSentinel",
+  "timestamp": "2026-09-20 18:51:17",
+  "total_cases": 185,
+  "total_time_s": 1086.45,
+  "tp": 110,
+  "fp": 0,
+  "tn": 74,
+  "fn": 0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "fpr": 0.0,
+  "f1": 1.0,
+  "errors": 1,
+  "by_context": {
+    "html_element": {
+      "tp": 48,
+      "fp": 0,
+      "tn": 33,
+      "fn": 0,
+      "error": 1,
+      "total": 82
+    },
+    "html_attribute_dq": {
+      "tp": 4,
+      "fp": 0,
+      "tn": 6,
+      "fn": 0,
+      "error": 0,
+      "total": 10
+    },
+    "html_attribute_sq": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "html_attribute_noquote": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "url_href": {
+      "tp": 8,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "total": 10
+    },
+    "event_handler": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 3
+    },
+    "css_context": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "total": 5
+    },
+    "script_string_dq": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 5,
+      "fn": 0,
+      "error": 0,
+      "total": 7
+    },
+    "script_string_sq": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "script_block": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 3,
+      "fn": 0,
+      "error": 0,
+      "total": 6
+    },
+    "script_template": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "svg_context": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 3
+    },
+    "math_context": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "url_javascript": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "meta_refresh": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "html_comment": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "total": 3
+    },
+    "cdata": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "template_angular": {
+      "tp": 2,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "dom_xss": {
+      "tp": 8,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "total": 10
+    },
+    "header_reflection": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 1
+    },
+    "header": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "html_attribute": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "redirect": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "dom_prototype": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "service_worker": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "web_worker": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "attribute": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "import_map": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "sri": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "trusted_types": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "websocket": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "sanitizer": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "graphql": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "blind_oob": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "time_based_css_import": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    },
+    "response_headers": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "total": 2
+    }
+  },
+  "false_positives": [],
+  "false_negatives": []
+}
