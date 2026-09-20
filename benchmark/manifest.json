@@ -353,7 +353,7 @@
       "context": "meta_refresh",
       "difficulty": "medium",
       "source": "PATT",
-      "note": "meta refresh url=javascript:"
+      "note": "meta refresh content= raw injection (scored on attribute breakout; the javascript: scheme itself is NOT a sink -- see neg-url-03)"
     },
     {
       "id": "pos-url-04",
@@ -387,6 +387,17 @@
       "difficulty": "hard",
       "source": "PATT",
       "note": "base href manipulation"
+    },
+    {
+      "id": "neg-url-03",
+      "path": "/s/url03",
+      "param": "q",
+      "mode": "escape_meta_refresh_js",
+      "ground_truth": "safe",
+      "context": "meta_refresh",
+      "difficulty": "medium",
+      "source": "PATT",
+      "note": "meta refresh url=javascript: escaped -- measured non-executing in Chromium; the refresh honours other schemes (about:) but refuses javascript:, so this is inert by scheme, not by being un-navigable"
     },
     {
       "id": "pos-style-01",

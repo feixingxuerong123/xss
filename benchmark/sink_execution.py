@@ -76,6 +76,43 @@ SHAPES: list[tuple[str, str, bool, bool]] = [
      "var e=document.createElement('div');"
      " e.innerHTML='<img src=x onerror=\\'document.title=\"EXEC\"\\'>';"
      " document.body.appendChild(e);", False, True),
+    ("img.src = javascript:CODE",
+     "var e=document.createElement('img');"
+     f" e.src='javascript:{_SELF}'; document.body.appendChild(e);", False, True),
+    ("link.href = javascript:CODE",
+     "var e=document.createElement('link');"
+     f" e.href='javascript:{_SELF}'; document.head.appendChild(e);",
+     False, True),
+    ("script.src = javascript:CODE",
+     "var e=document.createElement('script');"
+     f" e.src='javascript:{_SELF}'; document.body.appendChild(e);",
+     False, True),
+    ("base.href = javascript:CODE",
+     "var e=document.createElement('base');"
+     f" e.href='javascript:{_SELF}'; document.head.appendChild(e);",
+     False, True),
+    ("frame.src = javascript:CODE",
+     "var e=document.createElement('frame');"
+     f" e.src='javascript:{_FRAME}';"
+     " (document.body || document.documentElement).appendChild(e);",
+     False, True),
+    ("meta refresh url=javascript:CODE",
+     "var e=document.createElement('meta');"
+     " e.httpEquiv='refresh';"
+     f" e.content='0;url=javascript:{_SELF}'; document.head.appendChild(e);",
+     False, True),
+    ("img.src = data:text/html,<script>CODE",
+     "var e=document.createElement('img');"
+     f" e.src='data:text/html,<script>{_SELF}<\/script>';"
+     " document.body.appendChild(e);", False, True),
+    ("script.src = data:text/html,<script>CODE",
+     "var e=document.createElement('script');"
+     f" e.src='data:text/html,<script>{_SELF}<\/script>';"
+     " document.body.appendChild(e);", False, True),
+    ("div.innerHTML = <script>CODE (control)",
+     "var e=document.createElement('div');"
+     f" e.innerHTML='<script>{_SELF}<\/script>';"
+     " document.body.appendChild(e);", False, True),
 ]
 
 

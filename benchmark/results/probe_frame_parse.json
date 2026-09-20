@@ -1,0 +1,27 @@
+[
+ {
+  "case": "/c/script",
+  "executed": true,
+  "built": ""
+ },
+ {
+  "case": "/c/iframe-js",
+  "executed": true,
+  "built": "iframe"
+ },
+ {
+  "case": "/c/frame-bare",
+  "executed": false,
+  "built": ""
+ },
+ {
+  "case": "/c/frame-frameset",
+  "executed": true,
+  "built": "frameset,frame"
+ },
+ {
+  "case": "/c/frame-dynamic",
+  "executed": true,
+  "built": "frame"
+ }
+]

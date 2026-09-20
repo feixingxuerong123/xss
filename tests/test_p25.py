@@ -302,19 +302,27 @@ class TestVerifyFix:
         assert "no longer reflected" in res["detail"]
 
     def test_replay_request_classifies_still_vuln_for_script_block(self):
-        """Token reflected inside a <script> block -> still_vuln."""
+        """Token reflected so a <script> block actually RUNS -> still_vuln."""
         req = MagicMock()
         # verifier.mark will inject the token into the alert() arg; we
-        # craft a response that reflects that token inside <script>.
+        # craft a response that reflects that token inside a script block that
+        # executes.
         resp = MagicMock()
         # We don't know the exact token until _replay_request generates it,
-        # but we can echo whatever the marked payload is into a script block
-        # by inspecting the params sent to req.request.
+        # so the fake server echoes whatever was sent, unquoted, into the page.
         def fake_request(method, url, params=None, data=None):
             # The injected value lives in params (GET) or data (POST).
             payload = (params or {}).get("q") or (data or {}).get("q") or ""
-            # Return the payload embedded in a real <script> block.
-            resp.text = f"<html><script>var x = {payload!r};</script></html>"
+            # This used to be `f"<html><script>var x = {payload!r};</script>"`,
+            # which repr()s the payload into a JS *string literal* -- i.e. the
+            # token lands inside quotes, where nothing runs.  Measured in
+            # Chromium: that document executes nothing, while the same payload
+            # echoed unquoted into the body does (control shape in
+            # benchmark/browser_dom_oracle.py).  The old fixture therefore
+            # asserted still_vuln about a response that is actually fixed, and
+            # only passed because script confirmation used to be text-position
+            # rather than execution-based.
+            resp.text = f"<html><body>{payload}</body></html>"
             return resp
         req.request.side_effect = fake_request
         finding = {
@@ -325,6 +333,7 @@ class TestVerifyFix:
         res = verify_fix._replay_request(req, finding,
                                          "<script>alert('ORIG')</script>")
         assert res["status"] == "still_vuln", res
+        assert res["context"] == "script_block", res
 
     def test_replay_request_handles_request_exception(self):
         """If the HTTP request raises, the result is 'error'."""

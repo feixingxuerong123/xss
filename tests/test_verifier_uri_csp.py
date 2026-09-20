@@ -133,10 +133,22 @@ def test_real_unquoted_href_javascript_uri_confirms() -> None:
     assert _conf(body) is True
 
 
-def test_real_meta_refresh_confirms() -> None:
+def test_real_meta_refresh_is_not_a_sink() -> None:
+    """Phase 168: ``javascript:`` in a meta refresh does not execute.
+
+    Measured in Chromium over a real HTTP origin (``probe_meta_refresh_scheme.py``),
+    with the controls that make the negative meaningful: an inline ``<script>``
+    and an ``iframe.src=javascript:`` both run in the same session (so the
+    harness sees execution and sees this scheme), and
+    ``meta refresh -> about:blank`` does navigate (so the refresh does follow a
+    non-http scheme).  Only ``javascript:`` is refused.
+
+    The assertion here used to be the opposite, and it held only while
+    confirmation was text-position based rather than element-aware.
+    """
     body = ('<meta http-equiv="refresh" content="0;url=javascript:alert(\''
             + TOK + '\')">')
-    assert _conf(body) is True
+    assert _conf(body) is False
 
 
 def test_ampersand_after_scheme_does_not_mask_real_uri() -> None:

@@ -58,5 +58,50 @@
   "shape": "div.innerHTML = <img onerror=SENT (control)",
   "executes": true,
   "note": ""
+ },
+ {
+  "shape": "img.src = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "link.href = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "script.src = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "base.href = javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "frame.src = javascript:CODE",
+  "executes": true,
+  "note": ""
+ },
+ {
+  "shape": "meta refresh url=javascript:CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "img.src = data:text/html,<script>CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "script.src = data:text/html,<script>CODE",
+  "executes": false,
+  "note": ""
+ },
+ {
+  "shape": "div.innerHTML = <script>CODE (control)",
+  "executes": false,
+  "note": ""
  }
 ]

@@ -170,7 +170,9 @@ class TestUrlJavascriptEscapedWindow:
     """Phase 43 (async-benchmark FP): a literal ``javascript:`` substring
     survives html.escape, so an attribute-ESCAPED reflection must NOT be
     confirmed via the raw-text url_javascript/meta_refresh fallback.
-    A LIVE href=javascript: URI must still confirm."""
+    A LIVE href=javascript: URI must still confirm, and (Phase 168) a
+    ``javascript:`` URL in a meta refresh must NOT -- see
+    ``test_meta_refresh_javascript_is_not_a_sink``."""
 
     def test_escaped_attr_text_with_javascript_is_inert(self):
         from xssentinel.core import verifier
@@ -187,12 +189,33 @@ class TestUrlJavascriptEscapedWindow:
         assert v["confirmed"] is True
         assert v["context"] == "url_javascript"
 
-    def test_meta_refresh_javascript_still_confirms(self):
+    def test_meta_refresh_javascript_is_not_a_sink(self):
+        """Phase 168: a ``javascript:`` URL in a meta refresh never runs.
+
+        This test used to assert the opposite, and that was only ever true
+        while confirmation was text-position based (a literal ``javascript:``
+        near the token).  Measured in Chromium over a real HTTP origin
+        (``probe_meta_refresh_scheme.py``), with four controls in the same session:
+
+            inline <script>document.title=1</script>   executes  (sentinel OK)
+            iframe.src = javascript:CODE               executes  (scheme OK)
+            meta refresh -> http://.../child           navigates (/child served)
+            meta refresh -> about:blank                navigates
+            meta refresh -> javascript:CODE            nothing at all
+
+        The last two lines are the pair that matters: the refresh machinery does
+        honour a non-http scheme, so ``javascript:`` being inert there is that
+        scheme being refused, not the URL being skipped as un-navigable.  The
+        structural pass is now element-aware (``_JS_URI_EXECUTES``) and the
+        raw-text fallback cannot re-confirm what it refused
+        (``_attribute_hosting_token``).  ``context`` still says
+        ``meta_refresh``: the flow is real, the execution claim was not.
+        """
         from xssentinel.core import verifier
         html = ("<meta http-equiv=\"refresh\" "
                 "content=\"0;url=javascript:alert('xssv_mr01')\">")
         v = verifier.verify_semantic(html, "xssv_mr01")
-        assert v["confirmed"] is True
+        assert v["confirmed"] is False
         assert v["context"] == "meta_refresh"
 
     def test_escaped_meta_refresh_text_is_inert(self):

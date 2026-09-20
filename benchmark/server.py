@@ -97,6 +97,24 @@ def m_raw_math_href(v: str) -> tuple: return _page(f'<math><a xlink:href="{v}">x
 def m_raw_href_js(v: str) -> tuple: return _page(f'<a href="{v}">link</a>')
 def m_raw_href_data(v: str) -> tuple: return _page(f'<a href="{v}">link</a>')
 def m_raw_meta_refresh(v: str) -> tuple: return _page(f'<meta http-equiv="refresh" content="0;url={v}">')
+
+
+def m_escape_meta_refresh_js(v: str) -> tuple:
+    """Phase 168: a meta refresh whose value is escaped, so the payload keeps
+    its ``javascript:`` scheme but loses the quotes that would let it break out
+    of the attribute.
+
+    This is the safe twin of ``raw_meta_refresh``, and the only shape that
+    isolates the "meta refresh is a javascript: sink" claim: everything else the
+    scanner sends here cannot break out, so a finding can only come from a
+    detector still treating that scheme as execution.  Measured non-executing in
+    Chromium -- see ``probe_meta_refresh_scheme.py`` and
+    ``tests/test_phase35.py::test_meta_refresh_javascript_is_not_a_sink``.
+    """
+    return _page('<meta http-equiv="refresh" content="0;url='
+                 f'{html.escape(v, quote=True)}">')
+
+
 def m_raw_iframe_src(v: str) -> tuple: return _page(f'<iframe src="{v}"></iframe>')
 def m_raw_iframe_srcdoc(v: str) -> tuple: return _page(f'<iframe srcdoc="{v}"></iframe>')
 def m_raw_base_href(v: str) -> tuple: return _page(f'<base href="{v}">')
@@ -1916,6 +1934,7 @@ MODES: dict[str, callable] = {
     "raw_href_js": m_raw_href_js,
     "raw_href_data": m_raw_href_data,
     "raw_meta_refresh": m_raw_meta_refresh,
+    "escape_meta_refresh_js": m_escape_meta_refresh_js,
     "raw_iframe_src": m_raw_iframe_src,
     "raw_iframe_srcdoc": m_raw_iframe_srcdoc,
     "raw_base_href": m_raw_base_href,

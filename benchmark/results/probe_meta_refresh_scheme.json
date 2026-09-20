@@ -1,0 +1,57 @@
+[
+ {
+  "case": "/case/script",
+  "executed": true,
+  "url_after": "http://127.0.0.1:18941/case/script",
+  "navigated": false,
+  "nav_requests": [
+   "/case/script"
+  ]
+ },
+ {
+  "case": "/case/iframe-js",
+  "executed": true,
+  "url_after": "http://127.0.0.1:18941/case/iframe-js",
+  "navigated": false,
+  "nav_requests": [
+   "/case/iframe-js"
+  ]
+ },
+ {
+  "case": "/case/meta-http",
+  "executed": false,
+  "url_after": "http://127.0.0.1:18941/child",
+  "navigated": true,
+  "nav_requests": [
+   "/case/meta-http",
+   "/child"
+  ]
+ },
+ {
+  "case": "/case/meta-badscheme",
+  "executed": false,
+  "url_after": "about:blank",
+  "navigated": true,
+  "nav_requests": [
+   "/case/meta-badscheme"
+  ]
+ },
+ {
+  "case": "/case/meta-js-inline",
+  "executed": false,
+  "url_after": "http://127.0.0.1:18941/case/meta-js-inline",
+  "navigated": false,
+  "nav_requests": [
+   "/case/meta-js-inline"
+  ]
+ },
+ {
+  "case": "/case/meta-js-created",
+  "executed": false,
+  "url_after": "http://127.0.0.1:18941/case/meta-js-created",
+  "navigated": false,
+  "nav_requests": [
+   "/case/meta-js-created"
+  ]
+ }
+]

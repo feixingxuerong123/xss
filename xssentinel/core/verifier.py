@@ -20,6 +20,20 @@ from . import context as ctx
 from .parser_utils import bs_parser as _bs_parser
 
 _TOKEN_RE = re.compile(r"alert\((?:1|0|)\)")
+
+# Phase 168: where a reflected `javascript:` URL actually runs.  Measured with
+# benchmark/sink_execution.py (headless Chromium, 2026-09-18) -- the old rule
+# accepted ANY element's href/src, so <img src=javascript:...> was reported
+# with a "(marker executed)" claim while executing nothing.
+_JS_URI_EXECUTES = {("iframe", "src"), ("frame", "src")}
+# Activation-gated: the sink is real but the trigger is a user action.  The
+# anchor case is measured (it does not run on load, on a synthetic click, or
+# even on a trusted click in that harness, yet a javascript: href IS the
+# classic click-triggered XSS); form/button/input are the same class by
+# construction (a submit is the activation).
+_JS_URI_ACTIVATION = {("a", "href"), ("area", "href"),
+                      ("form", "action"), ("button", "formaction"),
+                      ("input", "formaction")}
 # Match alert(<anything-not-paren>) so we can token-mark ALL alert variants,
 # not just alert(1)/alert(0)/alert().  This covers alert(document.domain),
 # alert(document.cookie), alert('xss'), etc.  The second alternative marks
@@ -100,6 +114,24 @@ def mark(payload: str, token: str, style: str = "plain") -> str:
             return f"alert('{token}')"
         return f"alert`{token}`"
     return _ALERT_CALL_RE.sub(_sub, payload, count=1)
+
+
+def _attribute_hosting_token(soup, token: str):
+    """(element, attribute) whose VALUE contains the token, else None.
+
+    Phase 168: distinguishes "the token is markup" from "the token is inside an
+    attribute value that happens to contain markup-looking text".
+    """
+    try:
+        for tag in soup.find_all(True):
+            for attr, val in (tag.attrs or {}).items():
+                if isinstance(val, list):
+                    val = " ".join(str(v) for v in val)
+                if isinstance(val, str) and token in val:
+                    return f"{(tag.name or '?').lower()}[{attr.lower()}]"
+    except Exception:
+        return None
+    return None
 
 
 def _is_in_rcdata(tag) -> bool:
@@ -445,7 +477,6 @@ def verify_semantic(response_text: str, token: str,
     *breaks the tag name* to slip past a string-WAF is NOT counted as a real
     execution: e.g. `<\\tscript>` is parsed as text, not a script element, so
     it is reported as non-executable. This keeps confirmation meaningful.
-
     Args:
         response_text: The HTTP response body.
         token: The unique verification token injected into the payload.
@@ -473,9 +504,11 @@ def verify_semantic(response_text: str, token: str,
                 "detail": "token reflected inside RCDATA element (inert text)"}
 
     # -- Structural confirmation (authoritative) -------------------------
+    token_attr_host = None
     try:
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(response_text, _bs_parser())
+        token_attr_host = _attribute_hosting_token(soup, token)
         verdict = _structural_confirm(soup, token, csp_blocks,
                                       response_headers)
         if verdict is not None:
@@ -503,6 +536,30 @@ def verify_semantic(response_text: str, token: str,
 
     info = ctx._analyze_at(response_text, idx, token)
     c = info["context"] if info else None
+    # Phase 168: the raw-text fallback cannot tell markup from an attribute
+    # VALUE.  A payload such as data:text/html,<script>TOKEN</script> reflected
+    # into ANY attribute reads as "token inside a <script> element" to a text
+    # scan, and was confirmed -- while the browser keeps that text inside the
+    # attribute and parses no script at all (measured: img.src / script.src /
+    # link.href with such a value execute nothing).  If the parsed tree shows
+    # the token living in an attribute, do not let a markup-shaped context
+    # confirm it: URL/handler contexts are handled by the structural pass.
+    # ``srcdoc`` is the exception: its value IS parsed as a document, so a
+    # token inside it genuinely is markup (measured: iframe.srcdoc executes).
+    srcdoc_host = bool(token_attr_host and token_attr_host.endswith("[srcdoc]"))
+    if token_attr_host is not None and not srcdoc_host and c in (
+            "script_block", "script_string_dq", "script_string_sq",
+            "svg_context", "cdata", "html_element",
+            # url_javascript / meta_refresh are decided by the STRUCTURAL pass
+            # (Phase 168: element-aware).  Letting the raw fallback re-confirm
+            # them here is how <img src=javascript:...> stayed confirmed after
+            # the structural rule had already refused it.
+            "url_javascript", "meta_refresh"):
+        return {"confirmed": False, "context": c,
+                "detail": f"token lives inside the {token_attr_host} "
+                          f"attribute value; the markup-looking text around it "
+                          f"is not parsed as markup (URL/handler sinks are "
+                          f"judged structurally)"}
     executable = c in (
         "script_block", "script_string_dq", "script_string_sq",
         "event_handler", "url_javascript", "svg_context",
@@ -572,20 +629,44 @@ def _structural_confirm(soup, token: str, csp_blocks: bool,
                             "detail": f"token in {attr} but CSP blocks inline execution"}
                 return {"confirmed": True, "context": "event_handler",
                         "detail": f"token reflected in {attr} handler"}
-            if attr.lower() in ("href", "src") and "javascript:" in val.lower() \
-                    and token in val:
-                # CSP script-src 'none' also blocks javascript: URIs
-                if csp_blocks and _csp_blocks_js_uri(response_headers):
-                    return {"confirmed": False, "context": "url_javascript",
-                            "detail": "token in javascript: URI but CSP blocks script execution"}
-                return {"confirmed": True, "context": "url_javascript",
-                        "detail": f"token reflected in {attr}=javascript: URI"}
-            # meta refresh content="...url=javascript:..." executes on refresh
-            if attr.lower() == "content" and "javascript:" in val.lower() \
-                    and token in val:
-                return {"confirmed": True, "context": "meta_refresh",
-                        "detail": "token reflected in meta refresh "
-                                  "content=javascript: URI"}
+            # Phase 168: element-aware URL sinks.  Phase 167 measured, per
+            # (element, attribute), whether a javascript: URL actually runs
+            # (benchmark/sink_execution.py, headless Chromium):
+            #
+            #   iframe.src / frame.src   EXECUTES
+            #   a.href / area.href       does not run without activation --
+            #                            still a real XSS (a click is the
+            #                            trigger), reported WITH
+            #                            requires_activation
+            #   img.src / link.href / script.src / base.href / embed.src /
+            #   object.data / meta-refresh url=javascript: -> do NOT execute
+            #
+            # The old rule accepted ANY element's href/src, so
+            # <img src=javascript:...> and <embed src=javascript:...> were
+            # reported as "marker executed" while running nothing.
+            if "javascript:" in val.lower() and token in val:
+                el = (tag.name or "").lower()
+                attr_l = attr.lower()
+                if (el, attr_l) in _JS_URI_EXECUTES:
+                    if csp_blocks and _csp_blocks_js_uri(response_headers):
+                        return {"confirmed": False, "context": "url_javascript",
+                                "detail": "token in javascript: URI but CSP "
+                                          "blocks script execution"}
+                    return {"confirmed": True, "context": "url_javascript",
+                            "detail": f"token reflected in {el}.{attr_l}"
+                                      f"=javascript: URI"}
+                if (el, attr_l) in _JS_URI_ACTIVATION:
+                    if csp_blocks and _csp_blocks_js_uri(response_headers):
+                        return {"confirmed": False, "context": "url_javascript",
+                                "detail": "token in javascript: URI but CSP "
+                                          "blocks script execution"}
+                    return {"confirmed": True, "context": "url_javascript",
+                            "requires_activation": True,
+                            "detail": f"token reflected in {el}.{attr_l}"
+                                      f"=javascript: URI (runs when the user "
+                                      f"activates it)"}
+                # any other element/attribute: measured non-executing, so the
+                # flow is noted and execution is NOT claimed.
 
     # 3) SVG/MathML on* handlers (bs4 may store as `/onload` after a slash)
     for tag in soup.find_all(True):
