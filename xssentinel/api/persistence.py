@@ -183,6 +183,24 @@ class SqliteJobStore:
             cur = self._conn.execute(sql, params)
             return int(cur.fetchone()[0])
 
+    def purge_expired(self, ttl_days: int = 30) -> int:
+        """Phase 147 (G-06): delete terminal jobs older than the TTL.
+
+        Only rows in a terminal state (completed / failed / cancelled)
+        whose ``finished_at``（或 created_at 兑底）早于 cutoff 会被删除；
+        running/pending 任务永不清理。返回删除行数。
+        """
+        import datetime as _dt
+        cutoff = (_dt.datetime.now()
+                  - _dt.timedelta(days=ttl_days)).isoformat(
+                      timespec="seconds")
+        with self._lock:
+            cur = self._conn.execute(
+                "DELETE FROM jobs WHERE state IN ('completed','failed',"
+                "'cancelled') AND COALESCE(NULLIF(finished_at,''),"
+                "created_at) < ?", (cutoff,))
+            return int(cur.rowcount)
+
     def close(self) -> None:
         with self._lock:
             self._conn.close()
