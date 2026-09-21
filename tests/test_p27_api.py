@@ -87,8 +87,9 @@ class TestJobManagerStart:
             mgr.mark_completed(j.scan_id, findings=[{"severity": "high"}])
 
         mgr.start(job.scan_id, worker)
-        # Worker hasn't run yet (event not set).
-        assert job.state == JobState.RUNNING
+        # Phase 147 (G-05) queued semantics: the job starts PENDING and
+        # the reaper moves it to RUNNING once the gate frees a slot.
+        assert job.state in (JobState.PENDING, JobState.RUNNING)
         ran.set()
         # Wait for completion.
         for _ in range(40):
@@ -684,7 +685,7 @@ class TestEndToEndScan:
         assert status == 202
         data = json.loads(body)
         scan_id = data["scan_id"]
-        assert data["state"] == "running"
+        assert data["state"] in ("pending", "running")
 
         # Poll for completion (max ~30s).
         final_state = None
