@@ -623,6 +623,35 @@ def _with_hash_param_value(url: str, name: str, value: str) -> str:
                        parsed.params, parsed.query, new_fragment))
 
 
+def _auth_cookie_dicts(cookies: list, url: str) -> list[dict]:
+    """Build the cookie dicts Playwright's ``add_cookies`` wants.
+
+    Phase 174: ``url`` and ``path`` are **mutually exclusive** for Playwright.
+    Passing a bare ``path`` next to ``url`` makes the whole call raise
+    "Cookie should have either url or path", which is how this used to fail:
+    the old code always set ``path`` and then ALSO set ``url`` whenever the
+    cookie carried no domain -- exactly the manual ``--cookie`` jar -- so the
+    batch was rejected, the exception was swallowed into a debug line, and the
+    browser session stayed silently anonymous.  Authenticated scans then
+    rendered 403 route shells and every sink behind a login was invisible
+    (measured on Juice Shop's server-side XSS challenge, Phase 173).
+
+    So: domain present -> {domain, path}; domain absent -> {url} and no path.
+    """
+    from urllib.parse import urlparse
+    origin = "{0.scheme}://{0.netloc}".format(urlparse(url))
+    out: list[dict] = []
+    for c in cookies:
+        cd = {"name": c.get("name"), "value": c.get("value", "")}
+        if c.get("domain"):
+            cd["domain"] = c["domain"]
+            cd["path"] = c.get("path") or "/"
+        else:
+            cd["url"] = origin
+        out.append(cd)
+    return out
+
+
 class DynamicDomAnalyzer:
     """Runs a real headless browser to confirm DOM-XSS sinks execute."""
 
@@ -810,20 +839,8 @@ class DynamicDomAnalyzer:
                                url, exc_info=True)
             if self.auth_cookies:
                 try:
-                    from urllib.parse import urlparse
-                    origin = "{0.scheme}://{0.netloc}".format(
-                        urlparse(url))
-                    cookie_dicts = []
-                    for c in self.auth_cookies:
-                        cd = {"name": c.get("name"),
-                              "value": c.get("value", ""),
-                              "path": c.get("path") or "/"}
-                        if c.get("domain"):
-                            cd["domain"] = c["domain"]
-                        else:
-                            cd["url"] = origin
-                        cookie_dicts.append(cd)
-                    page.context.add_cookies(cookie_dicts)
+                    page.context.add_cookies(
+                        _auth_cookie_dicts(self.auth_cookies, url))
                 except Exception:
                     _log.debug("dom: auth cookie apply failed (url=%s)",
                                url, exc_info=True)

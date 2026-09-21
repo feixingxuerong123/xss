@@ -1,0 +1,302 @@
+{
+  "tool": "XSSentinel",
+  "target": "http://127.0.0.1:3000/",
+  "generated": "2026-09-21 23:35:48",
+  "requests": 45,
+  "waf": null,
+  "findings": [],
+  "coverage": {
+    "generated": "2026-09-21T23:35:48",
+    "totals": {
+      "endpoints": 3,
+      "parameters": 0,
+      "reflected": 0,
+      "confirmed": 0,
+      "requests": 37,
+      "findings": 0,
+      "payloads_dispatched": 0,
+      "payload_classes": []
+    },
+    "layer_coverage": {
+      "L1_reflected": 0,
+      "L2_waf_evade": 0,
+      "L3_dom_static": 1,
+      "L4_stored": 0,
+      "L4_stored_dom": 1,
+      "L4_second_order": 0,
+      "L5_blind_oob": 0,
+      "L6_dom_dynamic": 1,
+      "L7_mutation": 0,
+      "L7_dom_clobber": 0,
+      "L7_template": 0,
+      "L7_polyglot": 0,
+      "L7_jsonp": 1,
+      "L7_csp": 1,
+      "L7_time_based": 0,
+      "L8_postmessage": 1,
+      "L8_prototype": 1,
+      "L8_service_worker": 1,
+      "L8_web_worker": 1,
+      "L8_open_redirect": 1,
+      "L8_framework": 1,
+      "L8_header": 1,
+      "L8_path": 1,
+      "L8_cookie": 1,
+      "L8_error_page": 1,
+      "L8_markdown": 0,
+      "L9_param_miner": 1,
+      "L9_js_miner": 0,
+      "L9_form_miner": 0,
+      "L7_csp_nonce": 1,
+      "L7_css_injection": 1,
+      "L7_dangling_markup": 1,
+      "L7_import_map": 1,
+      "L7_sanitizer_bypass": 1,
+      "L7_sri_bypass": 1,
+      "L7_svg_xss": 1,
+      "L8_cookie_tossing": 1,
+      "L8_graphql": 1,
+      "L8_trusted_types": 1,
+      "L8_websocket": 1,
+      "L1_csp_gate": 0,
+      "L1_pre_encoded": 0,
+      "L1_reflection_profile": 0,
+      "L2_position_shift": 0,
+      "L7_cors": 1,
+      "L7_nonce_bypass": 0,
+      "L7_xsleak": 0,
+      "L8_request": 0,
+      "L9_scenario": 0,
+      "L9_upload_filename": 0
+    },
+    "layer_missing": {
+      "L1_reflected": 3,
+      "L2_waf_evade": 3,
+      "L3_dom_static": 2,
+      "L4_stored": 3,
+      "L4_stored_dom": 2,
+      "L4_second_order": 3,
+      "L5_blind_oob": 3,
+      "L6_dom_dynamic": 2,
+      "L7_mutation": 3,
+      "L7_dom_clobber": 3,
+      "L7_template": 3,
+      "L7_polyglot": 3,
+      "L7_jsonp": 2,
+      "L7_csp": 2,
+      "L7_time_based": 3,
+      "L8_postmessage": 2,
+      "L8_prototype": 2,
+      "L8_service_worker": 2,
+      "L8_web_worker": 2,
+      "L8_open_redirect": 2,
+      "L8_framework": 2,
+      "L8_header": 2,
+      "L8_path": 2,
+      "L8_cookie": 2,
+      "L8_error_page": 2,
+      "L8_markdown": 3,
+      "L9_param_miner": 2,
+      "L9_js_miner": 3,
+      "L9_form_miner": 3,
+      "L7_csp_nonce": 2,
+      "L7_css_injection": 2,
+      "L7_dangling_markup": 2,
+      "L7_import_map": 2,
+      "L7_sanitizer_bypass": 2,
+      "L7_sri_bypass": 2,
+      "L7_svg_xss": 2,
+      "L8_cookie_tossing": 2,
+      "L8_graphql": 2,
+      "L8_trusted_types": 2,
+      "L8_websocket": 2,
+      "L1_csp_gate": 3,
+      "L1_pre_encoded": 3,
+      "L1_reflection_profile": 3,
+      "L2_position_shift": 3,
+      "L7_cors": 2,
+      "L7_nonce_bypass": 3,
+      "L7_xsleak": 3,
+      "L8_request": 3,
+      "L9_scenario": 3,
+      "L9_upload_filename": 3
+    },
+    "endpoints": [
+      {
+        "url": "http://127.0.0.1:3000/",
+        "method": "GET",
+        "crawled": false,
+        "requests": 36,
+        "findings": 0,
+        "scan_started": "2026-09-21T23:35:23",
+        "scan_ended": "2026-09-21T23:35:30",
+        "layers": {
+          "L9_param_miner": {
+            "status": "ran",
+            "detail": "probing 0 known + hidden candidates",
+            "ts": "2026-09-21T23:35:23"
+          },
+          "L3_dom_static": {
+            "status": "ran",
+            "detail": "0 hint(s)",
+            "ts": "2026-09-21T23:35:24"
+          },
+          "L6_dom_dynamic": {
+            "status": "ran",
+            "detail": "playwright engine",
+            "ts": "2026-09-21T23:35:24"
+          },
+          "L7_jsonp": {
+            "status": "ran",
+            "detail": "probed callback params",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_csp": {
+            "status": "ran",
+            "detail": "parsed CSP header",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_cors": {
+            "status": "ran",
+            "detail": "ACAO origin-reflection probe",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_postmessage": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_prototype": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_service_worker": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_web_worker": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_open_redirect": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_framework": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_graphql": {
+            "status": "ran",
+            "detail": "static page analysis + endpoint probe",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_websocket": {
+            "status": "ran",
+            "detail": "static page analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_trusted_types": {
+            "status": "ran",
+            "detail": "static page analysis + CSP check",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_csp_nonce": {
+            "status": "ran",
+            "detail": "static nonce reuse analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_cookie_tossing": {
+            "status": "ran",
+            "detail": "Set-Cookie + client-side tossing analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_sri_bypass": {
+            "status": "ran",
+            "detail": "static SRI analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_import_map": {
+            "status": "ran",
+            "detail": "static import-map analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_sanitizer_bypass": {
+            "status": "ran",
+            "detail": "static sanitizer-bypass analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_css_injection": {
+            "status": "ran",
+            "detail": "static CSSI analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_dangling_markup": {
+            "status": "ran",
+            "detail": "static dangling-markup analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L7_svg_xss": {
+            "status": "ran",
+            "detail": "static SVG-vector analysis",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_header": {
+            "status": "ran",
+            "detail": "probe injectable headers",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_path": {
+            "status": "ran",
+            "detail": "probe URL path segment",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_cookie": {
+            "status": "ran",
+            "detail": "probe injectable cookies",
+            "ts": "2026-09-21T23:35:30"
+          },
+          "L8_error_page": {
+            "status": "ran",
+            "detail": "probe error-page reflection",
+            "ts": "2026-09-21T23:35:30"
+          }
+        },
+        "params": {}
+      },
+      {
+        "url": "http://127.0.0.1:3000/",
+        "method": "OPTIONS",
+        "crawled": false,
+        "requests": 1,
+        "findings": 0,
+        "scan_started": null,
+        "scan_ended": null,
+        "layers": {},
+        "params": {}
+      },
+      {
+        "url": "http://127.0.0.1:3000/api/Feedbacks",
+        "method": "POST",
+        "crawled": false,
+        "requests": 0,
+        "findings": 0,
+        "scan_started": null,
+        "scan_ended": null,
+        "layers": {
+          "L4_stored_dom": {
+            "status": "ran",
+            "detail": "inject->http://127.0.0.1:3000/#/administration param='comment' (form+json)",
+            "ts": "2026-09-21T23:35:30"
+          }
+        },
+        "params": {}
+      }
+    ]
+  }
+}
