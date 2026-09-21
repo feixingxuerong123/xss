@@ -1175,6 +1175,29 @@
       "note": "Reflection only in response header"
     },
     {
+      "id": "pos-hdr-01",
+      "path": "/s/hdr02",
+      "param": "q",
+      "mode": "late_header_reflect",
+      "ground_truth": "vulnerable",
+      "context": "header_reflection",
+      "difficulty": "easy",
+      "source": "OWASP",
+      "finding_types": ["header_xss"],
+      "note": "Phase 171/172: the payload must arrive through True-Client-IP, entry 7 of INJECTABLE_HEADERS -- the first one the old [:6] slice skipped. finding_types locks credit to the header carrier so no collateral finding can stand in for it (the pos-url-03 lesson). Mirrors Juice Shop build/routes/saveLoginIp.js:55."
+    },
+    {
+      "id": "neg-hdr-02",
+      "path": "/s/hdr03",
+      "param": "q",
+      "mode": "late_header_reflect_escaped",
+      "ground_truth": "safe",
+      "context": "header_reflection",
+      "difficulty": "easy",
+      "source": "OWASP",
+      "note": "Safe twin of pos-hdr-01: same late header, HTML-escaped. Guards the fix from degenerating into a rule that reports any late-header echo."
+    },
+    {
       "id": "neg-js-01",
       "path": "/s/js01",
       "param": "q",

@@ -48,7 +48,7 @@ COVERAGE = {
     "L8_web_worker": (["worker_vuln"], "added in Phase 113"),
     "L8_open_redirect": (["redirect_vuln"], "added in Phase 113"),
     "L8_framework": (["raw_template_vue"], "partial (Vue only)"),
-    "L8_header": (["header_only"], "yes"),
+    "L8_header": (["header_only", "late_header_reflect"], "yes"),
     "L8_path": (["path_echo"], "added in Phase 109"),
     "L8_cookie": (["cookie_echo"], "added in Phase 109"),
     "L8_error_page": (["error_echo"], "added in Phase 109"),

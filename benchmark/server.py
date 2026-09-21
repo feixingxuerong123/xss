@@ -496,6 +496,31 @@ def m_header_only(v: str) -> tuple:
     return _page("<div>static content, no reflection in body</div>",
                  {"X-Reflected-Input": v})
 
+# --- Phase 172: reflection reachable ONLY through a LATE injectable header ---
+#
+# Phase 171 removed the `INJECTABLE_HEADERS[:6]` slice from the header
+# carrier, and no existing case could have caught that class of bug: every
+# other header case either reflects a query PARAMETER or echoes into a
+# RESPONSE header (neg-header-01), so nothing depended on the scanner
+# actually sending entry #7 or beyond.  `True-Client-IP` is entry 7 -- with
+# the slice in place these endpoints are a false negative / a true negative;
+# without it, a true positive / still a true negative.  That is the contract
+# this pair locks (mirrors Juice Shop's build/routes/saveLoginIp.js:55, which
+# reads exactly this header).
+def m_late_header_reflect(v: str, ctx: dict) -> tuple:
+    """Vulnerable: the True-Client-IP request header is rendered RAW into the
+    body.  The query parameter is ignored on purpose -- the payload has to
+    arrive through that header or not at all."""
+    late = (ctx.get("headers") or {}).get("True-Client-IP", "")
+    return _page(f'<div id="client-ip">{late}</div>')
+
+
+def m_late_header_reflect_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: same header, HTML-escaped -- reflection without execution."""
+    late = html.escape((ctx.get("headers") or {}).get("True-Client-IP", ""),
+                       quote=True)
+    return _page(f'<div id="client-ip">{late}</div>')
+
 # --- Safe JS sinks ---
 def m_js_textcontent(v: str) -> tuple:
     escaped = v.replace("\\", "\\\\").replace('"', '\\"').replace("</", "<\\/")
@@ -894,6 +919,10 @@ POST_MODES: dict = {
 }
 
 MODES_CTX: dict = {
+    # Phase 172: this pair's reflection depends on the scanner actually
+    # sending a LATE injectable header (see m_late_header_reflect above).
+    "late_header_reflect": m_late_header_reflect,
+    "late_header_reflect_escaped": m_late_header_reflect_escaped,
     "cookie_echo": m_cookie_echo,
     "cookie_echo_escaped": m_cookie_echo_escaped,
     "path_echo": m_path_echo,

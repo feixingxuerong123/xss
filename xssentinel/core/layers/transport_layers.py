@@ -27,12 +27,13 @@ def _scan_header_xss(scanner, req, url: str) -> None:
         #
         # The cost is bounded by the ``break`` below: the loop stops at the
         # first confirmed header, so only endpoints that reflect NONE of the
-        # headers pay for all of them.  Measured on the full 186-case
-        # benchmark: 12694 -> 15244 requests (+20.1%), verdicts unchanged
-        # (TP110/FP0/TN76/FN0, f1=1.000).  That is an UPPER bound: no
-        # benchmark case confirms a header, so none of them gets the
-        # early-exit discount -- on a target that does reflect one
-        # (Juice Shop's saveLoginIp) the same change costs +2 requests.
+        # headers pay for all of them.  Measured when this landed (186 cases):
+        # 12694 -> 15244 requests (+20.1%), verdicts unchanged.  At that time
+        # it was an UPPER bound -- no case confirmed a header, so none of them
+        # got the early-exit discount; Phase 172 added one that does
+        # (pos-hdr-01: TP in 42 requests via the 7th header, against 53 for its
+        # safe twin), so the ledger now measures both sides.  A real target
+        # that reflects a header costs +2 (Juice Shop's saveLoginIp).
         for header in header_mod.INJECTABLE_HEADERS:
             token = "xsshd_" + secrets.token_hex(3)
             payload = f"<svg/onload=alert('{token}')>"
