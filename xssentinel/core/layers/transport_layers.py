@@ -18,7 +18,22 @@ def _scan_header_xss(scanner, req, url: str) -> None:
     scanner.coverage.touch_layer(url, "L8_header", "GET",
                                  detail="probe injectable headers")
     try:
-        for header in header_mod.INJECTABLE_HEADERS[:6]:  # top 6 headers
+        # Phase 171: probe the WHOLE declared list.  The former
+        # ``INJECTABLE_HEADERS[:6]`` was the *only* break point on Juice
+        # Shop's HTTP-Header XSS challenge -- build/routes/saveLoginIp.js:55
+        # reads ``req.headers['true-client-ip']``, which is entry SEVEN, so
+        # that header was never sent and a hand-confirmed real finding was
+        # unreachable (Phase 170c measured 39 requests / 0 findings there).
+        #
+        # The cost is bounded by the ``break`` below: the loop stops at the
+        # first confirmed header, so only endpoints that reflect NONE of the
+        # headers pay for all of them.  Measured on the full 186-case
+        # benchmark: 12694 -> 15244 requests (+20.1%), verdicts unchanged
+        # (TP110/FP0/TN76/FN0, f1=1.000).  That is an UPPER bound: no
+        # benchmark case confirms a header, so none of them gets the
+        # early-exit discount -- on a target that does reflect one
+        # (Juice Shop's saveLoginIp) the same change costs +2 requests.
+        for header in header_mod.INJECTABLE_HEADERS:
             token = "xsshd_" + secrets.token_hex(3)
             payload = f"<svg/onload=alert('{token}')>"
             try:
