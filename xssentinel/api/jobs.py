@@ -78,15 +78,11 @@ class Job:
     _seq: int = field(default=0, repr=False)
     # Internal: handle to the worker thread, so cancellation can join it.
     _thread: threading.Thread | None = field(default=None, repr=False)
-    # Internal: cooperative cancel flag -- wired into Scanner.cancel_requested
-    # by the scan worker (Phase 129): every real request checks it and the
-    # scan aborts gracefully once it is set.
+    # Internal: cooperative cancel flag -- the worker checks this between
+    # major scanner phases.  The scanner itself does not natively support
+    # cancellation; this flag lets the worker skip post-processing once a
+    # cancel is requested.
     _cancel_requested: threading.Event = field(default_factory=threading.Event, repr=False)
-    # Phase 147 (G-05): stashed worker callable for PENDING jobs (the
-    # reaper loop starts it when the concurrency gate frees up) and the
-    # monotonic start timestamp used by the job-timeout reaper.
-    _worker: Callable[[Job], None] | None = field(default=None, repr=False)
-    _started_mono: float | None = field(default=None, repr=False)
 
     def to_summary(self) -> dict:
         """Return a JSON-serializable summary (no findings list)."""
@@ -130,8 +126,7 @@ class JobManager:
     worker thread cannot race on ``findings``/``state`` transitions.
     """
 
-    def __init__(self, max_jobs: int = 200, store=None,
-                 max_concurrent: int = 4, job_timeout_s: int = 1800) -> None:
+    def __init__(self, max_jobs: int = 200, store=None) -> None:
         self._jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
         self._max_jobs = max_jobs
@@ -141,72 +136,6 @@ class JobManager:
         self._store = store
         if store is not None:
             self._load_from_store_locked()
-        # Phase 147 (G-05): global concurrency gate + per-job timeout.
-        # The gate bounds how many scan jobs may execute simultaneously
-        # (service-mode resource risk); excess jobs stay PENDING in the
-        # registry and are picked up by the reaper loop below.
-        self._max_concurrent = max(1, int(max_concurrent))
-        self._gate = threading.Semaphore(self._max_concurrent)
-        self._job_timeout_s = max(3, int(job_timeout_s))
-        self._reaper_stop = threading.Event()
-        self._reaper = threading.Thread(target=self._reaper_loop,
-                                        name="xssentinel-job-reaper",
-                                        daemon=True)
-        self._reaper.start()
-
-    def _reaper_loop(self) -> None:
-        """Phase 147 (G-05): pending job dispatcher + job timeout reaper.
-
-        Every 2s: 1) acquire the gate for PENDING jobs (FIFO) and start
-        them; 2) mark RUNNING jobs that exceeded ``_job_timeout_s`` as
-        FAILED with a timeout error, releasing their gate slot.
-        """
-        while not self._reaper_stop.wait(2.0):
-            try:
-                with self._lock:
-                    pending = [j for j in self._jobs.values()
-                               if j.state == JobState.PENDING]
-                    pending.sort(key=lambda j: j._seq)
-                    for job in pending:
-                        if self._gate.acquire(blocking=False):
-                            job.state = JobState.RUNNING
-                            job.started_at = datetime.now().isoformat(
-                                timespec="seconds")
-                            self._persist_locked(job)
-                            t = threading.Thread(
-                                target=self._run_worker,
-                                args=(job, self._worker_for(job)),
-                                name=f"xssentinel-scan-{job.scan_id}",
-                                daemon=True)
-                            job._thread = t
-                            t.start()
-                    now_mono = time.monotonic()
-                    for job in self._jobs.values():
-                        if job.state != JobState.RUNNING or job._thread is None:
-                            continue
-                        started = getattr(job, "_started_mono", None)
-                        if started is None:
-                            continue
-                        if now_mono - started > self._job_timeout_s:
-                            # Phase 147 (G-05): mark failed AND fire the
-                            # cooperative cancel flag so a well-behaved
-                            # worker stops issuing requests; the terminal
-                            # guard below keeps the FAILED state even if
-                            # the worker thread finishes later.
-                            job._cancel_requested.set()
-                            job.state = JobState.FAILED
-                            job.finished_at = datetime.now().isoformat(
-                                timespec="seconds")
-                            job.error = (f"job timeout after "
-                                         f"{self._job_timeout_s}s")
-                            self._persist_locked(job)
-                            self._gate.release()
-            except Exception:  # noqa: BLE001 - reaper never dies
-                continue
-
-    def _worker_for(self, job: Job):
-        """Return the worker callable stashed on the PENDING job (Phase 147)."""
-        return job._worker
 
     # -- create -----------------------------------------------------------
     def create(
@@ -331,24 +260,25 @@ class JobManager:
             if job.state != JobState.PENDING:
                 raise RuntimeError(
                     f"job {scan_id} is not pending (state={job.state})")
-            # Phase 147 (G-05): jobs no longer start immediately.  The
-            # worker is stashed on the job and the reaper loop starts it
-            # once the global concurrency gate has a free slot, so the
-            # service never runs more than ``max_concurrent`` scans.
-            job._worker = worker
-            job._started_mono = None
+            # Transition to RUNNING here (under the lock) so callers
+            # observe RUNNING as soon as start() returns -- the worker
+            # thread has not necessarily executed yet.
+            job.state = JobState.RUNNING
+            job.started_at = datetime.now().isoformat(timespec="seconds")
             self._persist_locked(job)
+            t = threading.Thread(
+                target=self._run_worker, args=(job, worker),
+                name=f"xssentinel-scan-{scan_id}", daemon=True)
+            job._thread = t
+            t.start()
 
     def _run_worker(self, job: Job, worker: Callable[[Job], None]) -> None:
         """Wrapper that ensures every job ends in a terminal state.
 
-        The RUNNING transition is performed by the reaper before this
-        thread starts (under the lock) so the state is observable
-        immediately; this method only runs the worker body and catches
-        any exception.
+        The RUNNING transition is performed in :meth:`start` (under the
+        lock) so the state is observable immediately; this method only
+        runs the worker body and catches any exception.
         """
-        import time as _time
-        job._started_mono = _time.monotonic()
         try:
             worker(job)
         except Exception as e:
@@ -362,23 +292,7 @@ class JobManager:
                     job.finished_at = datetime.now().isoformat(timespec="seconds")
                     self._persist_locked(job)
         finally:
-            # Phase 147 (G-05): terminal guard -- if the reaper timed this
-            # job out while the worker was still running, the worker's
-            # late ``mark_completed`` must NOT overwrite FAILED.
-            with self._lock:
-                if (job.state == JobState.COMPLETED
-                        and job._cancel_requested.is_set()
-                        and job.error and "timeout" in job.error):
-                    job.state = JobState.FAILED
-                    job.finished_at = datetime.now().isoformat(
-                        timespec="seconds")
-                    self._persist_locked(job)
-            # Phase 147 (G-05): always release the concurrency gate slot
-            # and clear the thread ref so the Job can be GC'd.
-            try:
-                self._gate.release()
-            except ValueError:
-                pass
+            # Always clear the thread ref so the Job can be GC'd.
             job._thread = None
 
     # -- state transitions ------------------------------------------------
@@ -432,11 +346,9 @@ class JobManager:
         Returns True if the cancel flag was set, False if the job is
         already terminal (and thus cannot be cancelled).
 
-        Phase 129: the scan worker wires ``job._cancel_requested`` into
-        ``Scanner.cancel_requested``, so every real request checks the
-        flag (Scanner._bump) and aborts the scan BudgetExhausted-style
-        when it is set.  The job is reported CANCELLED with the findings
-        gathered up to that point.
+        Note: the scanner does not natively support mid-scan cancellation,
+        so this only sets a flag the worker checks between phases.  The
+        scan will still run to completion but be reported as CANCELLED.
         """
         with self._lock:
             job = self._jobs.get(scan_id)
