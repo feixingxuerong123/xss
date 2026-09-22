@@ -310,7 +310,12 @@ class TestVerifyFix:
         resp = MagicMock()
         # We don't know the exact token until _replay_request generates it,
         # so the fake server echoes whatever was sent, unquoted, into the page.
-        def fake_request(method, url, params=None, data=None):
+        def fake_request(method, url, params=None, data=None,
+                         cache_get=True):
+            # cache_get is part of the real Requester.request signature
+            # (Phase 176d: the replay turns the GET cache off so it cannot read
+            # an earlier replay's body).  A stand-in that cannot accept it
+            # stops standing in for the real object.
             # The injected value lives in params (GET) or data (POST).
             payload = (params or {}).get("q") or (data or {}).get("q") or ""
             # This used to be `f"<html><script>var x = {payload!r};</script>"`,
@@ -561,7 +566,8 @@ class TestSecondOrder:
         # both succeed.  The viewer response embeds the token in a script.
         req = MagicMock()
 
-        def fake_request(method, url, params=None, data=None):
+        def fake_request(method, url, params=None, data=None,
+                         cache_get=True):
             return MagicMock(text="ok")
         req.request.side_effect = fake_request
 
@@ -571,7 +577,8 @@ class TestSecondOrder:
         # part of it back inside a <script> block.
         injected = {}
 
-        def fake_request_capture(method, url, params=None, data=None):
+        def fake_request_capture(method, url, params=None, data=None,
+                                 cache_get=True):
             payload = (params or {}).get("q") or (data or {}).get("q", "")
             injected["payload"] = payload
             return MagicMock(text="ok")

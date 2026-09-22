@@ -65,7 +65,11 @@ class _StubReq:
         self.raise_on_request = raise_on_request
         self.session = _Session()
 
-    def request(self, method, url, params=None, data=None):
+    def request(self, method, url, params=None, data=None, cache_get=True):
+        # cache_get belongs to the real Requester.request signature (Phase
+        # 176d: the replay disables the GET cache so it cannot read a previous
+        # replay's body).  A stand-in that rejects it no longer stands in for
+        # the real object.
         self.calls += 1
         if self.raise_on_request:
             raise RuntimeError("boom")

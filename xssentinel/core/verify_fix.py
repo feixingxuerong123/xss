@@ -244,13 +244,23 @@ def _replay_request(requester, finding: dict, payload: str) -> dict:
         # Requester.request() does not accept per-call headers; for header
         # and cookie injection we set them on the underlying session, then
         # restore afterwards so we don't leak state across findings.
+        #
+        # cache_get=False on EVERY replay: the GET cache keys on the URL and
+        # cannot see session-level header/cookie injection, so the SECOND
+        # finding targeting the same URL would read the FIRST finding's
+        # response.  A fresh token is minted per replay, so the cached body can
+        # never contain it -- the match fails and a still-exploitable hole is
+        # reported as fixed.  (Found by tests/test_verify_carriers_live.py:
+        # per-carrier replays passed in isolation, and two of them flipped to
+        # "fixed" the moment they ran through verify_findings on one session.)
         if headers:
             saved = {k: requester.session.headers.get(k) for k in headers}
             try:
                 requester.session.headers.update(headers)
                 resp = requester.request(method, url,
                                          params=params or None,
-                                         data=data or None)
+                                         data=data or None,
+                                         cache_get=False)
             finally:
                 for k, v in saved.items():
                     if v is None:
@@ -260,7 +270,8 @@ def _replay_request(requester, finding: dict, payload: str) -> dict:
         else:
             resp = requester.request(method, url,
                                      params=params or None,
-                                     data=data or None)
+                                     data=data or None,
+                                     cache_get=False)
     except Exception as e:
         _restore_cookie(requester, ck_name, saved_cookie)
         return {"status": "error", "detail": f"request failed: {e}",

@@ -296,7 +296,8 @@ class Requester:
                  data: dict | None = None,
                  json: dict | None = None,
                  files: dict | None = None,
-                 headers: dict | None = None) -> requests.Response:
+                 headers: dict | None = None,
+                 cache_get: bool = True) -> requests.Response:
         """Send an arbitrary-method request.
 
         Phase 46: previously every non-POST method silently DROPPED the
@@ -309,13 +310,24 @@ class Requester:
         per-request headers while the sync Requester silently ignored the
         kwarg, so upload_probe's ``headers=`` raised TypeError on every
         probe).
+        Phase 176c: ``cache_get`` is now forwarded to ``get()``.  The GET
+        cache keys on the URL and is skipped only for params / the
+        per-request ``headers`` argument -- it CANNOT see state the caller
+        put on ``self.session`` (headers or cookies).  A caller that varies a
+        request through the session must pass ``cache_get=False``, or the
+        second request to the same URL silently returns the first response.
+        Live failure this caused: ``verify_fix._replay_request`` re-tests one
+        URL per finding through session-level header/cookie injection, so
+        from the second finding onwards it read the first response and
+        reported still-exploitable holes as fixed.
         """
         m = method.upper()
         if m == "POST":
             return self.post(url, data=data, params=params, json=json,
                              files=files, headers=headers)
         if m == "GET":
-            return self.get(url, params=params, headers=headers)
+            return self.get(url, params=params, headers=headers,
+                            cache_get=cache_get)
         self.rate_limiter.acquire()
         self._guard(url)
         if self.budget is not None:
