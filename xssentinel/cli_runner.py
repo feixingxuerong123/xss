@@ -911,6 +911,83 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
     return results
 
 
+def ai_opts_from_args(args) -> dict:
+    """Build the ``meta['ai']`` block from CLI args (Phase 176).
+
+    Shared by the main scan path and the passive-proxy path so both get the
+    same pool sharing (one pool per process => cooldowns apply across every
+    target) and the same operator-facing hints.
+
+    Never raises: an unloadable pool yields ``enabled: True`` with
+    ``pool: None``, and ``report_ai`` then degrades to the template.  That way
+    ``--ai-report`` still produces a section even on a machine with no config.
+    """
+    if not getattr(args, "ai_report", False):
+        return {}
+    from .core.llm_pool import LLMPool
+    pool = None
+    try:
+        pool = LLMPool.from_file(getattr(args, "ai_config", None))
+        print(f"[*] AI report on: {len(pool.candidates)} candidate(s) from "
+              f"{pool.source}")
+    except Exception as e:
+        print(f"[!] --ai-report: cannot load the LLM pool "
+              f"({type(e).__name__}: {e}); the AI section will come from the "
+              f"built-in advice corpus.")
+    models = None
+    raw = getattr(args, "ai_model", None)
+    if raw:
+        models = [m.strip() for m in str(raw).split(",") if m.strip()] or None
+    return {
+        "enabled": True,
+        "pool": pool,
+        "config": getattr(args, "ai_config", None),
+        "lang": getattr(args, "ai_lang", "zh"),
+        "models": models,
+        "max_findings": getattr(args, "ai_max_findings", 25),
+        "timeout": getattr(args, "ai_timeout", None),
+    }
+
+
+def _attach_ai_report(scanner, target_url, meta):
+    """Phase 176: attach the LLM-written narrative section to ``meta``.
+
+    Opt-in (``--ai-report``) and never fatal: the detection results are
+    authoritative and must be reported whether or not a model was reachable.
+    ``report_ai`` degrades to the deterministic advice corpus on any failure,
+    so this function's only job is to route the result into ``meta`` where
+    the report builders pick it up.
+
+    The pool is passed in via ``meta['ai']['pool']`` so a batch scan reuses
+    ONE pool instance: cooldowns then apply across targets in the same
+    process instead of each target re-discovering the same rate limit.
+    """
+    opts = meta.get("ai") or {}
+    if not opts.get("enabled"):
+        return
+    try:
+        from .core import report_ai
+        rep = report_ai.build_ai_report(
+            scanner.findings, target_url, meta,
+            pool=opts.get("pool"),
+            config_path=opts.get("config"),
+            models=opts.get("models"),
+            lang=opts.get("lang", "zh"),
+            max_findings=int(opts.get("max_findings") or 25),
+            timeout=opts.get("timeout"),
+        )
+        meta["ai_report"] = rep.to_meta()
+        if rep.used_llm:
+            _log.warning("AI report: written by %s (%d failover(s), %.1fs)",
+                         rep.model or rep.provider, rep.failovers, rep.elapsed)
+        else:
+            _log.warning("AI report: degraded to template -- %s", rep.error)
+    except Exception as e:
+        # A narrative section is never worth failing a scan for.
+        _log.warning("AI report generation failed (%s); report continues "
+                     "without it", e)
+
+
 def _write_report(scanner, target_url, output_path, fmt, meta=None):
     """Write scan report to file."""
     meta = meta or {}
@@ -921,6 +998,9 @@ def _write_report(scanner, target_url, output_path, fmt, meta=None):
     # the scan-coverage section (which layers/params/payloads ran).
     if getattr(scanner, "coverage", None) is not None:
         meta.setdefault("coverage", scanner.coverage)
+    # Phase 176: AI narrative -- must run BEFORE the builders read meta, and
+    # after 'generated'/'requests' exist so the prompt carries real metadata.
+    _attach_ai_report(scanner, target_url, meta)
 
     if fmt == "json":
         out = reportmod.build_json(scanner.findings, target_url, meta)

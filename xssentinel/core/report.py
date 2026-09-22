@@ -162,6 +162,16 @@ def build_html(findings: list, target: str, meta: dict) -> str:
     except Exception as e:
         _log.debug("remediation section build failed: %s", e)
 
+    # Phase 176: AI narrative section, present only when --ai-report ran.  Its
+    # HTML is produced by report_ai (already escaped there: the text is full of
+    # live payloads, so the report itself must not become a vector).
+    ai_section = ""
+    try:
+        from . import report_ai
+        ai_section = report_ai.ai_section_html(meta.get("ai_report"))
+    except Exception as e:
+        _log.debug("ai section build failed: %s", e)
+
     return f"""<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <title>XSSentinel Report</title>
@@ -242,6 +252,18 @@ def build_html(findings: list, target: str, meta: dict) -> str:
  .param-detail summary{{cursor:pointer;padding:8px 14px;font-size:12px;color:#3b82f6}}
  .param-detail .param-table{{margin:0;border-radius:0;box-shadow:none}}
  .cov-help{{font-size:11px;color:#9aa3b2;margin-top:10px;padding:10px;background:#fafbfc;border-radius:6px;line-height:1.5}}
+ .ai-report{{padding:0 28px 24px}}
+ .ai-report h2{{font-size:16px;margin:0 0 10px}}
+ .ai-report h3{{font-size:14px;margin:16px 0 6px}}
+ .ai-report h4{{font-size:13px;margin:12px 0 5px}}
+ .ai-report p{{font-size:13px;color:#3a4150;line-height:1.65;margin:8px 0}}
+ .ai-report ul,.ai-report ol{{font-size:13px;color:#3a4150;padding-left:22px;margin:8px 0}}
+ .ai-report li{{margin:3px 0}}
+ .ai-report blockquote{{margin:8px 0;padding:8px 12px;background:#f0f2f7;border-left:3px solid #9aa3b2;color:#5b6473;font-size:12px}}
+ .ai-report code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
+ .ai-report table.ai-table{{width:100%;margin:10px 0;box-shadow:none;border-radius:8px;overflow:hidden}}
+ .ai-report table.ai-table td{{padding:6px 10px;border-bottom:1px solid #eef0f4;font-size:12px;background:#fff}}
+ .ai-report.degraded{{border-left:4px solid #f5a623}}
  .muted{{color:#9aa3b2;font-size:12px;padding:8px 0}}
  footer{{padding:14px 28px;color:#9aa3b2;font-size:12px}}
 </style></head>
@@ -255,6 +277,7 @@ def build_html(findings: list, target: str, meta: dict) -> str:
   <div class="card med"><div class="n">{counts['medium']}</div><div>Medium</div></div>
   <div class="card low"><div class="n">{counts['low']}</div><div>Low</div></div>
 </div>
+{ai_section}
 {compliance_section}
 <table>
 <tr><th>#</th><th>Type</th><th>URL</th><th>Method</th><th>Param</th><th>Context</th><th>Payload</th><th>Transform</th><th>Severity</th><th>Confidence</th><th>Headless</th><th>Detail</th><th>PoC</th></tr>
@@ -282,6 +305,12 @@ def build_json(findings: list, target: str, meta: dict) -> str:
             out["coverage"] = cov.to_json_dict()
         except Exception as e:
             _log.debug("coverage to_json failed: %s", e)
+    # Phase 176: AI narrative section (present only when --ai-report ran).
+    # The html rendering is dropped -- tools consuming this file want the
+    # markdown, and shipping both would double the report size for nothing.
+    ai = meta.get("ai_report")
+    if isinstance(ai, dict):
+        out["ai_report"] = {k: v for k, v in ai.items() if k != "html"}
     return json.dumps(out, ensure_ascii=False, indent=2)
 
 
@@ -557,6 +586,14 @@ def build_markdown(findings: list, target: str, meta: dict) -> str:
     Produces a concise summary table + per-finding detail sections,
     suitable for posting as a PR comment via GitHub Actions.
     """
+    # Phase 176: AI narrative section, present only when --ai-report ran.
+    ai_section = ""
+    try:
+        from . import report_ai
+        ai_section = report_ai.ai_section_markdown(meta.get("ai_report"))
+    except Exception as e:
+        _log.debug("ai markdown section build failed: %s", e)
+
     if not findings:
         return (
             f"# XSSentinel Scan Report\n\n"
@@ -566,6 +603,7 @@ def build_markdown(findings: list, target: str, meta: dict) -> str:
             f"**WAF:** {meta.get('waf', 'none detected')}\n\n"
             f"## Results\n\n"
             f"No XSS vulnerabilities found. ✅\n"
+            + (f"\n{ai_section}" if ai_section else "")
         )
 
     # Summary counts.
@@ -594,10 +632,16 @@ def build_markdown(findings: list, target: str, meta: dict) -> str:
         f"**WAF:** {meta.get('waf', 'none detected')}  ",
         f"**Findings:** {len(findings)} ({sev_summary})\n",
         f"**By type:** {type_summary}\n",
+    ]
+    # AI narrative goes right after the summary block, before the raw table:
+    # the reader gets the explanation before the evidence dump.
+    if ai_section:
+        lines.append(ai_section)
+    lines.extend([
         f"## Summary Table\n",
         f"| # | Severity | Type | URL | Param | Context |",
         f"|---|----------|------|-----|-------|---------|",
-    ]
+    ])
 
     for i, f in enumerate(findings, 1):
         d = f.data if hasattr(f, "data") else f

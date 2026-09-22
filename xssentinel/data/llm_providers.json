@@ -1,0 +1,110 @@
+{
+  "_readme": [
+    "XSSentinel LLM provider pool -- used ONLY to write the narrative report",
+    "(--ai-report).  It never decides whether something is vulnerable: findings,",
+    "severity, URLs and PoCs always come from the deterministic engine.",
+    "",
+    "Failover order = the order below.  Within a provider the expansion is",
+    "model-outer / key-inner, because a provider's several keys are quota",
+    "redundancy for the same model list: the preferred model is tried across",
+    "every key before a lesser model is used.",
+    "",
+    "Ordering evidence: every candidate was measured generating a REAL report",
+    "(~800-1500 output tokens), not a 16-token ping -- the two rankings differ a",
+    "lot.  ping latency ranks AMD DeepSeek-V4-Flash first (0.9s) while it times",
+    "out past 150s on real output; that is why it sits late here.",
+    "",
+    "Per-candidate state (cooldown after a 429 / 401 / timeout / empty body /",
+    "truncated body) is persisted next to this file in llm_state.json, so a",
+    "rate-limit window survives across processes.  Clear every cooldown with",
+    "`python -m xssentinel --ai-reset`, or just delete that file.",
+    "",
+    "Keys can be overridden without editing this file:",
+    "  XSSENTINEL_LLM_KEY_AMD=..., XSSENTINEL_LLM_KEY_SENSENOVA=... (comma-separated)",
+    "A different pool: XSSENTINEL_LLM_CONFIG=/path/to/pool.json",
+    "",
+    "Health-check every candidate at any time with:",
+    "  python -m xssentinel --ai-check"
+  ],
+  "version": 1,
+  "strategy": "failover",
+  "timeout": 35,
+  "max_attempts": 12,
+  "cooldown": {
+    "rate_limit": 20,
+    "auth_error": 600,
+    "server_error": 15,
+    "timeout": 20,
+    "model_not_found": 900,
+    "empty_response": 8,
+    "truncated_response": 8,
+    "backoff_factor": 2,
+    "max": 900
+  },
+  "generation": {
+    "max_tokens": 4000,
+    "temperature": 0.3
+  },
+  "providers": [
+    {
+      "id": "sensenova",
+      "label": "SenseNova (token.sensenova.cn)",
+      "base_url": "https://token.sensenova.cn/v1",
+      "keys": [
+        "$sk-exc...ROTATED-ROTATE-ON-GITHUB",
+        "$sk-28n...ROTATED-ROTATE-ON-GITHUB",
+        "$sk-yqb...ROTATED-ROTATE-ON-GITHUB"
+      ],
+      "models": [
+        "deepseek-v4-flash",
+        "kimi-k3",
+        "glm-5.2"
+      ],
+      "enabled": true,
+      "note": "First choice: 3 independent keys, and the only pool whose real-output latency was measured as good. deepseek-v4-flash produced a complete ~1700-char report in 9.3s (930 output tokens) and is therefore ranked first across all 3 keys. kimi-k3 answered a ping in 6.1s (real-output latency untested). glm-5.2 is kept third: it answered a ping in 0.8s but burned its entire 1500-token budget on its reasoning channel and returned only 95 characters of answer -- the pool now rejects a completion below report_ai.MIN_REPORT_CHARS as truncated_response, so that costs one failover rather than a stub report. deepseek-v4-flash intermittently returns an empty 200 body; empty_response handles it. deepseek-v4.1-flash is 403 'model is not available in the current token plan' and is not listed."
+    },
+    {
+      "id": "amd",
+      "label": "AMD Radeon Cloud (developer.amd.com.cn)",
+      "base_url": "https://developer.amd.com.cn/radeon/api/v1",
+      "keys": [
+        "rc-9e13de37f6046a9c510ea4b49616832abec5a1e6cddeaa14"
+      ],
+      "models": [
+        "MiniCPM5-2B",
+        "DeepSeek-V4-Flash",
+        "GLM-5.3-Flash",
+        "DeepSeek-V4.1-Flash"
+      ],
+      "enabled": true,
+      "note": "Second choice: smallest, fastest model first because AMD's latency is the least predictable of the three pools. Measured 2026-09-22 on REAL report output: DeepSeek-V4-Flash timed out past 150s (and past 45s in an end-to-end run) even though a 16-token ping answered in 0.9s -- it is kept second only because its output quality is the best here when it does answer. MiniCPM5-2B is the steady one (0.5s ping, and it wrote a complete 1517-char report in an end-to-end run); note it leaks its reasoning channel ahead of the answer, which report_ai.clean_completion strips. GLM-5.3-Flash and DeepSeek-V4.1-Flash answered 429 'at its concurrency limit (8 / 32)': reachable but heavily shared, so they sit last. Qwen3.8-* answered 200 with an EMPTY body and is deliberately omitted."
+    },
+    {
+      "id": "nvidia",
+      "label": "NVIDIA NIM (integrate.api.nvidia.com)",
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "keys": [
+        "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"
+      ],
+      "models": [
+        "deepseek-ai/deepseek-v4.1-flash",
+        "z-ai/glm-5.3-flash"
+      ],
+      "enabled": true,
+      "note": "Last resort: slow but real capacity when the others are cooling or rate-limited. Probed 2026-09-22: deepseek-ai/deepseek-v4.1-flash answered a ping in 23.8s; z-ai/glm-5.3-flash timed out twice at 45s (cold start) -- raise --ai-timeout if this pool matters. The model the original note named, z-ai/glm-5.2, is GONE (HTTP 410, end of life 2026-08-21) and has been replaced by the vendor's own successor glm-5.3-flash."
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter (openrouter.ai)",
+      "base_url": "https://openrouter.ai/api/v1",
+      "keys": [
+        "$sk-or-...ROTATED-ROTATE-ON-GITHUB"
+      ],
+      "models": [
+        "z-ai/glm-5.3-flash"
+      ],
+      "enabled": false,
+      "note": "DISABLED -- the account cannot infer. Probed 2026-09-22: every model returns 403 'Inference is blocked on this account. Please contact support@openrouter.ai', and the paid path returns 402 'Insufficient credits. This account never purchased credits'. The model named in the note, stealth/ox-alpha, no longer exists (404: 'Thank you for participating in the Stealth Ox Alpha testing period. This model was ZAI's GLM-5.3 Flash. Use it now: z-ai/glm-5.3-flash'). Flip enabled to true only after the account is fixed."
+    }
+  ]
+}

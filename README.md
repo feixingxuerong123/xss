@@ -614,6 +614,12 @@ API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host
 
 **基准工具链**：`benchmark/run_benchmark_batched.py [out.json] [batch] [port] [sync|async] [max_payloads] [max_transforms] [timeout]` —— 位置参数 4-7 可选，默认 sync/10/6/45；传 `sync 14 12 90` 才能复现 `python -m benchmark.runner` 的标定口径（旧基线就是 14/12/90，用默认 10/6 跑出来的数不能直接跟它比）。续跑时若检测到预算变了会丢弃旧结果而非静默合并。`benchmark/compare_runs.py A.json B.json` 做逐用例 diff（聚合分会掩盖"哪些用例移动了"，ERROR→FP 单独分桶，不会被当成改进）；`benchmark/repro_case.py CASE_ID [port] [sync|async]` 单跑一个用例并打印服务端原始回显 + 判定 + finding 详情——**排误报和验证 FN 是否是环境问题都用它**。
 
+**Phase 176：LLM 多供应商故障转移池 + AI 报告章节（`--ai-report`）**。报告此前只有确定性模板与语料修复建议；现在可选配一段由大模型撰写的叙事章节（执行摘要 / 风险评级 / 逐条成因与修复 / 修复优先级）。**判定权不下放**：类型、严重度、URL、参数、载荷全部来自确定性引擎，模型只写散文——prompt 明令禁止编造，`report_ai._verify_facts` 事后核对模型引用的 URL 与载荷是否真在输入里，对不上的进报告页脚告警而非当作事实。**默认关闭**：开启后目标 URL/参数/载荷会发给第三方供应商，帮助文本里已写明。**必须降级**：池全挂时回落 `data/fix_advice.json` 语料模板并在文首标注原因，报告永远有产出。
+
+池本体 `core/llm_pool.py`（零新依赖，仅 `requests`）：候选按「provider × key × model」展开（**model-outer / key-inner**，多 key 视为同一模型列表的配额冗余，先把首选模型在所有 key 上试一遍）；失败分类读 **body** 而不只看状态码——实测供应商会返回两种含义相反的 403（账户被封 vs 某个模型不在 token plan），只看码会把一个健康 key 整个停掉。冷却分作用域：`rate_limit` / `model_error` / `empty_response` / `truncated_response` 记在**候选级**（AMD 的并发上限是 **per-model**：「Model 'GLM-5.3-Flash' is at its concurrency limit (8)」，同 key 其他模型完全可用），`auth_error` / `server_error` / `timeout` 记在 **key 级**；同一轮内 key 级失败后同 key 的兄弟候选直接跳过（实测这处浪费让一次报告从 45s 涨到 95s+）。冷却带指数退避并持久化到 `data/llm_state.json`（跨进程保留限流窗口），全池冷却时取最快恢复者强行试一次，退化而非死掉。
+
+**实测（2026-09-22，全部真实调用）**：4 家供应商里 3 家的模型名有误或已下线（`stealth/ox-alpha` 404 测试期已结束、`z-ai/glm-5.2` 410 于 2026-08-21 EOL、`glm 5.3 flash` 真名 `GLM-5.3-Flash`），1 家整个账户被封（OpenRouter 403 "Inference is blocked on this account"）→ 配置里 `enabled: false` 并留证据。**ping 延迟不能用来排序**：AMD `DeepSeek-V4-Flash` 用 16-token ping 测是 0.9s，生成真实报告 **153s 超时**；最终首选 `sensenova/deepseek-v4-flash`（9.3s 出 1712 字符完整报告）。另有两种 200 假成功被识别并拦住：flash 类模型随机返回**空 body**（7 次探测 3 次），推理模型把预算烧在思考通道上导致**正文仅 95 字符** → 新增 `truncated_response` 与调用方传入的 `report_ai.MIN_REPORT_CHARS` 门槛。端到端：v1 排序 3 次转移 / 95.4s，最终排序 1 次转移 / 44.5s，全程无人工干预。报告 HTML 渲染 **escape-first**（正文按构造即含活载荷，报告不能自己变成载体），模型输出的思考通道由 `clean_completion` 两段式清洗。CLI：`--ai-report --ai-config --ai-lang --ai-model --ai-max-findings --ai-timeout`，另有 `--ai-check`（逐候选真实探测打健康表，key 全程脱敏）与 `--ai-reset`。测试 `tests/test_llm_pool.py` + `tests/test_ai_report.py` 共 104 例，全部用本地 mock（真 HTTP，不改 transport）；**mock server 必须用 `HTTP/1.0`**——禁用 keep-alive 才不会在本机劣化 loopback 下出现池化连接撞死 socket（`WinError 10054`）的假失败。
+
 ---
 
 ## 扩展指南
@@ -624,6 +630,7 @@ API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host
 - **加绕过变形**：在 `core/transform.py` 的 `REGISTRY` 注册新函数即可被审计引擎调用。
 - **加 WAF 指纹**：在 `core/waf.py` 的 `_WAF_SIGNATURES` 增加 `(名称, 正则)`。
 - **加 sink/source**：扩展 `core/dom.py` 的源/汇列表。
+- **加 LLM 供应商**：编辑 `data/llm_providers.json` 的 `providers` 数组（`base_url` + `keys` + `models`，`enabled` 控制开关；`base_url` 带不带 `/chat/completions` 都会归一化）。凭据可用 `XSSENTINEL_LLM_KEY_<PROVIDER_ID>`（逗号分隔）覆盖，池路径用 `XSSENTINEL_LLM_CONFIG` 覆盖。改完**务必用 `--ai-check` 实测一遍**——供应商给的模型名与可用性别照抄（Phase 176 里 4 家有 3 家的名字是错的，1 家账户已被封）。
 
 ---
 
@@ -636,4 +643,5 @@ API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host
 - 可复现 PoC 对 DOM 类漏洞会用真实执行型 payload（`<img src=x onerror=alert(document.domain)>`）替换内部标记，确保 PoC 页面点开即触发。
 - **盲打 XSS（L5）已支持自动确认**：`--oob self` 起本地监听器、`--oob interactsh` 用公共服务器，收到 beacon 即判定为已确认盲打；若超时未收到回调则不报（避免误判）。`interactsh` 模式需要公网可达的 callback 域名与网络连通，离线时优雅降级为"注入但未确认"。
 - **存储型 XSS（L4）需要"展示页"**：你必须提供注入接口与其对应的展示/列表接口（如评论提交页 + 评论列表页），框架才会重新拉取确认持久化执行。
+- **AI 报告（`--ai-report`）默认关闭**：一旦开启，目标 URL、参数与载荷会发送给 `data/llm_providers.json` 里配置的第三方 LLM 供应商。检测结论不受影响（模型只写叙事章节），但数据出网这件事由操作者决定。`--serve`（REST API）模式目前未接入该章节。
 - 这是安全研究/授权测试工具，请勿用于未授权目标。

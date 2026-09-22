@@ -14,6 +14,8 @@ htmlcov/
 *.log
 report.html
 report.html.json
+# Phase 176: LLM 池冷却状态（运行期生成；删掉即重置全部冷却）
+xssentinel/data/llm_state.json
 .benchmarks/
 
 # 备份文件（git 即历史，.bak 不再需要入库）
@@ -33,6 +35,7 @@ report.html.json
 /_*.log
 /_*.har
 /_*.json
+/_*.html
 /_*_out/
 /_audit_backup/
 

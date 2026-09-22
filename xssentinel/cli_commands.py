@@ -598,10 +598,11 @@ def _run_passive_proxy(args):
             out_path = "xssentinel-burp.xml"
         else:
             out_path = "passive_report.html"
-    from .cli_runner import _write_report
+    from .cli_runner import _write_report, ai_opts_from_args
     try:
         _write_report(scanner, "passive://proxy", out_path, fmt,
-                      meta={"passive": True, "stats": proxy.stats})
+                      meta={"passive": True, "stats": proxy.stats,
+                            "ai": ai_opts_from_args(args)})
         print(f"[+] Report written to: {out_path}")
     except Exception as e:
         _log.error("report write failed: %s", e)

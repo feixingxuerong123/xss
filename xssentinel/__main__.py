@@ -553,6 +553,44 @@ def build_parser():
                        choices=["debug", "info", "warning", "error"],
                        help="Logging verbosity (default: warning; "
                             "verbose implies info)")
+    # Phase 176: LLM-written narrative report section.  Opt-in on purpose --
+    # scanning is deterministic and must not depend on (or leak targets to) a
+    # third-party model unless the operator asks for it.
+    g_ai = ap.add_argument_group("AI report (Phase 176)")
+    g_ai.add_argument(
+        "--ai-report", dest="ai_report", action="store_true",
+        help="Add an LLM-written analysis section (executive summary, risk "
+             "rating, per-finding cause/remediation, fix priority) to the "
+             "report. Findings, severities, URLs and payloads still come "
+             "from the deterministic engine -- the model only writes prose. "
+             "If every provider is rate-limited or unreachable, the section "
+             "falls back to the built-in advice corpus, so a report is always "
+             "produced. NOTE: the target URL, parameters and payloads are "
+             "sent to a third-party provider when this is enabled.")
+    g_ai.add_argument("--ai-config", dest="ai_config", default=None,
+                      metavar="JSON",
+                      help="LLM provider pool config (default: the shipped "
+                           "xssentinel/data/llm_providers.json, or "
+                           "XSSENTINEL_LLM_CONFIG)")
+    g_ai.add_argument("--ai-lang", dest="ai_lang", default="zh",
+                      choices=["zh", "en"], help="Report language (default: zh)")
+    g_ai.add_argument("--ai-model", dest="ai_model", default=None,
+                      metavar="NAME[,NAME]",
+                      help="Only use these models from the pool (failover "
+                           "still applies across them)")
+    g_ai.add_argument("--ai-max-findings", dest="ai_max_findings", type=int,
+                      default=25, metavar="N",
+                      help="Cap how many findings go into the prompt; the "
+                           "rest are summarised as a count (default: 25)")
+    g_ai.add_argument("--ai-timeout", dest="ai_timeout", type=float,
+                      default=None, metavar="SEC",
+                      help="Per-call read timeout (default: pool config, 60s)")
+    g_ai.add_argument("--ai-check", dest="ai_check", action="store_true",
+                      help="Probe every provider in the pool with one tiny "
+                           "call, print a health table, and exit (no scan). "
+                           "Costs one minimal request per candidate.")
+    g_ai.add_argument("--ai-reset", dest="ai_reset", action="store_true",
+                      help="Clear all stored cooldowns for the pool and exit.")
     # Phase 44: passive proxy scanning (learned from xray / w13scan).
     g_passive = ap.add_argument_group("Passive proxy (Phase 44)")
     g_passive.add_argument("--passive", action="store_true",
@@ -589,6 +627,86 @@ def build_parser():
     return ap
 
 
+def _ai_model_filter(args) -> list | None:
+    """Parse ``--ai-model a,b`` into a list, or None for "no filter"."""
+    raw = getattr(args, "ai_model", None)
+    if not raw:
+        return None
+    names = [m.strip() for m in str(raw).split(",") if m.strip()]
+    return names or None
+
+
+def _load_ai_pool(args):
+    """Build the pool from CLI options.  Returns ``(pool, error)``.
+
+    A pool that cannot be loaded is a warning, never a fatal error: the scan
+    itself does not need a model, and the report degrades to the template.
+    """
+    from .core.llm_pool import LLMPool
+    try:
+        return LLMPool.from_file(getattr(args, "ai_config", None)), None
+    except Exception as e:
+        return None, f"{type(e).__name__}: {e}"
+
+
+def _run_ai_check(args) -> int:
+    """``--ai-check``: probe every candidate once and print a health table.
+
+    Deliberately ignores cooldowns -- this answers "which of my keys still
+    work?", which is a different question from "who should I route to now?".
+    """
+    pool, err = _load_ai_pool(args)
+    if pool is None:
+        print(f"[!] Cannot load LLM pool: {err}")
+        print("[*] Put a pool at xssentinel/data/llm_providers.json, or pass "
+              "--ai-config, or set XSSENTINEL_LLM_CONFIG.")
+        return 1
+
+    models = _ai_model_filter(args)
+    pool_cands = [c for c in pool.candidates if pool._matches(c, models)]
+    print(f"[*] Pool   : {pool.source}")
+    print(f"[*] State  : {pool.state_path}")
+    print(f"[*] Probes : {len(pool_cands)} candidate(s), 1 minimal call each")
+    if models:
+        print(f"[*] Filter : models={models}")
+    print()
+
+    rows = pool.probe(models=models)
+    print(f"{'result':<12} {'provider':<12} {'model':<30} {'key':<18} {'s':>6}")
+    print("-" * 84)
+    for r in rows:
+        tag = "OK" if r["ok"] else (r["kind"] or "fail")
+        if not r["ok"] and r.get("status"):
+            tag = f"{tag}/{r['status']}"
+        print(f"{tag:<12} {r['provider']:<12} {r['model'][:30]:<30} "
+              f"{r['key']:<18} {r['elapsed']:>5.1f}")
+        if not r["ok"] and r.get("detail"):
+            print(f"{'':<12} └─ {str(r['detail'])[:150]}")
+        elif r["ok"] and r.get("reply"):
+            print(f"{'':<12} └─ {r['reply'][:80]}")
+    ok = sum(1 for r in rows if r["ok"])
+    print()
+    print(f"[+] {ok}/{len(rows)} candidate(s) answered.")
+    if ok == 0:
+        print("[!] No provider is usable right now -- --ai-report would fall "
+              "back to the deterministic template.")
+    return 0 if ok else 2
+
+
+def _run_ai_reset(args) -> int:
+    """``--ai-reset``: drop every stored cooldown for the pool."""
+    pool, err = _load_ai_pool(args)
+    if pool is None:
+        print(f"[!] Cannot load LLM pool: {err}")
+        return 1
+    before = [c.describe() for c in pool.cooling()]
+    pool.reset_state()
+    print(f"[+] Cooldown state cleared: {pool.state_path}")
+    if before:
+        print(f"[*] Was cooling: {', '.join(before)}")
+    return 0
+
+
 def main(argv=None):
     ap = build_parser()
     args = ap.parse_args(argv)
@@ -604,6 +722,12 @@ def main(argv=None):
     # --self-test: run the built-in self-test suite and exit.
     if args.self_test:
         return _run_self_test()
+
+    # Phase 176: LLM pool diagnostics -- no scan, no target needed.
+    if getattr(args, "ai_check", False):
+        return _run_ai_check(args)
+    if getattr(args, "ai_reset", False):
+        return _run_ai_reset(args)
 
     # --serve: start the REST API server (microservice mode).
     if args.serve:
@@ -915,6 +1039,13 @@ def main(argv=None):
             out_dir = args.output or "."
         os.makedirs(out_dir, exist_ok=True)
 
+    # Phase 176: resolve the AI-report options ONCE per run, pool instance
+    # included.  Sharing one pool across targets means a cooldown earned on
+    # target #1 (say an AMD 429) also protects targets #2..#N in the same
+    # process, instead of each target re-discovering the same rate limit.
+    from .cli_runner import ai_opts_from_args
+    ai_opts: dict = ai_opts_from_args(args)
+
     # Run scan(s).
     total_findings = 0
     failed_targets: list[str] = []  # Phase 25-2: track per-target failures
@@ -1017,7 +1148,7 @@ def main(argv=None):
         else:
             out_path = args.output
 
-        meta = {"target": url}
+        meta = {"target": url, "ai": ai_opts}
         try:
             out_path = _write_report(scanner, url, out_path, args.format, meta)
             # Phase 139: optional PoC artifacts (opt-in; see --poc-dir).
