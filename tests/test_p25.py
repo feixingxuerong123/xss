@@ -288,6 +288,11 @@ class TestVerifyFix:
         req = MagicMock()
         resp = MagicMock()
         resp.text = "<html>nothing here</html>"
+        # A real requests.Response always carries a status code and Phase 176e
+        # reads it: a replay that comes back 4xx/5xx never reached a working
+        # endpoint, so it is "error", not "fixed".  Without this the comparison
+        # raises TypeError on the MagicMock's auto-created child.
+        resp.status_code = 200
         req.request.return_value = resp
         # Disable the verifier.mark indirection by using a payload without
         # alert() -- the marked payload equals the original so we can reason
@@ -308,6 +313,10 @@ class TestVerifyFix:
         # craft a response that reflects that token inside a script block that
         # executes.
         resp = MagicMock()
+        # Same reason as above: the replay reads ``status_code`` on the way to
+        # deciding "fixed", and an unset MagicMock child turns that read into a
+        # TypeError the moment this fake stops reflecting the payload.
+        resp.status_code = 200
         # We don't know the exact token until _replay_request generates it,
         # so the fake server echoes whatever was sent, unquoted, into the page.
         def fake_request(method, url, params=None, data=None,

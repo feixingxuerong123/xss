@@ -25,6 +25,7 @@ The result is emitted as a stand-alone HTML or JSON report.
 from __future__ import annotations
 
 import json
+import re
 import secrets
 from datetime import datetime
 from typing import Any
@@ -73,6 +74,13 @@ _REPLAYABLE_TYPES = {
 # "framework_vue_xss").  Any finding whose type starts with one of these
 # prefixes can be replayed.
 _REPLAYABLE_PREFIXES = ("framework_", "template_ssti_")
+
+#: A password field is what a sign-in page has and a vulnerable result page
+#: does not.  Deliberately narrow: a false positive here can only downgrade a
+#: verdict to "cannot judge", never promote it to "fixed", so the failure
+#: direction is safe.  It exists so a session-expired replay is not reported as
+#: a successful remediation.
+_AUTH_PAGE_RE = re.compile(r"""type\s*=\s*["']password["']""", re.I)
 
 
 def _is_replayable(ftype: str | None) -> bool:
@@ -289,11 +297,40 @@ def _replay_request(requester, finding: dict, payload: str) -> dict:
                 "detail": f"payload still executes: {verify['detail']}",
                 "response": resp, "context": verify.get("context")}
 
-    # If the token doesn't reflect at all, the input is no longer
-    # reflected -> fixed (or the endpoint changed).
+    # If the token doesn't reflect at all, the input is no longer reflected.
+    # "No reflection" is NOT by itself a fix though -- the three checks inside
+    # this branch (Phase 176e) separate "remediated" from "never got an answer
+    # worth judging".  The comment here used to read "fixed (or the endpoint
+    # changed)": the parenthetical was the whole problem, because the report
+    # rendered both outcomes as the same word.
     if token not in text:
         # Check the raw payload too (some payloads don't get tokenized).
         if payload and payload not in text:
+            # Our input never came back -- but "we saw nothing" has several
+            # causes and only ONE of them is a fix.  A 404 means the endpoint
+            # moved, a 403 means a WAF or auth layer answered instead of the
+            # app, a 5xx means the app is down: all of them produce a body with
+            # no payload in it and used to be reported as "fixed" with the SAME
+            # detail string as a genuine fix.  That left the report unable to
+            # tell "remediated" from "never tested", and since the CI gate only
+            # fails on still_vuln it passed those straight through.  The old
+            # comment said it out loud: "fixed (or the endpoint changed)".
+            #
+            # This check lives inside the "nothing came back" branch on
+            # purpose: error_page_xss and path_xss legitimately answer 404/500
+            # WHILE reflecting the payload, so they never reach here.
+            if resp.status_code >= 400:
+                return {"status": "error",
+                        "detail": f"HTTP {resp.status_code}: the replay did "
+                                  f"not reach a working endpoint, so "
+                                  f"remediation cannot be judged",
+                        "response": resp, "context": None}
+            if _AUTH_PAGE_RE.search(text):
+                return {"status": "error",
+                        "detail": "response looks like a sign-in page (the "
+                                  "session was probably expired) -- nothing "
+                                  "was tested",
+                        "response": resp, "context": None}
             return {"status": "fixed",
                     "detail": "payload no longer reflected in response",
                     "response": resp, "context": None}
