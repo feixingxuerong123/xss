@@ -576,6 +576,36 @@ def m_cookie_echo_escaped(v: str, ctx: dict) -> tuple:
     return _page(f'<div>Language: {val}</div>')
 
 
+def m_cookie_toss_parent(v: str, ctx: dict) -> tuple:
+    """Vulnerable: Set-Cookie with a Domain= BROADER than the response host.
+
+    Cookie tossing needs a parent/child domain pair, and this case supplies one
+    with no DNS or hosts-file work: the manifest asks for ``host=sub.localhost``
+    (see ``runner._build_target_url``) and ``*.localhost`` resolves to loopback
+    under RFC 6761.  The cookie is scoped to ``.localhost``, so it is delivered
+    to *sibling* origins as well -- exactly the relation
+    ``cookie_tossing.is_parent_domain_cookie`` tests
+    (``host.endswith("." + domain)``).
+
+    No user input is interpolated on purpose: this layer keys on the header, and
+    a reflecting page would add unrelated findings to the case.
+    """
+    return _page("<div>Theme: light</div>",
+                 {"Set-Cookie": "theme=light; Domain=.localhost; Path=/"})
+
+
+def m_cookie_toss_self(v: str, ctx: dict) -> tuple:
+    """Safe twin: same page, same cookie name, scoped to the response host.
+
+    ``Domain=sub.localhost`` equals the response host, so the cookie never
+    reaches a sibling origin and there is nothing to toss.  That single change
+    is the premise this layer actually tests -- a safe twin that altered some
+    other field would prove nothing.
+    """
+    return _page("<div>Theme: light</div>",
+                 {"Set-Cookie": "theme=light; Domain=sub.localhost; Path=/"})
+
+
 def m_path_echo(v: str, ctx: dict) -> tuple:
     """Vulnerable: the LAST path segment is echoed raw into the body.
 
@@ -925,6 +955,11 @@ MODES_CTX: dict = {
     "late_header_reflect_escaped": m_late_header_reflect_escaped,
     "cookie_echo": m_cookie_echo,
     "cookie_echo_escaped": m_cookie_echo_escaped,
+    # Phase 176f: the cookie-tossing pair.  Needs a genuine parent/child host
+    # pair, which the manifest case supplies with host=sub.localhost -- see the
+    # handler docstrings for why that works without DNS.
+    "cookie_toss_parent": m_cookie_toss_parent,
+    "cookie_toss_self": m_cookie_toss_self,
     "path_echo": m_path_echo,
     "path_echo_escaped": m_path_echo_escaped,
     "error_echo": m_error_echo,

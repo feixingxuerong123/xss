@@ -1,9 +1,9 @@
 {
-  "cases": 176,
-  "modes": 173,
-  "layers": 49,
-  "covered": 48,
-  "uncovered": 1,
+  "cases": 190,
+  "modes": 187,
+  "layers": 50,
+  "covered": 50,
+  "uncovered": 0,
   "rows": [
     {
       "layer": "L1_reflected",
@@ -51,6 +51,15 @@
         "stored_write"
       ],
       "note": "added in Phase 110"
+    },
+    {
+      "layer": "L4_stored_dom",
+      "covered": true,
+      "modes": [
+        "stored_api_write",
+        "stored_api_user_write"
+      ],
+      "note": "Phase 152: SPA shape (write endpoint + client-rendered view; only the real-browser DOM engine can confirm); + Phase 153 user-write shape (companion fields demanded)"
     },
     {
       "layer": "L4_second_order",
@@ -187,7 +196,8 @@
       "layer": "L8_header",
       "covered": true,
       "modes": [
-        "header_only"
+        "header_only",
+        "late_header_reflect"
       ],
       "note": "yes"
     },
@@ -289,9 +299,11 @@
     },
     {
       "layer": "L8_cookie_tossing",
-      "covered": false,
-      "modes": [],
-      "note": "no cookie-tossing target"
+      "covered": true,
+      "modes": [
+        "cookie_toss_parent"
+      ],
+      "note": "added in Phase 176f (host=sub.localhost supplies the parent/child pair)"
     },
     {
       "layer": "L8_graphql",
@@ -415,7 +427,5 @@
       "note": "added in Phase 120 (behavioural)"
     }
   ],
-  "uncovered_layers": [
-    "L8_cookie_tossing"
-  ]
+  "uncovered_layers": []
 }

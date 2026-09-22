@@ -147,6 +147,18 @@ def _build_target_url(base: str, case: dict) -> str:
     """Construct the target URL for a manifest case."""
     path = case["path"]
     param = case.get("param", "q")
+    # Phase 176f: a case may need a different HOST, not just a path.  The
+    # cookie-tossing layer keys on the relation between the RESPONSE HOST and
+    # the Set-Cookie Domain attribute, so covering it needs a real parent/child
+    # pair -- and `*.localhost` resolves to loopback on this host (RFC 6761),
+    # which supplies one with no DNS or hosts-file work.  Cases that do not ask
+    # for a host are untouched.
+    host = case.get("host")
+    if host:
+        from urllib.parse import urlsplit, urlunsplit
+        parts = urlsplit(base)
+        netloc = f"{host}:{parts.port}" if parts.port else host
+        base = urlunsplit((parts.scheme, netloc, "", "", ""))
     url = f"{base}{path}"
     # Phase 110: body-carried cases (upload/stored) put the parameter in
     # -d instead, so the URL must stay clean.

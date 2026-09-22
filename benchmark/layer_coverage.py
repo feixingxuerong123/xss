@@ -63,7 +63,13 @@ COVERAGE = {
     "L7_sanitizer_bypass": (["sanitizer_vuln"], "added in Phase 117"),
     "L7_sri_bypass": (["sri_vuln"], "added in Phase 116"),
     "L7_svg_xss": (["raw_svg*"], "yes (raw_svg family)"),
-    "L8_cookie_tossing": (None, "no cookie-tossing target"),
+    # Phase 176f: this layer was parked as "needs infrastructure" (a parent
+    # domain) because a benchmark on 127.0.0.1 has no parent/child host pair.
+    # The trigger is only a string relation (host.endswith("." + domain)) and
+    # *.localhost resolves to loopback, so the manifest case asks for
+    # host=sub.localhost and gets a real pair with no DNS involved.
+    "L8_cookie_tossing": (["cookie_toss_parent"],
+                          "added in Phase 176f (host=sub.localhost supplies the parent/child pair)"),
     "L8_graphql": (["graphql_vuln"], "added in Phase 117"),
     "L8_trusted_types": (["tt_vuln"], "added in Phase 116"),
     "L8_websocket": (["ws_vuln"], "added in Phase 116"),

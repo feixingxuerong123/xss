@@ -34,8 +34,14 @@ base = f"http://127.0.0.1:{PORT}"
 # 1) raw behaviour of the endpoint
 import urllib.request  # noqa: E402
 import urllib.parse  # noqa: E402
+from benchmark.runner import _build_target_url  # noqa: E402
 probe = "Pz'\"<z>"
-url = f"{base}{case['path']}?{urllib.parse.urlencode({case['param']: probe})}"
+# Phase 176f: build the probe URL exactly the way the runner does.  A case may
+# ask for its own HOST (the cookie-tossing pair needs sub.localhost), and
+# assembling `{base}{path}` here printed 127.0.0.1 while evaluate_case actually
+# scanned sub.localhost -- a probe line that disagreed with the verdict it sits
+# above, which is worse than no probe line at all.
+url = _build_target_url(base, dict(case, param_value=probe))
 try:
     with urllib.request.urlopen(url, timeout=5) as r:
         body = r.read().decode("utf-8", "replace")

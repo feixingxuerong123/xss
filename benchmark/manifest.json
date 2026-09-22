@@ -21,7 +21,10 @@
       "context": "reflection context category",
       "difficulty": "how hard to detect correctly",
       "source": "knowledge source (PATT=PayloadsAllTheThings, CVE, OWASP, etc.)",
-      "note": "brief description"
+      "note": "brief description",
+      "host": "optional: override the target host (default 127.0.0.1, built from the runner's base_url). Needed by layers that key on the host itself -- the cookie-tossing pair asks for sub.localhost, because *.localhost resolves to loopback and thereby supplies a real parent/child domain pair",
+      "param_value": "optional: override the probe value placed in `param`",
+      "engines": "optional: restrict to [\"sync\"] / [\"async\"]; a non-matching engine scores SKIP, not FN"
     }
   },
   "cases": [
@@ -1364,6 +1367,34 @@
       "note": "Phase 109 safe twin: same cookie echo, HTML-escaped",
       "finding_types": [
         "cookie_xss"
+      ]
+    },
+    {
+      "id": "pos-ctoss-01",
+      "path": "/r/ctoss01",
+      "param": "q",
+      "mode": "cookie_toss_parent",
+      "host": "sub.localhost",
+      "ground_truth": "vulnerable",
+      "context": "header",
+      "difficulty": "medium",
+      "note": "Phase 176f: Set-Cookie Domain=.localhost is a PARENT of the response host sub.localhost, so the cookie is delivered to sibling origins -- the L8 cookie-tossing premise. host=sub.localhost is what makes the pair real: *.localhost resolves to loopback, so a parent/child domain relation exists without DNS or a hosts file (the reason this layer had no case). The page reflects nothing, so the finding comes from the header alone.",
+      "finding_types": [
+        "cookie_tossing_set_cookie"
+      ]
+    },
+    {
+      "id": "neg-ctoss-01",
+      "path": "/s/ctoss01",
+      "param": "q",
+      "mode": "cookie_toss_self",
+      "host": "sub.localhost",
+      "ground_truth": "safe",
+      "context": "header",
+      "difficulty": "medium",
+      "note": "Phase 176f safe twin: same host, same page, same cookie name -- only Domain= changes from .localhost to sub.localhost, i.e. from a parent to the response host itself. The cookie can no longer reach a sibling origin, which is the exact premise this layer tests.",
+      "finding_types": [
+        "cookie_tossing_set_cookie"
       ]
     },
     {
