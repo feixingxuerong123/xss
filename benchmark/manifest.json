@@ -1167,6 +1167,32 @@
       "note": "json.dumps object value"
     },
     {
+      "id": "pos-jsonct-01",
+      "path": "/r/jsonct01",
+      "param": "q",
+      "mode": "jsonct_raw",
+      "ground_truth": "vulnerable",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "note": "Phase 176g: the only case whose response is REAL application/json. Every other JSON-ish handler returns through _page(), which forces text/html -- so a reflection in those is in an HTML context and genuinely exploitable, and scanner.py's Phase 32 content-type branch had never been exercised by any case (layer coverage is not branch coverage). Markup in a JSON body does not run in a browser tab, so this case locks the ENGINE'S OWN choice: keep the finding for the record, drop it to low confidence. It asserts 'reported at low confidence', not 'exploitable'.",
+      "finding_types": [
+        "reflected"
+      ]
+    },
+    {
+      "id": "neg-jsonct-01",
+      "path": "/s/jsonct01",
+      "param": "q",
+      "mode": "jsonct_escaped",
+      "ground_truth": "safe",
+      "context": "script_string_dq",
+      "difficulty": "medium",
+      "note": "Phase 176g safe twin: identical application/json response, but the value has its angle brackets escaped (\\u003c / \\u003e) the way an API treating input as data would. json.dumps alone escapes quotes only, so it cannot serve as the safe twin -- both halves would be byte-identical. Escaping removes the one premise this layer keys on: the payload appearing verbatim in the response.",
+      "finding_types": [
+        "reflected"
+      ]
+    },
+    {
       "id": "neg-header-01",
       "path": "/s/hdr01",
       "param": "q",

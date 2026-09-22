@@ -1,13 +1,13 @@
 # Layer coverage matrix (static, Phase 111)
 
-Benchmark: 190 cases / 187 modes  
+Benchmark: 192 cases / 189 modes  
 Engine layers: 50  
 Covered by at least one case: 50  
 NOT covered: 0
 
 | layer | covered | exercising modes | note |
 |---|---|---|---|
-| L1_reflected | yes | raw_*, attr_*, escape_*, comment_*, rcdata_*, raw_cdata, raw_base_href, raw_meta_refresh, output_*, filter_*, multi_*, double_encode_safe, csp_* | wide |
+| L1_reflected | yes | raw_*, attr_*, escape_*, comment_*, rcdata_*, raw_cdata, raw_base_href, raw_meta_refresh, output_*, filter_*, multi_*, double_encode_safe, csp_*, jsonct_raw | wide |
 | L2_waf_evade | yes | waf_naive | added in Phase 118 (pseudo-WAF target) |
 | L3_dom_static | yes | dom_hash_*, dom_jquery_html, dom_search_eval, dom_postmessage | yes |
 | L4_stored | yes | stored_write | added in Phase 110 |

@@ -25,7 +25,7 @@ COVERAGE = {
                       "script_*", "svg_*", "math_*", "style_*", "raw_cdata",
                       "raw_base_href", "raw_meta_refresh", "iframe_*", "href_*",
                       "output_*", "filter_*", "multi_*", "double_encode_safe",
-                      "csp_*"], "wide"),
+                      "csp_*", "jsonct_raw"], "wide"),
     "L2_waf_evade": (["waf_naive"], "added in Phase 118 (pseudo-WAF target)"),
     "L3_dom_static": (["dom_hash_*", "dom_jquery_html", "dom_search_eval",
                        "dom_postmessage"], "yes"),

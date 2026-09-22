@@ -1,6 +1,6 @@
 {
-  "cases": 190,
-  "modes": 187,
+  "cases": 192,
+  "modes": 189,
   "layers": 50,
   "covered": 50,
   "uncovered": 0,
@@ -21,7 +21,8 @@
         "filter_*",
         "multi_*",
         "double_encode_safe",
-        "csp_*"
+        "csp_*",
+        "jsonct_raw"
       ],
       "note": "wide"
     },

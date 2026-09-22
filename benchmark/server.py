@@ -840,6 +840,41 @@ def m_json_echo(v: str, ctx: dict) -> tuple:
     return _page(f'<div>{"status": "ok", "echo": "{val}"}</div>')
 
 
+def m_jsonct_raw(v: str, ctx: dict) -> tuple:
+    """JSON-shaped body served as REAL ``application/json``, echoing raw.
+
+    Note what every other JSON-ish handler here does: it returns through
+    ``_page()``, which forces ``Content-Type: text/html``.  A reflection in one
+    of those IS in an HTML context and really is exploitable -- so until this
+    pair existed, no case ever exercised scanner.py's Phase 32 content-type
+    branch, even though the layer matrix read 50/50 (layer coverage is not
+    branch coverage).
+
+    Markup inside a JSON body does not execute in a browser tab.  The engine
+    keeps the finding for the record and drops it to low confidence, so this
+    case locks THAT behaviour deliberately: it asserts "reported, at low
+    confidence", not "exploitable".
+    """
+    val = (ctx.get("fields") or {}).get(ctx.get("field") or "q", "") or v
+    return (200, {"Content-Type": "application/json; charset=utf-8"},
+            json.dumps({"status": "ok", "echo": val}))
+
+
+def m_jsonct_escaped(v: str, ctx: dict) -> tuple:
+    """Safe twin: same JSON response, markup escaped to \\u003c / \\u003e.
+
+    ``json.dumps`` escapes quotes but NOT angle brackets, so it cannot serve
+    as the safe twin on its own -- both halves would be byte-identical and the
+    pair would prove nothing.  A real API that treats the value as data
+    escapes the brackets; doing so here removes the one premise this layer
+    keys on (the payload appearing verbatim in the response).
+    """
+    val = (ctx.get("fields") or {}).get(ctx.get("field") or "q", "") or v
+    val = val.replace("<", "\\u003c").replace(">", "\\u003e")
+    return (200, {"Content-Type": "application/json; charset=utf-8"},
+            json.dumps({"status": "ok", "echo": val}))
+
+
 # ---------------------------------------------------------------------------
 # Phase 152: SPA-shaped stored XSS.  The write endpoint accepts form-encoded
 # AND JSON bodies (_parse_post_body handles both).  The VIEW page never
@@ -946,6 +981,10 @@ POST_MODES: dict = {
     "upload_echo": m_upload_echo,
     "upload_echo_escaped": m_upload_echo_escaped,
     "json_echo": m_json_echo,
+    # Phase 176g: the only pair whose response is REAL application/json.  All
+    # the other JSON-shaped handlers go through _page() and are text/html.
+    "jsonct_raw": m_jsonct_raw,
+    "jsonct_escaped": m_jsonct_escaped,
 }
 
 MODES_CTX: dict = {
