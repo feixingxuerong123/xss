@@ -114,3 +114,37 @@ class TestReplayCarriers:
                         "<script>alert(1)</script>")
         q = r.calls[-1]["params"].get("q", "")
         assert q.startswith("<script>")
+
+    def test_query_param_is_replaced_not_duplicated(self):
+        """Regression (Phase 176c): a finding URL carrying the target
+        parameter -- `?q=test`, exactly what a scan emits -- must not put TWO
+        `q=` on the wire.  Servers read the first, so the payload never
+        arrives, nothing reflects, and the replay wrongly reports the hole as
+        FIXED.  Observed live against a reflector that echoes every input."""
+        r = _FakeRequester()
+        f = dict(_finding("reflected", "q"), url="http://t/s?q=test")
+        _replay_request(r, f, "<script>alert(1)</script>")
+        call = r.calls[-1]
+        assert call["url"] == "http://t/s"           # query moved into params
+        assert "?" not in call["url"]
+        assert call["params"]["q"].startswith("<script>")
+        assert call["params"]["q"] != "test"
+
+    def test_sibling_query_params_survive_the_injection(self):
+        """Only the target parameter is rewritten; the rest of the query still
+        has to be sent, or the replay stops resembling the original request."""
+        r = _FakeRequester()
+        f = dict(_finding("reflected", "q"), url="http://t/s?id=7&q=test")
+        _replay_request(r, f, "<script>alert(1)</script>")
+        params = r.calls[-1]["params"]
+        assert params["id"] == "7"
+        assert params["q"].startswith("<script>")
+
+    def test_post_body_injection_is_unaffected_by_url_query(self):
+        r = _FakeRequester()
+        f = dict(_finding("reflected", "q"), url="http://t/s?q=test",
+                 method="POST")
+        _replay_request(r, f, "<script>alert(1)</script>")
+        call = r.calls[-1]
+        assert call["data"]["q"].startswith("<script>")
+        assert call["url"] == "http://t/s"

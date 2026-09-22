@@ -151,6 +151,24 @@ def _replay_request(requester, finding: dict, payload: str) -> dict:
     data: dict = {}
     headers: dict = {}
 
+    # Carry the URL's own query into ``params`` and keep it out of the URL.
+    # A finding's URL routinely holds the very parameter we are about to
+    # inject (``...?q=test`` -- that is just what a scan emits), and handing
+    # that URL to requests *alongside* ``params={"q": marked}`` appends a
+    # SECOND ``q=``.  Servers read the first, so the payload never reaches the
+    # target parameter, nothing reflects, and the replay concludes "no longer
+    # reflected" -- i.e. FIXED.  Observed live: a reflector that echoes every
+    # input was reported as fixed, which is the worst failure mode a
+    # remediation report has (the client is told an open hole is closed).
+    # Seeding ``params`` from the query turns the injection into an overwrite
+    # and leaves every OTHER query parameter intact.
+    from urllib.parse import parse_qsl, urlsplit, urlunsplit
+    _parts = urlsplit(url)
+    if _parts.query:
+        for _k, _v in parse_qsl(_parts.query, keep_blank_values=True):
+            params.setdefault(_k, _v)
+        url = urlunsplit((_parts.scheme, _parts.netloc, _parts.path, "", ""))
+
     # -- non-query carriers ------------------------------------------------
     # Findings store the carrier in the param marker -- "(header:User-Agent)"
     # / "(cookie:sid)" -- or use the bare param name as the legacy header /
@@ -420,10 +438,26 @@ def summarize(results: list[dict]) -> dict:
 
 
 def build_html(results: list[dict], source_report: str,
-               target: str | None = None) -> str:
-    """Render a verification report as HTML."""
+               target: str | None = None,
+               ai_report: dict | None = None) -> str:
+    """Render a verification report as HTML.
+
+    ``ai_report`` is a ``report_ai.AIReport.to_meta()`` dict (Phase 176),
+    supplied only when ``--ai-report`` ran.  Absent means no section -- which
+    is byte-for-byte the pre-Phase-176 output.
+    """
     import html as _html
     s = summarize(results)
+
+    # Phase 176: the AI narrative section (already escaped inside report_ai).
+    ai_section = ""
+    if isinstance(ai_report, dict):
+        try:
+            from . import report_ai
+            ai_section = report_ai.ai_section_html(ai_report)
+        except Exception:
+            ai_section = ""
+
     c = s["counts"]
     rows = []
     for i, r in enumerate(results, 1):
@@ -475,6 +509,18 @@ def build_html(results: list[dict], source_report: str,
  .status-badge.st-vuln{{background:#e5484d}}
  .status-badge.st-err{{background:#f5a623}}
  .status-badge.st-skip{{background:#9aa3b2}}
+ .ai-report{{padding:0 28px 24px}}
+ .ai-report h2{{font-size:16px;margin:0 0 10px}}
+ .ai-report h3{{font-size:14px;margin:16px 0 6px}}
+ .ai-report h4{{font-size:13px;margin:12px 0 5px}}
+ .ai-report p{{font-size:13px;color:#3a4150;line-height:1.65;margin:8px 0}}
+ .ai-report ul,.ai-report ol{{font-size:13px;color:#3a4150;padding-left:22px;margin:8px 0}}
+ .ai-report li{{margin:3px 0}}
+ .ai-report blockquote{{margin:8px 0;padding:8px 12px;background:#f0f2f7;border-left:3px solid #9aa3b2;color:#5b6473;font-size:12px}}
+ .ai-report code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
+ .ai-report table.ai-table{{width:100%;margin:10px 0;box-shadow:none;border-radius:8px;overflow:hidden}}
+ .ai-report table.ai-table td{{padding:6px 10px;border-bottom:1px solid #eef0f4;font-size:12px;background:#fff}}
+ .ai-report.degraded{{border-left:4px solid #f5a623}}
  footer{{padding:14px 28px;color:#9aa3b2;font-size:12px}}
 </style></head>
 <body>
@@ -487,6 +533,7 @@ def build_html(results: list[dict], source_report: str,
   <div class="card err"><div class="n">{c['error']}</div><div>Error</div></div>
   <div class="card skip"><div class="n">{c['skipped']}</div><div>Skipped</div></div>
 </div>
+{ai_section}
 <table>
 <tr><th>#</th><th>Status</th><th>Type</th><th>URL</th><th>Method</th><th>Param</th><th>Payload</th><th>Severity</th><th>Detail</th><th>Checked At</th></tr>
 {rows_html}
@@ -496,7 +543,8 @@ def build_html(results: list[dict], source_report: str,
 
 
 def build_json(results: list[dict], source_report: str,
-               target: str | None = None) -> str:
+               target: str | None = None,
+               ai_report: dict | None = None) -> str:
     s = summarize(results)
     out = {
         "tool": "XSSentinel",
@@ -507,4 +555,9 @@ def build_json(results: list[dict], source_report: str,
         "summary": s,
         "findings": results,
     }
+    # Phase 176: the AI section metadata, when --ai-report ran.  The html
+    # rendering is dropped -- consumers of this file want the markdown, and
+    # shipping both would double the payload for nothing.
+    if isinstance(ai_report, dict):
+        out["ai_report"] = {k: v for k, v in ai_report.items() if k != "html"}
     return json.dumps(out, ensure_ascii=False, indent=2)

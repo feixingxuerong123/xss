@@ -374,12 +374,24 @@ def _run_verify_fix(args):
     # Write the output report.
     out_path = args.output or "verify_fix.html"
     fmt = args.format if args.format in ("html", "json") else "html"
+
+    # Phase 176: optional AI narrative over the re-test results.  Built before
+    # rendering and never fatal -- a provider outage must not stop a client
+    # deliverable from being written.  `target` may be absent (the source
+    # report had no envelope), in which case the report path stands in so the
+    # prompt still names what was re-tested.
+    from .cli_runner import ai_opts_from_args, ai_report_for
+    ai_meta = ai_report_for(
+        results, target or src,
+        {"source_report": src, "generated": s["generated"]},
+        ai_opts_from_args(args), task="verify")
+
     if fmt == "json":
-        out = vf.build_json(results, src, target)
+        out = vf.build_json(results, src, target, ai_report=ai_meta)
         if not out_path.endswith(".json"):
             out_path += ".json"
     else:
-        out = vf.build_html(results, src, target)
+        out = vf.build_html(results, src, target, ai_report=ai_meta)
         if not out_path.endswith(".html"):
             out_path += ".html"
 

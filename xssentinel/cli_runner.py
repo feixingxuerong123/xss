@@ -949,26 +949,23 @@ def ai_opts_from_args(args) -> dict:
     }
 
 
-def _attach_ai_report(scanner, target_url, meta):
-    """Phase 176: attach the LLM-written narrative section to ``meta``.
+def ai_report_for(data, target, meta, opts, task="findings"):
+    """Build the AI section metadata for any task (Phase 176).
 
-    Opt-in (``--ai-report``) and never fatal: the detection results are
-    authoritative and must be reported whether or not a model was reachable.
-    ``report_ai`` degrades to the deterministic advice corpus on any failure,
-    so this function's only job is to route the result into ``meta`` where
-    the report builders pick it up.
+    Shared by the scan path (``task="findings"``) and the verify-fix path
+    (``task="verify"``), so both get the same pool sharing, the same
+    degradation guarantee and the same logging.
 
-    The pool is passed in via ``meta['ai']['pool']`` so a batch scan reuses
-    ONE pool instance: cooldowns then apply across targets in the same
-    process instead of each target re-discovering the same rate limit.
+    Returns ``None`` when AI is not enabled, or when generation failed
+    outright -- a narrative section is never worth failing a command for.
     """
-    opts = meta.get("ai") or {}
-    if not opts.get("enabled"):
-        return
+    if not (opts or {}).get("enabled"):
+        return None
     try:
         from .core import report_ai
         rep = report_ai.build_ai_report(
-            scanner.findings, target_url, meta,
+            data, target, meta,
+            task=task,
             pool=opts.get("pool"),
             config_path=opts.get("config"),
             models=opts.get("models"),
@@ -976,16 +973,35 @@ def _attach_ai_report(scanner, target_url, meta):
             max_findings=int(opts.get("max_findings") or 25),
             timeout=opts.get("timeout"),
         )
-        meta["ai_report"] = rep.to_meta()
-        if rep.used_llm:
-            _log.warning("AI report: written by %s (%d failover(s), %.1fs)",
-                         rep.model or rep.provider, rep.failovers, rep.elapsed)
-        else:
-            _log.warning("AI report: degraded to template -- %s", rep.error)
     except Exception as e:
-        # A narrative section is never worth failing a scan for.
-        _log.warning("AI report generation failed (%s); report continues "
-                     "without it", e)
+        _log.warning("AI report generation failed (%s); continuing without it",
+                     e)
+        return None
+    if rep.used_llm:
+        _log.warning("AI report: written by %s (%d failover(s), %.1fs)",
+                     rep.model or rep.provider, rep.failovers, rep.elapsed)
+    else:
+        _log.warning("AI report: degraded to template -- %s", rep.error)
+    return rep.to_meta()
+
+
+def _attach_ai_report(scanner, target_url, meta):
+    """Phase 176: attach the LLM-written narrative section to ``meta``.
+
+    Opt-in (``--ai-report``) and never fatal: the detection results are
+    authoritative and must be reported whether or not a model was reachable.
+    ``report_ai`` degrades to the deterministic corpus on any failure, so this
+    only has to route the result into ``meta`` where the report builders pick
+    it up.
+
+    The pool arrives via ``meta['ai']['pool']`` so a batch scan reuses ONE pool
+    instance and a cooldown earned on target #1 protects targets #2..#N in the
+    same process.
+    """
+    ai_meta = ai_report_for(scanner.findings, target_url, meta,
+                            meta.get("ai"), task="findings")
+    if ai_meta is not None:
+        meta["ai_report"] = ai_meta
 
 
 def _write_report(scanner, target_url, output_path, fmt, meta=None):

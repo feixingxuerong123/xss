@@ -157,6 +157,63 @@ _COPY = {
 
 
 # ---------------------------------------------------------------------------
+# Verify-fix copy (a separate table: ``_COPY[lang]["verify"]`` is already the
+# label for "reproduce", so the task cannot own that key).
+# ---------------------------------------------------------------------------
+
+_COPY_VERIFY = {
+    "zh": {
+        "task_title": "修复验证分析",
+        "summary": "修复验证摘要",
+        "overview": "修复状态总览",
+        "still": "仍可利用项（优先处理）",
+        "undetermined": "无法判定项",
+        "next": "修复建议与后续步骤",
+        "status": "状态",
+        "count": "数量",
+        "fixed": "已修复",
+        "still_vuln": "仍可利用",
+        "error": "无法判定",
+        "skipped": "未复测",
+        "meta_line": "目标 {target} · 复测 {n} 条 · 来源报告 {source}",
+        "all_fixed": "全部条目均已修复，修复验证通过。",
+        "some_vuln": "仍有 {n} 条可被利用——修复不完整，需继续处理。",
+        "none_fixed": "本次复测未确认任何修复生效，请核对修复是否已部署到被测环境。",
+        "skipped_note": "有 {n} 条因类型限制无法自动复测（如存储型/盲打需人工确认），"
+                        "它们的状态**未知**，不作为已修复处理。",
+        "error_note": "有 {n} 条因网络或响应异常无法判定，建议重新跑一次复测。",
+        "none_items": "无。",
+    },
+    "en": {
+        "task_title": "Remediation Verification",
+        "summary": "Verification Summary",
+        "overview": "Status Overview",
+        "still": "Still Exploitable (fix first)",
+        "undetermined": "Undetermined",
+        "next": "Recommended Next Steps",
+        "status": "Status",
+        "count": "Count",
+        "fixed": "fixed",
+        "still_vuln": "still vulnerable",
+        "error": "undetermined",
+        "skipped": "not re-tested",
+        "meta_line": "Target {target} · {n} re-tested · source report {source}",
+        "all_fixed": "Every item is fixed; verification passed.",
+        "some_vuln": "{n} item(s) are still exploitable -- the remediation is "
+                     "incomplete.",
+        "none_fixed": "No fix was confirmed in this run; check that the fix is "
+                      "actually deployed on the tested environment.",
+        "skipped_note": "{n} item(s) cannot be re-tested automatically (stored / "
+                        "blind types need a human); their status is UNKNOWN and "
+                        "must not be read as fixed.",
+        "error_note": "{n} item(s) could not be determined due to network or "
+                      "response errors; consider re-running the verification.",
+        "none_items": "None.",
+    },
+}
+
+
+# ---------------------------------------------------------------------------
 # Result holder
 # ---------------------------------------------------------------------------
 
@@ -277,6 +334,55 @@ def summarize_findings(findings: list, max_findings: int = MAX_FINDINGS_DEFAULT
     return rows, stats
 
 
+def summarize_verify(results: list, max_findings: int = 10 ** 6
+                     ) -> tuple[list[dict], dict]:
+    """Digest one verify-fix run, with each item's status up front.
+
+    Unlike the findings digest this does not truncate by default: a client
+    deliverable has to account for every re-tested item, and a row here is
+    small (status, type, URL, the engine's re-test detail).  Rows are ordered
+    still_vuln first -- the narrative should lead with what is still
+    exploitable, not with the good news.
+    """
+    order = {"still_vuln": 0, "error": 1, "skipped": 2, "fixed": 3}
+    counts = {"fixed": 0, "still_vuln": 0, "error": 0, "skipped": 0}
+
+    collected: list[tuple[str, dict, dict]] = []
+    for r in results:
+        d = _d(r)
+        v = d.get("verify") or {}
+        st = str(v.get("status") or "error")
+        counts[st] = counts.get(st, 0) + 1
+        collected.append((st, d, v))
+    collected.sort(key=lambda t: order.get(t[0], 9))
+
+    rows: list[dict] = []
+    for i, (st, d, v) in enumerate(collected[:max_findings], 1):
+        rows.append({
+            "n": i,
+            "status": st,
+            "type": str(d.get("type") or "unknown"),
+            "severity": str(d.get("severity") or ""),
+            "url": _clip(d.get("url"), _URL_CAP),
+            "method": str(d.get("method") or "GET"),
+            "param": d.get("param") or "",
+            "payload": _clip(d.get("payload"), _PAYLOAD_CAP),
+            "detail": _clip(v.get("detail"), _DETAIL_CAP),
+        })
+
+    stats = {
+        "total": len(results),
+        "counts": counts,
+        "fixed": counts["fixed"],
+        "still_vuln": counts["still_vuln"],
+        "error": counts["error"],
+        "skipped": counts["skipped"],
+        "included": len(rows),
+        "omitted": max(0, len(results) - len(rows)),
+    }
+    return rows, stats
+
+
 # ---------------------------------------------------------------------------
 # Prompt
 # ---------------------------------------------------------------------------
@@ -330,11 +436,92 @@ Hard constraints:
 5. Professional, concise, aimed at engineers and security owners.
 6. If the finding list is empty, say so plainly and do not invent anything."""
 
+_SYSTEM_VERIFY_ZH = """你是一名资深 Web 安全工程师，负责为客户撰写**漏洞修复验证报告**（复测报告）。
+
+输入是一次复测的客观结果：每条历史漏洞都带一个复测状态 ——
+`still_vuln`（仍可利用）、`fixed`（已修复）、`error`（无法判定）、`skipped`（无法自动复测）。
+
+硬性约束：
+1. 只能使用输入中提供的事实（URL、参数、类型、严重度、复测状态、复测详情）。禁止编造未列出的漏洞、修复代码或统计数据。
+2. **禁止修改任何一条的复测状态**，也禁止把 skipped / error 叙述成 fixed 或 still_vuln —— 它们的结论是"未知"。
+3. 输出纯 Markdown，不要用代码围栏包裹整篇报告，不要寒暄。
+4. 结构必须严格如下：
+
+## 修复验证摘要
+（2-4 句：复测了多少条、多少已修复、多少仍可利用，修复是否算通过；存在未知状态时要说明）
+
+## 修复状态总览
+（Markdown 表格：状态 / 数量）
+
+## 仍可利用项（优先处理）
+（每条：类型、URL、参数、为什么仍然能利用、具体修复建议。没有则明确写"无"）
+
+## 无法判定项
+（哪些条目状态未知及原因；没有则写"无"）
+
+## 修复建议与后续步骤
+（有序列表，可执行）
+
+5. 语言：简体中文。风格专业、客观，面向研发负责人与客户。
+6. 可以指出**修复不彻底**的迹象（例如只做了输入过滤而没有输出编码、修了一个上下文而同类上下文仍可注入），但必须基于输入中的证据，不得推测。"""
+
+_SYSTEM_VERIFY_EN = """You are a senior web security engineer writing a
+**remediation verification report** for a client.
+
+The input is the objective result of re-testing historical findings.  Each item
+carries a status: `still_vuln`, `fixed`, `error`, or `skipped`.
+
+Hard constraints:
+1. Use ONLY the given facts (URL, parameter, type, severity, status, detail).
+   Never invent findings, fixes or statistics.
+2. NEVER alter a status, and never present `skipped` / `error` as if the
+   outcome were known -- their result is UNKNOWN.
+3. Plain Markdown, no whole-report code fence, no pleasantries.
+4. Structure exactly:
+
+## Verification Summary
+## Status Overview
+## Still Exploitable (fix first)
+## Undetermined
+## Recommended Next Steps
+
+5. Professional and factual, aimed at engineering owners and the client.
+6. You may call out signs of INCOMPLETE remediation (input filtering without
+   output encoding, one context fixed while a sibling stays injectable), but
+   only from evidence present in the input."""
+
 
 def build_prompt(rows: list[dict], stats: dict, target: str, meta: dict,
-                 lang: str = "zh") -> list[dict]:
-    """Build the chat messages.  Facts in, prose out, nothing else."""
+                 lang: str = "zh", task: str = "findings") -> list[dict]:
+    """Build the chat messages.  Facts in, prose out, nothing else.
+
+    ``task`` selects the brief and the payload shape: a scan report argues about
+    what was found, a verification report argues about whether it is still
+    there.  Mixing the two briefs would let the model re-grade a re-test result
+    as if it had discovered it.
+    """
     lang = lang if lang in _COPY else "zh"
+    if task == "verify":
+        system = _SYSTEM_VERIFY_ZH if lang == "zh" else _SYSTEM_VERIFY_EN
+        payload = {
+            "target": target,
+            "generated": meta.get("generated", ""),
+            "source_report": meta.get("source_report", ""),
+            "verification_stats": stats,
+            "items": rows,
+        }
+        blob = json.dumps(payload, ensure_ascii=False, indent=1)
+        user = (
+            "以下是一次漏洞修复复测的客观结果（JSON），每条都带复测状态。"
+            "请据此撰写修复验证报告。\n\n```json\n" + blob + "\n```\n"
+        ) if lang == "zh" else (
+            "Objective results of one remediation re-test (JSON) follow, each "
+            "item carrying its status. Write the verification report from "
+            "them.\n\n```json\n" + blob + "\n```\n"
+        )
+        return [{"role": "system", "content": system},
+                {"role": "user", "content": user}]
+
     system = _SYSTEM_ZH if lang == "zh" else _SYSTEM_EN
     payload = {
         "target": target,
@@ -622,8 +809,8 @@ def _md_to_html(md: str) -> str:
 # Deterministic fallback (the pre-existing, corpus-driven path)
 # ---------------------------------------------------------------------------
 
-def template_report(findings: list, target: str, meta: dict,
-                    reason: str = "", lang: str = "zh") -> str:
+def _template_findings(findings: list, target: str, meta: dict,
+                       reason: str = "", lang: str = "zh") -> str:
     """Build the same structure without any model, from the advice corpus.
 
     This is the safety net: an unreachable pool must still yield a report a
@@ -727,11 +914,138 @@ def template_report(findings: list, target: str, meta: dict,
     return "\n".join(lines).strip() + "\n"
 
 
+def _template_verify(results: list, target: str, meta: dict,
+                     reason: str = "", lang: str = "zh") -> str:
+    """The verification section, written from the re-test results alone.
+
+    Ordering mirrors the brief: still-exploitable first, then undetermined,
+    then the summary.  ``skipped`` and ``error`` are reported as UNKNOWN and
+    never folded into "fixed" -- conflating those is exactly how a
+    verification report lies to a client about their remediation.
+    """
+    from . import fix_advice
+
+    c = _COPY.get(lang, _COPY["zh"])
+    v = _COPY_VERIFY.get(lang, _COPY_VERIFY["zh"])
+    rows, stats = summarize_verify(results)
+    counts = stats["counts"]
+
+    lines: list[str] = []
+    if reason:
+        lines.append(f"> {c['degraded_note'].format(reason=reason)}")
+        lines.append("")
+
+    # -- summary -----------------------------------------------------------
+    lines.append(f"## {v['summary']}")
+    lines.append("")
+    lines.append(v["meta_line"].format(
+        target=target, n=stats["total"],
+        source=meta.get("source_report") or "-"))
+    lines.append("")
+    if stats["total"] == 0:
+        lines.append(c["none"])
+    elif counts["still_vuln"]:
+        lines.append(v["some_vuln"].format(n=counts["still_vuln"]))
+    elif counts["fixed"] == stats["total"]:
+        lines.append(v["all_fixed"])
+    else:
+        lines.append(v["none_fixed"])
+    if counts["skipped"]:
+        lines.append("")
+        lines.append(v["skipped_note"].format(n=counts["skipped"]))
+    if counts["error"]:
+        lines.append("")
+        lines.append(v["error_note"].format(n=counts["error"]))
+    lines.append("")
+
+    # -- overview ----------------------------------------------------------
+    lines.append(f"## {v['overview']}")
+    lines.append("")
+    lines.append(f"| {v['status']} | {v['count']} |")
+    lines.append("|---|---|")
+    for key in ("still_vuln", "fixed", "error", "skipped"):
+        lines.append(f"| {v[key]} | {counts[key]} |")
+    lines.append("")
+
+    # -- still exploitable -------------------------------------------------
+    lines.append(f"## {v['still']}")
+    lines.append("")
+    still = [r for r in rows if r["status"] == "still_vuln"]
+    if not still:
+        lines.append(v["none_items"])
+    else:
+        for r in still:
+            lines.append(f"- **{r['type']}** · {r['severity']} · `{r['url']}`")
+            if r.get("param"):
+                lines.append(f"  - {c['param']}：`{r['param']}`"
+                             f"（`{r['method']}`）")
+            if r.get("detail"):
+                lines.append(f"  - {c['verify']}结果：{r['detail']}")
+            adv = fix_advice.get_advice(r["type"])
+            if adv.get("headline"):
+                lines.append(f"  - {c['fix']}：{adv['headline']}")
+    lines.append("")
+
+    # -- undetermined ------------------------------------------------------
+    lines.append(f"## {v['undetermined']}")
+    lines.append("")
+    unknown = [r for r in rows if r["status"] in ("error", "skipped")]
+    if not unknown:
+        lines.append(v["none_items"])
+    else:
+        for r in unknown:
+            detail = f" · {r['detail']}" if r.get("detail") else ""
+            lines.append(f"- [{v.get(r['status'], r['status'])}] "
+                         f"**{r['type']}** · `{r['url']}`{detail}")
+    lines.append("")
+
+    # -- next steps --------------------------------------------------------
+    lines.append(f"## {v['next']}")
+    lines.append("")
+    steps: list[str] = []
+    if counts["still_vuln"]:
+        steps.append(f"优先处理上面的 {counts['still_vuln']} 条仍可利用项，"
+                     f"并确认修复确实已部署到被测环境。")
+    if counts["skipped"]:
+        steps.append(f"{counts['skipped']} 条无法自动复测，安排人工确认"
+                     f"（存储型需要展示页，盲打需要回连通道）。")
+    if counts["error"]:
+        steps.append(f"{counts['error']} 条判定失败，重新跑一次复测。")
+    if counts["fixed"] and not counts["still_vuln"]:
+        steps.append("把已修复项固化成回归用例，避免同类上下文再次引入。")
+    if not steps:
+        steps.append("无需额外动作。")
+    for i, s in enumerate(steps, 1):
+        lines.append(f"{i}. {s}")
+    lines.append("")
+
+    if stats.get("omitted"):
+        lines.append(c["truncated"].format(n=stats["omitted"]))
+        lines.append("")
+    return "\n".join(lines).strip() + "\n"
+
+
+def template_report(data: list, target: str, meta: dict,
+                    reason: str = "", lang: str = "zh",
+                    task: str = "findings") -> str:
+    """Deterministic fallback section, dispatching on ``task``.
+
+    ``findings`` (default) renders the scan report from the advice corpus;
+    ``verify`` renders the remediation-verification section from the re-test
+    results.  Both are always available, so a caller never has to handle
+    "no model, no section".
+    """
+    if task == "verify":
+        return _template_verify(data, target, meta, reason, lang)
+    return _template_findings(data, target, meta, reason, lang)
+
+
 # ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
 
-def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
+def build_ai_report(data: list, target: str, meta: dict | None = None, *,
+                    task: str = "findings",
                     pool=None, config_path: str | None = None,
                     models: list[str] | None = None,
                     lang: str = "zh",
@@ -740,16 +1054,27 @@ def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
                     verify_facts: bool = True) -> AIReport:
     """Produce the narrative section, never raising on LLM failure.
 
+    ``task`` selects the brief and the digest shape:
+
+      * ``"findings"`` (default) -- a scan report, from finding dicts/objects;
+      * ``"verify"`` -- a remediation-verification report, from the re-test
+        results ``verify_fix.verify_findings`` returns (each carrying
+        ``verify.status``).
+
     On success: a model written section + routing info.
     On any failure (no config, all candidates rate-limited/blocked, bad
-    output): the deterministic template, with ``error`` explaining why.
+    output): the deterministic template for that task, with ``error``
+    explaining why.
     """
     meta = meta or {}
     lang = lang if lang in _COPY else "zh"
-    rep = AIReport(finding_count=len(findings))
+    rep = AIReport(finding_count=len(data))
     t0 = time.time()
 
-    rows, stats = summarize_findings(findings, max_findings)
+    if task == "verify":
+        rows, stats = summarize_verify(data, max_findings)
+    else:
+        rows, stats = summarize_findings(data, max_findings)
 
     resolved_pool = pool
     if resolved_pool is None:
@@ -762,12 +1087,13 @@ def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
             _log.warning("ai report: no usable LLM pool (%s); using template",
                          reason)
             rep.error = reason
-            rep.markdown = template_report(findings, target, meta, reason, lang)
+            rep.markdown = template_report(data, target, meta, reason, lang,
+                                           task=task)
             rep.html = _md_to_html(rep.markdown)
             rep.elapsed = time.time() - t0
             return rep
 
-    messages = build_prompt(rows, stats, target, meta, lang)
+    messages = build_prompt(rows, stats, target, meta, lang, task)
     try:
         result = resolved_pool.complete(messages, models=models,
                                         timeout=timeout,
@@ -777,7 +1103,8 @@ def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
         _log.warning("ai report: pool exhausted (%s); using template", reason)
         rep.error = reason
         rep.attempts = [a.to_dict() for a in getattr(e, "attempts", [])]
-        rep.markdown = template_report(findings, target, meta, reason, lang)
+        rep.markdown = template_report(data, target, meta, reason, lang,
+                                       task=task)
         rep.html = _md_to_html(rep.markdown)
         rep.elapsed = time.time() - t0
         return rep
@@ -790,7 +1117,8 @@ def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
         reason = "model returned an empty completion"
         rep.error = reason
         rep.attempts = [a.to_dict() for a in result.attempts]
-        rep.markdown = template_report(findings, target, meta, reason, lang)
+        rep.markdown = template_report(data, target, meta, reason, lang,
+                                       task=task)
         rep.html = _md_to_html(rep.markdown)
         rep.elapsed = time.time() - t0
         return rep
