@@ -739,8 +739,19 @@ def test_from_file_env_override(tmp_path, mock_llm, monkeypatch):
 
 def test_shipped_default_pool_config_is_valid():
     """The config that ships in the package must load and expand -- a typo
-    there would silently disable --ai-report for everyone."""
-    pool = LLMPool.from_file()
+    there would silently disable --ai-report for everyone.
+
+    Resolved via the package path directly rather than a bare
+    ``LLMPool.from_file()``: tests/conftest.py points XSSENTINEL_LLM_CONFIG at
+    a non-existent file so a test can never reach a live provider, and this
+    test is specifically about the file that ships.
+    """
+    import os
+    from xssentinel.core import llm_pool as _lp
+    shipped = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(_lp.__file__))),
+        "data", "llm_providers.json")
+    pool = LLMPool.from_file(shipped)
     assert len(pool.candidates) >= 5
     ids = {c.provider_id for c in pool.candidates}
     assert "amd" in ids and "sensenova" in ids

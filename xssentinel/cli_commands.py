@@ -297,6 +297,8 @@ def _run_serve(args):
         db_path=args.db_path,
         webhook_urls=args.webhook_urls or None,
         webhook_secret=args.webhook_secret,
+        # Phase 176: pool path for scans that request an AI narrative.
+        ai_config=getattr(args, "ai_config", None),
     )
 
 

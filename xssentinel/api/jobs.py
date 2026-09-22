@@ -87,6 +87,16 @@ class Job:
     # monotonic start timestamp used by the job-timeout reaper.
     _worker: Callable[[Job], None] | None = field(default=None, repr=False)
     _started_mono: float | None = field(default=None, repr=False)
+    # Phase 176: the AI narrative section for this scan, when one was asked
+    # for (``options.ai_report``) or generated on demand via ``?ai=1``.
+    # In-memory only, deliberately: the narrative is a derived artifact, and
+    # persisting it would mean a sqlite schema migration for something that
+    # can be regenerated.  See ``server._generate_job_ai_report``.
+    _ai_report: dict | None = field(default=None, repr=False)
+    # Phase 176: serialises generation so two concurrent report requests for
+    # the same scan cannot both bill a model call for identical output.
+    _ai_lock: threading.Lock = field(default_factory=threading.Lock,
+                                     repr=False)
 
     def to_summary(self) -> dict:
         """Return a JSON-serializable summary (no findings list)."""
@@ -103,6 +113,10 @@ class Job:
             "high_severity_count": self.high_severity_count,
             "requests_made": self.requests_made,
             "waf_name": self.waf_name,
+            # Phase 176: lets a client tell whether the report it is about to
+            # fetch already carries an AI narrative, without fetching it first.
+            # False after a restart, which is accurate -- the cache is in-memory.
+            "has_ai_report": self._ai_report is not None,
         }
 
     def to_detail(self) -> dict:

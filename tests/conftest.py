@@ -17,11 +17,38 @@ inside fixtures/tests right before real loopback work and
 """
 from __future__ import annotations
 
+import os
 import socket as _socket
 import sys
+import tempfile
 import threading
 
 import pytest
+
+# ---------------------------------------------------------------------------
+# Phase 176: keep the suite off live model providers
+# ---------------------------------------------------------------------------
+# LLM pool discovery ends at the pool shipped INSIDE the package -- real
+# vendors with real credentials.  So a test that forgets to pass an explicit
+# pool path does not fail loudly; it makes a live HTTP call to a model
+# provider.  That is slow, flaky, and ships whatever the test "scanned" to a
+# third party.
+#
+# This happened for real: the API AI-report tests resolved jobs through
+# JobManager directly (bypassing the handler that injects the pool path), so
+# "no pool configured" quietly meant "use the shipped pool", and four tests
+# spent 34s each talking to a live vendor.
+#
+# Pointing the env override at a path that does not exist makes any such
+# mistake degrade to the deterministic template instead.  Tests that DO
+# exercise the pool pass an explicit ``config_path``, which takes precedence
+# over the environment -- so this does not weaken them.
+#
+# Escape hatch for a deliberate live-integration run:
+#   XSSENTINEL_ALLOW_LIVE_LLM_IN_TESTS=1 pytest ...
+if os.environ.get("XSSENTINEL_ALLOW_LIVE_LLM_IN_TESTS") != "1":
+    os.environ["XSSENTINEL_LLM_CONFIG"] = os.path.join(
+        tempfile.gettempdir(), "xssentinel-no-live-llm-in-tests.json")
 
 SOCKETPAIR_OK = True
 

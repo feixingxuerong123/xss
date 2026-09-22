@@ -439,18 +439,28 @@ def clean_completion(text: str) -> str:
 # Fact verification (the model writes prose, not facts)
 # ---------------------------------------------------------------------------
 
-def _verify_facts(text: str, rows: list[dict]) -> list[str]:
+def _verify_facts(text: str, rows: list[dict],
+                  extra_urls: list[str] | None = None) -> list[str]:
     """Flag URLs / payloads the model quoted that are NOT in the digest.
 
-    A cheap, deliberately conservative check: it only looks for quoted URLs
-    and backticked payload-looking strings, and reports the ones it cannot
-    attribute.  It never edits the text -- a false accusation is worse than a
-    missed one here, so the bar is "this looks like a real URL/payload and it
-    is nowhere in the input".
+    ``extra_urls`` carries legitimate non-finding URLs the model is expected to
+    reference -- above all the scan TARGET, which is in the prompt's metadata
+    and which any summary naturally names.  Without it every report about a
+    clean scan gets a false "unverified content" warning: with zero findings
+    there are no finding URLs at all, so the target was the only URL in the
+    text and got reported as invented.  (Observed live on an API scan of a
+    reflector that produced 0 findings.)
+
+    A cheap, deliberately conservative check: it only looks at quoted URLs and
+    backticked payload-looking strings, and reports what it cannot attribute.
+    It never edits the text -- a false accusation is worse than a missed one
+    here, so the bar is "this looks like a real URL/payload and it appears
+    nowhere in the input".
     """
     if not text:
         return []
     known_urls = {r["url"] for r in rows if r.get("url")}
+    known_urls |= {u for u in (extra_urls or []) if u}
     known_payloads = {r["payload"] for r in rows if r.get("payload")}
     # Hosts are enough: models legitimately shorten a long URL to its path.
     known_hosts = set()
@@ -792,7 +802,9 @@ def build_ai_report(findings: list, target: str, meta: dict | None = None, *,
         "",
     ]
     if verify_facts:
-        warnings = _verify_facts(text, rows)
+        # The target is legitimate context -- it is in the prompt's metadata,
+        # so naming it is not invention.
+        warnings = _verify_facts(text, rows, extra_urls=[target])
         if warnings:
             rep.fact_warnings = warnings
             items = "；".join(f"`{w}`" for w in warnings)

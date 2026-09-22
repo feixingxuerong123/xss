@@ -26,6 +26,9 @@ from urllib.parse import urlparse, parse_qs
 
 from .jobs import Job, JobManager, JobNotFoundError, JobState
 from .validation import DEFAULT_MAX_BODY_BYTES, cors_origin_for, parse_cors_origins, validate_findings
+from ..core.logger import get_logger
+
+_log = get_logger("api")
 
 
 # ---------------------------------------------------------------------------
@@ -116,6 +119,69 @@ def _record_scan_metrics(job: Job, findings: list[dict]) -> None:
         pass
 
 
+def _parse_ai_models(raw) -> list[str] | None:
+    """Accept ``"a,b"`` or ``["a", "b"]``; ``None`` means "no filter"."""
+    if not raw:
+        return None
+    if isinstance(raw, str):
+        names = [m.strip() for m in raw.split(",") if m.strip()]
+    elif isinstance(raw, (list, tuple)):
+        names = [str(m).strip() for m in raw if str(m).strip()]
+    else:
+        return None
+    return names or None
+
+
+def _generate_job_ai_report(job: Job, findings, meta: dict,
+                            opts: dict | None = None) -> dict | None:
+    """Phase 176: produce and cache the AI narrative section for one job.
+
+    Returns the ``AIReport.to_meta()`` dict, or ``None`` if generation failed
+    outright.  Three properties matter:
+
+    * **Never raises.**  ``report_ai`` already degrades to the deterministic
+      advice corpus when no provider answers; this wrapper only has to make
+      sure that even a coding error inside it cannot change a scan's verdict
+      or a job's state.  A narrative section is never worth failing a scan.
+    * **Idempotent.**  Guarded by ``job._ai_lock`` plus the cached
+      ``job._ai_report``, so concurrent report requests for one scan bill at
+      most one model call.
+    * **Server-configured pool.**  ``_ai_config`` is injected by the server's
+      own startup flag, never read from the request body -- a client must not
+      be able to point the pool loader at an arbitrary path.
+
+    ``findings`` may be Finding objects or the plain dicts a job stores;
+    ``report_ai`` handles both.
+    """
+    opts = opts or {}
+    with job._ai_lock:
+        if job._ai_report is not None:
+            return job._ai_report
+        try:
+            from xssentinel.core import report_ai
+            rep = report_ai.build_ai_report(
+                findings, job.target_url, meta,
+                config_path=opts.get("_ai_config"),
+                models=opts.get("ai_models"),
+                lang=opts.get("ai_lang") or "zh",
+                timeout=opts.get("ai_timeout"),
+                max_findings=int(opts.get("ai_max_findings") or 25),
+            )
+            job._ai_report = rep.to_meta()
+            if rep.used_llm:
+                _log.warning("api: AI report for %s written by %s "
+                             "(%d failover(s), %.1fs)", job.scan_id,
+                             rep.model or rep.provider, rep.failovers,
+                             rep.elapsed)
+            else:
+                _log.warning("api: AI report for %s degraded to template -- %s",
+                             job.scan_id, rep.error)
+        except Exception as e:
+            _log.warning("api: AI report generation failed for %s: %s",
+                         job.scan_id, e)
+        return job._ai_report
+
+
 def _scan_worker(job: Job) -> None:
     """Worker thread body: build a Scanner, scan, publish findings.
 
@@ -186,6 +252,21 @@ def _scan_worker(job: Job) -> None:
                     cov_summary = cov.summary()
             except Exception:
                 cov_summary = None
+
+        # Phase 176: optional AI narrative, generated on the job's OWN worker
+        # thread -- no HTTP request ever waits on a model.  Done BEFORE
+        # publishing on purpose: the job reaches COMPLETED only once its
+        # report is complete, so a client that polls and then fetches the
+        # report gets the section in one round trip instead of racing the
+        # generator.  Skipped for a cancelled scan (partial findings are not
+        # worth spending provider quota on); `?ai=1` can still generate later.
+        if opt.get("ai_report") and not job._cancel_requested.is_set():
+            _generate_job_ai_report(job, scanner.findings, {
+                "target": job.target_url,
+                "generated": datetime.now().isoformat(timespec="seconds"),
+                "requests": getattr(scanner, "requests_made", 0),
+                "waf": getattr(scanner, "waf_name", None),
+            }, opt)
 
         # Mark completed (or cancelled if requested).
         # We need to peek the cancel flag through the manager -- but the
@@ -358,6 +439,17 @@ def _handle_create_scan(ctx, m, body, query) -> Response:
         "dom_engine": body.get("dom_engine", "auto"),
         "crawl_engine": body.get("crawl_engine", "auto"),
         "custom_payloads": body.get("custom_payloads") or [],
+        # Phase 176: AI narrative, opt-in per scan.  Off by default because
+        # enabling it sends the target URL, parameters and payloads to a
+        # third-party model provider.  Note `_ai_config` is server-side only:
+        # a client picks which models may be used, never a filesystem path for
+        # the server to load.
+        "ai_report": bool(body.get("ai_report", False)),
+        "ai_lang": str(body.get("ai_lang") or "zh"),
+        "ai_models": _parse_ai_models(body.get("ai_model")),
+        "ai_timeout": body.get("ai_timeout"),
+        "ai_max_findings": int(body.get("ai_max_findings") or 25),
+        "_ai_config": getattr(ctx.server, "ai_config", None),
     }
 
     mgr = ctx.server.job_manager
@@ -491,6 +583,25 @@ def _handle_get_report(ctx, m, body, query) -> Response:
         "requests": job.requests_made,
         "waf": job.waf_name,
     }
+
+    # Phase 176: the AI narrative travels with the report.  Two ways in:
+    #   * the scan asked for it up front (``options.ai_report``) -> already
+    #     cached, so this costs no request latency at all;
+    #   * ``?ai=1`` for a scan that did not ask -> generated NOW, which BLOCKS
+    #     this request for as long as the provider pool takes (seconds, or up
+    #     to the pool's attempt budget when providers are rate-limited).  Use
+    #     the scan-time option when request latency matters.
+    # ``?ai=refresh`` drops the cache first, to re-generate after the findings
+    # or the pool changed.  A degraded (template) section is a valid result,
+    # never an error: the pool falling over must not fail the report.
+    ai_flag = (query.get("ai") or [""])[0].strip().lower()
+    if ai_flag == "refresh":
+        job._ai_report = None
+    if job._ai_report is not None:
+        meta["ai_report"] = job._ai_report
+    elif ai_flag in ("1", "true", "yes", "on", "refresh"):
+        meta["ai_report"] = _generate_job_ai_report(
+            job, shim.findings, meta, job.options)
 
     builder = {
         "html": reportmod.build_html, "json": reportmod.build_json,
@@ -808,11 +919,16 @@ class StdlibServer:
                  webhook_urls: list[str] | None = None,
                  webhook_secret: str | None = None,
                  cors_origins: str | list[str] | None = None,
-                 max_body_bytes: int = DEFAULT_MAX_BODY_BYTES) -> None:
+                 max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
+                 ai_config: str | None = None) -> None:
         self.host = host
         self.port = port
         self.api_key = api_key
         self.verbose = verbose
+        # Phase 176: LLM provider pool config for scans that ask for an AI
+        # narrative.  A server-side setting on purpose -- a request body may
+        # choose models, but never a filesystem path for the server to load.
+        self.ai_config = ai_config
         # Phase 29-1: CORS allowlist.  When empty, no Access-Control-Allow-Origin
         # header is emitted (browsers block cross-origin requests).  When set
         # to "*" or a list of origins, only matching origins are allowed.
@@ -979,7 +1095,8 @@ class FlaskServer:
     def __init__(self, api_key: str | None = None,
                  max_jobs: int = 200, verbose: bool = False,
                  cors_origins: str | list[str] | None = None,
-                 max_body_bytes: int = DEFAULT_MAX_BODY_BYTES) -> None:
+                 max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
+                 ai_config: str | None = None) -> None:
         try:
             from flask import Flask, request, jsonify, Response as FResp
         except ImportError as e:
@@ -988,6 +1105,8 @@ class FlaskServer:
             ) from e
         self.api_key = api_key
         self.verbose = verbose
+        # Phase 176: see StdlibServer.__init__ -- server-side pool path.
+        self.ai_config = ai_config
         self.cors_origins = parse_cors_origins(cors_origins)
         self.max_body_bytes = max_body_bytes
         self.job_manager = JobManager(max_jobs=max_jobs)
@@ -1102,14 +1221,16 @@ def run_stdio(host: str = "127.0.0.1", port: int = 8000,
               webhook_urls: list[str] | None = None,
               webhook_secret: str | None = None,
               cors_origins: str | list[str] | None = None,
-              max_body_bytes: int = DEFAULT_MAX_BODY_BYTES) -> int:
+              max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
+              ai_config: str | None = None) -> int:
     """Start the API server.  Used by the CLI ``--serve`` flag."""
     if use_flask:
         try:
             server = FlaskServer(api_key=api_key, max_jobs=max_jobs,
                                  verbose=verbose,
                                  cors_origins=cors_origins,
-                                 max_body_bytes=max_body_bytes)
+                                 max_body_bytes=max_body_bytes,
+                                 ai_config=ai_config)
             server.run(host=host, port=port)
             return 0
         except RuntimeError as e:
@@ -1121,6 +1242,7 @@ def run_stdio(host: str = "127.0.0.1", port: int = 8000,
                           webhook_urls=webhook_urls,
                           webhook_secret=webhook_secret,
                           cors_origins=cors_origins,
-                          max_body_bytes=max_body_bytes)
+                          max_body_bytes=max_body_bytes,
+                          ai_config=ai_config)
     server.serve_forever()
     return 0

@@ -469,6 +469,39 @@ def test_fact_check_ignores_prose_without_urls_or_payloads():
     assert ra._verify_facts("本次扫描风险较高，建议尽快修复。", rows) == []
 
 
+def test_fact_check_accepts_the_scan_target_when_passed_as_context():
+    """Regression: a clean scan has no finding URLs, so the target was the
+    only URL in the model's summary and got flagged as invented.  Observed on
+    a live API scan (0 findings)."""
+    rows, _ = ra.summarize_findings([])
+    warnings = ra._verify_facts(
+        "目标 http://t.local/?q=test 扫描完成，未发现缺陷。", rows,
+        extra_urls=["http://t.local/?q=test"])
+    assert warnings == []
+
+
+def test_fact_check_still_flags_a_foreign_host_alongside_the_target():
+    rows, _ = ra.summarize_findings([])
+    warnings = ra._verify_facts(
+        "目标 http://t.local/ 与 http://elsewhere.example/x", rows,
+        extra_urls=["http://t.local/"])
+    assert any("elsewhere.example" in w for w in warnings)
+    assert not any("t.local" in w for w in warnings)
+
+
+def test_clean_scan_report_has_no_false_unverified_warning(tmp_path):
+    """The whole path, not just the checker: a 0-finding run must not warn."""
+    mock = _Mock(reply=_LONG_REPLY + "\n目标 http://clean.local/?q=1 未发现缺陷。").start()
+    try:
+        rep = ra.build_ai_report([], "http://clean.local/?q=1", {},
+                                 pool=_pool_for(tmp_path, mock))
+    finally:
+        mock.stop()
+    assert rep.used_llm
+    assert rep.fact_warnings == []
+    assert "未能与扫描结果核对" not in rep.markdown
+
+
 def test_invented_url_surfaces_in_the_report_header(tmp_path):
     mock = _Mock(reply=_LONG_REPLY + "\n详见 http://made-up.example/x").start()
     try:

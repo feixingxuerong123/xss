@@ -620,6 +620,10 @@ API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host
 
 **实测（2026-09-22，全部真实调用）**：4 家供应商里 3 家的模型名有误或已下线（`stealth/ox-alpha` 404 测试期已结束、`z-ai/glm-5.2` 410 于 2026-08-21 EOL、`glm 5.3 flash` 真名 `GLM-5.3-Flash`），1 家整个账户被封（OpenRouter 403 "Inference is blocked on this account"）→ 配置里 `enabled: false` 并留证据。**ping 延迟不能用来排序**：AMD `DeepSeek-V4-Flash` 用 16-token ping 测是 0.9s，生成真实报告 **153s 超时**；最终首选 `sensenova/deepseek-v4-flash`（9.3s 出 1712 字符完整报告）。另有两种 200 假成功被识别并拦住：flash 类模型随机返回**空 body**（7 次探测 3 次），推理模型把预算烧在思考通道上导致**正文仅 95 字符** → 新增 `truncated_response` 与调用方传入的 `report_ai.MIN_REPORT_CHARS` 门槛。端到端：v1 排序 3 次转移 / 95.4s，最终排序 1 次转移 / 44.5s，全程无人工干预。报告 HTML 渲染 **escape-first**（正文按构造即含活载荷，报告不能自己变成载体），模型输出的思考通道由 `clean_completion` 两段式清洗。CLI：`--ai-report --ai-config --ai-lang --ai-model --ai-max-findings --ai-timeout`，另有 `--ai-check`（逐候选真实探测打健康表，key 全程脱敏）与 `--ai-reset`。测试 `tests/test_llm_pool.py` + `tests/test_ai_report.py` 共 104 例，全部用本地 mock（真 HTTP，不改 transport）；**mock server 必须用 `HTTP/1.0`**——禁用 keep-alive 才不会在本机劣化 loopback 下出现池化连接撞死 socket（`WinError 10054`）的假失败。
 
+**REST API（`--serve`）同样可选该章节**：`POST /api/v1/scans` 带 `{"ai_report": true}` 时，扫描**自己的 worker 线程**在收尾阶段撰写章节，因此**没有任何 HTTP 请求会等模型**，客户端第一次取报告就已带章节；`GET .../report?ai=1` 用于给没提前要求的扫描补生成（会阻塞该次请求），`?ai=refresh` 强制重建。每扫描可调 `ai_lang`（zh|en）/ `ai_model`（模型白名单）/ `ai_timeout` / `ai_max_findings`。结果缓存在 job 上（**内存态**，重启即失效——它是派生产物，重算即可，为此不动 sqlite schema），并用锁保证并发请求最多只产生一次模型调用。池路径只由服务端 `--ai-config` 决定（缺省用包内池），请求体只能挑模型、不能指定路径。三个测试文件合计 **128 例**。
+
+**本轮踩到的真问题（测试隔离）**：`ai_config` 为空时池发现顺序会**回落到包内的真池（真 key）**，于是"未配池"的 API 测试会真的调用外部供应商——曾让 4 个用例各花 34s 出网，整组 438s。两层修法：`tests/conftest.py` 默认把 `XSSENTINEL_LLM_CONFIG` 指向一个不存在的路径（任何忘记显式传池的测试都降级而非出网；`XSSENTINEL_ALLOW_LIVE_LLM_IN_TESTS=1` 可放开跑真集成），而**显式传入的 `config_path` 优先于环境变量**，所以真正测池的用例不受影响。修复后同一组 438s → 49s。
+
 ---
 
 ## 扩展指南
@@ -643,5 +647,5 @@ API 攻击面加固：--serve 状态变更路由同源防御（Phase 70）+ Host
 - 可复现 PoC 对 DOM 类漏洞会用真实执行型 payload（`<img src=x onerror=alert(document.domain)>`）替换内部标记，确保 PoC 页面点开即触发。
 - **盲打 XSS（L5）已支持自动确认**：`--oob self` 起本地监听器、`--oob interactsh` 用公共服务器，收到 beacon 即判定为已确认盲打；若超时未收到回调则不报（避免误判）。`interactsh` 模式需要公网可达的 callback 域名与网络连通，离线时优雅降级为"注入但未确认"。
 - **存储型 XSS（L4）需要"展示页"**：你必须提供注入接口与其对应的展示/列表接口（如评论提交页 + 评论列表页），框架才会重新拉取确认持久化执行。
-- **AI 报告（`--ai-report`）默认关闭**：一旦开启，目标 URL、参数与载荷会发送给 `data/llm_providers.json` 里配置的第三方 LLM 供应商。检测结论不受影响（模型只写叙事章节），但数据出网这件事由操作者决定。`--serve`（REST API）模式目前未接入该章节。
+- **AI 报告（`--ai-report`）默认关闭**：一旦开启，目标 URL、参数与载荷会发送给 `data/llm_providers.json` 里配置的第三方 LLM 供应商。检测结论不受影响（模型只写叙事章节），但数据出网这件事由操作者决定。REST API（`--serve`）走同一套开关：扫描时 `{"ai_report": true}`，或取报告时 `?ai=1`。
 - 这是安全研究/授权测试工具，请勿用于未授权目标。
