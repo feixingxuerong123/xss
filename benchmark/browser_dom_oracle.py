@@ -209,6 +209,26 @@ SETTLE_OVERRIDES = {
     "smil-animate-end": 1800,
 }
 
+# Per-HOST settle, added in Phase 176i to settle a specific disagreement.
+#
+# `mxss-body-br` x `iframe_src` came back exec_ihn1=False / exec_ihn2=True,
+# i.e. looking like mutation XSS.  But an iframe only loads its srcdoc AFTER it
+# is attached to a live document, and it loads asynchronously -- so "False on
+# round 1" has two very different explanations:
+#
+#   (a) the payload really is inert until a serialisation round-trip (mXSS), or
+#   (b) 300ms simply was not enough for the child document to run, and round 2
+#       only "executed" because the frame had finished loading in the meantime.
+#
+# Guessing between them is how you either ship an engine bug or delete a real
+# one, so the host gets a generous settle and the case is re-measured.  If
+# exec_ihn1 flips to True it was (b) -- a harness artefact, and the sandbox was
+# right all along.  If it stays False while exec_ihn2 stays True, it is (a) and
+# sandbox.py owes us a MUTATED verdict for srcdoc.
+HOST_SETTLE_OVERRIDES = {
+    "iframe_src": 1500,
+}
+
 # ---------------------------------------------------------------------------
 # Hosts: where the payload lands in the document the server returned.
 # ``__P__`` is the reflection point.  ``sink_ok`` says which sinks are a
@@ -422,7 +442,8 @@ def run(settle_ms: int = 300, limit: int = 0) -> list[dict]:
                     row: dict = {"payload": pid, "host": hid,
                                  "tags": list(tags), "document": doc}
 
-                    settle = max(settle_ms, SETTLE_OVERRIDES.get(pid, 0))
+                    settle = max(settle_ms, SETTLE_OVERRIDES.get(pid, 0),
+                                 HOST_SETTLE_OVERRIDES.get(hid, 0))
 
                     # ---- sink 1: the parser, i.e. what the server reflected --
                     _Handler.PAGES["/p"] = doc

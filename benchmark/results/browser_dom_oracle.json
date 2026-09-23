@@ -17553,7 +17553,8 @@
     "url"
    ],
    "document": "<html><body><template><a href=\"jav&#x00;ascript:__x()\">c</a></template></body></html>",
-   "exec_parser": false,
+   "exec_parser": null,
+   "parser_err": "Page.goto: net::ERR_CONNECTION_RESET at http://127.0.0.1:37412/p\nCall log:\n  - navigating to \"http://127.0.0.1:37412/p\",",
    "exec_ihn1": false,
    "serialized": "<template><a href=\"jav�ascript:__x()\">c</a></template>",
    "live_after_parse": [],
@@ -17803,7 +17804,8 @@
     "event"
    ],
    "document": "<html><body><!--<img src=x onerror=\"ale\u0000rt(1);__x()\">--></body></html>",
-   "exec_parser": false,
+   "exec_parser": null,
+   "parser_err": "Page.goto: net::ERR_CONNECTION_RESET at http://127.0.0.1:37412/p\nCall log:\n  - navigating to \"http://127.0.0.1:37412/p\",",
    "exec_ihn1": false,
    "serialized": "<!--<img src=x onerror=\"ale�rt(1);__x()\">-->",
    "live_after_parse": [],
@@ -17943,7 +17945,8 @@
     "event"
    ],
    "document": "<html><body><select><option><img src=x onerror=\"ale\u0000rt(1);__x()\"></option></select></body></html>",
-   "exec_parser": false,
+   "exec_parser": null,
+   "parser_err": "Page.goto: net::ERR_CONNECTION_RESET at http://127.0.0.1:37412/p\nCall log:\n  - navigating to \"http://127.0.0.1:37412/p\",",
    "exec_ihn1": false,
    "serialized": "<select><option><img src=\"x\" onerror=\"ale�rt(1);__x()\"></option></select>",
    "live_after_parse": [
@@ -20026,8 +20029,7 @@
     "event"
    ],
    "document": "<html><body><a href=\"<svg><animate onbegin=__x() attributeName=\"x\" begin=\"indefinite\" dur=\"1s\"></animate></svg>\">t</a></body></html>",
-   "exec_parser": null,
-   "parser_err": "Page.goto: net::ERR_CONNECTION_RESET at http://127.0.0.1:20798/p\nCall log:\n  - navigating to \"http://127.0.0.1:20798/p\",",
+   "exec_parser": false,
    "exec_ihn1": false,
    "serialized": "<a href=\"&lt;svg&gt;&lt;animate onbegin=__x() attributeName=\" x\"=\"\" begin=\"indefinite\" dur=\"1s\">\"&gt;t</a>",
    "live_after_parse": [],

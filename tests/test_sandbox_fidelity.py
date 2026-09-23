@@ -8,8 +8,11 @@ and the cost is asymmetric -- an inert verdict on something the browser runs is
 a missed vulnerability the scanner never reports.
 
 So this test replays the recorded Chromium ground truth
-(benchmark/results/browser_dom_oracle.json -- 900 payload x context x sink cases,
-regenerate with `python -m benchmark.browser_dom_oracle`) and asserts the two
+(benchmark/results/browser_dom_oracle.json -- 60 payloads x 20 contexts = 1200
+rows.  The "900" that used to sit here was simply the last count anybody
+refreshed, which is how a stale oracle number survives for months.  Regenerate
+with `python -m benchmark.browser_dom_oracle`; the full matrix takes ~35 min,
+so it is easy to leave half-done) and asserts the two
 numbers that decide whether the sandbox may be consulted at all:
 
     MISSED == 0   the sandbox never calls a browser-executing payload inert
