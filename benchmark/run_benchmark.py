@@ -50,6 +50,12 @@ def main():
     # 94 s, so the budget, not the case, was the binding constraint.
     parser.add_argument("--timeout", type=int, default=90,
                         help="Per-case scanner timeout in seconds (default: 90)")
+    # Same class of gap as the missing --timeout above: `runner.run_benchmark`
+    # has taken an `engine` argument since Phase 43, but this entry point never
+    # exposed it -- so `python -m benchmark.run_benchmark` could not measure the
+    # async engine at all, which is part of how async accuracy ended up unmeasured.
+    parser.add_argument("--engine", choices=["sync", "async"], default="sync",
+                        help="Which scanner engine to score (default: sync).")
     args = parser.parse_args()
 
     # --- Run XSSentinel evaluation via runner ---
@@ -58,6 +64,7 @@ def main():
     result = run_benchmark(
         port=args.port,
         timeout=args.timeout,
+        engine=args.engine,
         max_payloads=args.max_payloads,
         max_transforms=args.max_transforms,
         quick=args.quick,
@@ -149,6 +156,10 @@ def main():
     json_path = os.path.join(out_dir, f"benchmark_{ts}.json")
     result_dict = {
         "tool": result.tool,
+        # Which engine produced these numbers.  Without it a sync headline and an
+        # async headline are the same file apart from their timestamps, and the
+        # two are NOT comparable (see the sync-TP / async-FN on pos-cdata-01).
+        "engine": result.engine,
         "timestamp": result.timestamp,
         "total_cases": result.total_cases,
         "total_time_s": result.total_time_s,
@@ -157,6 +168,17 @@ def main():
         "recall": result.recall, "precision": result.precision,
         "fpr": result.fpr, "f1": result.f1,
         "errors": getattr(result, "errors", None),
+        # Skipped cases are a hole in the denominator, and recall/precision are
+        # computed over what RAN (runner.py:569-570).  Printing only tp/fp/tn/fn
+        # lets a run that scored 185 of 192 cases read as a clean sweep, so the
+        # count that explains the gap has to sit next to the rates.
+        "skipped": sum(1 for c in result.cases if c["verdict"] == "SKIP"),
+        "scored": sum(1 for c in result.cases
+                      if c["verdict"] in ("TP", "FP", "TN", "FN")),
+        # How much of this sweep only produced an answer after a re-measure.  A
+        # run with 192 verdicts and 12 retries is a much less healthy machine than
+        # one with no retries, and the rates alone cannot tell them apart.
+        "retried_cases": sum(1 for c in result.cases if c.get("retries")),
         "by_context": result.by_context,
         "false_positives": result.false_positives,
         "false_negatives": result.false_negatives,

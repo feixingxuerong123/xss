@@ -170,3 +170,172 @@ def test_overall_fpr_zero(benchmark_server):
         f"FPR regression: {fp_count}/{total} negative cases produced findings "
         f"(FPR={fpr:.2%}). Expected 0%."
     )
+
+
+# ---------------------------------------------------------------------------
+# The scorer itself: SKIP is a verdict, not a crash
+# ---------------------------------------------------------------------------
+
+class TestScoringHandlesSkipVerdict:
+    """`--engine async` used to die on the first sync-only manifest case.
+
+    `runner.evaluate_case` returns `verdict="SKIP"` for a case an engine does not
+    implement (Phase 112: an engine is neither credited nor blamed for a vector it
+    lacks).  Neither `_print_progress`'s icon table nor the by-context /
+    by-difficulty buckets had a `skip` key, so the run raised
+    `KeyError: 'SKIP'` / `KeyError: 'skip'` -- and a twelve-minute sweep produced
+    no result file at all, which is why the async pipeline's accuracy has never
+    been measured.  Six manifest cases declare `engines: ["sync"]`, so this was
+    not a hypothetical path.
+    """
+
+    @staticmethod
+    def _row(verdict, ground_truth, context="html_element", difficulty="easy"):
+        from benchmark.runner import CaseResult
+        return CaseResult(case_id="t-" + verdict, path="/r/x", param="q",
+                          mode="raw_element", ground_truth=ground_truth,
+                          context=context, difficulty=difficulty,
+                          detected=verdict in ("TP", "FP"), verdict=verdict)
+
+    def test_skip_row_survives_metrics_and_progress(self, capsys):
+        from benchmark.runner import _compute_metrics, _print_progress
+        # every context stated explicitly: `_row` has a default, and a test that
+        # counts rows per context must not depend on remembering it
+        rows = [self._row("SKIP", "safe", context="html_element"),
+                self._row("TP", "vulnerable", context="html_element"),
+                self._row("TN", "safe", context="url_href"),
+                self._row("ERROR", "safe", context="url_href",
+                          difficulty="hard"),
+                self._row("FN", "vulnerable", context="event_handler")]
+        m = _compute_metrics(rows, 12.0)
+        assert m.by_context["html_element"]["skip"] == 1
+        assert m.by_context["html_element"]["total"] == 2
+        assert m.by_context["url_href"]["total"] == 2, "ERROR needs a bucket too"
+        for i, r in enumerate(rows, 1):
+            _print_progress(i, len(rows), r)          # must not raise
+        out = capsys.readouterr().out
+        assert "[-]" in out, "a skipped case has no progress marker"
+
+    def test_rates_ignore_skipped_but_the_count_stays_visible(self):
+        """recall/precision are computed over what RAN; the artifact has to say
+        how much did not run, or 192 manifest cases and 185 scored ones look
+        identical."""
+        from benchmark.runner import _compute_metrics
+        rows = [self._row("TP", "vulnerable")] + \
+               [self._row("SKIP", "vulnerable", context=f"c{i}")
+                for i in range(5)]
+        m = _compute_metrics(rows, 1.0)
+        assert m.recall == 1.0 and m.fn == 0
+        assert sum(s["skip"] for s in m.by_context.values()) == 5
+        assert sum(s["total"] for s in m.by_context.values()) == 6
+
+
+# ---------------------------------------------------------------------------
+# The retry policy itself: an unfinished scan is re-measured in BOTH classes
+# ---------------------------------------------------------------------------
+
+class TestErroredCasesGetRetriedInBothClasses:
+    """A scan the harness could not finish is retried whether ground truth says
+    "vulnerable" or "safe".
+
+    The Phase 69 retry loop was conditioned on ``verdict == "FN"``, so only
+    errored *vulnerable* cases were re-run.  A 90 s timeout on a safe case --
+    ``neg-graphql-01`` in the 192-case run -- was accepted on the first attempt
+    and then dropped out of the denominator, so one flaky loopback read as "1
+    fewer case measured" instead of "1 case worth trying again" (it scanned
+    clean in 9.2 s when re-run on its own).
+
+    The counterpart assertions below are the point of the class: exhausting the
+    budget must leave the honest verdict in place.  Re-trying is not a licence
+    to call a scan that never finished a correct non-detection.
+    """
+
+    @staticmethod
+    def _row(verdict, ground_truth, error=""):
+        from benchmark.runner import CaseResult
+        return CaseResult(case_id="neg-retry-01", path="/s/x", param="q",
+                          mode="raw_element", ground_truth=ground_truth,
+                          context="html_element", difficulty="easy",
+                          detected=verdict in ("TP", "FP"), verdict=verdict,
+                          error=error)
+
+    @staticmethod
+    def _script(monkeypatch, rows):
+        """Hand back `rows` in order (repeating the last one) and record calls."""
+        import benchmark.runner as runner
+        calls = []
+
+        def fake(base_url, case, timeout, max_payloads, max_transforms,
+                 engine="sync"):
+            calls.append({"case": case["id"], "engine": engine,
+                          "timeout": timeout})
+            return rows[min(len(calls) - 1, len(rows) - 1)]
+
+        monkeypatch.setattr(runner, "evaluate_case", fake)
+        return calls
+
+    def test_errored_safe_case_is_measured_again(self, monkeypatch):
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("ERROR", "safe", error="timeout after 90s"),
+            self._row("TN", "safe"),
+        ])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "neg-graphql-01"},
+                                          90, 14, 12, "sync")
+        assert len(calls) == 2, "an errored safe case used to stop at one try"
+        assert r.verdict == "TN" and not r.error
+        assert r.retries == 1, "the row must say this answer arrived on try two"
+
+    def test_errored_vulnerable_case_still_retried_on_named_engine(
+            self, monkeypatch):
+        """Phase 69 behaviour preserved, and the retry stays on the engine it
+        was asked for -- a retry that silently fell back to `sync` would be
+        measuring a different engine than the one being scored."""
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("FN", "vulnerable", error="scanner killed"),
+            self._row("TP", "vulnerable"),
+        ])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "pos-x-01"},
+                                          45, 14, 12, "async")
+        assert len(calls) == 2
+        assert {c["engine"] for c in calls} == {"async"}
+        assert {c["timeout"] for c in calls} == {45}
+        assert r.verdict == "TP"
+
+    def test_answered_case_is_not_wasted_on_a_retry(self, monkeypatch):
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [self._row("FP", "safe")])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "neg-y-01"},
+                                          90, 14, 12, "sync")
+        assert len(calls) == 1, "a completed scan must not be re-run"
+        assert r.retries == 0
+        assert r.verdict == "FP", "a retry loop must not soften a false positive"
+
+    def test_exhausted_budget_leaves_safe_case_error_not_tn(self, monkeypatch):
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("ERROR", "safe", error="timeout after 90s")])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "neg-z-01"},
+                                          90, 14, 12, "sync")
+        assert len(calls) == 1 + runner._ERROR_RETRIES
+        assert r.retries == runner._ERROR_RETRIES
+        assert r.verdict == "ERROR"
+        assert r.error == "timeout after 90s"
+
+    def test_exhausted_budget_leaves_vulnerable_case_fn(self, monkeypatch):
+        """A vulnerability never evaluated is still a miss, not a free pass --
+        the asymmetry against the safe case above is deliberate and is the
+        reason `ERROR` had to stay visible in the aggregate."""
+        import benchmark.runner as runner
+        self._script(monkeypatch, [
+            self._row("FN", "vulnerable", error="timeout after 90s")])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "pos-w-01"},
+                                          90, 14, 12, "sync")
+        assert r.verdict == "FN"
+

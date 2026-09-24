@@ -1,14 +1,18 @@
 """Re-measure benchmark cases that ERRORED instead of being scored.
 
 `run_benchmark.py` excludes an errored case from its rate metrics -- correct, a
-scan that never finished carries no information -- but it only *retries* errored
-vulnerable cases (`r.verdict != "FN"` breaks the retry loop), so an errored
-NEGATIVE just disappears.  A full 185 run can therefore report
-recall/precision = 1.0 while two safe cases went unmeasured.
+scan that never finished carries no information.  Until Phase 176n it also only
+*retried* errored vulnerable cases (`r.verdict != "FN"` broke the retry loop), so
+an errored NEGATIVE dropped out on the first try: a full run could report
+recall/precision = 1.0 while a safe case went unmeasured.  Both classes are now
+retried in `runner._evaluate_with_retries`.
 
-This re-runs named cases alone, with a budget the 185-case sweep cannot afford
-each of them, so the missing cells get filled by measurement rather than assumed
-to be TN.
+This tool is what a retry cannot reach.  The sweep gives every case the same
+90 s ceiling and two attempts; a case that still errors there needs a budget the
+sweep cannot afford per cell, and needs to be re-measured alone so nothing else
+on the box is competing for loopback.  That is how `neg-graphql-01` (ERROR after
+90.0 s inside the sweep) came back TN in 9.2 s on its own -- an environment
+artefact, recorded as such rather than assumed to be TN.
 
 Usage:
   python -m benchmark.err_case_recheck                     # the known two

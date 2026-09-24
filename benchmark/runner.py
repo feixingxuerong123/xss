@@ -55,6 +55,10 @@ class CaseResult:
                              # startup, noisy on degraded-loopback hosts)
     finding_details: list = field(default_factory=list)
     error: str = ""
+    # How many EXTRA times the harness re-ran this case before it answered.
+    # A case that recovered on retry and one clean on the first try otherwise
+    # look identical in the artifact; only the second is a healthy measurement.
+    retries: int = 0
 
 
 @dataclass
@@ -438,6 +442,71 @@ def evaluate_case(base_url: str, case: dict, timeout: int,
 _ERROR_RETRIES = 2
 
 
+def _evaluate_with_retries(base_url: str, case: dict, timeout: int,
+                           max_payloads: int, max_transforms: int,
+                           engine: str = "sync",
+                           verbose: bool = False) -> CaseResult:
+    """Run one case, re-measuring scans the harness could not complete.
+
+    Phase 176n: the retry used to be conditioned on ``verdict == "FN"``, i.e.
+    only *vulnerable* cases got a second chance.  An errored safe case -- a
+    90s timeout on ``neg-graphql-01``, say -- was accepted on the first try and
+    simply vanished from the scored denominator.  A killed loopback connection
+    is a harness artefact, not a measurement, so both classes are retried here.
+
+    What is deliberately NOT retried away is the verdict: when the budget runs
+    out, a safe case still reports ERROR rather than TN.  A scan that never
+    finished is not evidence of a correct non-detection; retrying only buys a
+    second chance at a real answer.  How many extra attempts it took is recorded
+    on the row, so "recovered" and "clean first time" stay distinguishable.
+    """
+    r = evaluate_case(base_url, case, timeout, max_payloads, max_transforms,
+                      engine=engine)
+    for attempt in range(_ERROR_RETRIES):
+        if not r.error:
+            break
+        if verbose:
+            print(f"    [retry {attempt + 1}/{_ERROR_RETRIES}] "
+                  f"{r.case_id} ({r.error})", file=sys.stderr)
+        r = evaluate_case(base_url, case, timeout, max_payloads,
+                          max_transforms, engine=engine)
+        r.retries = attempt + 1
+    return r
+
+
+def _quick_subset(cases: list, per_class: int = 5) -> list:
+    """Pick a quick-run subset that spans the manifest, not its first page.
+
+    The previous pick was literally `[...][:5]` per class, i.e. whichever contexts
+    happen to sit at the top of `manifest.json`.  CI runs `--quick` on every build
+    (see .github/workflows/ci.yml), so the same few contexts were re-measured
+    forever while, say, every `url_href` case waited for a manual full run.
+
+    Round-robin over `context` keeps it deterministic -- the same manifest always
+    yields the same N cases, so two builds are comparable -- while making the N
+    cases cover N different contexts.
+    """
+    out: list = []
+    for gt in ("vulnerable", "safe"):
+        by_ctx: dict[str, list] = {}
+        for c in cases:
+            if c.get("ground_truth") == gt:
+                by_ctx.setdefault(c.get("context") or "unknown", []).append(c)
+        picked, rank = 0, 0
+        while picked < per_class:
+            took = False
+            for ctx in sorted(by_ctx):
+                bucket = by_ctx[ctx]
+                if rank < len(bucket) and picked < per_class:
+                    out.append(bucket[rank])
+                    picked += 1
+                    took = True
+            if not took:
+                break                      # every context is exhausted
+            rank += 1
+    return out
+
+
 def run_benchmark(port: int = DEFAULT_PORT, concurrency: int = 1,
                   timeout: int = 60, max_payloads: int = 14,
                   max_transforms: int = 12, quick: bool = False,
@@ -450,7 +519,8 @@ def run_benchmark(port: int = DEFAULT_PORT, concurrency: int = 1,
         timeout: Per-case scanner timeout in seconds.
         max_payloads: Scanner payload budget.
         max_transforms: Scanner transform budget.
-        quick: If True, run a subset (first 5 pos + first 5 neg) for fast iteration.
+        quick: If True, run a stratified subset (5 pos + 5 neg, one per
+            distinct context where possible) for fast iteration.
         verbose: Print per-case progress.
 
     Returns:
@@ -464,10 +534,9 @@ def run_benchmark(port: int = DEFAULT_PORT, concurrency: int = 1,
     cases = manifest["cases"]
 
     if quick:
-        pos = [c for c in cases if c["ground_truth"] == "vulnerable"][:5]
-        neg = [c for c in cases if c["ground_truth"] == "safe"][:5]
-        cases = pos + neg
-        print(f"[*] Quick mode: {len(cases)} cases")
+        cases = _quick_subset(cases)
+        print(f"[*] Quick mode: {len(cases)} cases "
+              f"({len(set(c.get('context') for c in cases))} distinct contexts)")
 
     # Ensure results directory exists
     _RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -502,27 +571,17 @@ def run_benchmark(port: int = DEFAULT_PORT, concurrency: int = 1,
 
     if concurrency <= 1:
         for i, case in enumerate(cases):
-            r = evaluate_case(base_url, case, timeout, max_payloads,
-                              max_transforms, engine=engine)
-            # Phase 69: retry cases the scanner could not complete.  This
-            # host (and CI runners like it) intermittently kills loopback
-            # connections, which otherwise masquerades as a miss.
-            for _attempt in range(_ERROR_RETRIES):
-                if r.verdict != "FN" or not r.error:
-                    break
-                if verbose:
-                    print(f"    [retry {_attempt + 1}/{_ERROR_RETRIES}] "
-                          f"{r.case_id} ({r.error})", file=sys.stderr)
-                r = evaluate_case(base_url, case, timeout, max_payloads,
-                                  max_transforms, engine=engine)
+            r = _evaluate_with_retries(base_url, case, timeout, max_payloads,
+                                       max_transforms, engine, verbose)
             results.append(r)
             if verbose or (i + 1) % 10 == 0:
                 _print_progress(i + 1, len(cases), r)
     else:
         with ThreadPoolExecutor(max_workers=concurrency) as pool:
             futures = {
-                pool.submit(evaluate_case, base_url, case, timeout,
-                            max_payloads, max_transforms, engine): case
+                pool.submit(_evaluate_with_retries, base_url, case, timeout,
+                            max_payloads, max_transforms, engine, verbose):
+                case
                 for case in cases
             }
             done_count = 0
@@ -552,7 +611,13 @@ def run_benchmark(port: int = DEFAULT_PORT, concurrency: int = 1,
 
 def _print_progress(done: int, total: int, r: CaseResult):
     """Print a progress line."""
-    icon = {"TP": "+", "TN": ".", "FP": "!", "FN": "x", "ERROR": "?"}[r.verdict]
+    # `SKIP` is a verdict like any other: a case an engine does not implement.
+    # It used to be missing from this dict, so `--engine async` raised
+    # KeyError:'SKIP' the moment it reached one of the six sync-only manifest
+    # cases -- which is how the async pipeline ended up with no measured accuracy
+    # at all.  No default here on purpose: an unknown verdict must raise.
+    icon = {"TP": "+", "TN": ".", "FP": "!", "FN": "x", "ERROR": "?",
+            "SKIP": "-"}[r.verdict]
     err = f" ERR:{r.error[:30]}" if r.error else ""
     print(f"  [{done:3d}/{total}] [{icon}] {r.case_id} "
           f"({r.scan_time_s:.1f}s){err}")
@@ -578,7 +643,7 @@ def _compute_metrics(results: list[CaseResult], total_time: float) -> BenchmarkR
         ctx = r.context or "unknown"
         if ctx not in by_context:
             by_context[ctx] = {"tp": 0, "fp": 0, "tn": 0, "fn": 0,
-                               "error": 0, "total": 0}
+                               "error": 0, "skip": 0, "total": 0}
         by_context[ctx][r.verdict.lower()] += 1
         by_context[ctx]["total"] += 1
 
@@ -588,7 +653,7 @@ def _compute_metrics(results: list[CaseResult], total_time: float) -> BenchmarkR
         diff = r.difficulty or "unknown"
         if diff not in by_difficulty:
             by_difficulty[diff] = {"tp": 0, "fp": 0, "tn": 0, "fn": 0,
-                                   "error": 0, "total": 0}
+                                   "error": 0, "skip": 0, "total": 0}
         by_difficulty[diff][r.verdict.lower()] += 1
         by_difficulty[diff]["total"] += 1
 
@@ -675,14 +740,20 @@ def print_summary(result: BenchmarkResult):
                   f"difficulty={fn['difficulty']}")
 
     # Context breakdown
-    print(f"\n  BY CONTEXT:")
+    print("\n  BY CONTEXT:")
     for ctx, stats in sorted(result.by_context.items()):
         total = stats["total"]
         tp_s = stats["tp"]
         fp_s = stats["fp"]
         fn_s = stats["fn"]
         err_s = stats.get("error", 0)
-        tail = f"  ERR={err_s}" if err_s else ""
+        skip_s = stats.get("skip", 0)
+        # total without TN and SKIP in the tail is not a checkable number: a
+        # context whose six cases were all skipped because the engine does not
+        # implement them read exactly like one where six were scored clean.
+        tail = (f"  TN={stats['tn']}"
+                + (f"  ERR={err_s}" if err_s else "")
+                + (f"  SKIP={skip_s}" if skip_s else ""))
         print(f"    {ctx:30s}  total={total:2d}  TP={tp_s}  FP={fp_s}  "
               f"FN={fn_s}{tail}")
 
