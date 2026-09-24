@@ -29,6 +29,11 @@ EVIDENCE_MODEL = "model-only"
 # that never claimed execution, and that a client would read as hedging.
 EVIDENCE_NO_BROWSER = "browser-unavailable"
 
+# The top class: a real browser replayed the page and a dialog carried the
+# probe token.  A constant so emit sites that KNOW they were browser-confirmed
+# can state it without hand-typing the string the helper would return.
+EVIDENCE_BROWSER_EXECUTED = "browser-executed"
+
 # What a captured secret is replaced with in a finding, a PoC and a stored job.
 REDACTED = "<redacted-credential>"
 
@@ -83,7 +88,7 @@ def _grade_evidence(headless, confidence: str, detail: str,
         else:
             outcome = "not-fired"
     if outcome == "fired":
-        return "browser-executed", "high", detail
+        return (EVIDENCE_BROWSER_EXECUTED, "high", detail)
     if outcome == "not-fired":
         return ("browser-refuted", "low",
                 detail + " | browser replay did NOT reproduce execution: report"

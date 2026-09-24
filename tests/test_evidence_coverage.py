@@ -19,31 +19,55 @@ from __future__ import annotations
 import ast
 import os
 import sys
+from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 PKG = os.path.join(ROOT, "xssentinel")
 
-# Sites that construct a Finding without stating a tier.  Measured 2026-09-24:
-#   async_scanner 15, cli_commands 2, cli_runner 2, api/server 1,
-#   layers/common 1  (that last one fans out ~32 finding types and needs a
-#   per-caller verdict -- ~10 of its callers gate on verify_semantic, the rest
-#   are static -- so it is NOT safe to stamp one tier on all of them).
-# Lower this number as they are graded; never raise it.  It started at 35, and
-# 14 sites in the sync pipeline (scanner_layers 9, upload_probe 3, scenarios 1,
-# plus the polyglot row) are now graded -- 13 as `browser-unavailable` (header
-# audits / pure reflection: nothing judged execution) and the verify_semantic
-# ones as the new `model-only` tier, because calling a sandbox verdict
-# "browser-unavailable" erases the judgement that WAS made.
-_UNGRADED_BUDGET = 21
+# Sites that construct a Finding without stating a tier.  Measured 2026-09-24
+# after grading 27 sites: only `layers/common.py` remains, and it is left
+# deliberately -- 32 finding types fan out of that one helper, ~10 of its
+# callers gate on verify_semantic and the rest are static, so one default tier
+# would be invented data (task: classify per caller).
+_UNGRADED_BUDGET = 0
+
+# `Finding(**f)` where f is a NAME is a pass-through: the tier belongs to the
+# code that built the dict, and stamping it here would OVERWRITE a correct
+# value.  `layers/common.py` is the exception that proves the rule -- it is the
+# one choke point every advanced layer routes through, and it derives the tier
+# from the caller's own `headless` argument (pinned by
+# `test_the_layer_choke_point_still_defaults_a_class` below).
+#
+# Keyed by MODULE + COUNT, not file:line -- an insertion anywhere above a site
+# shifts its line number, so a line-pinned allow-list rots the moment the file
+# is edited (it did, once, within this same session).  Per-module counts still
+# catch a new pass-through hiding next to an old one.
+_PASSTHROUGH_SITES = {
+    "xssentinel/cli_commands.py": 2,       # retire_js + sqli advisory dicts
+    "xssentinel/cli_runner.py": 2,         # same, batch path
+    "xssentinel/api/server.py": 1,         # rehydrating findings from the store
+    "xssentinel/core/layers/common.py": 1,  # the layer choke point, graded here
+}
 
 # Anything that lowers the total to here is not "fixed", it is a deleted probe.
 _MIN_SITES = 40
 
 
+def _is_passthrough(node):
+    """True for `Finding(**f)` where f is a NAME -- forwarding, not authoring.
+
+    A dict LITERAL (`Finding(**{...})`) is still authoring: its keys are right
+    there in the source, and most real emit sites are written that way.
+    """
+    return (not node.args and len(node.keywords) == 1
+            and node.keywords[0].arg is None
+            and isinstance(node.keywords[0].value, ast.Name))
+
+
 def _sites():
-    """Every `Finding(...)` construction in the package: (path, lineno, graded)."""
+    """Every `Finding(...)` construction: (path, lineno, graded, passthrough)."""
     out = []
     for base, dirs, files in os.walk(PKG):
         dirs[:] = [d for d in dirs if d != "__pycache__"]
@@ -63,11 +87,25 @@ def _sites():
                     getattr(node.func, "id", None)
                 if fname != "Finding":
                     continue
+                pass_through = _is_passthrough(node)
                 seg = ast.get_source_segment(src, node) or ""
-                graded = "evidence_class" in seg or any(
+                graded = pass_through or "evidence_class" in seg or any(
                     k.arg == "evidence_class" for k in node.keywords)
-                out.append((os.path.relpath(path, ROOT), node.lineno, graded))
+                out.append((os.path.relpath(path, ROOT).replace(os.sep, "/"),
+                            node.lineno, graded, pass_through))
     return out
+
+
+def test_passthrough_sites_are_the_known_ones():
+    """Forwarding sites are exempt for a stated reason, so the reason is pinned.
+
+    A new `Finding(**f)` anywhere fails this, and so does one added inside an
+    already-exempt module -- counts are per module, not per file.
+    """
+    seen = Counter(p for p, _l, _g, pt in _sites() if pt)
+    assert dict(seen) == _PASSTHROUGH_SITES, (
+        "pass-through set drifted; expected %s got %s"
+        % (_PASSTHROUGH_SITES, dict(seen)))
 
 
 def test_the_ruler_finds_known_sites():
@@ -79,14 +117,14 @@ def test_the_ruler_finds_known_sites():
     """
     sites = _sites()
     assert len(sites) >= _MIN_SITES, f"parser sees only {len(sites)} sites"
-    graded = [s for s in sites if s[2]]
-    assert graded, "parser found zero graded sites: the check is broken"
+    graded = [s for s in sites if s[2] and not s[3]]
+    assert graded, "parser found zero authored+graded sites: the check is broken"
     # the module that started it all must still be one of them
-    assert any("scanner.py" in p for p, _l, g in graded if g)
+    assert any("scanner.py" in p for p, _l, g, _pt in graded if g)
 
 
 def test_no_new_un_graded_finding_site():
-    un = [f"{p}:{ln}" for p, ln, g in sorted(_sites()) if not g]
+    un = [f"{p}:{ln}" for p, ln, g, _pt in sorted(_sites()) if not g]
     assert len(un) <= _UNGRADED_BUDGET, (
         f"{len(un)} Finding() sites state no evidence_class (budget "
         f"{_UNGRADED_BUDGET}). Every one of these renders as an unqualified "
@@ -103,10 +141,36 @@ def test_graded_modules_stay_fully_graded():
     committed = ("core/scanner.py", "core/scanner_stored.py",
                  "core/scanner_crawl.py", "core/passive_proxy.py",
                  "core/time_xss.py", "core/scanner_layers.py",
-                 "core/upload_probe.py", "core/scenarios.py")
+                 "core/upload_probe.py", "core/scenarios.py",
+                 "core/async_scanner.py")
     bad = []
-    for path, lineno, graded in _sites():
+    for path, lineno, graded, _pt in _sites():
         norm = path.replace(os.sep, "/").split("xssentinel/")[-1]
         if norm in committed and not graded:
             bad.append(f"{norm}:{lineno}")
     assert not bad, "un-graded findings in committed modules: " + ", ".join(bad)
+
+
+def test_the_layer_choke_point_still_defaults_a_class():
+    """The exemption for `layers/common.py` is only true while that helper
+    keeps stating a tier -- so the behavior is pinned, not assumed.
+
+    The tier must come from what the CALLER already declared (a `headless`
+    dict), never from a guess about the layer: 32 different finding types flow
+    through this one function.
+    """
+    from xssentinel.core.findings import (EVIDENCE_BROWSER_EXECUTED,
+                                          EVIDENCE_NO_BROWSER)
+    from xssentinel.core.layers.common import _make_finding
+
+    plain = _make_finding(url="http://t/", ftype="postmessage_xss")
+    assert plain.data["evidence_class"] == EVIDENCE_NO_BROWSER
+
+    ran = _make_finding(url="http://t/", ftype="worker_xss",
+                        headless={"available": True, "confirmed": True})
+    assert ran.data["evidence_class"] == EVIDENCE_BROWSER_EXECUTED
+
+    # A caller that knows better wins: setdefault must not clobber it.
+    stated = _make_finding(url="http://t/", ftype="dangling_markup_potential",
+                           evidence_class="model-only")
+    assert stated.data["evidence_class"] == "model-only"

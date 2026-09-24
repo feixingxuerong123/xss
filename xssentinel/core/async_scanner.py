@@ -32,6 +32,8 @@ from typing import AsyncIterator
 from urllib.parse import urlparse, urljoin
 
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
+from .findings import (EVIDENCE_BROWSER_EXECUTED, EVIDENCE_MODEL,
+                       EVIDENCE_NO_BROWSER, EVIDENCE_OOB)
 from .scanner_layers import AdvancedLayerMixin
 from .scanner_crawl import CrawlMixin
 from .requester import JsonBody, CountingRequester
@@ -746,6 +748,7 @@ class AsyncScanner:
                         # WHERE the payload rode so the PoC replays the same
                         # carrier instead of guessing it from the method.
                         param_in="body" if is_body else "query",
+                        evidence_class=EVIDENCE_MODEL,
                     )
                     param_confirmed = True
                     break  # leave the variant loop; outer loop re-checks
@@ -799,6 +802,7 @@ class AsyncScanner:
                         # OTHER location, so the carrier here is the FLIPPED
                         # one -- exactly the value the PoC needs.
                         param_in="query" if is_body else "body",
+                        evidence_class=EVIDENCE_MODEL,
                     )
                     param_confirmed = True
                     break
@@ -859,6 +863,7 @@ class AsyncScanner:
                             confidence="high",
                             transform=tchain,
                             param_in="body" if is_body else "query",
+                            evidence_class=EVIDENCE_MODEL,
                         )
                         break
 
@@ -937,6 +942,7 @@ class AsyncScanner:
                                 confidence="high",
                                 transform=["csp_nonce"],
                                 param_in="body" if is_body else "query",
+                                evidence_class=EVIDENCE_MODEL,
                             )
 
         # Phase 132: L7 parameter layers (mutation / DOM clobber / template
@@ -1080,6 +1086,7 @@ class AsyncScanner:
                     confidence="high",
                     transform=[f"pre_encode:{struct}"],
                     param_in="body" if is_body else "query",
+                    evidence_class=EVIDENCE_MODEL,
                 )
                 return
 
@@ -1153,6 +1160,7 @@ class AsyncScanner:
                     confidence=r.get("confidence", "low"),
                     detail=r.get("detail", ""),
                     type="dom",
+                    evidence_class=EVIDENCE_NO_BROWSER,
                 )
             for d in dyn_findings:
                 yield Finding(
@@ -1164,8 +1172,10 @@ class AsyncScanner:
                     detail=d.get("detail", ""),
                     type="dom_dynamic",
                     headless={"available": True, "confirmed": True,
+                              "outcome": "fired",
                               "detail": "marker executed in real browser sink"},
                     proof=d.get("snippet", ""),
+                    evidence_class=EVIDENCE_BROWSER_EXECUTED,
                 )
         except Exception as e:
             _log.warning("async DOM layer error: %s", e, exc_info=self.verbose)
@@ -1380,6 +1390,7 @@ class AsyncScanner:
                 csp_header=resp_headers.get("Content-Security-Policy", ""),
                 bypass_type=best.get("type", ""),
                 bypass_reason=best.get("reason", ""),
+                evidence_class=EVIDENCE_NO_BROWSER,
             )
         except Exception as e:
             _log.warning("async CSP layer error: %s", e, exc_info=self.verbose)
@@ -1442,6 +1453,7 @@ class AsyncScanner:
                 context="cors_header", severity=sev,
                 type="cors_misconfig", confidence="firm",
                 evidence=evidence, detail=reason,
+                evidence_class=EVIDENCE_NO_BROWSER,
             )
             return  # one finding per origin is enough
 
@@ -1482,6 +1494,7 @@ class AsyncScanner:
             confidence=verdict.get("confidence", "firm"),
             evidence=verdict.get("evidence", ""),
             detail=verdict.get("detail", ""),
+            evidence_class=EVIDENCE_NO_BROWSER,
         )
 
     async def _probe_upload_async(self, session, url: str, params: dict,
@@ -1561,6 +1574,7 @@ class AsyncScanner:
                                " (filename echoed in upload response)",
                         evidence=evidence,
                         transform=["multipart_filename"],
+                        evidence_class=EVIDENCE_MODEL,
                     )
                     return  # one confirmed filename echo is enough
                 stored_url = _first_url_with(text, marker)
@@ -1603,6 +1617,7 @@ class AsyncScanner:
                                            stext.find(marker)
                                            + len(marker) + 120],
                             transform=["multipart_filename", "stored"],
+                            evidence_class=EVIDENCE_MODEL,
                         )
                         return
 
@@ -1686,6 +1701,7 @@ class AsyncScanner:
                                        stext.find(cmarker)
                                        + len(cmarker) + 120],
                         transform=["uploaded_file_content", "stored"],
+                        evidence_class=EVIDENCE_MODEL,
                     )
                     return
 
@@ -1741,6 +1757,7 @@ class AsyncScanner:
                         evidence=f"JSONP callback reflection: {v['detail']}",
                         type="jsonp_xss",
                         confidence="high",
+                        evidence_class=EVIDENCE_MODEL,
                     )
                     return  # one confirmed JSONP finding is enough
             except (BudgetExhausted, CircuitOpen):
@@ -1903,6 +1920,7 @@ class AsyncScanner:
                         f"(classic blind/stored flow)."),
                 headless=None,
                 proof={"callback": self.oob.callback_url(tok)},
+                evidence_class=EVIDENCE_OOB,
             )
         unconfirmed = [p for p in pending if p["token"] not in confirmed]
         if getattr(self, "oob_keep_listening", False):
