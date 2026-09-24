@@ -433,6 +433,10 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint,
                     ),
                     type="fuzzer_triage",
                     confidence="medium",
+                    # A triage row is a candidate, not a verified XSS: say so
+                    # in the same field that every other finding uses, or the
+                    # report implies a browser looked at it.
+                    evidence_class="browser-unavailable",
                 ))
             # Phase 22-4: use triage result to filter the param list.
             # Only the top-N highest-scoring params are passed to the
@@ -688,7 +692,9 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint,
     # alongside scanner findings).
     from .core.requester import Requester as _Requester
     _sync_req = _Requester(timeout=getattr(args, "timeout", 20) or 20,
-                           proxy=args.proxy)
+                           proxy=args.proxy,
+                           max_response_bytes=getattr(
+                               args, "max_response_bytes", 0))
     _maybe_run_fast_checks(args, _sync_req, parsed.geturl(),
                            args.method, params, data, shim.findings)
     shim.dedup()
@@ -1009,6 +1015,17 @@ def _write_report(scanner, target_url, output_path, fmt, meta=None):
     meta = meta or {}
     meta.setdefault("generated", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     meta.setdefault("requests", scanner.requests_made)
+    # Egress accounting from the one place that cannot miss a failure
+    # (Requester._send).  Without these two keys a scan of a dead target writes
+    # the same report as a scan of a clean one: `findings: []`, exit 0.
+    req = getattr(scanner, "req", None)
+    meta.setdefault("requests_attempted",
+                    getattr(req, "attempted_requests", None))
+    meta.setdefault("requests_failed", getattr(req, "failed_requests", None))
+    # A body cut short by the cap can hide a reflection, so "0 findings" from a
+    # bounded scan is qualified in the artifact rather than left absolute.
+    meta.setdefault("responses_truncated",
+                    getattr(req, "truncated_responses", None))
     meta.setdefault("waf", scanner.waf_name)
     # Phase 20-3: attach coverage tracker so HTML/JSON reports include
     # the scan-coverage section (which layers/params/payloads ran).

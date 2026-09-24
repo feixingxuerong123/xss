@@ -426,8 +426,17 @@ def payload_survived(response_text: str, payload: str) -> bool:
         try:
             if re.search(pat, response_text):
                 return True
-        except re.error:                                  # pragma: no cover
-            return True
+        except re.error as e:                            # pragma: no cover
+            # Fail CLOSED, and say so.  This is the gate that exists to stop
+            # "the payload came back, therefore exploitable" -- returning True
+            # here meant an unanswerable survival question was resolved in the
+            # direction that manufactures a finding, which is the one direction
+            # this function was written to refuse.  `pat` is built from
+            # re.escape(), so this is near-unreachable by construction; the
+            # warning is there so "near" is never read as "never".
+            _log.warning("payload survival check inconclusive (regex error: %s);"
+                         " not treating it as survived", e)
+            return False
     return False
 
 
@@ -1150,6 +1159,7 @@ def verify_headless(url: str, method: str, params: dict | None,
         from .dom_engine import get_shared_browser
     except Exception:
         return {"available": False, "confirmed": False,
+                "outcome": "unavailable",
                 "detail": "playwright not installed; skipped"}
 
     from urllib.parse import urlencode
@@ -1180,6 +1190,7 @@ def verify_headless(url: str, method: str, params: dict | None,
                 page.set_content(body, timeout=timeout * 1000)
             except Exception as e:
                 return {"available": True, "confirmed": False,
+                        "outcome": "errored",
                         "detail": f"headless POST error: {e}"}
         else:
             full_url = url
@@ -1221,12 +1232,21 @@ def verify_headless(url: str, method: str, params: dict | None,
                       f"NOT the payload; not confirmed")
         else:
             detail = "no dialog"
-        result = {"available": True, "confirmed": confirmed, "detail": detail}
+        # `outcome` exists because `confirmed: False` covers two opposite
+        # statements: "the browser ran the page and the payload did NOT execute"
+        # (evidence against the finding) and "the browser never got to look"
+        # (no evidence at all).  Grading confidence needs that distinction;
+        # `detail` has carried it in prose since Phase 46, and prose cannot be
+        # branched on.
+        result = {"available": True, "confirmed": confirmed,
+                  "outcome": "fired" if confirmed else "not-fired",
+                  "detail": detail}
         if screenshot_b64:
             result["screenshot_b64"] = screenshot_b64
         return result
     except Exception as e:  # pragma: no cover
         return {"available": True, "confirmed": False,
+                "outcome": "errored",
                 "detail": f"headless run error: {e}"}
     finally:
         # Pages are disposable; the shared browser is NOT closed.

@@ -376,15 +376,27 @@ class CoverageTracker:
             p["payloads_sent"] for ep in eps for p in ep["params"].values()
         )
 
-        # Per-layer coverage across endpoints.
+        # Per-layer coverage across endpoints.  A layer counts as covered only
+        # when it ran *and* did not report failure.  Presence was the old test,
+        # and `record_layer(..., "failed")` sets the key too -- so a browser that
+        # never launched, a DOM engine that crashed on start and a layer that
+        # finished its work all inflated the same percentage.
+        # `layer_coverage + layer_failed + layer_missing == endpoints` is the
+        # invariant the report text now leans on, so it is asserted in tests.
         layer_ran: dict[str, int] = {lid: 0 for lid, _, _ in LAYERS}
         layer_missing: dict[str, int] = {lid: 0 for lid, _, _ in LAYERS}
+        layer_failed: dict[str, int] = {lid: 0 for lid, _, _ in LAYERS}
         for ep in eps:
             for lid, _, _ in LAYERS:
-                if lid in ep["layers"]:
-                    layer_ran[lid] += 1
-                else:
+                rec = ep["layers"].get(lid)
+                if rec is None:
                     layer_missing[lid] += 1
+                    continue
+                status = rec.get("status") if isinstance(rec, dict) else "ran"
+                if status == "failed":
+                    layer_failed[lid] += 1
+                else:
+                    layer_ran[lid] += 1
 
         # All distinct payload classes observed.
         all_classes: set[str] = set()
@@ -403,8 +415,17 @@ class CoverageTracker:
                 "findings": total_findings,
                 "payloads_dispatched": total_payloads,
                 "payload_classes": sorted(all_classes),
+                # Endpoints where not one request came back with a response.
+                # They are listed because a scan of a dead host produces the
+                # same shape as a scan of a hardened one -- zero findings, some
+                # parameters recorded -- and the reader has to be able to tell
+                # them apart without reading the exception log.
+                "endpoints_no_response": sorted(
+                    f"{ep.get('method', 'GET')} {ep['url']}"
+                    for ep in eps if not ep.get("requests")),
             },
             "layer_coverage": layer_ran,
+            "layer_failed": layer_failed,
             "layer_missing": layer_missing,
             "endpoints": eps,
         }
@@ -533,9 +554,38 @@ class CoverageTracker:
                        else "cov-med" if overall >= 40
                        else "cov-low")
 
+        # A scan that received nothing still has a layer percentage -- and the
+        # percentage is precisely the number a reviewer trusts.  State the
+        # contradiction here, above the tables rather than under them, so nobody
+        # reads "82% coverage, 0 findings" as a clean bill without seeing that no
+        # endpoint answered and no layer actually completed.
+        noresp = t.get("endpoints_no_response") or []
+        failed_layers = {k: v for k, v in s["layer_failed"].items() if v}
+        warn_html = ""
+        if noresp:
+            shown = ", ".join(f"<code>{_html.escape(x)}</code>"
+                              for x in noresp[:8])
+            warn_html += (
+                '<div style="border-left:4px solid #f5a623;padding:8px 12px;'
+                'margin:10px 0;background:#fff8ec">'
+                f'<strong>No response from {len(noresp)} endpoint(s):</strong> '
+                f'{shown}{" &hellip;" if len(noresp) > 8 else ""}'
+                ' &mdash; the percentages below were recorded without a single '
+                'answering request, so "0 findings" here means <em>untested</em>, '
+                'not clean.</div>')
+        if failed_layers:
+            warn_html += (
+                '<div style="border-left:4px solid #f5a623;padding:8px 12px;'
+                'margin:10px 0;background:#fff8ec">'
+                '<strong>Layers that reported failure:</strong> '
+                + ", ".join(f"{_html.escape(k)}&times;{v}"
+                            for k, v in sorted(failed_layers.items()))
+                + ' &mdash; counted as <em>not</em> covered above.</div>')
+
         return f"""
 <section class="coverage">
 <h2>Scan Coverage Report</h2>
+{warn_html}
 <div class="cov-overview">
   <div class="cov-overall">
     <div class="cov-overall-label">Overall Layer Coverage</div>
@@ -574,8 +624,12 @@ class CoverageTracker:
   may have skipped checks (e.g. OOB blind injection disabled, or no DOM
   engine available).  "Reflected" tracks whether the probe marker appeared
   in the response; "Confirmed" means a payload actually executed.  Zero
-  findings with high layer coverage = the endpoint was tested thoroughly
-  and is genuinely clean.
+  findings <em>plus</em> high layer coverage <em>plus</em> at least one
+  answered request per tested endpoint is what a clean result looks like.
+  A layer listed under "reported failure" was attempted and did not finish,
+  and is <strong>not</strong> counted as covered; an endpoint that answered
+  nothing is named at the top of this section, and no coverage percentage
+  on this page makes a silent target into a secure one.
 </p>
 </section>
 """

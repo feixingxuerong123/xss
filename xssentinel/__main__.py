@@ -25,7 +25,8 @@ from urllib.parse import urlparse
 # Allow running as a module or script.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from xssentinel.core.requester import Requester
+from xssentinel.core.requester import (DEFAULT_MAX_RESPONSE_BYTES,
+                                       Requester)
 from xssentinel.core.oob import make_listener, oob_callback_warning
 from xssentinel.core.config import Config, save_config
 from xssentinel.core.checkpoint import Checkpoint
@@ -132,6 +133,22 @@ def build_parser():
                             " form/JSON bodies built from schemas, apiKey/"
                             " bearer security added as headers; pairs with"
                             " -o DIR.")
+    # Phase 176l: authorization scope for IMPORTED targets.  A browser HAR
+    # carries the site's CDN / analytics / SSO / ad domains next to the app, and
+    # those are other people's systems.  Payloads must never reach them just
+    # because they appeared in a file.
+    g_tgt.add_argument("--allow-host", dest="allow_host", action="append",
+                       default=[], metavar="HOST",
+                       help="Add HOST to the scan scope (repeatable). Applies to"
+                            " hosts imported by --har/--openapi, which are"
+                            " otherwise dropped unless they match a host you"
+                            " named with -u/--batch. Use '.example.com' to mean"
+                            " the whole domain.")
+    g_tgt.add_argument("--allow-any-host", dest="allow_any_host",
+                       action="store_true",
+                       help="Disable the imported-host scope check. Only for"
+                            " specs/HARs you are authorized to hit in full;"
+                            " prints the full host set it is about to probe.")
     g_tgt.add_argument("--self-test", action="store_true",
                        help="Start the local vuln server and run the full "
                             "self-test suite to validate every detection layer")
@@ -243,8 +260,20 @@ def build_parser():
     g_http.add_argument("--timeout", type=int, default=15)
     g_http.add_argument("--no-verify-ssl", action="store_true")
     g_http.add_argument("--rate-limit", type=float, default=0,
-                        help="Max requests/sec (0 = unlimited). Keeps the "
-                             "scanner polite on sensitive targets.")
+                        help="Max requests/sec for the WHOLE scan (0 = "
+                             "unlimited). Shared by every worker thread and "
+                             "every clone, so --threads does not multiply it. "
+                             "Keeps the scanner polite on sensitive targets.")
+    g_http.add_argument("--max-response-bytes", dest="max_response_bytes",
+                        type=int,
+                        default=DEFAULT_MAX_RESPONSE_BYTES,
+                        help=f"Bytes of response body to read per request "
+                             f"(default {DEFAULT_MAX_RESPONSE_BYTES}, 0 = "
+                             "unlimited). Stops a huge export/download endpoint"
+                             " from OOMing the scan; a body cut this short is"
+                             " counted as responses_truncated in the report,"
+                             " because a reflection past the cap is invisible,"
+                             " not absent.")
     g_http.add_argument("--max-requests", dest="max_requests", type=int,
                         default=None,
                         help="Stop the scan after this many outgoing "
@@ -838,6 +867,12 @@ def main(argv=None):
         _log.error("%s", load_err)
         return 2
 
+    # The operator-named targets are the authorization record.  Captured here
+    # because an import below replaces `urls` wholesale with spec-derived
+    # endpoints, after which "which hosts did the human actually type" would be
+    # unanswerable -- and that question is what scopes a probe.
+    operator_urls = list(urls)
+
     # Phase 88/89 (P1): --har / --openapi expand into one scan target per
     # captured/declared HTTP operation (method/body/cookies/headers or
     # security preserved).  Spec targets override the global
@@ -877,6 +912,47 @@ def main(argv=None):
         if not parsed.scheme or not parsed.netloc:
             _log.error("Invalid URL: %s", url)
             return 2
+
+    # Phase 176l: an imported host is not an authorized host.  A browser HAR
+    # carries the site's CDN / analytics / SSO domains next to the application,
+    # and probing those is contacting a third party.  The check is host-exact on
+    # purpose -- `api.example.com` and `cdn.example.com` can be different
+    # authorizations, and the operator is the one who knows that.
+    scope_dropped: list[dict] = []
+    if spec_targets:
+        from .core import scoping
+        patterns = scoping.baseline_hosts(operator_urls,
+                                          getattr(args, "allow_host", []))
+        if args.allow_any_host:
+            print("[!] --allow-any-host: probing every host the import names,"
+                  " third parties included: "
+                  + ", ".join(scoping.distinct_hosts(spec_targets)[:12]),
+                  file=sys.stderr)
+        elif patterns:
+            spec_targets, scope_dropped = scoping.partition_by_scope(
+                spec_targets, patterns)
+            if scope_dropped:
+                hosts = sorted({d.get("host") or "?" for d in scope_dropped})
+                print(f"\n[!] {len(scope_dropped)} imported endpoint(s) are"
+                      " OUTSIDE the scan scope and were not probed."
+                      " Hosts: " + ", ".join(hosts[:12])
+                      + (" ..." if len(hosts) > 12 else ""), file=sys.stderr)
+                print("    Name a host deliberately with --allow-host HOST"
+                      " ('.example.com' for a whole domain), or pass"
+                      " --allow-any-host to disable this check.",
+                      file=sys.stderr)
+            urls = [t["url"] for t in spec_targets]
+            if not urls:
+                _log.error("Every imported endpoint was out of scope; nothing to"
+                           " scan. Re-run with --allow-host for the hosts above.")
+                return 2
+        else:
+            # Import-only run (-u absent): the file the operator chose defines
+            # scope, but the host set is stated before any traffic goes out.
+            hosts = scoping.distinct_hosts(spec_targets)
+            print(f"[*] Import defines scope: {len(hosts)} host(s) will be"
+                  " probed: " + ", ".join(hosts[:12])
+                  + (" ..." if len(hosts) > 12 else ""))
 
     # Build shared HTTP requester.
     headers = {}
@@ -930,6 +1006,8 @@ def main(argv=None):
                           verify_ssl=args.verify_ssl,
                           rate_limit=args.rate_limit,
                           proxy_pool=_proxy_pool,
+                          max_response_bytes=getattr(
+                              args, "max_response_bytes", 0),
                           rotate_headers=getattr(args, "rotate_headers",
                                                  False),
                           jitter=getattr(args, "jitter_ratio", 0.0) or 0.0)
@@ -1049,6 +1127,17 @@ def main(argv=None):
     # Run scan(s).
     total_findings = 0
     failed_targets: list[str] = []  # Phase 25-2: track per-target failures
+    # Egress totals, for the exit code: how many requests the run actually put
+    # on the wire, and how many never got a response.
+    attempted_total = 0
+    failed_total = 0
+    # Whether ANY scanner in this run actually reported egress numbers.  The
+    # async engine returns a shim with no `.req`, and "not reported" must not be
+    # read as "zero requests attempted" -- the first async measurement taken
+    # after this rule landed showed 10/10 cases as `exit=3` for exactly that
+    # reason, i.e. an honest-looking alarm raised by a missing instrument.
+    egress_reported = False
+    is_async = bool(getattr(args, "async_mode", False))
 
     # Phase 25-3: when --async is enabled with multiple URLs, run ALL URLs
     # through a single asyncio.run() call (one event loop, one aiohttp
@@ -1130,6 +1219,18 @@ def main(argv=None):
             continue
 
         total_findings += len(scanner.findings)
+        _req = getattr(scanner, "req", None)
+        _att = getattr(_req, "attempted_requests", None)
+        # The async shim carries a real `Requester` (used for auth replay and
+        # fast checks) whose counter stays 0, because the scan itself speaks
+        # aiohttp. Reading that 0 as "nothing was attempted" put a false
+        # `exit=3` on every async case -- an instrument that exists but was
+        # never wired to the traffic is worse than a missing one, so the gate
+        # only trusts egress numbers from the engine that made the requests.
+        if _att is not None and not is_async:
+            egress_reported = True
+            attempted_total += _att
+            failed_total += getattr(_req, "failed_requests", 0) or 0
 
         # Write report.
         if out_dir:
@@ -1148,7 +1249,15 @@ def main(argv=None):
         else:
             out_path = args.output
 
-        meta = {"target": url, "ai": ai_opts}
+        meta = {"target": url, "ai": ai_opts,
+                # What the scope check refused to touch, so the report itself
+                # records that part of the import was not scanned rather than
+                # letting "0 findings" imply the whole spec was covered.
+                "scope_dropped": [
+                    {"url": d.get("url"), "host": d.get("host"),
+                     "method": d.get("method", "GET")}
+                    for d in scope_dropped[:20]],
+                "scope_dropped_count": len(scope_dropped)}
         try:
             out_path = _write_report(scanner, url, out_path, args.format, meta)
             # Phase 139: optional PoC artifacts (opt-in; see --poc-dir).
@@ -1197,6 +1306,31 @@ def main(argv=None):
         print(f"\n[!] CI gate: {total_findings} findings >= threshold "
               f"{args.exit_code} -- exiting with code 1.")
         return 1
+
+    # Exit 3: this run cannot support a negative conclusion.  Kept separate from
+    # the findings gate (1) so a pipeline can tell "the target is vulnerable"
+    # from "the target was never reached" -- which used to be indistinguishable,
+    # because both wrote a 0-finding report and exited 0.  Not 2: argparse already
+    # exits 2 on a usage error, and a caller that cannot tell "you passed a bad
+    # flag" from "the scan proved nothing" has been handed a fake signal.
+    if failed_targets:
+        print(f"\n[!] Scan incomplete: {len(failed_targets)} target(s) raised "
+              "and were not scanned. Exit 3.", file=sys.stderr)
+        return 3
+    if not egress_reported:
+        # Say that the completeness gate was offline.  A check that silently
+        # declines to run is how `--async` scans would read as "verified clean"
+        # while nothing examined them.
+        print("[*] Completeness check offline: this run's scanner reported no "
+              "egress counters (the async engine does not yet), so an empty "
+              "result was not tested for 'nothing reached the target'.")
+    if total_findings == 0 and egress_reported and (
+            attempted_total == 0 or failed_total >= attempted_total):
+        print(f"\n[!] Scan incomplete: {failed_total} of {attempted_total} "
+              "request(s) received no response and nothing was confirmed. "
+              "'No findings' here is not evidence of absence. Exit 3.",
+              file=sys.stderr)
+        return 3
 
     return 0
 

@@ -6,6 +6,7 @@ import json
 import re
 from datetime import datetime
 
+from .findings import EVIDENCE_OOB
 from .logger import get_logger
 
 _log = get_logger("report")
@@ -35,6 +36,32 @@ def _safe_url(url: str) -> str:
 
 
 def build_html(findings: list, target: str, meta: dict) -> str:
+    # Egress status, stated once at the top of the human deliverable.  A reader
+    # who sees only "0 findings" cannot tell a hardened target from one that was
+    # never reached, and that distinction is the whole point of the counters in
+    # `Requester._send`.
+    _st = scan_status(meta)
+    _att, _fail = meta.get("requests_attempted"), meta.get("requests_failed")
+    status_banner = (
+        "" if _st in ("completed", "unknown") else
+        f'<br><b>SCAN INCOMPLETE ({_st}): '
+        f'{_fail if _fail is not None else "?"} of '
+        f'{_att if _att is not None else "?"} requests never received a response. '
+        'Zero findings in this report is not evidence of absence.</b>')
+    # A bounded read is a DIFFERENT blind spot from a missing response, and it
+    # used to be invisible here: `responses_truncated` had exactly one consumer
+    # in the whole codebase -- the JSON at `build_json` -- so a report handed to
+    # a client said nothing about bodies it had only half looked at, while the
+    # machine-readable sibling did.  Deliberately not folded into `scan_status`:
+    # every endpoint WAS reached and answered here, so calling that "partial"
+    # would move the exit code of an otherwise-complete scan.  `--truncation-hint`
+    # is unrelated (it shortens the request body we send, not what we read back).
+    _trunc = meta.get("responses_truncated")
+    if _trunc:
+        status_banner += (
+            f'<br><b>BOUNDED READ: {_trunc} response(s) exceeded '
+            '--max-response-bytes, so only their leading bytes were examined. '
+            'A reflection past that point was not testable in this run.</b>')
     # Phase 20-3: coverage section (when a coverage tracker is supplied).
     coverage_section = ""
     cov = meta.get("coverage")
@@ -58,10 +85,24 @@ def build_html(findings: list, target: str, meta: dict) -> str:
         sev = d.get("severity", "info")
         hclass = {"critical": "sev-crit", "high": "sev-high", "medium": "sev-med", "low": "sev-low"}.get(sev, "sev-info")
         headless = d.get("headless") or {}
-        hstatus = "n/a"
-        if headless:
-            hstatus = "confirmed" if headless.get("confirmed") else \
-                      ("skipped" if not headless.get("available") else "not fired")
+        # Three states, named.  `confirmed: False` used to render as "not fired"
+        # whether or not the browser ever looked, which told the reader "we
+        # checked and it is quiet" when the truth was "we could not check".
+        _out = headless.get("outcome") or (
+            "fired" if headless.get("confirmed")
+            else "unavailable" if not headless.get("available")
+            else "not-fired")
+        hstatus = {"fired": "browser executed",
+                   "not-fired": "browser did NOT reproduce",
+                   "errored": "browser errored",
+                   "unavailable": "no browser check"}.get(_out, "n/a")
+        # A stated tier outranks this inferred phrase.  An out-of-band callback
+        # finding has no headless dialog to report and would otherwise read
+        # "no browser check" in the same row that says the victim browser
+        # fetched the URL -- the two lines would contradict each other, and the
+        # weaker one would win in whoever's triage is skimming the column.
+        if d.get("evidence_class") == EVIDENCE_OOB:
+            hstatus = "executed out-of-band (callback hit, no dialog check)"
         poc = d.get("poc") or {}
         poc_curl = _esc(poc.get("curl", ""))
         poc_html = _esc(poc.get("html", ""))
@@ -105,6 +146,34 @@ def build_html(findings: list, target: str, meta: dict) -> str:
         if d.get("cvss_score") is not None:
             sev_cell += (f'<div class="cvss"><b>{_esc(d.get("cvss_score"))}</b>'
                          f' <code>{_esc(d.get("cvss_vector") or "")}</code></div>')
+        # How sure we are, stated next to how bad it would be.  Severity and
+        # confidence were the same word for the same reason a client mis-triages:
+        # a browser-refuted finding looked exactly as loud as a browser-executed
+        # one.  `evidence_class` names the strongest class actually obtained; the
+        # PoC replay verdict rides along because a PoC that does not replay is a
+        # different deliverable from one that does, and that fact used to live
+        # only in the optional --poc-dir INDEX.md.
+        _cls = d.get("evidence_class")
+        _ev = d.get("evidence")
+        _bits = []
+        if _cls:
+            _bits.append(f'evidence: {_esc(_cls)}')
+        if _ev:
+            # A different thing from the tier: the text that proves the
+            # reflection.  Clip BEFORE escaping -- slicing an escaped string can
+            # cut `&amp;` in half and emit broken markup into the deliverable.
+            _bits.append(f'excerpt: {_esc(str(_ev)[:160])}')
+        _cf = d.get("confidence")
+        if _cf:
+            _bits.append(f'confidence: {_esc(_cf)}')
+        _pv = d.get("poc_verified")
+        if _pv is True:
+            _bits.append("PoC replay: verified")
+        elif _pv is False:
+            _bits.append("PoC replay: DID NOT replay (treat as unproven)")
+        if _bits:
+            sev_cell += ('<div class="evid" style="margin-top:4px;font-size:11px;'
+                         'color:#5b6473">' + "<br>".join(_bits) + "</div>")
         shot_html = ""
         shot = (headless or {}).get("screenshot_b64")
         if headless and headless.get("confirmed") and shot:
@@ -269,7 +338,7 @@ def build_html(findings: list, target: str, meta: dict) -> str:
 </style></head>
 <body>
 <header><h1>XSSentinel — XSS Detection Report</h1>
-<div class="meta">Target: {_esc(target)} · Generated: {_esc(meta.get('generated'))} · Requests: {_esc(meta.get('requests'))} · WAF: {_esc(meta.get('waf') or 'none detected')}</div>
+<div class="meta">Target: {_esc(target)} · Generated: {_esc(meta.get('generated'))} · Requests: {_esc(meta.get('requests'))} · WAF: {_esc(meta.get('waf') or 'none detected')} · Status: {_esc(_st)}{status_banner}</div>
 </header>
 <div class="summary">
   <div class="card crit"><div class="n">{counts['critical']}</div><div>Critical</div></div>
@@ -289,12 +358,47 @@ def build_html(findings: list, target: str, meta: dict) -> str:
 </body></html>"""
 
 
+def scan_status(meta: dict) -> str:
+    """What the numbers actually say the scan did.
+
+    `findings: []` is one string, but it covers two opposite outcomes: the
+    target was tested and held, and the target was never reached at all.  Before
+    this existed both produced the same artifact and the same exit code, so a
+    dead host, a TLS failure or a WAF black-hole could be delivered as "clean".
+    """
+    attempted = meta.get("requests_attempted")
+    failed = meta.get("requests_failed")
+    if attempted is None:
+        return "unknown"
+    if attempted == 0:
+        return "not_tested"
+    if failed:
+        if failed >= attempted:
+            return "unreachable"
+        return "partial"
+    return "completed"
+
+
 def build_json(findings: list, target: str, meta: dict) -> str:
     out = {
         "tool": "XSSentinel",
         "target": target,
         "generated": meta.get("generated"),
         "requests": meta.get("requests"),
+        # Egress truth, not effort accounting: how many requests the scanner
+        # asked for, how many never came back with a response, and the one-word
+        # verdict a CI job can gate on.  See `scan_status`.
+        "requests_attempted": meta.get("requests_attempted"),
+        "requests_failed": meta.get("requests_failed"),
+        # Response bodies shortened by --max-response-bytes.  A reflection that
+        # sat past the cap could not be seen, so a bounded scan must be able to
+        # say it was bounded.
+        "responses_truncated": meta.get("responses_truncated"),
+        "scan_status": scan_status(meta),
+        # Imported endpoints the scope check refused to probe.  Recorded here so
+        # "0 findings" cannot be read as "the whole HAR/spec was covered".
+        "scope_dropped": meta.get("scope_dropped"),
+        "scope_dropped_count": meta.get("scope_dropped_count"),
         "waf": meta.get("waf"),
         "findings": [f.data if hasattr(f, "data") else f for f in findings],
     }
@@ -862,7 +966,15 @@ def build_burp_xml(findings: list, target: str, meta: dict) -> str:
             f"{url}|{ftype}|{param}".encode("utf-8")).hexdigest()[:15], 16)
         req_raw = _raw_request(d).encode("utf-8")
         req_b64 = base64.b64encode(req_raw).decode("ascii")
-        evidence = d.get("evidence") or ""
+        # Burp's evidence pane wants the PROVING TEXT, not a tier label.  The
+        # sync scanner keeps that in `proof["snippet"]` (the reflected markup
+        # around the payload) and never set `evidence`, so this export used to
+        # ship an empty response body for exactly the findings whose reflection
+        # we verified.
+        _pr = d.get("proof")
+        evidence = (d.get("evidence")
+                    or (_pr.get("snippet") if isinstance(_pr, dict) else "")
+                    or "")
         resp_b64 = ""
         if evidence:
             resp_b64 = base64.b64encode(

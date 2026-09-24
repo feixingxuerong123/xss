@@ -832,14 +832,123 @@ class TestCliBatchFailureAggregation:
         # Both URLs must have been attempted (not just the first).
         assert call_count["n"] == 2, \
             "batch aborted after first failure instead of continuing"
-        # Exit code 0 because exit_code threshold is 0 (disabled).
-        assert rc == 0
+        # Phase 176k: a batch that lost a target exits 2, not 0.  The assertions
+        # below already require the summary to say "1 failed" and to list the
+        # target -- so the run ADMITS it is incomplete while handing CI a success
+        # code.  Continuation is unchanged; only the exit status is honest now.
+        assert rc == 3, f"a lost target must not exit 0 (got {rc})"
+        assert "Scan incomplete" in captured.err, \
+            f"the exit reason must be stated: {captured.err!r}"
         # The summary must mention the failure count (first URL failed,
         # second succeeded).
         assert "1 failed" in captured.out, \
             f"failure count missing from batch summary: {captured.out!r}"
         # The summary must list the failed target(s).
         assert "Failed targets" in captured.out
+
+    def _clean_batch_argv(self, tmp_path):
+        """A two-URL batch file + the flags the exit-status tests share."""
+        batch = tmp_path / "urls.txt"
+        batch.write_text("http://127.0.0.1:1/a\nhttp://127.0.0.1:1/b\n",
+                         encoding="utf-8")
+        out_dir = str(tmp_path / "reports")
+        os.makedirs(out_dir, exist_ok=True)
+        return ["--batch", str(batch), "-o", out_dir, "-f", "json",
+                "--timeout", "5", "--threads", "2", "--max-transforms", "2",
+                "--max-payloads", "5", "--progress", "none",
+                "--log-level", "error"]
+
+    def test_every_request_failing_exits_2(self, tmp_path, capsys):
+        """Phase 176k: "0 findings" must not be able to mean "nothing answered".
+
+        A scanner whose requests all raised before a response arrives returns a
+        finding-free report -- byte for byte the shape of a hardened target.  The
+        only thing separating those two runs is the egress tally the Requester
+        keeps, so the exit status has to read it.
+        """
+        from xssentinel import __main__ as cli
+
+        def _scan(args, url, requester, oob, progress, checkpoint,
+                  auth_state=None):
+            ms = MagicMock()
+            ms.findings = []
+            ms.waf_name = None
+            ms.req.attempted_requests = 6
+            ms.req.failed_requests = 6
+            return ms
+
+        with patch.object(cli, "_run_scan", side_effect=_scan), \
+             patch.object(cli, "_write_report",
+                          side_effect=lambda *a, **k: "r.json"):
+            rc = cli.main(self._clean_batch_argv(tmp_path))
+        err = capsys.readouterr().err
+        assert rc == 3, f"a run where nothing answered must not exit 0 ({rc})"
+        assert "not evidence of absence" in err, err
+
+    def test_answered_and_clean_still_exits_0(self, tmp_path, capsys):
+        """The other side of the rule, so the fix is not a standing false alarm:
+        a target that answered and produced nothing is a clean result."""
+        from xssentinel import __main__ as cli
+
+        def _scan(args, url, requester, oob, progress, checkpoint,
+                  auth_state=None):
+            ms = MagicMock()
+            ms.findings = []
+            ms.waf_name = None
+            ms.req.attempted_requests = 40
+            ms.req.failed_requests = 1
+            return ms
+
+        with patch.object(cli, "_run_scan", side_effect=_scan), \
+             patch.object(cli, "_write_report",
+                          side_effect=lambda *a, **k: "r.json"):
+            rc = cli.main(self._clean_batch_argv(tmp_path))
+        assert rc == 0, capsys.readouterr().err
+
+    def test_usage_error_stays_2_so_callers_can_tell_it_from_3(self):
+        """The exit-code table, one assertion per row.
+
+        0 = ran and nothing to report, 1 = findings reached `--exit-code`,
+        2 = argparse usage error, 3 = the scan could not support a conclusion.
+        3 was chosen *because* 2 was taken: a CI job that reads 2 as "the scan
+        proved nothing" would also be firing on a typo in its own command line.
+        """
+        from xssentinel import __main__ as cli
+
+        with pytest.raises(SystemExit) as e:
+            cli.main(["--nonsense-flag"])
+        assert e.value.code == 2, (
+            f"argparse owns exit 2; if that changed, `Scan incomplete`'s 3 is "
+            "no longer distinguishable from a bad command line")
+
+    def test_missing_egress_counters_do_not_become_an_alarm(self, tmp_path,
+                                                            capsys):
+        """The async engine has no `Requester`, and that must not read as
+        "zero requests were attempted".
+
+        The first async measurement taken after the completeness gate landed
+        showed 10/10 cases `exit=3`: the shim has no `.req`, so the total stayed
+        at 0 and the rule mistook a missing instrument for an empty scan. A gate
+        that cannot see has to say so and stand down.
+        """
+        import types
+
+        from xssentinel import __main__ as cli
+
+        def _scan(args, url, requester, oob, progress, checkpoint,
+                  auth_state=None):
+            # deliberately NOT a MagicMock: a mock answers every attribute, and
+            # the whole point is that this scanner cannot answer for its egress
+            return types.SimpleNamespace(findings=[], waf_name=None)
+
+        with patch.object(cli, "_run_scan", side_effect=_scan), \
+             patch.object(cli, "_write_report",
+                          side_effect=lambda *a, **k: "r.json"):
+            rc = cli.main(self._clean_batch_argv(tmp_path))
+        out = capsys.readouterr()
+        assert rc == 0, f"a missing counter must not exit 3 (got {rc}): {out.err}"
+        assert "Completeness check offline" in out.out, \
+            "the run has to state that the check was offline"
 
     def test_batch_failure_marks_checkpoint(self, tmp_path, capsys):
         """A failed target must be recorded in the checkpoint so --resume

@@ -77,7 +77,8 @@ _log = get_logger("scanner")
 # `max_transforms` entries (default 12) so coverage scales with the flag.
 
 from .findings import (Finding, _DEFAULT_TRANSFORMS,
-                       _norm, _proof, _safe_snippet)  # noqa: F401
+                       _grade_evidence, _norm, _proof,
+                       _safe_snippet)  # noqa: F401
 from .scanner_stored import StoredBlindMixin
 from .scanner_layers import AdvancedLayerMixin
 from .scanner_crawl import CrawlMixin
@@ -880,15 +881,22 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             _ok = bool(_nv["confirmed"])
         if not _ok:
             return False
+        # The proof here is `verify_semantic` on the injected response: the
+        # nonce-bearing payload landed in an executable context.  No browser ran
+        # it, so "executed" overstated the claim, and the tier says so plainly.
+        _cls, _conf, _det = _grade_evidence(None, "high", (
+            "CSP nonce leaked near the reflection "
+            "point; injected script carrying the "
+            "page nonce rendered in an executable context"))
         self._add(Finding(**{
             "url": url, "method": method, "param": param,
             "type": "reflected", "context": context,
             "payload": _npay,
             "transform": ["csp_nonce_leak"],
-            "severity": "high", "confidence": "high",
-            "detail": "CSP nonce leaked near the reflection "
-                      "point; injected script carrying the "
-                      "page nonce executed",
+            "severity": "high",
+            "confidence": _conf,
+            "detail": _det,
+            "evidence_class": _cls,
             "headless": None,
             "proof": _proof(_nresp, method, param, _npay),
         }))
@@ -1179,13 +1187,18 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             v = verifier.verify_semantic(resp2.text, token,
                                          response_headers=dict(resp2.headers))
             if v["confirmed"]:
+                _cls, _conf, _det = _grade_evidence(
+                    None, "high",
+                    v["detail"] + f" (pre-encoded {struct} param)")
                 self._add(Finding(**{
                     "url": url, "method": method, "param": param,
                     "type": "reflected", "context": context,
                     "payload": enc,
                     "transform": [f"pre_encode:{struct}"],
-                    "severity": "high", "confidence": "high",
-                    "detail": v["detail"] + f" (pre-encoded {struct} param)",
+                    "severity": "high",
+                    "confidence": _conf,
+                    "detail": _det,
+                    "evidence_class": _cls,
                     "headless": None,
                     "proof": _proof(resp2, method, param, enc),
                 }))
@@ -1305,11 +1318,20 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             confidence = "low"
             detail = (detail + " (non-HTML content-type '%s')"
                       % ctype.split(";")[0].strip())
+        evidence, confidence, detail = _grade_evidence(headless, confidence,
+                                                      detail)
         self._add(Finding(**{
             "url": url, "method": method, "param": param,
             "type": ftype, "context": context, "payload": payload,
             "transform": tset, "severity": severity,
             "confidence": confidence, "detail": detail,
+            # The strongest evidence class actually behind this finding, stated
+            # instead of being implied by a severity label.  Its OWN key: every
+            # other producer in this codebase (~50 sites across layers/*,
+            # async_scanner, sandbox) writes an evidence EXCERPT into `evidence`,
+            # and report.py / report_ai.py read that as descriptive text.  A tier
+            # name in there silently replaced the reflected-markup excerpt.
+            "evidence_class": evidence,
             # Phase 164: WHERE the payload actually rode.  The PoC generator
             # used to infer this from the method ("POST -> body"), which is
             # wrong for every position-shift finding: _try_position_shift

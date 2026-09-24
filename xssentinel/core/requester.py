@@ -33,6 +33,15 @@ DEFAULT_HEADERS = {
 }
 
 
+#: Default per-response body cap, in bytes.  One constant on purpose: the CLI and
+#: the async shim both build a Requester, and a default stated twice drifts apart
+#: (this repo has already been bitten by `--timeout` living in two places).
+#: 32 MiB is deliberately generous -- it exists to stop a 2 GB export endpoint
+#: OOMing a worker, not to trim a large SPA bundle, because a reflection that
+#: falls past the cap is a false negative wearing the mask of a clean scan.
+DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024 * 1024
+
+
 class RateLimiter:
     """Thread-safe token-bucket rate limiter.
 
@@ -74,6 +83,23 @@ class JsonBody(dict):
     """
 
 
+class _Tally:
+    """Clone-shared counters for requests that were attempted and failed.
+
+    A scan that reached no verdict can look exactly like a scan that found
+    nothing: zero findings either way.  The difference lives here -- `attempted`
+    counts logical requests issued through this Requester (and its clones, which
+    share one tally), `failed` counts the ones that raised before any response
+    arrived.  `requests_made` on the Scanner cannot serve that purpose: it is
+    bumped after a response, and a cache hit bumps it too.
+    """
+
+    def __init__(self) -> None:
+        self.attempted = 0
+        self.failed = 0
+        self.truncated = 0
+
+
 class Requester:
     def __init__(self, timeout: int = 15, proxy: str | None = None,
                  headers: dict | None = None, cookies: dict | None = None,
@@ -83,7 +109,9 @@ class Requester:
                  breaker: "CircuitBreaker | None" = None,
                  proxy_pool: list | None = None,
                  rotate_headers: bool = False,
-                 jitter: float = 0.0):
+                 jitter: float = 0.0,
+                 tally: "_Tally | None" = None,
+                 max_response_bytes: int = 0):
         self.timeout = timeout
         self.rate_limiter = RateLimiter(rate_limit, jitter=jitter)
         # Phase 46: optional shared request budget.  Every REAL network call
@@ -128,12 +156,45 @@ class Requester:
         # Counters for observability (hits/misses).
         self.cache_hits = 0
         self.cache_misses = 0
+        # Requests that raised before any response arrived.  Shared across
+        # clones for the same reason `budget` and `breaker` are: the scanner
+        # clones per endpoint and per parameter, and a failure tally that lives
+        # in one clone's attribute is invisible to whoever writes the report.
+        self.tally = tally if tally is not None else _Tally()
+        # Bytes of response body to materialize per request (0 = unlimited).
+        # See `_bound`: this exists for the 2 GB export endpoint that would
+        # otherwise OOM a worker, and it counts every body it shortens.
+        self.max_response_bytes = max(0, int(max_response_bytes or 0))
         # Phase 45: optional response hook -- callable(resp, requester)
         # invoked after EVERY response.  SessionManager.attach() uses it to
         # detect a session dying MID-SCAN (401/403 or redirect-to-login) and
         # re-authenticate immediately, closing the gap where keep_alive()
         # only ran between batch URLs.
         self.on_response = None
+
+    @property
+    def attempted_requests(self) -> int:
+        """Logical requests issued through this Requester or any of its clones."""
+        return self.tally.attempted
+
+    @property
+    def truncated_responses(self) -> int:
+        """Bodies shortened by `max_response_bytes`.
+
+        A reflection past the cap cannot be seen, so a bounded scan that found
+        nothing has to be able to say it was bounded.
+        """
+        return self.tally.truncated
+
+    @property
+    def failed_requests(self) -> int:
+        """Requests that raised before a response arrived.
+
+        Not the same as "found nothing": a target that refuses connections, a
+        TLS failure and a WAF that black-holes every probe all land here, and the
+        scan otherwise reports zero findings exactly as a clean result does.
+        """
+        return self.tally.failed
 
     def _guard(self, url: str) -> None:
         """Raise CircuitOpen when the breaker has tripped (pre-send)."""
@@ -149,6 +210,48 @@ class Requester:
                 self.breaker.record(resp.status_code)
             except Exception:
                 pass
+
+    def _bound(self, resp):
+        """Cap the body that gets read into memory, and say when it happened.
+
+        Two separate hazards, which is why this returns the response either way:
+        a 2 GB export endpoint or a self-referential download OOMs the worker --
+        and after the exit-status fix that at least now reads as an incomplete
+        scan instead of a clean one -- while silently truncating a large SPA
+        index could hide a reflection, turning the cap into a false negative.
+        So every truncated body is counted (`tally.truncated`) and surfaces in
+        the report, where a reviewer can see the scan was bounded.
+        """
+        cap = self.max_response_bytes
+        if cap <= 0:
+            return resp
+        declared = 0
+        try:
+            declared = int(resp.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            declared = 0
+        if declared and declared <= cap:
+            # Small and honest about its size: let requests read it the normal
+            # way, so nothing about encoding or history handling changes.
+            _ = resp.content
+            return resp
+        try:
+            data = resp.raw.read(cap + 1, decode_content=True)
+        except Exception:
+            # An unreadable stream is not evidence of anything; the caller's own
+            # exception handling turns it into a failed request, which is
+            # counted as failed rather than silently treated as an empty page.
+            raise
+        resp._content_consumed = True
+        resp._content = data[:cap]
+        if len(data) > cap:
+            resp.xss_truncated = True
+            self.tally.truncated += 1
+        try:
+            resp.raw.close()
+        except Exception:
+            pass
+        return resp
 
     def _fire_hook(self, resp, method: str, url: str, params, data):
         """Run the on_response hook; return a REPLACEMENT response if the
@@ -199,21 +302,37 @@ class Requester:
         proxies = self._stealth_proxies()
         if proxies is not None:
             kw["proxies"] = proxies
+        if self.max_response_bytes > 0:
+            # Otherwise the body is already in memory by the time `_bound` is
+            # asked to limit it, which would make the cap decorative.
+            kw["stream"] = True
+        self.tally.attempted += 1
         try:
-            return self.session.request(method, url,
-                                        timeout=self.timeout, **kw)
-        except (requests.exceptions.ProxyError,
-                requests.exceptions.ConnectTimeout) as e:
-            if self.proxy_pool is None:
-                raise
-            bad = kw.get("proxies") or {}
-            self.proxy_pool.mark_dead(bad.get("http") or bad.get("https"))
-            alt = self._stealth_proxies()
-            if not alt or alt == bad:
-                raise
-            kw["proxies"] = alt
-            return self.session.request(method, url,
-                                        timeout=self.timeout, **kw)
+            try:
+                return self._bound(self.session.request(method, url,
+                                                        timeout=self.timeout,
+                                                        **kw))
+            except (requests.exceptions.ProxyError,
+                    requests.exceptions.ConnectTimeout):
+                if self.proxy_pool is None:
+                    raise
+                bad = kw.get("proxies") or {}
+                self.proxy_pool.mark_dead(bad.get("http") or bad.get("https"))
+                alt = self._stealth_proxies()
+                if not alt or alt == bad:
+                    raise
+                kw["proxies"] = alt
+                return self._bound(self.session.request(method, url,
+                                                        timeout=self.timeout,
+                                                        **kw))
+        except Exception:
+            # Counted here and nowhere else: every call site that swallows a
+            # request failure (`except Exception: continue`) is doing the right
+            # thing for the scan and the wrong thing for the report.  A proxy
+            # failover that succeeds is not a failure, so the tally is taken from
+            # the outer scope that only a final raise reaches.
+            self.tally.failed += 1
+            raise
 
     def get(self, url: str, params: dict | None = None,
             cache_get: bool = True,
@@ -389,7 +508,18 @@ class Requester:
                          # each gets its own header rotator sequence.
                          proxy_pool=self.proxy_pool,
                          rotate_headers=bool(self.header_rotator),
-                         jitter=self.rate_limiter.jitter)
+                         jitter=self.rate_limiter.jitter,
+                         tally=self.tally,
+                         max_response_bytes=self.max_response_bytes)
+        # Share ONE token bucket with the parent.  `budget` and `breaker` are
+        # deliberately shared above, but `rate_limit=` above builds a *fresh*
+        # limiter, and this file's callers clone per endpoint
+        # (scanner.py:370) and then again per parameter (scanner.py:424) -- so
+        # `--threads N --rate-limit R` was really issuing up to N x R requests
+        # per second, and the number in the report was a fraction of the traffic
+        # the client's IDS actually saw.  RateLimiter is documented
+        # thread-safe, which is why sharing it is the fix rather than a race.
+        clone.rate_limiter = self.rate_limiter
         # Phase 45: worker-thread clones keep the response hook so a session
         # dying mid-scan is re-authenticated regardless of which clone saw it.
         clone.on_response = self.on_response
