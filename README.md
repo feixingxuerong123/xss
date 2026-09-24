@@ -315,12 +315,12 @@ python tests/passive_demo.py         # 产出 tests/passive_demo_report.html
 
 测试策略（Phase 37）：`tests/test_pipeline.py` 把靶场 2 的精简切片纳入 pytest —— **主流程回归在每次 pytest 就会暴露**，不再依赖手动靶场演练；`tests/test_async_pipeline.py` 补上 async 扫描器首批测试（曾靠 0% 覆盖掩盖了 `for_context` 缺失导致 async L1 静默失效的 bug）；core 的 verbose 诊断已统一路由到 `logger.debug`（`--verbose` 即 DEBUG 级）。Phase 43 补齐 `tests/test_fuzzer.py`（`--fuzz` 七个评分维度全断言，覆盖率 0%→全路径）与 `tests/test_form_miner.py`（表单抽取/填充/端点转换），并拆分 `__main__.py`（1145→497 行 + cli_runner/cli_commands）。Phase 44 新增三个测试文件共 42 例：`tests/test_passive_proxy.py`（签名去重/scope 匹配/body 解析/裸 socket 真代理端到端捕获 + 真实 Scanner 反射命中回归）、`tests/test_sqli.py`（五家族指纹全路径 + 真回显服务命中）、`tests/test_retire_js.py`（库名锚定版本提取防路径数字泄漏/版本区间边界/去重）。
 
-**当前基线（2026-09-24 实测，192 用例矩阵）**：`benchmark/run_benchmark.py`（默认预算 10/6/90，结果 `benchmark/results/benchmark_20260924_022744.json`）：
+**当前基线（2026-09-24 实测，192 用例矩阵，两引擎同一口径）**：`benchmark/run_benchmark.py`，默认预算 10/6/90；结果 `benchmark/results/benchmark_20260924_022744.json`（sync）与 `benchmark_20260924_231718.json`（async）。**两引擎并不对齐**，见下表下注：
 
 | 引擎 | 用例 | TP | FP | TN | FN | ERROR | recall | precision | FPR | 墙钟 |
 |------|------|----|----|----|----|-------|--------|-----------|-----|------|
 | sync | 192 | 113 | 0 | 79 | 0 | **0** | 1.000 | 1.000 | 0.000 | 1214s |
-| async | 192 | — | — | — | — | — | — | — | — | 未在本矩阵复测 |
+| async | 192 | 100 | 0 | 76 | **10** | **0** | **0.909** | 1.000 | 0.000 | 1186s |
 
 - **192/192 全部计分**（`scored=192`、`errors=0`、产物里新增 `engine` / `retried_cases` 字段）。
   上一轮同一改动集是 `errors=1`：`neg-graphql-01` 在扫描里 90.036s 超时被判 ERROR，
@@ -329,8 +329,16 @@ python tests/passive_demo.py         # 产出 tests/passive_demo_report.html
   直接从分母消失——一趟跑可以报双 1.0 而其中一格从未被测。现已由
   `_evaluate_with_retries()` 对两类一并重测（串行与**并发路径**此前完全不重试），
   预算用尽仍保留 ERROR/FN，不把"没扫完"洗成"扫了没发现"。
-- **async 只有 98 用例口径的历史数**（下表 0.938），192 矩阵下从未复测；
-  在补上之前，README 不把两个引擎并排放在同一张表里冒充"对齐"。
+- **两个引擎现在并排，但结论是「不对齐」**：`--async` 在同口径下漏 10 条（recall 0.909），
+  **误报仍为 0**。逐格独立重跑 2 次全部复现且 `error=''`，所以不是环境窗口。分组：
+  **6 条是异步引擎没有对应的层**（`form_miner` / `js_miner` / `second_order` /
+  `scenario` / `cookie_tossing` / `time_based` 在 `async_scanner.py` 中被引用 0 次），
+  3 条是候选选择分歧（`pos-url-04` / `pos-cdata-01` / `neg-filter-05`，异步发满 104 个请求
+  仍不中），1 条（`pos-dom-02`）原因未定。**因此 `--async` 目前不适合作为"扫全"的入口**：
+  它快、零误报，但覆盖范围小于同步引擎，选它的人应当知道少了哪几层。
+- 另注：`pos-jsmine-01` 在整轮矩阵里同步是 TP（162 请求），单独复跑同步却是 FN（23 请求）
+  ——同步侧存在**顺序/状态依赖**，所以"sync FN=0"这一格不是逐格稳定复现的头条，
+  见 `实战验证交付报告` 176r。
 
 **历史基线（2026-09-06 实测，Phase 93 后，98 用例，预算 14/12/90）**：`benchmark/results/post_audit_sync.json` / `post_audit_async.json`：
 
