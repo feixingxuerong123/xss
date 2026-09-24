@@ -30,7 +30,7 @@ XSSentinel 的目标是**在开源/自研工具中做到检测维度最全、架
 - **深度爬虫**：`-c` 自动发现同域 `<a>` 链接与 `<form>` 端点（BFS，`--crawl-depth` 控深度，`--scope` 限域），连"无参数纯 DOM 页面"也纳入扫描——多数单脚本工具跑完一个 URL 就停了。
 - **发现去重**：`dedup()` 按 `(type, URL, param, context)` 合并经不同爬取路径/变形变体发现的同一漏洞，避免重复告警刷屏（DOM 类忽略 query 差异）。
 - **隐藏参数挖掘（Phase 43）**：内置 313 个高产出候选词（分页/token/回跳/模板等 14 类），`--param-wordlist` 可追加自定义词表（操作符提示前置）；fuzzer 差分 triage 从大词表挑 top-N 深测，请求量可控。
-- **双引擎精度对齐（Phase 43）**：`benchmark/runner.py --engine {sync,async}` 用同一 98 用例矩阵分别标定两条流水线——async 经 CSP 响应头门、转义实体窗口、mXSS payload 自带结构守卫三层修复后已达 **recall 100% / precision 100% / FPR 0**，与 sync 完全对齐（Phase 69 重新标定：sync 98 用例 TP=64/FP=0/FN=0，recall/precision 100%，FPR 0——此前本机退化 loopback 曾出现 1 例环境性假 FN，单跑该用例 0.2s 即检出；runner 现对出错用例自动重试，且**漏洞用例若最终无法完成计入 FN**，不再让跑不完的用例悄悄缩小 recall 分母）。**注意该标定已被 Phase 91/92 刷新**：当时 async 基线里 3 个 safe 用例存在从未暴露的误报（Phase 84 引入），最新数字见文末「当前基线」表——precision 仍是 1.000，但 recall 分母口径下的 FN 需先单跑复现再判定。
+- **双引擎精度对齐（Phase 43）**：`benchmark/runner.py --engine {sync,async}` 用同一 98 用例矩阵分别标定两条流水线——async 经 CSP 响应头门、转义实体窗口、mXSS payload 自带结构守卫三层修复后已达 **recall 100% / precision 100% / FPR 0**，与 sync 完全对齐（Phase 69 重新标定：sync 98 用例 TP=64/FP=0/FN=0，recall/precision 100%，FPR 0——此前本机退化 loopback 曾出现 1 例环境性假 FN，单跑该用例 0.2s 即检出；runner 现对出错用例自动重试，且**漏洞用例若最终无法完成计入 FN**，不再让跑不完的用例悄悄缩小 recall 分母。Phase 176n 补上这句话当时做不到的部分：旧闸门是 `verdict != "FN"`，**只有出错的漏洞用例被重试**，出错的安全用例首试即被接受、直接从分母消失；现由 `_evaluate_with_retries()` 两类一并重测（并发路径此前一次都不重试），产物并记录 `engine` / `retried_cases` / 每例 `retries`）。**注意该标定已被 Phase 91/92 刷新**：当时 async 基线里 3 个 safe 用例存在从未暴露的误报（Phase 84 引入），最新数字见文末「当前基线」表——precision 仍是 1.000，但 recall 分母口径下的 FN 需先单跑复现再判定。
 - **可复现 PoC**：每个确认漏洞自动产出 **curl 命令 + 含 payload 的 URL + 自包含 HTML PoC 页面**（iframe / 自动提交表单 / `location.hash` 触发 DOM），HTML/JSON/CSV/SARIF 四报告均携带，直接交差或进缺陷单。
 - **被动代理扫描（Phase 44）**：`--passive` 起本地 HTTP 代理（对标 xray / w13scan 的被动模式），浏览器/工具挂代理即可把流量捕获进扫描流水线——按 `方法+主机+路径+参数名集合` 签名去重（分页/翻 token 不重扫），GET/POST 表单与 JSON body 全解析，HTTPS 默认走 CONNECT 隧道透传；加 `--mitm-ca ca.pem`（Phase 50）则自动生成本地 CA 并对 scope 内主机做 HTTPS 拦截——每主机证书由该 CA 签发，把 CA 证书 `ca-cert.pem` 装进浏览器/系统信任库后 HTTPS 参数/body 也能被捕获扫描（越 scope 主机保持盲透传）；后台 worker 把捕获端点直接喂给 L1 流水线，`--sqli-check` / `--check-outdated-js` 快检可联动（见下）。写端点（POST/PUT/PATCH）扫描后自动进入 **stored 二阶观察**：对 body 参数注入唯一 token 探针，之后浏览到的任意页面若原样渲染该 token（可执行上下文）即确认 high `second_order` finding——存储型 XSS 无需手动指定注入/查看端点（Phase 67）。
 - **目标级 CORS / XS-Leaks 审计（Phase 51/53）**：每 origin 探测 Origin 反射（GET+OPTIONS 兜底）——反射任意 Origin+Allow-Credentials → high `cors_misconfig`；`--audit-xs-leaks` 对无任何跨源隔离头（COOP/CORP/COEP/帧守卫）的页面记 low `xs_leak_surface`；`xs_leaks.py` 另附 img/frame-timing/window.name/history 四信道载荷库与免服务器演示 PoC（证明已确认 XSS 的跨站窃取半径）。sync/async 双引擎对齐（Phase 54）。
@@ -315,7 +315,24 @@ python tests/passive_demo.py         # 产出 tests/passive_demo_report.html
 
 测试策略（Phase 37）：`tests/test_pipeline.py` 把靶场 2 的精简切片纳入 pytest —— **主流程回归在每次 pytest 就会暴露**，不再依赖手动靶场演练；`tests/test_async_pipeline.py` 补上 async 扫描器首批测试（曾靠 0% 覆盖掩盖了 `for_context` 缺失导致 async L1 静默失效的 bug）；core 的 verbose 诊断已统一路由到 `logger.debug`（`--verbose` 即 DEBUG 级）。Phase 43 补齐 `tests/test_fuzzer.py`（`--fuzz` 七个评分维度全断言，覆盖率 0%→全路径）与 `tests/test_form_miner.py`（表单抽取/填充/端点转换），并拆分 `__main__.py`（1145→497 行 + cli_runner/cli_commands）。Phase 44 新增三个测试文件共 42 例：`tests/test_passive_proxy.py`（签名去重/scope 匹配/body 解析/裸 socket 真代理端到端捕获 + 真实 Scanner 反射命中回归）、`tests/test_sqli.py`（五家族指纹全路径 + 真回显服务命中）、`tests/test_retire_js.py`（库名锚定版本提取防路径数字泄漏/版本区间边界/去重）。
 
-**当前基线（2026-09-06 实测，Phase 93 后）**：双引擎 98 用例矩阵（预算 14/12/90，结果 `benchmark/results/post_audit_sync.json` / `post_audit_async.json`）：
+**当前基线（2026-09-24 实测，192 用例矩阵）**：`benchmark/run_benchmark.py`（默认预算 10/6/90，结果 `benchmark/results/benchmark_20260924_022744.json`）：
+
+| 引擎 | 用例 | TP | FP | TN | FN | ERROR | recall | precision | FPR | 墙钟 |
+|------|------|----|----|----|----|-------|--------|-----------|-----|------|
+| sync | 192 | 113 | 0 | 79 | 0 | **0** | 1.000 | 1.000 | 0.000 | 1214s |
+| async | 192 | — | — | — | — | — | — | — | — | 未在本矩阵复测 |
+
+- **192/192 全部计分**（`scored=192`、`errors=0`、产物里新增 `engine` / `retried_cases` 字段）。
+  上一轮同一改动集是 `errors=1`：`neg-graphql-01` 在扫描里 90.036s 超时被判 ERROR，
+  而单跑 9.2s 就是 TN。根因不是那条用例慢，是**重试策略只重试出错的"易受攻击"用例**
+  （`runner.py` 旧闸门 `verdict != "FN"`），出错的**安全**用例首试即被接受、
+  直接从分母消失——一趟跑可以报双 1.0 而其中一格从未被测。现已由
+  `_evaluate_with_retries()` 对两类一并重测（串行与**并发路径**此前完全不重试），
+  预算用尽仍保留 ERROR/FN，不把"没扫完"洗成"扫了没发现"。
+- **async 只有 98 用例口径的历史数**（下表 0.938），192 矩阵下从未复测；
+  在补上之前，README 不把两个引擎并排放在同一张表里冒充"对齐"。
+
+**历史基线（2026-09-06 实测，Phase 93 后，98 用例，预算 14/12/90）**：`benchmark/results/post_audit_sync.json` / `post_audit_async.json`：
 
 | 引擎 | TP | FP | TN | FN | ERROR | recall | precision | FPR | 全矩阵耗时 |
 |------|----|----|----|----|-------|--------|-----------|-----|-----------|
