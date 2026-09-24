@@ -527,10 +527,17 @@ class AsyncScanner:
             return
 
         # Classify context (CPU-bound) -- run in thread.
-        try:
-            context = await asyncio.to_thread(ctx.classify, text, marker)
-        except Exception:
-            context = "html_element"
+        # `ctx.classify` never existed: this call raised AttributeError on every
+        # parameter and the bare `except` swallowed it, so the async engine
+        # selected payloads from "html_element" ALWAYS -- the url_href / cdata /
+        # css sibling corpora were never consulted, which is why it could spend
+        # 104 requests and still miss pos-url-04 and pos-cdata-01 that sync
+        # confirms with 59.  Now uses the same function sync uses, with NO
+        # swallow: a broken wiring must surface as a failed layer, not as a
+        # silently degraded scan (`core/layer_guard.py` exists because this
+        # pattern hid the async L1 outage in Phase 63).
+        _info = await asyncio.to_thread(ctx.analyze, text, marker)
+        context = _info["context"] if _info else "html_element"
 
         # Phase 93: escaped-reflection convergence (sync parity).  When the
         # marker reflects but the input around it is HTML-encoded, the
