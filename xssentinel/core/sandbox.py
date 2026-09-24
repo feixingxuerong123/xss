@@ -232,6 +232,17 @@ JS_URI_INERT = {
     # question stayed unasked and the verdict stays UNKNOWN.
     ("image", "href"), ("image", "xlink:href"),
     ("use", "xlink:href"), ("feimage", "href"),
+    # The attribute-absorption shapes.  In an unquoted attribute context the
+    # payload's own tag never becomes an element: `<div class=<a href="javascript:
+    # CODE">` builds a DIV that carries an attribute called `href`, and a div has no
+    # navigation machinery to give it -- measured on the `attr_unq` rows of the
+    # stamped oracle (benchmark/results/browser_dom_oracle.json), False on the
+    # parser arm AND on both innerHTML arms, and no user gesture can turn a `div`
+    # into an anchor after the fact, so this is the bounded kind of False.
+    # `img.href` is the same story one step along: `<image>` renames to `img` in
+    # HTML content, and `img` loads `src`, never `href`.
+    ("div", "href"), ("div", "src"), ("div", "data"), ("div", "action"),
+    ("img", "href"),
 }
 
 #: Events that fire without user interaction, and the elements they can fire on

