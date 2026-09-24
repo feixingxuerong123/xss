@@ -32,6 +32,26 @@ import sqlite3
 import threading
 from typing import Any
 
+from ..core.findings import REDACTED, _is_credential_field
+
+
+def _mask_secrets(obj: Any) -> Any:
+    """Replace credential-shaped VALUES with a fixed token, keeping every key.
+
+    A SQLite row outlives the scan that produced it -- it gets attached to
+    reports, backed up and re-read long after -- while the Authorization/Cookie/
+    password captured inside it is worthless for a resumed run (that session has
+    moved on).  So masking at write time costs nothing that matters and removes a
+    standing leak.  Keys survive so the redaction stays auditable: an operator
+    can see which fields were dropped and supply their own values.
+    """
+    if isinstance(obj, dict):
+        return {k: (REDACTED if _is_credential_field(str(k))
+                    else _mask_secrets(v)) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_mask_secrets(v) for v in obj]
+    return obj
+
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS jobs (
@@ -112,9 +132,11 @@ class SqliteJobStore:
         default to sane empties so callers can pass a partial dict.
         """
         scan_id = job_dict["scan_id"]
-        params = json.dumps(job_dict.get("params") or {})
-        data = json.dumps(job_dict.get("data") or {})
-        options = json.dumps(job_dict.get("options") or {})
+        # Masked here, at the only write path, rather than at each reader: the
+        # stored row is the copy that escapes into backups and report annexes.
+        params = json.dumps(_mask_secrets(job_dict.get("params") or {}))
+        data = json.dumps(_mask_secrets(job_dict.get("data") or {}))
+        options = json.dumps(_mask_secrets(job_dict.get("options") or {}))
         findings = json.dumps(job_dict.get("findings") or [])
         cov = job_dict.get("coverage_summary")
         cov_json = json.dumps(cov) if cov is not None else None
