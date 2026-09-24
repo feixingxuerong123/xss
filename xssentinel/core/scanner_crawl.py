@@ -21,7 +21,7 @@ from . import polyglot as poly_mod
 from . import dom as dommod
 from . import dom_engine
 from . import spa_crawler as spa_mod
-from .findings import (Finding, _DEFAULT_TRANSFORMS,
+from .findings import (Finding, _DEFAULT_TRANSFORMS, _grade_evidence,
                        _norm, _proof, _safe_snippet)
 from .logger import get_logger
 
@@ -134,14 +134,20 @@ class CrawlMixin:
             # kind) -- the adjacent-vulnerability classes DalFox reports
             # alongside XSS triage.
             for b in p.get("bav") or []:
+                # Graded OUTSIDE the try below: that handler swallows every
+                # exception, so a grading bug would silently delete findings
+                # rather than surface as one.
+                _cls, _conf, _det = _grade_evidence(
+                    None, "medium",
+                    f"BAV probe on param '{name}': {b['detail']}")
                 try:
                     from .findings import Finding
                     self._add(Finding(
                         url=url, method=method, param=name,
                         type="bav", context=b["kind"],
                         payload="", transform=[],
-                        severity="medium", confidence="medium",
-                        detail=f"BAV probe on param '{name}': {b['detail']}",
+                        severity="medium", confidence=_conf,
+                        detail=_det, evidence_class=_cls,
                         headless=None, proof={"kind": b["kind"]},
                     ))
                 except Exception:

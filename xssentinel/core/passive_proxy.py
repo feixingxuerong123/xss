@@ -894,18 +894,25 @@ def _verify_stored_hits(proxy, scanner) -> None:
             if not v.get("confirmed"):
                 continue
             if hasattr(scanner, "_add"):
-                from .findings import Finding
+                from .findings import Finding, _grade_evidence
+                # verify_semantic on the captured viewer response: the token
+                # reached an executable context.  Nobody ran a browser over it,
+                # so the old "executed at" wording claimed an observation the
+                # passive path cannot make.
+                _cls, _conf, _det = _grade_evidence(None, "high", (
+                    f"payload injected at {info['inject_url']} "
+                    f"({info['inject_method']} "
+                    f"{info['inject_param']}) rendered in an executable "
+                    f"context at {hit['viewer_url']} ({v.get('detail')})"))
                 scanner._add(Finding(
                     url=info["inject_url"],
                     method=info["inject_method"],
                     param=info["inject_param"],
                     type="second_order", context=v.get("context"),
                     payload=info["payload"], transform=[],
-                    severity="high", confidence="high",
-                    detail=(f"payload injected at {info['inject_url']} "
-                            f"({info['inject_method']} "
-                            f"{info['inject_param']}) executed at "
-                            f"{hit['viewer_url']} ({v.get('detail')})"),
+                    severity="high", confidence=_conf,
+                    detail=_det,
+                    evidence_class=_cls,
                     headless=None,
                     proof={"viewer_url": hit["viewer_url"],
                            "token": hit["token"],

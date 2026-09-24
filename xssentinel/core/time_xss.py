@@ -38,6 +38,8 @@ import logging
 import time
 import secrets
 
+from .findings import EVIDENCE_OOB
+
 _log = logging.getLogger(__name__)
 
 
@@ -324,6 +326,10 @@ def scan_time_based(scanner, req, url: str, method: str,
                                f"callback (token={token}); the browser fetched "
                                f"the callback resource, proving the payload was "
                                f"parsed as HTML despite CSP blocking alert()"),
+                    # The beacon IS the browser-grade proof here.  `headless`
+                    # stays None because the dialog hook is the thing that
+                    # cannot see this channel, not because nothing checked.
+                    "evidence_class": EVIDENCE_OOB,
                     "headless": None,
                     "proof": {"channel": p["channel"], "token": token},
                 }))

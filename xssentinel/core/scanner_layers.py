@@ -24,7 +24,8 @@ from . import template as tpl_mod
 from . import polyglot as poly_mod
 from . import dom as dommod
 from . import dom_engine
-from .findings import Finding
+from .findings import (Finding, EVIDENCE_MODEL, EVIDENCE_NO_BROWSER,
+                       _grade_evidence)
 from .logger import get_logger
 from .requester import JsonBody
 
@@ -82,14 +83,26 @@ class AdvancedLayerMixin:
         # the pair skips ONLY pages that cannot execute anything at all.
         if (engine is not None and dom_engine.page_has_client_js(text)
                 and dom_engine.page_can_run_sink(text)):
-            # Phase 20-3: record L6 DOM-dynamic layer when a real browser
-            # engine is available and the page has client-side JS.
-            self.coverage.touch_layer(url, "L6_dom_dynamic", "GET",
-                                      detail="playwright engine")
+            # The layer is recorded only once it has actually run.  This used to
+            # `touch_layer` BEFORE `engine.analyze()` and swallow the exception,
+            # so a browser that failed to launch (no chromium binary, dead
+            # process, OOM page) still printed "L6_dom_dynamic: ran" in the
+            # client's coverage matrix while every JS sink in the application
+            # went unexamined -- the one evidence class this scanner cannot
+            # substitute a heuristic for.
             try:
                 dyn_findings = engine.analyze(url)
-            except Exception:
+                self.coverage.touch_layer(url, "L6_dom_dynamic", "GET",
+                                          detail="playwright engine")
+            except Exception as e:
                 dyn_findings = []
+                self.coverage.record_layer(url, "L6_dom_dynamic", "GET",
+                                           status="failed",
+                                           detail=f"{type(e).__name__}: "
+                                                  f"{str(e)[:140]}")
+                _log.warning("L6_dom_dynamic failed for %s (%s: %s); DOM sinks "
+                             "on this page were NOT examined", url,
+                             type(e).__name__, e)
 
         # Collect normalized dynamic sinks for dedup against static hints.
         dyn_sinks: set = set()
@@ -111,26 +124,41 @@ class AdvancedLayerMixin:
         for r in static_results:
             if _suppressed(r):
                 continue  # confirmed dynamically; the dynamic finding covers it
+            # `_sev_conf` is the layer's OWN belief; severity is impact and must
+            # not be derived from the graded confidence below, or "no browser
+            # checked this" would silently demote the finding in triage.
+            _sev_conf = r.get("confidence", "low")
+            _cls, _conf, _det = _grade_evidence(None, _sev_conf,
+                                                r.get("detail", ""))
             self._add(Finding(**{
                 "url": url, "method": "GET", "param": None,
                 "type": "dom", "context": r.get("type"),
                 "payload": r.get("snippet", ""), "transform": [],
-                "severity": "medium" if r.get("confidence") == "medium" else "low",
-                "confidence": r.get("confidence", "low"),
-                "detail": r.get("detail", ""),
+                "severity": "medium" if _sev_conf == "medium" else "low",
+                "confidence": _conf,
+                "detail": _det,
+                "evidence_class": _cls,
                 "headless": None, "proof": None,
             }))
             self.coverage.record_finding(url, "GET")
 
         for d in dyn_findings:
+            # This one ran: the sink fired the marker in a real browser.  State
+            # the outcome instead of leaving `_grade_evidence` to infer it from
+            # `confirmed`, and keep `proof` a string only because that is what
+            # dom_engine hands back -- report.py's Burp fallback guards for it.
+            _h = {"available": True, "confirmed": True, "outcome": "fired",
+                  "detail": "marker executed in real browser sink"}
+            _cls, _conf, _det = _grade_evidence(_h, d.get("confidence", "high"),
+                                                d.get("detail", ""))
             self._add(Finding(**{
                 "url": url, "method": "GET", "param": None,
                 "type": "dom_dynamic", "context": d.get("sink"),
                 "payload": d.get("snippet", ""), "transform": [],
-                "severity": "high", "confidence": d.get("confidence", "high"),
-                "detail": d.get("detail", ""),
-                "headless": {"available": True, "confirmed": True,
-                             "detail": "marker executed in real browser sink"},
+                "severity": "high", "confidence": _conf,
+                "detail": _det,
+                "evidence_class": _cls,
+                "headless": _h,
                 "proof": d.get("snippet", ""),
             }))
             self.coverage.record_finding(url, "GET")
@@ -237,6 +265,7 @@ class AdvancedLayerMixin:
                         context="script_block",
                         severity="high",
                         type="jsonp_xss",
+                        evidence_class=EVIDENCE_NO_BROWSER,
                         evidence=f"callback name reflected at response start; "
                                  f"callback_name={result['callback_name']}",
                         poc_html=poc,
@@ -284,6 +313,7 @@ class AdvancedLayerMixin:
                 context="csp_header",
                 severity="medium" if report.bypassable else "info",
                 type="csp_bypass",
+                evidence_class=EVIDENCE_NO_BROWSER,
                 evidence="; ".join(report.weak),
                 csp_header=csp_header,
                 bypass_type=best.get("type", ""),
@@ -348,6 +378,7 @@ class AdvancedLayerMixin:
                     url=url, method=method, param="",
                     payload=evil, context="cors_header",
                     severity=sev, type="cors_misconfig",
+                    evidence_class=EVIDENCE_NO_BROWSER,
                     confidence="firm", evidence=evidence,
                     detail=reason,
                 ))
@@ -397,6 +428,7 @@ class AdvancedLayerMixin:
                 payload="", context=verdict.get("context", "response_headers"),
                 severity=verdict.get("severity", "low"),
                 type=verdict.get("type", "xs_leak_surface"),
+                evidence_class=EVIDENCE_NO_BROWSER,
                 confidence=verdict.get("confidence", "firm"),
                 evidence=verdict.get("evidence", ""),
                 detail=verdict.get("detail", ""),
@@ -435,6 +467,7 @@ class AdvancedLayerMixin:
                     context="html_element",
                     severity="high",
                     type="mutation_xss",
+                    evidence_class=EVIDENCE_NO_BROWSER,
                     evidence=f"reflected + mutating sinks: {result['sinks']}",
                     vector=result["vector"],
                 ))
@@ -507,6 +540,7 @@ class AdvancedLayerMixin:
                         context="html_element",
                         severity="high",
                         type="dom_clobber",
+                        evidence_class=EVIDENCE_NO_BROWSER,
                         evidence=f"reflected id={token}; JS refs: "
                                  f"{js_refs[:3]}; danger sink present",
                     ))
@@ -524,6 +558,7 @@ class AdvancedLayerMixin:
                     context="html_element",
                     severity="high",
                     type="dom_clobber",
+                    evidence_class=EVIDENCE_NO_BROWSER,
                     evidence=f"reflected id={token}; JS refs: {result['js_refs']}",
                 ))
             self.coverage.record_finding(url, method)
@@ -578,6 +613,7 @@ class AdvancedLayerMixin:
                         context="template_angular",
                         severity="critical",
                         type=f"template_ssti_{fw.lower()}",
+                        evidence_class=EVIDENCE_NO_BROWSER,
                         evidence=f"{fw} template engine executing user input "
                                  f"(probe {{{{7*7}}}} rendered to 49)",
                     ))
@@ -634,6 +670,7 @@ class AdvancedLayerMixin:
                         context=v.get("context") or "html_element",
                         severity="medium",   # polyglot = unconfirmed which context
                         type="polyglot_reflection",
+                        evidence_class=EVIDENCE_MODEL,
                         evidence=f"polyglot ({kind}) token '{msg}' reflected: "
                                  f"{v['detail']}",
                     ))

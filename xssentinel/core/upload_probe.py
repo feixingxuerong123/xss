@@ -26,7 +26,7 @@ import re
 import secrets
 from urllib.parse import urljoin
 
-from .findings import Finding
+from .findings import EVIDENCE_MODEL, Finding
 from .stealth import marker as _stem_marker
 from . import verifier
 
@@ -179,6 +179,7 @@ def probe_upload_content(requester, url: str, file_field: str,
             "url": target, "method": "GET",
             "param": f"{file_field}[content]",
             "type": "stored_upload", "context": "uploaded_file_content",
+            "evidence_class": EVIDENCE_MODEL,
             "payload": filename, "severity": "high",
             "confidence": "high",
             "detail": (sv.get("detail") or "") +
@@ -248,6 +249,7 @@ def probe_upload(requester, url: str, file_field: str,
             out.append(Finding(**{
                 "url": url, "method": method, "param": f"{file_field}[filename]",
                 "type": "upload_xss", "context": "multipart_filename",
+            "evidence_class": EVIDENCE_MODEL,
                 "payload": filename, "severity": "high",
                 "confidence": "high",
                 "detail": (v.get("detail") or "") +
@@ -279,6 +281,7 @@ def probe_upload(requester, url: str, file_field: str,
                             "url": target, "method": "GET",
                             "param": f"{file_field}[filename]",
                             "type": "stored_upload", "context": "uploaded_file",
+                        "evidence_class": EVIDENCE_MODEL,
                             "payload": filename, "severity": "high",
                             "confidence": "high",
                             "detail": (sv.get("detail") or "") +

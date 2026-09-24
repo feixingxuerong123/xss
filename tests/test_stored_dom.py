@@ -90,6 +90,10 @@ def test_hit_emits_stored_dom_and_submits_form_plus_json():
     assert f["type"] == "stored_dom"
     assert f["severity"] == "high"
     assert f["confidence"] == "high"
+    # The engine DID run a browser here, so this finding must stop filing as
+    # "never checked" (`headless` used to be None on this exact path).
+    assert f["evidence_class"] == "browser-executed"
+    assert f["headless"]["outcome"] == "fired"
     assert f["method"] == "POST" and f["param"] == "comment"
     proof = f["proof"]
     assert proof["view_url"] == "http://t/view"
@@ -144,6 +148,14 @@ def test_self_view_is_downgraded_to_medium_confidence():
     ok = host.scan_stored_dom("http://t/write")
     assert ok is True
     assert host.findings[0].data["confidence"] == "medium"
+    # Execution and persistence are separate claims: the browser DID fire the
+    # marker here, so the tier says so -- and the grading must not spend that
+    # fact to upgrade a confidence number that is about "renders for OTHER
+    # viewers", which self-view has not shown.
+    _d = host.findings[0].data
+    assert _d["evidence_class"] == "browser-executed"
+    assert _d["confidence"] == "medium", "grading must not raise this"
+    assert _d["severity"] == "high", "severity is impact, not belief"
 
 
 def test_alertless_payloads_are_skipped(monkeypatch):

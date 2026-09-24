@@ -215,6 +215,10 @@ class TestScanTimeBased:
         f = sc.findings[0].data
         assert f["type"] == "time_based_xss"
         assert f["severity"] == "high" and f["confidence"] == "high"
+        # The beacon IS the browser-grade proof on this channel; filing it with
+        # no tier at all let the report say "no browser check" about a finding
+        # whose whole evidence is a victim browser coming back to us.
+        assert f["evidence_class"] == "oob-confirmed"
         assert f["param"] == "q"
         assert f["context"].startswith("time_based_")
         # confirmed on the FIRST payload -> only one probe sent

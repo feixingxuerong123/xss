@@ -39,6 +39,7 @@ import secrets
 import threading
 
 from . import verifier
+from .findings import EVIDENCE_MODEL
 from .logger import get_logger
 
 _log = get_logger("scenarios")
@@ -160,6 +161,9 @@ def _mk_finding(url, param, sc, v, text, token, resp, payload):
         type="scenario", context=v.get("context") or "html_element",
         payload=payload, transform=[f"scenario:{sc.get('id')}"],
         severity="high", confidence="high",
+        # Confirmed by `verify_semantic` (and the pure-Python HTML model behind
+        # it) -- no browser ever rendered this, so the tier must not imply one.
+        evidence_class=EVIDENCE_MODEL,
         detail=(f"scenario '{sc.get('id')}' confirmed: {v.get('detail')}"),
         headless=None,
         proof={"scenario": sc.get("id"), "token": token,

@@ -22,8 +22,8 @@ from . import polyglot as poly_mod
 from . import dom as dommod
 from . import dom_engine
 from . import spa_crawler as spa_mod
-from .findings import (Finding, _DEFAULT_TRANSFORMS,
-                       _norm, _proof, _safe_snippet)
+from .findings import (EVIDENCE_OOB, Finding, _DEFAULT_TRANSFORMS,
+                       _grade_evidence, _norm, _proof, _safe_snippet)
 from .logger import get_logger
 
 if TYPE_CHECKING:  # only ever referenced inside annotations
@@ -138,7 +138,16 @@ class StoredBlindMixin:
                     # so the next fetch actually sees the just-stored payload.
                     if hasattr(req, "invalidate"):
                         req.invalidate(view_url)
-                    vresp = view_req.get(view_url)
+                    # Read UNCACHED, and not only via `req.invalidate` above:
+                    # with `--stored-fresh-session` the page is fetched through a
+                    # DIFFERENT Requester (line ~77), and `Requester.invalidate`
+                    # only clears the caller's own cache (requester.py:352-361).
+                    # So from the second variant onward the viewer was served its
+                    # own cached copy of the page as it looked after variant 1 --
+                    # `verify_semantic` then could not find the newer token, and
+                    # the whole stored pass could report "not stored" having
+                    # really tested one payload out of ~n.
+                    vresp = view_req.get(view_url, cache_get=False)
                     self._bump()
                 except Exception:
                     continue
@@ -159,13 +168,21 @@ class StoredBlindMixin:
                     else:
                         confidence = "high"
                         note = "explicit viewer page rendered the payload"
+                    # `verify_semantic` proves the token landed in an EXECUTABLE
+                    # CONTEXT on the viewer page.  Nothing in this path ran a
+                    # browser, so the old wording ("persisted and executed")
+                    # claimed more than was observed -- and the tier attached
+                    # below says plainly that execution is unverified.
+                    _d0 = (f"payload persisted and rendered in an executable "
+                           f"context in {view_url} ({v['detail']}; {note})")
+                    _cls, _conf, _det = _grade_evidence(None, confidence, _d0)
                     self._add(Finding(**{
                         "url": inject_url, "method": method, "param": param,
                         "type": "stored", "context": "stored_view",
                         "payload": variant, "transform": tset,
-                        "severity": "high", "confidence": confidence,
-                        "detail": f"payload persisted and executed in {view_url} "
-                                  f"({v['detail']}; {note})",
+                        "severity": "high", "confidence": _conf,
+                        "detail": _det,
+                        "evidence_class": _cls,
                         "headless": None,
                         "proof": {"view_url": view_url, "token": token,
                                   "fresh_session": bool(fresh_session and
@@ -296,15 +313,30 @@ class StoredBlindMixin:
                 else:
                     confidence = "high"
                     note = "view page rendered the stored payload in a real browser"
+                # The DOM engine ran a real browser and the marker reached an
+                # executable sink, so this finding DOES have browser-grade
+                # proof.  It used to be filed with `headless: None`, which would
+                # have graded as "never checked" -- the opposite of the truth.
+                _h = {"available": True, "confirmed": True, "outcome": "fired",
+                      "detail": f"dom engine: marker reached sink(s) {sinks}"}
+                _cls, _conf, _det = _grade_evidence(_h, confidence, (
+                    f"stored payload rendered client-side and "
+                    f"reached executable sink(s) [{sinks}] on "
+                    f"{view_url} ({note})"))
+                # Execution and persistence are different claims.  A browser
+                # firing the marker proves the first; the self-view case above
+                # has NOT proved it renders for other visitors, and that is what
+                # this site's confidence number is about -- so the grade may
+                # state the tier, but it may not raise this confidence.
+                _conf = confidence
                 self._add(Finding(**{
                     "url": inject_url, "method": "POST", "param": param,
                     "type": "stored_dom", "context": "stored_dom_view",
                     "payload": variant, "transform": [],
-                    "severity": "high", "confidence": confidence,
-                    "detail": f"stored payload rendered client-side and "
-                              f"reached executable sink(s) [{sinks}] on "
-                              f"{view_url} ({note})",
-                    "headless": None,
+                    "severity": "high", "confidence": _conf,
+                    "detail": _det,
+                    "evidence_class": _cls,
+                    "headless": _h,
                     "proof": {"view_url": view_url, "token": token,
                               "sinks": sinks,
                               "snippets": [str(h.get("snippet", ""))[:200]
@@ -339,16 +371,23 @@ class StoredBlindMixin:
             start_url=start_url, viewer_urls=viewer_urls,
             max_pages=max_pages, verbose=self.verbose)
         for r in results:
+            # second_order confirms with `verify_semantic` (nonce token landed
+            # in an executable context on the viewer page), NOT with a browser
+            # that ran it -- so "executed at" here used to claim an observation
+            # nobody made.
+            _cls, _conf, _det = _grade_evidence(None, "high", (
+                f"payload injected at {r['inject_url']} "
+                f"({r['inject_method']} {r['inject_param']}) "
+                f"rendered in an executable context at {r['viewer_url']} "
+                f"({r['detail']})"))
             self._add(Finding(**{
                 "url": r["inject_url"], "method": r["inject_method"],
                 "param": r["inject_param"],
                 "type": "second_order", "context": r["context"],
                 "payload": r["payload"], "transform": [],
-                "severity": "high", "confidence": "high",
-                "detail": (f"payload injected at {r['inject_url']} "
-                           f"({r['inject_method']} {r['inject_param']}) "
-                           f"executed at {r['viewer_url']} "
-                           f"({r['detail']})"),
+                "severity": "high", "confidence": _conf,
+                "detail": _det,
+                "evidence_class": _cls,
                 "headless": None,
                 "proof": {"viewer_url": r["viewer_url"],
                           "token": r["token"], "snippet": r["snippet"]},
@@ -465,6 +504,11 @@ class StoredBlindMixin:
                            f"('{self.oob.name}'); a victim's browser executed it, "
                            f"proving the input renders in an executable context "
                            f"(classic blind/stored flow)."),
+                # A beacon arriving at the callback host is execution proof,
+                # observed out-of-band.  `headless: None` above only means the
+                # dialog hook never looked; grading it as "no browser check"
+                # would understate the strongest channel this tool has.
+                "evidence_class": EVIDENCE_OOB,
                 "headless": None,
                 "proof": {"callback": self.oob.callback_url(tok)},
             }))
