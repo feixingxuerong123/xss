@@ -19,10 +19,7 @@ from __future__ import annotations
 
 import ast
 import os
-import subprocess
 import sys
-
-import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -33,6 +30,20 @@ from xssentinel.core import async_scanner as ASYNC  # noqa: E402
 def _source():
     path = str(ASYNC.__file__)
     return open(path, encoding="utf-8").read()
+
+
+# The pre-fix shape, written out rather than pulled from history.  `ctx` resolves
+# to the real context module, exactly as it does in the engine.
+_BROKEN_SNIPPET = (
+    "import asyncio\n"
+    "from . import context as ctx\n"
+    "async def _scan(text, marker):\n"
+    "    try:\n"
+    "        context = await asyncio.to_thread(ctx.classify, text, marker)\n"
+    "    except Exception:\n"
+    "        context = 'html_element'\n"
+    "    return context\n"
+)
 
 
 def _missing_calls(src):
@@ -80,21 +91,21 @@ def test_every_module_symbol_async_calls_actually_exists():
 def test_the_guard_actually_catches_the_original_bug():
     """Self-check on the detector: it must find the bug it was written for.
 
-    Without this line, a guard that silently matches nothing is indistinguishable
-    from a fixed engine -- the false-green shape that has now bitten this project
-    four times in one day.  It skips once the fix is committed and HEAD no longer
-    contains the broken call, rather than lying about coverage.
+    Deliberately SYNTHETIC, not `git show HEAD:...`.  The first version read
+    HEAD and expected `ctx.classify` there; once the fix was committed, the
+    string still appeared -- inside the comment explaining the old bug -- so the
+    premise check passed while the detector correctly found nothing, and the
+    test failed for the opposite of the reason it exists.  A mutation harness
+    that depends on repository history rots the moment history moves; this one
+    cannot.
     """
-    head = subprocess.run(
-        ["git", "show", "HEAD:xssentinel/core/async_scanner.py"],
-        capture_output=True, text=True, encoding="utf-8",
-        cwd=ROOT).stdout
-    if "ctx.classify" not in head:
-        pytest.skip("HEAD no longer carries the bug this guard was written for")
-    caught = _missing_calls(head)
+    caught = _missing_calls(_BROKEN_SNIPPET)
     assert any("ctx.classify" in c for c in caught), (
         "the detector is vacuous -- it missed the very bug it exists for "
         "(it reported: %s)" % (caught or "nothing at all"))
+    # and it must not fire on the shape that replaced it
+    assert not _missing_calls(_BROKEN_SNIPPET.replace(
+        "ctx.classify", "ctx.analyze")), "detector fires on correct code too"
 
 
 def test_async_does_not_call_the_nonexistent_classifier():
