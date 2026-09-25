@@ -87,6 +87,19 @@ def test_no_false_positive(benchmark_server, case):
     from xssentinel.core.scanner import Scanner
     from xssentinel.core.requester import Requester
 
+    # The fixture asks loopback_healthy() ONCE (module scope), but conftest
+    # documents it as a per-use probe -- so a mid-file degradation made the
+    # remaining ~70 cases hang instead of skipping.  Observed twice on
+    # 2026-09-25, at two DIFFERENT stalls (sock.connect, then _read_status),
+    # with every case passing in isolation -- i.e. host state, not this code.
+    # A stall is not free either: Requester runs HTTPAdapter(max_retries=2)
+    # (requester.py:147), so one throttled read costs ~3x its 10s timeout and
+    # the file ends with pytest-timeout killing it and NO verdict at all.
+    from tests.conftest import loopback_healthy
+    if not loopback_healthy():
+        pytest.skip(f"loopback degraded mid-file before {case['id']} -- "
+                    "skipping instead of hanging on a throttled connect")
+
     path = case["path"]
     param = case.get("param", "q")
     url = f"{benchmark_server}{path}?{param}=test"
@@ -133,6 +146,14 @@ def test_overall_fpr_zero(benchmark_server):
     """Aggregate check: total FPR across all negative cases must be 0%."""
     from xssentinel.core.scanner import Scanner
     from xssentinel.core.requester import Requester
+
+    # Same per-use health probe as test_no_false_positive: this one scans every
+    # negative case in a loop, so a degradation that starts halfway through is
+    # even less likely to surface as anything but a hang.
+    from tests.conftest import loopback_healthy
+    if not loopback_healthy():
+        pytest.skip("loopback degraded mid-file -- skipping the aggregate FPR "
+                    "scan instead of hanging on a throttled connect")
 
     fp_count = 0
     total = len(_NEGATIVE_CASES)
@@ -251,13 +272,21 @@ class TestErroredCasesGetRetriedInBothClasses:
     """
 
     @staticmethod
-    def _row(verdict, ground_truth, error=""):
+    def _row(verdict, ground_truth, error="", requests=25):
+        """A row as the runner hands one back.
+
+        `requests` defaults to a NON-ZERO count on purpose: every pre-Phase-176t
+        case in this class is about the `error` trigger, and `CaseResult`'s own
+        default is 0 -- which now also means "never spoke", so leaving it bare
+        would silently route all of them through the new trigger and this class
+        would stop testing the one it was written for.
+        """
         from benchmark.runner import CaseResult
         return CaseResult(case_id="neg-retry-01", path="/s/x", param="q",
                           mode="raw_element", ground_truth=ground_truth,
                           context="html_element", difficulty="easy",
                           detected=verdict in ("TP", "FP"), verdict=verdict,
-                          error=error)
+                          requests=requests, error=error)
 
     @staticmethod
     def _script(monkeypatch, rows):
@@ -338,4 +367,99 @@ class TestErroredCasesGetRetriedInBothClasses:
                                           {"id": "pos-w-01"},
                                           90, 14, 12, "sync")
         assert r.verdict == "FN"
+
+
+class TestZeroRequestRowsGetRetried:
+    """A clean-looking report from a scan that never spoke is not a measurement.
+
+    Measured in the Phase 176s async matrix: `pos-elem-05` scored FN with
+    **requests=0** (it was TP with 30 in the previous run), `pos-ctoss-01`
+    likewise, and `neg-csp-01` was credited a TN with 0 requests -- all three
+    with `error=''` and 11.2-11.9s wall time, i.e. the scanner's own
+    ``--timeout 10`` expiring INSIDE the scan.  A scanner timeout never reaches
+    the harness `error` field, so the old retry gate (`if not r.error`) accepted
+    the row as a real answer and the headline read "6 detection misses" when
+    some of them were never measured.
+
+    These tests pin both directions, because a trigger this loose is one step
+    from laundering real misses: 0 requests must be retried, a real miss with
+    traffic must NOT be.
+    """
+
+    _row = staticmethod(TestErroredCasesGetRetriedInBothClasses._row)
+    _script = staticmethod(TestErroredCasesGetRetriedInBothClasses._script)
+
+    def test_zero_request_fn_is_retried_despite_no_error(self, monkeypatch):
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("FN", "vulnerable", requests=0),
+            self._row("TP", "vulnerable", requests=30),
+        ])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "pos-elem-05"},
+                                          90, 10, 6, "async")
+        assert len(calls) == 2, ("a scan that issued no requests used to be "
+                                 "accepted because it carried no error")
+        assert r.verdict == "TP" and r.retries == 1
+
+    def test_zero_request_safe_case_is_not_credited_as_tn_untouched(
+            self, monkeypatch):
+        """The safe twin of the same shape: a TN from an empty scan is exactly
+        as unearned as an FN from one, and Phase 176n already said so for the
+        `error` path."""
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("TN", "safe", requests=0),
+            self._row("TN", "safe", requests=22),
+        ])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "neg-csp-01"},
+                                          90, 10, 6, "async")
+        assert len(calls) == 2
+        assert r.verdict == "TN" and r.retries == 1
+
+    def test_real_miss_with_traffic_is_never_retried(self, monkeypatch):
+        """Negative control: this trigger must not become a general "retry all
+        FNs" clause, or a genuine detection gap gets two more chances to be
+        reported as a pass and the matrix stops measuring anything."""
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("FN", "vulnerable", requests=41)])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "neg-filter-05"},
+                                          90, 10, 6, "async")
+        assert len(calls) == 1, "a miss the scanner actually worked for stays a miss"
+        assert r.verdict == "FN" and r.retries == 0
+
+    def test_declared_skip_is_never_retried(self, monkeypatch):
+        """SKIP rows carry requests=0 by construction (runner.py:371-376), so a
+        requests-based trigger would burn 2 scans per sync-only case -- 12
+        wasted runs -- to re-measure a vector the engine does not implement."""
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("SKIP", "vulnerable", requests=0)])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "pos-stored-01"},
+                                          90, 10, 6, "async")
+        assert len(calls) == 1
+        assert r.verdict == "SKIP"
+
+    def test_persistent_zero_request_stays_fn_with_no_invented_error(
+            self, monkeypatch):
+        """If it never speaks, it stays an honest FN with `error=''`.
+
+        Filling in `error` here would flip the safe-case verdicts to ERROR too
+        and make the aggregate count a detection gap as an environment gap; the
+        row already carries `requests: 0`, and the aggregate now reports
+        `zero_request_rows` so the headline cannot be misread.
+        """
+        import benchmark.runner as runner
+        calls = self._script(monkeypatch, [
+            self._row("FN", "vulnerable", requests=0)])
+        r = runner._evaluate_with_retries("http://127.0.0.1:9",
+                                          {"id": "pos-ctoss-01"},
+                                          90, 10, 6, "async")
+        assert len(calls) == 1 + runner._ERROR_RETRIES
+        assert r.verdict == "FN" and r.error == "" and r.requests == 0
+        assert r.retries == runner._ERROR_RETRIES
 

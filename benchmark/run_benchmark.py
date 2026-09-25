@@ -179,6 +179,15 @@ def main():
         # run with 192 verdicts and 12 retries is a much less healthy machine than
         # one with no retries, and the rates alone cannot tell them apart.
         "retried_cases": sum(1 for c in result.cases if c.get("retries")),
+        # Rows that STILL report zero traffic after the retries.  Such a case
+        # answered nothing about the scanner, and without this line `fn: 6`
+        # reads as six detection misses when some of them are unresolved
+        # environment failures (Phase 176t measured three at 11.2-11.9s each,
+        # with error='' -- the scanner's own --timeout 10 expiring inside the
+        # scan, which never surfaces as a harness error).
+        "zero_request_rows": sum(1 for c in result.cases
+                                 if not c.get("requests")
+                                 and c["verdict"] != "SKIP"),
         "by_context": result.by_context,
         "false_positives": result.false_positives,
         "false_negatives": result.false_negatives,

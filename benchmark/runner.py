@@ -442,6 +442,23 @@ def evaluate_case(base_url: str, case: dict, timeout: int,
 _ERROR_RETRIES = 2
 
 
+def _unanswered(r: CaseResult) -> bool:
+    """True when this row carries no information about the scanner at all.
+
+    Two shapes.  ``r.error`` -- the harness could not get a report back.  And
+    ``r.requests == 0`` -- the report came back *clean* but the scanner never
+    spoke: the target connection timed out inside the scanner (the benchmark
+    CLI runs with ``--timeout 10``, and the three rows this was written for all
+    cost 11.2-11.9s with ``error=''``), so an empty report is scored as a real
+    answer.  Measured consequence: ``pos-elem-05`` went TP(30 req) -> FN(0 req)
+    and ``neg-csp-01`` was credited a TN for a scan that asked the server
+    nothing -- and neither was retried, because neither "errored".
+    """
+    if r.verdict == "SKIP":
+        return False     # declared out of this engine's scope; nothing to re-measure
+    return bool(r.error) or r.requests == 0
+
+
 def _evaluate_with_retries(base_url: str, case: dict, timeout: int,
                            max_payloads: int, max_transforms: int,
                            engine: str = "sync",
@@ -454,6 +471,10 @@ def _evaluate_with_retries(base_url: str, case: dict, timeout: int,
     simply vanished from the scored denominator.  A killed loopback connection
     is a harness artefact, not a measurement, so both classes are retried here.
 
+    Phase 176t: the trigger is now ``_unanswered`` rather than ``r.error``, so a
+    scan that issued zero requests is re-measured too -- it is the same artefact
+    wearing a clean report.
+
     What is deliberately NOT retried away is the verdict: when the budget runs
     out, a safe case still reports ERROR rather than TN.  A scan that never
     finished is not evidence of a correct non-detection; retrying only buys a
@@ -463,11 +484,12 @@ def _evaluate_with_retries(base_url: str, case: dict, timeout: int,
     r = evaluate_case(base_url, case, timeout, max_payloads, max_transforms,
                       engine=engine)
     for attempt in range(_ERROR_RETRIES):
-        if not r.error:
+        if not _unanswered(r):
             break
         if verbose:
             print(f"    [retry {attempt + 1}/{_ERROR_RETRIES}] "
-                  f"{r.case_id} ({r.error})", file=sys.stderr)
+                  f"{r.case_id} ({r.error or 'no requests issued'})",
+                  file=sys.stderr)
         r = evaluate_case(base_url, case, timeout, max_payloads,
                           max_transforms, engine=engine)
         r.retries = attempt + 1
