@@ -28,8 +28,8 @@ import asyncio
 import copy
 import time
 import secrets
-from typing import AsyncIterator
-from urllib.parse import urlparse, urljoin
+from typing import Any, AsyncIterator
+from urllib.parse import urlparse, urljoin, urlencode
 
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
 from .findings import (EVIDENCE_BROWSER_EXECUTED, EVIDENCE_MODEL,
@@ -343,9 +343,17 @@ class AsyncScanner:
                     session, url, method, params, data, text)))
 
                 # L3 DOM static analysis.
+                # Phase 176t: pass method+params.  The real-browser pass reads
+                # the page, so it must be pointed at a URL that carries the
+                # user-controlled query -- sync re-attaches them for exactly
+                # this reason (scanner.py:479-486).  Async keeps `url` and
+                # `params` apart internally, so handing the browser the bare
+                # url showed it an empty location.search and made every
+                # source-read DOM vector structurally unconfirmable
+                # (measured: pos-dom-02 async FN / sync TP).
                 if self.advanced_layers:
                     page_tasks.append(("L3_dom", self._scan_dom_async(
-                        url, text)))
+                        url, text, method, params)))
 
                 # L5 advanced page layers (postMessage / prototype / SW / etc).
                 # Phase 87: pass the endpoint params -- run_page_layers uses
@@ -962,6 +970,17 @@ class AsyncScanner:
                 probe_text or text or ""):
             yield _f
 
+        # Phase 176s: time-based (OOB) fallback -- sync parity with
+        # scanner.py:1122.  The marker reflected but nothing confirmed, so
+        # a strict CSP is the prime suspect; resource-fetch payloads prove
+        # the markup was parsed as HTML even when inline script is blocked.
+        # Reached only when this param produced no confirmed finding, and
+        # only with an OOB listener configured (same guards as sync).
+        if self.oob and self.advanced_layers and not param_confirmed:
+            async for _f in self._scan_time_based(url, method, params, data,
+                                                  param, is_body):
+                yield _f
+
     def _build_variants(self, marked: str, context: str, marker: str,
                         cap_override: int | None = None
                         ) -> list[tuple[list[str], str]]:
@@ -1112,7 +1131,9 @@ class AsyncScanner:
         except Exception:
             return None
 
-    async def _scan_dom_async(self, url: str, page_text: str
+    async def _scan_dom_async(self, url: str, page_text: str,
+                              method: str = "GET",
+                              params: dict | None = None
                               ) -> AsyncIterator[Finding]:
         """L3 static + L6 real-browser DOM layer -- sync _scan_dom parity.
 
@@ -1121,6 +1142,16 @@ class AsyncScanner:
         accidental truthy pass-through that broke for empty URLs), and the
         real-browser dynamic confirmation (dom_dynamic) never ran in async
         mode at all.
+
+        Phase 176t adds the third one, and it is the kind that cannot be
+        spotted from a finding count: the browser was navigated to ``url``,
+        which in async does NOT contain the endpoint's query string (the
+        engine keeps ``url`` and ``params`` apart -- see _scan_reflected).
+        So ``location.search`` was empty at read time, and every DOM vector
+        whose source is the query string was structurally unconfirmable --
+        reported as a clean page, not as a degraded scan.  Sync already
+        re-attaches params before this call (scanner.py:479-486); the guard
+        below is copied from there, including the GET-only condition.
         """
         try:
             from . import dom as dom_mod
@@ -1140,7 +1171,17 @@ class AsyncScanner:
                     lambda t: (dom_engine_mod.page_has_client_js(t)
                                and dom_engine_mod.page_can_run_sink(t)),
                     page_text):
-                dyn_findings = await asyncio.to_thread(engine.analyze, url)
+                page_url = url
+                if method == "GET" and params:
+                    try:
+                        qs = urlencode(params)
+                        if qs:
+                            page_url = url + ("&" if "?" in url
+                                              else "?") + qs
+                    except Exception:
+                        pass
+                dyn_findings = await asyncio.to_thread(engine.analyze,
+                                                       page_url)
 
             dyn_sinks: set = set()
             for d in dyn_findings:
@@ -1199,18 +1240,71 @@ class AsyncScanner:
         dangling markup sub-layers use them to detect user-controlled
         reflection; the old call left them at None (sync parity:
         scanner.py passes ``params=params``).
+
+        Phase 176s: pass a REAL requester instead of ``None``.  Several page
+        layers need a follow-up GET -- most visibly cookie tossing, which
+        reads the ``Set-Cookie`` response headers (``layers/content_layers.py``
+        does ``req.get(url)`` then ``resp.raw.headers.getlist``).  With
+        ``req=None`` that call raised AttributeError, the layer's own
+        ``except Exception: pass`` swallowed it, and the layer went on with
+        an empty header list -- so it could never report the one thing it
+        exists to report.  The shim's old comment called this "degrades
+        gracefully"; it degrades *silently*, which is how the gap survived
+        until a benchmark case (pos-ctoss-01) measured it.
         """
         try:
             from . import advanced_layers
             # Create a lightweight sync scanner shim to collect findings.
             shim = _AsyncScannerShim(self)
+            # CountingRequester, not the bare requester: some sub-layers bump
+            # the scanner themselves and some do not, and either way the
+            # traffic has to land in the scan's request accounting instead of
+            # sailing past it (Phase 142).
+            shim.req = CountingRequester(self._get_sync_requester(),
+                                         shim._bump)
             await asyncio.to_thread(
-                advanced_layers.run_page_layers, shim, None, url, page_text,
-                params=params)
+                advanced_layers.run_page_layers, shim, shim.req, url,
+                page_text, params=params)
+            self.requests_made += shim.requests_made
             for f in shim._findings:
                 yield f
         except Exception as e:
             _log.warning("async advanced page layers error: %s", e, exc_info=self.verbose)
+
+    async def _scan_time_based(self, url: str, method: str, params: dict,
+                               data: dict, param: str, is_body: bool
+                               ) -> AsyncIterator[Finding]:
+        """Phase 176s: time-based (OOB resource-fetch) fallback.
+
+        Sync reaches this at the end of ``_scan_param`` (scanner.py:1122):
+        the marker reflected, every standard payload failed to confirm, so a
+        strict CSP is the prime suspect.  ``<style>@import</style>`` /
+        ``<img src>`` / onerror-fetch payloads make the browser fetch a
+        resource whether or not inline script is allowed, and the OOB
+        listener turns that fetch into proof of execution.
+
+        Async never had this step at all.  It matters precisely because it
+        is the ONLY thing that fires on a CSP-locked endpoint -- without it
+        those are silent false negatives, not degraded detections.
+        """
+        try:
+            from . import time_xss as tx_mod
+            shim = _AsyncScannerShim(self)
+            # Same requester wiring as the other thread-offloaded sync
+            # layers: a real one, wrapped so its traffic is counted.
+            shim.req = CountingRequester(self._get_sync_requester(),
+                                         shim._bump)
+            await asyncio.to_thread(
+                tx_mod.scan_time_based, shim, shim.req, url, method,
+                params, data, param, is_body)
+            self.requests_made += shim.requests_made
+            for f in shim._findings:
+                yield f
+        except (BudgetExhausted, CircuitOpen):
+            raise        # a budget stop is not a layer bug
+        except Exception as e:
+            _log.warning("async time-based fallback error: %s", e,
+                         exc_info=self.verbose)
 
     async def _scan_request_layers(self, url: str, method: str,
                                    params: dict, data: dict
@@ -1962,6 +2056,94 @@ class AsyncScanner:
             delay = min(delay * 2, 8.0)  # exponential backoff, cap 8s
         return False
 
+    async def _crawl_mine_endpoints(self, text: str, url: str, depth: int
+                                    ) -> list[tuple[str, str, dict, dict]]:
+        """Phase 176s: form + JS endpoint mining (sync parity).
+
+        ``_extract_links`` collects ``<a href>`` and bare form *actions* --
+        with no fields attached.  Two whole discovery classes were therefore
+        missing from ``--async`` crawls:
+
+          * forms: ``form_miner`` also recovers textarea / select /
+            checkbox / radio / hidden inputs, so the endpoint gets probed
+            with the fields the server actually reads
+            (scanner_crawl.py:250).
+          * JS routes: endpoints referenced in inline or external script but
+            never linked via ``<a href>`` -- the common SPA case
+            (scanner_crawl.py:300).
+
+        Either way an endpoint discovered without its parameters cannot
+        reflect anything, so these were silent false negatives rather than
+        merely thinner coverage (pos-formmine-01 / pos-jsmine-01).
+
+        External scripts are fetched at depth 0 only, mirroring sync's
+        request-volume guard.
+        """
+        found: list[tuple[str, str, dict, dict]] = []
+        origin = urlparse(url).netloc
+        # 1) forms -> endpoint with the fields the markup declares.
+        try:
+            from . import form_miner
+            for f_url, f_method, f_params, f_data in (
+                    form_miner.forms_to_endpoints(text, url) or []):
+                if urlparse(f_url).netloc != origin:
+                    continue
+                found.append((f_url, f_method or "GET", dict(f_params or {}),
+                              dict(f_data or {})))
+        except Exception as e:
+            # Wiring defects escalate before the swallow.  Sync does the
+            # same at scanner_crawl.py:349-352 ("silent layer loss is worse
+            # than a noisy crawl") -- a debug-level catch here would hide a
+            # renamed layer function as "this page had no forms", which is
+            # the exact shape that cost the async engine its ctx.classify
+            # outage (see tests/test_async_wiring.py).
+            if layer_guard.is_wiring_error(e):
+                _log.warning("[layer:async_form_miner] %s: %s",
+                             type(e).__name__, e)
+            _log.debug("async form mining failed on %s: %s", url, e)
+        # 2) routes defined in JS rather than in markup.
+        try:
+            from . import js_miner
+            res = js_miner.mine_html(text, url) or {}
+            eps = list(res.get("inline_endpoints") or [])
+            if depth == 0:
+                for s_url in (res.get("external_scripts") or [])[:8]:
+                    try:
+                        # _throttle FIRST, then send, then count -- the
+                        # ordering every other async send uses.  Without it
+                        # this mining traffic sailed past --max-requests and
+                        # inflated the total, which is Phase 142's bug in a
+                        # new place.
+                        await self._throttle(s_url)
+                        req = self._get_sync_requester()
+                        sj = await asyncio.to_thread(req.get, s_url)
+                        self.requests_made += 1
+                        eps.extend(
+                            (js_miner.mine_js_file(sj.text or "") or {})
+                            .get("endpoints", []))
+                    except (BudgetExhausted, CircuitOpen):
+                        raise    # a budget stop is not a mining bug
+                    except Exception:
+                        continue
+            for ep_url, _kind in eps:
+                resolved = urljoin(url, ep_url)
+                if urlparse(resolved).netloc != origin:
+                    continue
+                params: dict = {}
+                if "?" in resolved:
+                    q = resolved.split("?", 1)[1]
+                    params = {k.split("=")[0]: "xss"
+                              for k in q.split("&") if k}
+                    resolved = urljoin(
+                        resolved, urlparse(resolved).path or "/")
+                found.append((resolved, "GET", params, {}))
+        except Exception as e:
+            if layer_guard.is_wiring_error(e):
+                _log.warning("[layer:async_js_miner] %s: %s",
+                             type(e).__name__, e)
+            _log.debug("async JS mining failed on %s: %s", url, e)
+        return found
+
     async def _crawl_and_scan(self, session, start_url: str,
                               start_text: str) -> AsyncIterator[Finding]:
         """L7 crawl: discover linked endpoints and scan them.
@@ -1980,6 +2162,10 @@ class AsyncScanner:
         from collections import deque
 
         visited: set[str] = {start_url}
+        # Phase 176s: mined endpoints are keyed by (method, url, fields)
+        # because the same URL reached with different fields is a different
+        # target -- and the bare form action is already in `visited`.
+        mined_seen: set[tuple] = set()
         queue: deque[tuple[str, int]] = deque([(start_url, 0)])
         while queue:
             current_url, depth = queue.popleft()
@@ -2027,6 +2213,21 @@ class AsyncScanner:
                     link = urljoin(link, fu.path or "/")
                 async for finding in self._scan_reflected(
                         session, link, "GET", cparams, {}, text):
+                    yield finding
+
+            # Phase 176s: form + JS mining, in addition to <a href> links.
+            # These arrive WITH their parameters, so unlike the link loop
+            # above they can actually carry a payload.
+            for m_url, m_method, m_params, m_data in await (
+                    self._crawl_mine_endpoints(text, current_url, depth)):
+                m_base = m_url.split("?", 1)[0]
+                key = (m_method, m_base,
+                       tuple(sorted(set(m_params) | set(m_data))))
+                if key in mined_seen:
+                    continue
+                mined_seen.add(key)
+                async for finding in self._scan_reflected(
+                        session, m_base, m_method, m_params, m_data, text):
                     yield finding
 
     async def _add_finding(self, finding: Finding) -> None:
@@ -2258,9 +2459,22 @@ class _AsyncScannerShim(AdvancedLayerMixin, CrawlMixin):
         self.requests_made = 0
         self.coverage = _AsyncScannerShim._NullCoverage()
         # Page layers also reach for the requester (GraphQL / cookie
-        # tossing follow-up probes).  Async has no sync Requester, so those
-        # layers' own try/except degrades gracefully.
-        self.req = None
+        # tossing follow-up probes).  Default None; callers that run
+        # request-driven page layers must set a real one.
+        #
+        # Phase 176s: this used to be justified as "the layers' own
+        # try/except degrades gracefully".  It does not -- it degrades
+        # SILENTLY.  Cookie tossing needs a follow-up GET to read
+        # Set-Cookie; with req=None it raised, swallowed the exception,
+        # and proceeded with no headers, so it could never fire.  Async
+        # has had a sync requester since Phase 87 (_get_sync_requester);
+        # the note simply predated it and nobody re-read it.  Do not
+        # reintroduce "it degrades gracefully" reasoning here.
+        #
+        # Annotated `Any` because the layers assign a real Requester over it;
+        # left bare, mypy infers `req: None` from this line and every
+        # `shim.req = CountingRequester(...)` becomes an assignment error.
+        self.req: Any = None
         # Phase 132: the L7 parameter layers (mutation / DOM clobber /
         # template / polyglot / markup) read these two off the scanner.
         # Without them ``_run_advanced_layers`` would raise on the JSON
@@ -2268,6 +2482,14 @@ class _AsyncScannerShim(AdvancedLayerMixin, CrawlMixin):
         # getattr: tests build the scanner with __new__ to skip __init__.
         self.json_body = getattr(async_scanner, "json_body", None)
         self._advanced_layers = True
+        # Phase 176s: the OOB-aware layers (time-based) read ``scanner.oob``
+        # and ``scanner._oob_started`` directly.  Async owns both -- it runs
+        # its own listener -- so proxy them instead of letting the layer see
+        # nothing and bail out.  Without this the time-based fallback raised
+        # AttributeError on entry and every CSP-locked endpoint stayed a
+        # silent false negative (pos-tb-01).
+        self.oob = getattr(async_scanner, "oob", None)
+        self._oob_started = bool(getattr(async_scanner, "_oob_started", False))
         # Phase 133: CrawlMixin._mine_hidden_params reads these.
         self.max_payloads = getattr(async_scanner, "max_payloads", 14)
         self.param_wordlist = None      # --param-wordlist stays sync-only

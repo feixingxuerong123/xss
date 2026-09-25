@@ -2218,6 +2218,7 @@
     },
     {
       "id": "pos-so2-01",
+      "engines": ["sync"],
       "path": "/r/so2in01",
       "param": "q",
       "method": "POST",
@@ -2233,6 +2234,7 @@
     },
     {
       "id": "neg-so2-01",
+      "engines": ["sync"],
       "path": "/s/so2in01",
       "param": "q",
       "method": "POST",
@@ -2248,6 +2250,7 @@
     },
     {
       "id": "pos-scn-01",
+      "engines": ["sync"],
       "path": "/r/scin01",
       "param": "comment",
       "method": "POST",
@@ -2264,6 +2267,7 @@
     },
     {
       "id": "neg-scn-01",
+      "engines": ["sync"],
       "path": "/s/scin01",
       "param": "note",
       "method": "POST",
