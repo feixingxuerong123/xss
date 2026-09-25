@@ -205,31 +205,62 @@ class TestIndependentTarget(unittest.TestCase):
             pass
 
     # -- positives: a scanner must find these ---------------------------
+    #
+    # Recall alone is not acceptance: `assertTrue(got)` once passed on a
+    # run whose only finding was a low-confidence polyglot note.  Each
+    # positive now also names the finding TYPE that legitimately confirms
+    # that shape (sets, not single values: several layers may honestly
+    # claim the same reflection) plus high severity + confidence -- the
+    # signature of a confirmed finding rather than a noted one.
+
+    _TYPES = {
+        "query": {"reflected"},
+        "path": {"path_xss"},
+        "header": {"header_xss"},
+        "cookie": {"header_xss", "cookie_xss"},
+        "dom": {"dom_dynamic"},
+        "template": {"reflected"},
+        "double": {"reflected"},
+        "post": {"reflected"},
+        "stored": {"stored", "second_order"},
+    }
+
+    def _confirmed(self, got, shape):
+        types = self._TYPES[shape]
+        hits = [f for f in got
+                if f.get("type") in types
+                and f.get("severity") == "high"
+                and f.get("confidence") == "high"]
+        self.assertTrue(
+            hits,
+            f"{shape}: no confirmed {sorted(types)} finding -- got "
+            f"{[(f.get('type'), f.get('severity'), f.get('confidence')) for f in got]}")
+        return hits
 
     def test_query_reflection(self):
-        self.assertTrue(_scan(self.base, "/api/search?term=probe"))
+        self._confirmed(_scan(self.base, "/api/search?term=probe"), "query")
 
     def test_path_segment_reflection(self):
-        self.assertTrue(_scan(self.base, "/api/u/alice"))
+        self._confirmed(_scan(self.base, "/api/u/alice"), "path")
 
     def test_header_reflection(self):
-        self.assertTrue(_scan(self.base, "/api/reflect"))
+        self._confirmed(_scan(self.base, "/api/reflect"), "header")
 
     def test_cookie_reflection(self):
-        self.assertTrue(_scan(self.base, "/api/cookie"))
+        self._confirmed(_scan(self.base, "/api/cookie"), "cookie")
 
     def test_dom_reflection(self):
-        self.assertTrue(_scan(self.base, "/api/dom"))
+        self._confirmed(_scan(self.base, "/api/dom"), "dom")
 
     def test_template_syntax(self):
-        self.assertTrue(_scan(self.base, "/api/tpl?term=probe"))
+        self._confirmed(_scan(self.base, "/api/tpl?term=probe"), "template")
 
     def test_double_url_encoding(self):
-        self.assertTrue(_scan(self.base, "/api/double?term=probe"))
+        self._confirmed(_scan(self.base, "/api/double?term=probe"), "double")
 
     def test_post_body_reflection(self):
         got = _scan(self.base, "/api/post", ("-m", "POST", "-d", "body=probe"))
-        self.assertTrue(got)
+        self._confirmed(got, "post")
 
     def test_stored(self):
         """Stored XSS needs the write and the render endpoint named.
@@ -245,7 +276,7 @@ class TestIndependentTarget(unittest.TestCase):
             "--stored-inject", f"{self.base}/api/store",
             "--stored-view", f"{self.base}/api/store/feed",
             "--stored-param", "note"))
-        self.assertTrue(got)
+        self._confirmed(got, "stored")
 
     # -- decoys: any finding here is a false positive -------------------
 
