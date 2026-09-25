@@ -1123,14 +1123,26 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         if self.oob and self._advanced_layers:
             try:
                 from . import time_xss as tx_mod
+                tx_mod.scan_time_based(
+                    self, req, url, method, params, data, param, is_body)
+                # Phase 176u: record AFTER the layer has actually run.  The
+                # touch_layer used to sit before the call, so a failure on
+                # entry -- a bad import, a renamed symbol -- still printed
+                # "L7_time_based: ran" in the client's coverage matrix while
+                # the CSP fallback had done nothing at all.  Same lie, same
+                # fix as L6_dom_dynamic (scanner_layers.py:93-105), which is
+                # the pattern copied here including the failed-status row.
                 self.coverage.touch_layer(
                     url, "L7_time_based", method,
                     detail=f"fallback for param '{param}' (CSP may block alert)")
-                tx_mod.scan_time_based(
-                    self, req, url, method, params, data, param, is_body)
             except Exception as e:
-                if self.verbose:
-                    _log.debug(f"    [!] time-based fallback error: {e}")
+                self.coverage.record_layer(url, "L7_time_based", method,
+                                           status="failed",
+                                           detail=f"{type(e).__name__}: "
+                                                  f"{str(e)[:140]}")
+                _log.warning("L7_time_based failed for %s (%s: %s); the CSP "
+                             "fallback did not run on this parameter", url,
+                             type(e).__name__, e)
         return False
 
     # -- L4 stored XSS -----------------------------------------------------

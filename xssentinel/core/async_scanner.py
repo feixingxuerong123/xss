@@ -1287,6 +1287,7 @@ class AsyncScanner:
         is the ONLY thing that fires on a CSP-locked endpoint -- without it
         those are silent false negatives, not degraded detections.
         """
+        shim = None
         try:
             from . import time_xss as tx_mod
             shim = _AsyncScannerShim(self)
@@ -1303,6 +1304,12 @@ class AsyncScanner:
         except (BudgetExhausted, CircuitOpen):
             raise        # a budget stop is not a layer bug
         except Exception as e:
+            # Same failed-row rule as _scan_request_layers above: silence
+            # here reads as "this param had no CSP fallback", not "it died".
+            if shim is not None:
+                shim.coverage.record_layer(
+                    url, "L7_time_based", status="failed",
+                    detail=f"{type(e).__name__}: {str(e)[:140]}")
             _log.warning("async time-based fallback error: %s", e,
                          exc_info=self.verbose)
 
@@ -1325,23 +1332,38 @@ class AsyncScanner:
         not a layer bug -- it propagates (through _drain_agen) like every
         other layer instead of being swallowed.
         """
+        shim = None
         try:
             from . import advanced_layers
             shim = _AsyncScannerShim(self)
             req = self._get_sync_requester()
-            # Coverage visibility: the shim's NullCoverage only records in
-            # memory, but tests/debugging can inspect shim.coverage.touched
-            # to prove the L8 request layers ran.
-            shim.coverage.touch_layer(url, "L8_request", method,
-                                      "async request-injection layers")
             await asyncio.to_thread(
                 advanced_layers.run_request_layers,
                 shim, req, url, method, params, data)
+            # Coverage visibility: the shim's NullCoverage only records in
+            # memory, but tests/debugging inspect shim.coverage.touched to
+            # prove the L8 request layers ran -- which is exactly why the
+            # touch happens AFTER the call now.  Recorded before it, an
+            # entry-time failure still left "L8_request: touched" behind, so
+            # the introspection that exists to catch a silently dead layer was
+            # itself fooled by one.  (sync: scanner.py L7_time_based, same
+            # fix, same reason.)
+            shim.coverage.touch_layer(url, "L8_request", method,
+                                      "async request-injection layers")
             for f in shim._findings:
                 yield f
         except (BudgetExhausted, CircuitOpen):
             raise        # Phase 86: a budget/circuit stop is NOT a layer bug
         except Exception as e:
+            # Phase 176u: a swallowed failure must leave a failed row, not
+            # silence -- "no row" reads as "this endpoint had no such layer",
+            # which is exactly how a dead layer stayed invisible.  shim is
+            # None precisely when the failure was on entry (bad import /
+            # constructor), which is the case this row exists to reveal.
+            if shim is not None:
+                shim.coverage.record_layer(
+                    url, "L8_request", status="failed",
+                    detail=f"{type(e).__name__}: {str(e)[:140]}")
             _log.warning("async request layers error: %s", e,
                          exc_info=self.verbose)
 
