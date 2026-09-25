@@ -466,3 +466,95 @@ class TestAsyncPageLayerParity:
                                   detail="x")
         assert shim.coverage.touched == [
             ("http://t/", "L8_postmessage", "GET", "x")]
+
+
+class _FilterSession:
+    """Echoes q raw but rewrites literal callables -- the neg-filter-05 shape.
+
+    The benchmark's m_filter_keywords: rewrite ``alert(``-style callables to
+    ``blocked(``, strip script tags, strip on*= attribute tags.  A plain
+    marked payload can never survive this filter; only the CONCAT stamp
+    (``window['ale'+'rt']('TOK')``, no literal callable + paren) carries the
+    marker through.
+    """
+
+    def __init__(self):
+        import re as _re
+        self._re = _re
+        self.calls = []
+
+    def request(self, method, url, params=None, data=None,
+                headers=None, proxy=None):
+        val = (params or {}).get("q", "") + (data or {}).get("q", "")
+        safe = self._re.sub(
+            r"(?i)(alert|prompt|confirm|eval|function|setTimeout|setinterval"
+            r"|fetch|xmlhttprequest)\s*\(", "blocked(", val)
+        safe = self._re.sub(r"(?i)</?script[^>]*>", "", safe)
+        safe = self._re.sub(r"(?i)<[^>]*\bon\w+\s*=[^>]*>", "", safe)
+        self.calls.append({"params": dict(params or {}),
+                           "data": dict(data or {})})
+        return _Resp(f"<html><body><div>{safe}</div></body></html>")
+
+
+class TestAsyncConcatRetry:
+    """Phase 166 in the async MAIN payload loop, not only under a WAF.
+
+    The async concat retry used to live only inside the position-shift
+    block, which requires a detected WAF *fingerprint*; a WAF-less keyword
+    filter never reaches it, so async paid its whole payload budget and
+    reported nothing where sync confirms via the concat stamp
+    (benchmark neg-filter-05: async 106 requests / 0 findings, stable FN
+    across both 192-case runs, while sync TP with 78).
+    """
+
+    def _collect_filtered(self, params):
+        original = AsyncScanner._scan_advanced_param_layers
+
+        async def _noop(self, *a, **k):
+            if False:                 # pragma: no cover -- keeps it a gen
+                yield None
+
+        AsyncScanner._scan_advanced_param_layers = _noop
+        try:
+            async def run():
+                asc = AsyncScanner(max_concurrent=4, per_host_delay=0,
+                                   jitter=0)
+                asc._semaphore = asyncio.Semaphore(4)
+                session = _FilterSession()
+                out = []
+                async for f in asc._probe_param(session, "http://t/x", "GET",
+                                                "q", params, {}, False, "x"):
+                    out.append(f)
+                return out, session
+
+            return asyncio.run(run())
+        finally:
+            AsyncScanner._scan_advanced_param_layers = original
+
+    def test_keyword_filter_confirms_via_concat_stamp(self):
+        findings, session = self._collect_filtered({"q": "probe"})
+        assert findings, ("a keyword-filtered but echo-raw target must "
+                          "confirm via the concat stamp (neg-filter-05)")
+        f = findings[0]
+        assert f.data["type"] == "reflected"
+        assert f.data["severity"] == "high"
+        assert f.data["confidence"] == "high"
+        # The winning variant must BE the concat-stamped one -- no literal
+        # callable survives this filter, so anything else would mean the
+        # fake verifier accepted a dead payload.
+        assert "ale'+'rt" in f.data["payload"], (
+            f"expected the concat-stamped winner, got {f.data['payload']!r}")
+        # The bare concat variant rides the empty chain; only a transformed
+        # one carries the concat_stamp tag (same shape as sync's retry list).
+        assert f.data["transform"] == [] \
+            or "concat_stamp" in f.data["transform"]
+        # The filter really did have something to rewrite: at least one
+        # literal-callable variant must have gone over the wire (the
+        # REWRITE itself only shows in the response, not in what we sent).
+        import re as _re2
+        assert any(
+            _re2.search(r"(?i)(alert|prompt|confirm|eval)\s*\(",
+                        c["params"].get("q", "") + c["data"].get("q", ""))
+            for c in session.calls), (
+            "the fixture never exercised the filter -- a literal-callable "
+            "variant must be sent first and rewritten")

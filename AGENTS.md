@@ -37,6 +37,21 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
         oracle 一更新就该跑,没有"太贵"这个借口
   - [ ] 待定(需人决策):JSON 响应里的 reflection 是否连 severity 一起降
         (现在只降 confidence,只按 severity 过滤的下游仍会看到 high)
+- [x] **176u 分层记账诚实化(接手未提交 WIP 并修完)**:touch 移到层真实调用之后,
+      失败路径落 `status="failed"` 行;测试的 AST 匹配器补上"作为 callable 传给
+      `asyncio.to_thread` 的层函数"形态(否则对 async 恒空转)。3/3 passed
+- [x] **177 多反射点上下文选择**:两个引擎原来都只按 marker 的第一处反射分类
+      (`rank_contexts` 从出生就是零调用),marker 先落惰性上下文(注释/导航高亮)
+      后落可执行上下文时,可执行语料永远不会被发。`context.analyze_all()` 按执行
+      优先级选主上下文(单反射行为逐字节不变),次上下文候选排队尾不增预算。
+      `tests/test_multi_reflection_context.py` 6 例;sync 192 例 f1=1.000 零退化
+- [x] **177 续:async 首次与 sync 全量对齐**。FN 漂移分解:so2/scn×4 是 176s 的
+      engines 门补上前的旧账(现已 SKIP);其余为环境伪影(隔离复跑全 TP);
+      唯一稳定真分歧 neg-filter-05 = async 主循环缺 Phase 166 concat 重试
+      (它只存在于需要 WAF 指纹的位置变换分支,无 WAF 的关键字过滤器永远够不着)。
+      已补进主循环(escaped 跳过,不破 27-1 收敛预算)。
+      **async 192 例 TP108/FP0/TN74/FN0,f1=1.000**(`benchmark_20260925_asyncfix.json`),
+      此前最好 0.9455;红队 15/15(阳性现在断言 type/severity/confidence)
 
 ## 环境配置
 

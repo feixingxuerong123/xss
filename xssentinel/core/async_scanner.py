@@ -784,6 +784,77 @@ class AsyncScanner:
                     param_confirmed = True
                     break  # leave the variant loop; outer loop re-checks
 
+            # Phase 166 (sync parity, scanner._try_payload:1112): the plain
+            # stamp confirmed nothing for THIS payload.  A keyword filter
+            # rewrites a LITERAL callable (``alert(`` -> ``blocked(``) while
+            # letting the concatenated form through, so retry with the CONCAT
+            # stamp -- bounded to two requests, exactly like sync pays them
+            # per base payload.  This used to exist only inside the
+            # position-shift block below, which requires a WAF *fingerprint*;
+            # a WAF-less keyword filter never gets there (neg-filter-05:
+            # sync confirms via the concat stamp, async paid 106 requests
+            # and reported nothing).
+            # Skipped when the marker came back HTML-escaped: the encoder
+            # eats the concat variant just as dead as the plain one, and the
+            # Phase 27-1 convergence budget must not grow by 2/payload
+            # (test_async_escaped_convergence pins that ceiling).
+            if not param_confirmed and not marker_escaped:
+                concat_marked = verifier.mark(payload, marker, style="concat")
+                if concat_marked != marked:
+                    concat_retry: list = [([], concat_marked)]
+                    for tchain, _v in variants[:1]:
+                        v2 = concat_marked
+                        for t in tchain:
+                            v2 = await asyncio.to_thread(transform_mod.apply,
+                                                         t, v2)
+                        concat_retry.append(
+                            (list(tchain) + ["concat_stamp"], v2))
+                    for tchain, variant in concat_retry:
+                        if marker not in variant:
+                            continue
+                        send_params, send_data = self._probe_kv(
+                            params, data, param, variant, is_body)
+                        try:
+                            async with self._semaphore:
+                                await self._throttle(url)
+                                async with session.request(
+                                    method, url, params=send_params or None,
+                                    headers=self._req_headers(self.headers),
+                                    proxy=self._next_proxy(),
+                                    **_body_kwargs(send_data),
+                                ) as resp:
+                                    text = await resp.text()
+                                    resp_headers = dict(getattr(
+                                        resp, "headers", None) or {})
+                                    self.requests_made += 1
+                                    self._record_status(
+                                        getattr(resp, "status", 200))
+                        except (BudgetExhausted, CircuitOpen):
+                            raise
+                        except Exception:
+                            continue
+                        v = await asyncio.to_thread(
+                            verifier.verify_semantic, text, marker,
+                            response_headers=resp_headers)
+                        if (v["confirmed"]
+                                and verifier.payload_survived(text, variant)):
+                            idx = text.find(marker)
+                            param_confirmed = True
+                            yield Finding(
+                                url=url, method=method, param=param,
+                                context=v.get("context") or context,
+                                payload=variant,
+                                severity="high",
+                                evidence=text[max(0, idx - 30):
+                                              idx + len(marker) + 30],
+                                type="reflected",
+                                confidence="high",
+                                transform=tchain,
+                                param_in="body" if is_body else "query",
+                                evidence_class=EVIDENCE_MODEL,
+                            )
+                            break
+
         # Phase 37: parameter position shift (sync parity).  WAFs often
         # guard only the ORIGINAL parameter location -- re-fire the top
         # payloads with the param cloned into the OTHER location.
