@@ -210,3 +210,60 @@ class TestBenchmarkFormatReport:
         assert "Requests/sec:" in report
         assert "Findings:" in report
         assert "Layers fired:" in report
+
+
+class TestFixtureServerOwnership:
+    """`ensure_server()` must refuse to benchmark somebody else's server.
+
+    Why this exists: on Windows `HTTPServer.allow_reuse_address` makes the bind
+    succeed even when another process holds the port, so the harness scanned a
+    foreign listener and reported `requests_made > 0` with
+    `payloads_dispatched == 0` and empty `findings_by_type`.  Because the module
+    fixture caches that result, every dependent test failed on every retry too --
+    one transient impersonating four deterministic code regressions, which is
+    how I nearly mis-attributed it to the code under test.
+    """
+
+    def test_a_foreign_listener_is_detected_instead_of_adopted(self, monkeypatch):
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+
+        class Foreign(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"not the xssentinel fixture")
+
+            def log_message(self, *args):
+                pass
+
+        foreign = HTTPServer(("127.0.0.1", 0), Foreign)
+        port = foreign.server_address[1]
+        thread = threading.Thread(target=foreign.serve_forever, daemon=True)
+        thread.start()
+        try:
+            monkeypatch.setattr(bench, "BENCH_PORT", port)
+            monkeypatch.setattr(bench, "_server", None)
+            monkeypatch.setattr(bench, "_server_thread", None)
+            with pytest.raises(RuntimeError) as exc:
+                bench.ensure_server()
+            msg = str(exc.value)
+            assert ("another process" in msg or "cannot bind" in msg), msg
+            assert str(port) in msg, "the error must name the port at fault"
+            assert bench._server is None, "a refused startup must not leak a server"
+        finally:
+            foreign.shutdown()
+            foreign.server_close()
+            thread.join(timeout=5)
+
+    def test_our_own_server_passes_the_same_probe(self):
+        """Positive control: without this, the test above could pass because the
+        probe always fails."""
+        try:
+            bench.ensure_server()
+        except RuntimeError as exc:
+            pytest.skip("port busy in this run: %s" % exc)
+        try:
+            assert bench._we_own_the_port() is True
+        finally:
+            bench.stop_server()

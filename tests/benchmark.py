@@ -108,19 +108,63 @@ _server_thread: threading.Thread | None = None
 _server: object | None = None
 
 
+_OWNER_PROBE = "/echo?q=xssentinel_owner_probe"
+
+
+def _we_own_the_port() -> bool:
+    """True only if OUR fixture handler answered, not just "something answered"."""
+    import http.client
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", BENCH_PORT, timeout=5)
+        conn.request("GET", _OWNER_PROBE)
+        resp = conn.getresponse()
+        body = resp.read().decode("utf-8", "replace")
+        conn.close()
+        return resp.status == 200 and "xssentinel_owner_probe" in body
+    except Exception:
+        return False
+
+
 def ensure_server() -> None:
-    """Start the vulnerable test server in a background thread (once)."""
+    """Start the vulnerable test server in a background thread (once).
+
+    Ownership is PROBED, not assumed.  `HTTPServer.allow_reuse_address` is on,
+    and on Windows `SO_REUSEADDR` lets the bind SUCCEED even when another
+    process already holds the port -- traffic then keeps going to that other
+    server.  Measured consequence: the benchmark scanned a foreign listener on
+    8899, reported `requests_made > 0` with `payloads_dispatched == 0` and an
+    empty `findings_by_type`, and because this fixture is module-scoped the bad
+    dict was reused for every dependent test, so one transient looked like four
+    reproducible code failures (and a retry could not heal it).  Fail loudly
+    here instead of measuring somebody else's app.
+    """
     global _server_thread, _server
     if _server is not None:
         return
     from http.server import HTTPServer
-    _server = HTTPServer(("127.0.0.1", BENCH_PORT),
-                         vuln_server.H)
+    try:
+        _server = HTTPServer(("127.0.0.1", BENCH_PORT),
+                             vuln_server.H)
+    except OSError as exc:
+        raise RuntimeError(
+            "cannot bind the xssentinel fixture server on 127.0.0.1:%d (%s); "
+            "something else holds it -- close it or point BENCH_PORT elsewhere"
+            % (BENCH_PORT, exc)) from exc
     _server_thread = threading.Thread(target=_server.serve_forever,
                                       daemon=True)
     _server_thread.start()
     # Give the server a moment to bind.
     time.sleep(0.2)
+    if not _we_own_the_port():
+        _server.shutdown()
+        _server.server_close()
+        _server, _server_thread = None, None
+        raise RuntimeError(
+            "127.0.0.1:%d is answered by another process, not by this fixture "
+            "server (the bind succeeded anyway -- Windows SO_REUSEADDR allows "
+            "that). Refusing to benchmark a foreign server: it produces zero "
+            "payloads and empty findings that look like a detection regression."
+            % BENCH_PORT)
 
 
 def stop_server() -> None:
