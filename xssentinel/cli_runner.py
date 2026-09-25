@@ -930,12 +930,30 @@ def ai_opts_from_args(args) -> dict:
     """
     if not getattr(args, "ai_report", False):
         return {}
+    # Engagement kill switch (OPSEC): an environment-level NO outranks the
+    # CLI flag.  Authorized engagements are commonly governed by a rule
+    # that no client data may leave the operator's machine -- the flag may
+    # be set by habit or by a wrapper script, and habit is not consent.
+    # With this variable set, the AI section silently degrades to the
+    # deterministic template and NO finding data ever leaves the machine.
+    if os.environ.get("XSSentinel_NO_AI_EGRESS", "").strip().lower() in (
+            "1", "true", "yes", "on"):
+        print("[!] --ai-report ignored: XSSentinel_NO_AI_EGRESS is set -- "
+              "no target or finding data will be sent to any LLM provider.")
+        return {}
     from .core.llm_pool import LLMPool
     pool = None
     try:
         pool = LLMPool.from_file(getattr(args, "ai_config", None))
         print(f"[*] AI report on: {len(pool.candidates)} candidate(s) from "
               f"{pool.source}")
+        # Say WHERE the data goes, not just that it does: the target URL,
+        # parameters and payloads leave this machine for these hosts.
+        hosts = sorted({urlparse(c.endpoint).netloc or c.endpoint
+                        for c in pool.candidates})
+        if hosts:
+            print(f"[*] AI report egress: target URLs, parameters and "
+                  f"payloads will be sent to: {', '.join(hosts)}")
     except Exception as e:
         print(f"[!] --ai-report: cannot load the LLM pool "
               f"({type(e).__name__}: {e}); the AI section will come from the "

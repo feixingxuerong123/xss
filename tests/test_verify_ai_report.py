@@ -395,6 +395,27 @@ class TestCliWiring:
         args = build_parser().parse_args(["--verify-fix", "old.json"])
         assert ai_opts_from_args(args) == {}
 
+    def test_no_ai_egress_env_beats_the_flag(self, monkeypatch):
+        """OPSEC kill switch: the environment-level NO outranks --ai-report.
+
+        An authorized engagement can enforce "no client data leaves this
+        machine" via the environment; an operator passing --ai-report out
+        of habit (or a wrapper script passing it) must not override that.
+        """
+        from xssentinel.cli_runner import ai_opts_from_args
+        from xssentinel.__main__ import build_parser
+        args = build_parser().parse_args(
+            ["--verify-fix", "old.json", "--ai-report"])
+        for value in ("1", "true", "Yes", "ON"):
+            monkeypatch.setenv("XSSentinel_NO_AI_EGRESS", value)
+            assert ai_opts_from_args(args) == {}, (
+                f"XSSentinel_NO_AI_EGRESS={value!r} must disable AI egress")
+        monkeypatch.setenv("XSSentinel_NO_AI_EGRESS", "")
+        # Unset/empty restores normal (flag-driven) behaviour: enabled=True
+        # must come back, pool may be None on a machine without config.
+        opts = ai_opts_from_args(args)
+        assert opts.get("enabled") is True
+
     def test_ai_report_for_returns_none_when_disabled(self):
         from xssentinel.cli_runner import ai_report_for
         assert ai_report_for(MIXED, "http://t", {}, {}) is None
