@@ -315,33 +315,57 @@ python tests/passive_demo.py         # 产出 tests/passive_demo_report.html
 
 测试策略（Phase 37）：`tests/test_pipeline.py` 把靶场 2 的精简切片纳入 pytest —— **主流程回归在每次 pytest 就会暴露**，不再依赖手动靶场演练；`tests/test_async_pipeline.py` 补上 async 扫描器首批测试（曾靠 0% 覆盖掩盖了 `for_context` 缺失导致 async L1 静默失效的 bug）；core 的 verbose 诊断已统一路由到 `logger.debug`（`--verbose` 即 DEBUG 级）。Phase 43 补齐 `tests/test_fuzzer.py`（`--fuzz` 七个评分维度全断言，覆盖率 0%→全路径）与 `tests/test_form_miner.py`（表单抽取/填充/端点转换），并拆分 `__main__.py`（1145→497 行 + cli_runner/cli_commands）。Phase 44 新增三个测试文件共 42 例：`tests/test_passive_proxy.py`（签名去重/scope 匹配/body 解析/裸 socket 真代理端到端捕获 + 真实 Scanner 反射命中回归）、`tests/test_sqli.py`（五家族指纹全路径 + 真回显服务命中）、`tests/test_retire_js.py`（库名锚定版本提取防路径数字泄漏/版本区间边界/去重）。
 
-**当前基线（2026-09-25 实测，192 用例矩阵，两引擎同一口径）**：`benchmark/run_benchmark.py`，默认预算 10/6/90；结果 `benchmark/results/benchmark_20260924_022744.json`（sync）与 `benchmark_20260925_001801.json`（async，已含 `ctx.classify` 修复）。**两引擎并不对齐**，见下表下注：
+**当前基线（2026-09-25 实测，192 用例矩阵，两引擎同一口径）**：`benchmark/run_benchmark.py`，默认预算 10/6/90；结果 `benchmark/results/benchmark_20260924_022744.json`（sync）与 `benchmark_20260925_140833.json`（async，已含 `ctx.classify` 修复 + Phase 176s 补层）。**两引擎仍不对齐**，但差距已从 9 条缩到"1 条真漏 + 2 条待整轮复测"：
 
 | 引擎 | 用例 | TP | FP | TN | FN | ERROR | recall | precision | FPR | 墙钟 |
 |------|------|----|----|----|----|-------|--------|-----------|-----|------|
 | sync | 192 | 113 | 0 | 79 | 0 | **0** | 1.000 | 1.000 | 0.000 | 1214s |
-| async | 192 | 101 | 0 | 76 | **9** | **0** | **0.918** | 1.000 | 0.000 | 1460s |
+| async | 192 | 104 | 0 | 76 | **6** | **0** | **0.9455** | 1.000 | 0.000 | 1255s |
 
 - **sync 192/192 全部计分**（`scored=192`、`errors=0`、产物里新增 `engine` /
   `retried_cases` 字段）；async 是 `scored=186 / skipped=6`——那 6 例
   （`pos/neg-stored-01..03`）在 manifest 里声明 `engines:["sync"]`，异步引擎不实现
-  存储型链路，**记 SKIP 而不是记通过或记漏报**。上一轮同一改动集是 `errors=1`：
+  存储型链路，**记 SKIP 而不是记通过或记漏报**。Phase 176t 之后这一类又加 4 例
+  （`pos/neg-so2-01`、`pos/neg-scn-01`）：它们靠 `--second-order-inject` /
+  `--scenarios` 驱动，而这两个 flag 在异步里本来就**被明确拒绝并告警**
+  （`cli_runner.py:838-844`），此前没写 `engines` 就等于让异步为一条被告知忽略的
+  flag 背漏检锅。**注意这是重新分类、不是新检测到**，异步分母随之从 113 变 111。
+  上一轮同一改动集是 `errors=1`：
   `neg-graphql-01` 在扫描里 90.036s 超时被判 ERROR，
   而单跑 9.2s 就是 TN。根因不是那条用例慢，是**重试策略只重试出错的"易受攻击"用例**
   （`runner.py` 旧闸门 `verdict != "FN"`），出错的**安全**用例首试即被接受、
   直接从分母消失——一趟跑可以报双 1.0 而其中一格从未被测。现已由
   `_evaluate_with_retries()` 对两类一并重测（串行与**并发路径**此前完全不重试），
   预算用尽仍保留 ERROR/FN，不把"没扫完"洗成"扫了没发现"。
-- **两个引擎现在并排，但结论是「不对齐」**：`--async` 在同口径下漏 9 条（recall 0.918），
-  **误报仍为 0**。分组：
-  **6 条是异步引擎没有对应的层**（`form_miner` / `js_miner` / `second_order` /
-  `scenario` / `cookie_tossing` / `time_based` 在 `async_scanner.py` 中被引用 0 次），
-  2 条（`neg-filter-05`、`pos-dom-02`）成因独立、尚未定性，第 9 条 `pos-tpl-02` 是
-  **基础设施造成的**：该行 `requests=0`（子进程一个请求都没发出）、重试一次仍空，
-  按"漏洞用例跑不完算 FN、不白拿"的规则记成漏报 —— 单独复跑 3/3 为 TP。
-  而 CORS / XS-leaks / CSP / JSONP / upload / stored / DOM-engine **都在**，所以按特性的
-  对齐说法仍然成立。**因此 `--async` 目前不适合作为"扫全"的入口**：它快、零误报，
-  但覆盖范围小于同步引擎，选它的人应当知道少了哪几层。
+- **闸门本身在 Phase 176t 又被抓到一次漏**：旧条件是 `if not r.error`，而扫描器
+  **自己的** `--timeout 10` 在扫描中途到期时，CLI 交回的是**一份干净可解析的空报告**
+  ——`error=''`、`requests=0`。同一轮矩阵里三行是这个形状：`pos-elem-05` FN(0 请求，
+  前两轮都是 TP/30 请求)、`pos-ctoss-01` FN(0 请求)、`neg-csp-01` 竟被记成
+  **0 请求的 TN**（一个没向服务器要过任何东西的扫描被算作"正确未发现"），三行耗时
+  都在 11.2-11.9s。现在 `_unanswered()` 把"无错误但零流量"与"有错误"同等对待
+  （`SKIP` 例外，否则每例白烧 2 次扫描），头条新增 `zero_request_rows`，
+  预算用尽也不伪造 `error`。5 条新用例做了变异验证：把旧闸门换回去时**恰好**
+  3 条重试用例失败，而 2 条"真漏检不得重试"的对照仍通过——这个修法危险的方向
+  是放宽成"所有 FN 都重试"，那会把真实缺口洗成通过。
+- **本轮补上的异步层**（矩阵实测）：`_crawl_mine_endpoints`（form_miner + js_miner，
+  发现端点时**带上字段**）与 `_scan_time_based`（CSP 下的 OOB 资源探测回退）。
+  `pos-formmine-01` 23→33 请求 FN→TP、`pos-jsmine-01` 23→33 请求 FN→TP、
+  `pos-tb-01` 105→110 请求 FN→TP。另两条机制性修复**目前只有逐例 repro 证据，
+  尚未跑整轮**：`_scan_advanced_page` 原本给页面层传 `req=None`（cookie tossing
+  需要一次 follow-up GET 去读 `Set-Cookie`，AttributeError 被吞掉后它拿着空头列表继续跑，
+  于是永远报不出它存在的唯一理由）—— `pos-ctoss-01` repro 28 请求 TP；
+  `_scan_dom_async` 原本把**不含 query 的裸 URL**交给浏览器（异步内部 url 与 params
+  分开传，所以 `location.search` 读到时是空的，同步在 `scanner.py:479-486` 正是为此
+  把参数拼回去）—— `pos-dom-02`（`location.search -> eval`）repro 28 请求 TP，
+  命中类型 `dom_dynamic`、context `eval`。
+- **异步只剩 1 条真漏**：`neg-filter-05` 异步 **222 请求仍 FN**（不是环境窗口），
+  同步 129 请求 TP，命中载荷 `<a id=x href=javascript:window['ale'+'rt'](...)>`
+  在语料里属 **`dom_clobber`** 族（`payloads[528]`/`payloads[558]`，
+  tags `id_shadow`/`named_property`）——即同步是靠 DOM-clobbering gadget 链在这条
+  raw 回显页上赢的，异步这一族没走到。与 `ctx.analyze` 那次修复无关。
+- **两个引擎现在并排，但结论仍是「不对齐」**：`--async` 误报为 0、比同步快，
+  但覆盖仍小于同步；而 CORS / XS-leaks / CSP / JSONP / upload / stored / DOM-engine
+  **都在**。
 - **本轮修掉的一条大 bug**：`ctx.classify` 从来不存在，异步在
   `try: … except Exception: context = "html_element"` 里调它 —— **每个参数**都抛
   AttributeError 后被咽掉，于是上下文恒为 `html_element`、`url_href`/`cdata`/`css`

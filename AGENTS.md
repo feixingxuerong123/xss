@@ -29,10 +29,12 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
   - [x] 176j oracle 重采:矩阵 60×20=1200 → **84×20=1680**,补进 corpus_gap 指出的
         24 个语料家族各一条代表载荷(只把 alert(1) 换成 sentinel),
         产物 `benchmark/results/browser_dom_oracle.json`
-  - [ ] **176j 续:1680-case oracle 扩完之后尚未重新给沙箱评分**(重采落盘了,
-        评分没跑)。收口动作 = 重跑 `tests/test_sandbox_fidelity.py`,
-        要求 MISSED=0 且 OVER=0 —— MISSED 优先,那是"浏览器会执行而沙箱判惰性",
-        即永不报告的漏洞
+  - [x] 176j 续:1680-case oracle 已重新给沙箱评分 —— `tests/test_sandbox_fidelity.py`
+        **8/8 passed**;parser 臂 scored 1676 / **MISSED 0 / OVER 0** / UNKNOWN 60(3.6%),
+        innerHTML 臂 scored 1680 / **MISSED 0 / OVER 0** / UNKNOWN 60。
+        即 176j 新纳入的 24 个 corpus_gap 家族**没有暴露任何沙箱误判**。
+        注:评分器是**纯 Python 重放**,不启动浏览器,2 秒跑完 1680 行 ——
+        oracle 一更新就该跑,没有"太贵"这个借口
   - [ ] 待定(需人决策):JSON 响应里的 reflection 是否连 severity 一起降
         (现在只降 confidence,只按 severity 过滤的下游仍会看到 high)
 

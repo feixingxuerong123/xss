@@ -8,9 +8,14 @@ and the cost is asymmetric -- an inert verdict on something the browser runs is
 a missed vulnerability the scanner never reports.
 
 So this test replays the recorded Chromium ground truth
-(benchmark/results/browser_dom_oracle.json -- 60 payloads x 20 contexts = 1200
-rows.  The "900" that used to sit here was simply the last count anybody
-refreshed, which is how a stale oracle number survives for months.  Regenerate
+(benchmark/results/browser_dom_oracle.json -- 84 payloads x 20 insertion hosts
+= 1680 rows as of 2026-09-25.  The axis is `r["host"]` (the file's own `hosts`
+list), not a "context" column -- there isn't one.  It was 60x20=1200 before
+Phase 176j folded in one representative payload for each of the 24 corpus_gap
+families, and "900" before
+that.  Each of those numbers was simply the last count anybody refreshed, which
+is how a stale oracle number survives for months -- the count lives in the
+JSON's own `count` field, so prefer reading that over trusting prose.  Regenerate
 with `python -m benchmark.browser_dom_oracle`; the full matrix takes ~35 min,
 so it is easy to leave half-done) and asserts the two
 numbers that decide whether the sandbox may be consulted at all:
