@@ -3,7 +3,9 @@
 Why this exists: on this host a security product intermittently kills
 loopback connections, so a SINGLE-process `pytest tests/` wedges.  Running
 file-by-file with a per-file timeout and one retry is the only reliable
-full-suite gate here (46 files, ~8 minutes).  Usage:
+full-suite gate here (file count is whatever tests/ holds at run time --
+a count frozen in this docstring rotted from 46 to 129 within a few
+months, so it is not written down anymore; expect 10+ minutes).  Usage:
 
     python tests/run_all_batched.py            # all files
     python tests/run_all_batched.py --quiet    # only print failures

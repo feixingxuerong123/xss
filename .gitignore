@@ -58,3 +58,9 @@ benchmark/http_*.json
 
 # 回归批次 runner 的逐文件日志（失败/重试才写，证据保留用）
 benchmark/results/regression_logs/
+
+# 根目录一次性草稿约定:_ 前缀 = 探针/日志/产物,不入库。
+# 历史草稿已归档到 dev/attic/(同样不入库)。
+/_*
+/dev/attic/*
+!/dev/attic/README.md
