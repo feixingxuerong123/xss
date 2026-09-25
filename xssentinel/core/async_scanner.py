@@ -544,8 +544,14 @@ class AsyncScanner:
         # swallow: a broken wiring must surface as a failed layer, not as a
         # silently degraded scan (`core/layer_guard.py` exists because this
         # pattern hid the async L1 outage in Phase 63).
-        _info = await asyncio.to_thread(ctx.analyze, text, marker)
-        context = _info["context"] if _info else "html_element"
+        # Phase 177: classify EVERY reflection point (sync parity via the
+        # same shared analyzer) -- the first byte-stream occurrence is
+        # frequently an inert comment/nav highlight while the live sink
+        # comes later; picking by execution priority is the whole fix.
+        # Single-reflection pages keep exactly the old answer.
+        _sel = await asyncio.to_thread(ctx.analyze_all, text, marker)
+        context = _sel["context"]
+        _extra_contexts = [c for c in _sel["contexts"] if c != context][:2]
 
         # Phase 93: escaped-reflection convergence (sync parity).  When the
         # marker reflects but the input around it is HTML-encoded, the
@@ -589,6 +595,16 @@ class AsyncScanner:
                 cand_budget)
         except Exception:
             cands = payloads_mod.for_context("html_element")[:cand_budget]
+        # Phase 177: multi-reflection parity with sync -- append a small
+        # slice for each additional reflection context after the primary
+        # queue; the payload-loop budget decides whether they ever fire.
+        if _extra_contexts:
+            _seen = set(cands)
+            for _xc in _extra_contexts:
+                for p in payloads_mod.for_context(_xc):
+                    if p not in _seen:
+                        _seen.add(p)
+                        cands.append(p)
 
         # Phase 37: reflection profile + generative payloads (sync parity).
         # One sandwich probe reveals surviving characters; payloads whose

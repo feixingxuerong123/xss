@@ -565,8 +565,17 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             return
         if marker not in resp.text:
             return  # not reflected -> skip
-        info = ctx._analyze_at(resp.text, resp.text.find(marker), marker)
-        context = info["context"] if info else "html_element"
+        # Phase 177: classify EVERY reflection point of the marker, not
+        # just the first.  A parameter echoed in a nav highlight AND inside
+        # a script block used to be classified by whichever came first in
+        # the byte stream -- typically the inert one -- so payloads shaped
+        # for the live context were never sent.  `ctx.rank_contexts`
+        # existed for this from the start but had zero callers; analyze_all
+        # wraps it with the execution-priority tiebreak.  Single-reflection
+        # pages get exactly the old answer.
+        sel = ctx.analyze_all(resp.text, marker)
+        context = sel["context"]
+        extra_contexts = [c for c in sel["contexts"] if c != context][:2]
         # Phase 27-1: early-stop optimization.  When the marker is reflected
         # but HTML-ENCODED (e.g. &lt; instead of <), the server is applying
         # context-aware output encoding.  In that case, the vast majority of
@@ -601,6 +610,18 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         # and transform chains that can restore them are tried first.
         transform_priority = None
         bases = candidates + polies
+        # Phase 177: queue a small candidate slice for each additional
+        # reflection context AFTER the primary queue.  The payload-loop cap
+        # (effective_max) is untouched, so single-reflection behaviour and
+        # request counts are identical; extras only fire when the primary's
+        # payloads leave budget unspent.
+        if extra_contexts:
+            _seen = {b.get("payload") for b in bases if isinstance(b, dict)}
+            for _xc in extra_contexts:
+                for p in self._build_candidates(_xc, marker_escaped)[0]:
+                    if isinstance(p, dict) and p.get("payload") not in _seen:
+                        _seen.add(p.get("payload"))
+                        bases.append(p)
         bases, transform_priority, profile = self._prioritize_bases(
             req, url, method, params, data, param, is_body,
             bases, context, marker_escaped)

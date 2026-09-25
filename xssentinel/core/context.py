@@ -250,3 +250,45 @@ def rank_contexts(body: str, marker: str) -> list[str]:
             seen.append(c["context"])
         start = i + len(marker)
     return seen
+
+
+# Contexts ordered by how directly an unescaped payload there executes.
+# The marker often reflects at SEVERAL points in one page (a nav
+# highlight, an HTML comment, and the actual sink); classifying only the
+# first byte-stream occurrence made both engines pick payloads for
+# whatever came first -- typically an inert comment -- while the
+# executable context was never tested at all.  This list is the
+# tiebreaker `analyze_all` uses to choose the primary context among ALL
+# reflection points.  Single-reflection pages keep exactly the old
+# behaviour: one occurrence -> its own context, whatever it is.
+_CONTEXT_PRIORITY = [
+    "script_block", "script_string_dq", "script_string_sq",
+    "script_template", "event_handler", "url_javascript",
+    "url_href", "meta_refresh",
+    "html_attribute_dq", "html_attribute_sq", "html_attribute_noquote",
+    "svg_context", "math_context", "html_element",
+    "css_context", "template_angular", "html_comment", "cdata",
+]
+
+
+def analyze_all(body: str, marker: str) -> dict:
+    """Classify every reflection of ``marker`` and choose a primary context.
+
+    Returns ``{"context": <primary>, "contexts": [<distinct contexts in
+    reflection order>]}``.  The primary is the highest-priority context
+    from ``_CONTEXT_PRIORITY`` (executable contexts beat inert ones);
+    when the marker reflects only once this is exactly ``analyze()``'s
+    answer.  The full list lets the scanners queue a small candidate set
+    for each additional context without growing the request budget.
+    """
+    contexts = rank_contexts(body, marker)
+    if not contexts:
+        return {"context": "html_element", "contexts": []}
+
+    def _prio(c: str) -> int:
+        try:
+            return _CONTEXT_PRIORITY.index(c)
+        except ValueError:
+            return len(_CONTEXT_PRIORITY)
+
+    return {"context": min(contexts, key=_prio), "contexts": contexts}
