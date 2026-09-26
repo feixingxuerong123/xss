@@ -684,6 +684,38 @@ def build_junit(findings: list, target: str, meta: dict) -> str:
     )
 
 
+def _md_cell(s) -> str:
+    """Make a string safe inside a GFM table cell.
+
+    A raw ``|`` spawns a column, a raw newline spawns a row, and a
+    backtick closes the inline code span the cell is wrapped in -- a
+    reflected payload that rides the URL (path/header findings) carries
+    all three, and the summary table it lands in is the client-facing
+    deliverable.
+    """
+    return (str(s).replace("\\", "\\\\").replace("|", "\\|")
+            .replace("`", "'").replace("\r", " ").replace("\n", " "))
+
+
+def _md_fence(*blocks: str) -> str:
+    """A code fence LONGER than any backtick run in the block contents.
+
+    A payload containing ``` would close a fixed three-backtick fence and
+    render the rest of the payload as live markdown -- the scan report
+    injected by the very payloads it reports.  GFM closes a fence on a
+    run of AT LEAST the opening length, so longest_run + 1 can never be
+    closed by the content.
+    """
+    longest = 0
+    for block in blocks:
+        run = 0
+        for ch in str(block):
+            run = run + 1 if ch == "`" else 0
+            if run > longest:
+                longest = run
+    return "`" * max(3, longest + 1)
+
+
 def build_markdown(findings: list, target: str, meta: dict) -> str:
     """Markdown format for GitHub PR comments / issue tracking.
 
@@ -757,8 +789,9 @@ def build_markdown(findings: list, target: str, meta: dict) -> str:
         # Truncate URL for table readability.
         url_short = url if len(url) <= 60 else url[:57] + "..."
         lines.append(
-            f"| {i} | {sev} | {ftype} | `{url_short}` | "
-            f"{param} | {context} |"
+            f"| {i} | {_md_cell(sev)} | {_md_cell(ftype)} | "
+            f"`{_md_cell(url_short)}` | "
+            f"{_md_cell(param)} | {_md_cell(context)} |"
         )
 
     # Per-finding detail sections.
@@ -782,17 +815,19 @@ def build_markdown(findings: list, target: str, meta: dict) -> str:
         lines.append(f"- **Parameter:** `{param}`")
         lines.append(f"- **Context:** `{context}`")
         if payload:
+            fence = _md_fence(payload)
             lines.append(f"- **Payload:**")
-            lines.append(f"  ```")
+            lines.append(f"  {fence}")
             lines.append(f"  {payload}")
-            lines.append(f"  ```")
+            lines.append(f"  {fence}")
         if detail:
-            lines.append(f"- **Detail:** {detail}")
+            lines.append(f"- **Detail:** {_md_cell(detail)}")
         if poc_curl:
+            fence = _md_fence(poc_curl)
             lines.append(f"- **PoC (curl):**")
-            lines.append(f"  ```bash")
+            lines.append(f"  {fence}bash")
             lines.append(f"  {poc_curl}")
-            lines.append(f"  ```")
+            lines.append(f"  {fence}")
         lines.append("")
 
     return "\n".join(lines)
