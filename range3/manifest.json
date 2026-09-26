@@ -1,0 +1,161 @@
+{
+ "range": "range3",
+ "note": "Third-opinion range: SQLite state, auth sessions, mixed content types. Ground truth authored from the SERVER's behavior, not from any scanner.",
+ "cases": [
+  {
+   "id": "r3-pos-q-raw",
+   "gt": "vulnerable",
+   "path": "/search",
+   "param": "q"
+  },
+  {
+   "id": "r3-pos-multictx",
+   "gt": "vulnerable",
+   "path": "/find",
+   "param": "q"
+  },
+  {
+   "id": "r3-pos-rcdata",
+   "gt": "vulnerable",
+   "path": "/article",
+   "param": "draft"
+  },
+  {
+   "id": "r3-pos-attr",
+   "gt": "vulnerable",
+   "path": "/redirect-preview",
+   "param": "url"
+  },
+  {
+   "id": "r3-pos-path",
+   "gt": "vulnerable",
+   "path": "/page/probe",
+   "param": "(path)"
+  },
+  {
+   "id": "r3-pos-header",
+   "gt": "vulnerable",
+   "path": "/track",
+   "param": "(header:True-Client-IP)"
+  },
+  {
+   "id": "r3-pos-cookie",
+   "gt": "vulnerable",
+   "path": "/mypage",
+   "param": "(cookie:theme)"
+  },
+  {
+   "id": "r3-pos-b64",
+   "gt": "vulnerable",
+   "path": "/gob64",
+   "param": "next",
+   "container": "b64"
+  },
+  {
+   "id": "r3-pos-jwt",
+   "gt": "vulnerable",
+   "path": "/jwtview",
+   "param": "token",
+   "container": "jwt"
+  },
+  {
+   "id": "r3-pos-dom",
+   "gt": "vulnerable",
+   "path": "/domsearch",
+   "param": "",
+   "accept_types": [
+    "dom_dynamic",
+    "dom",
+    "trusted_types_taint_flow"
+   ]
+  },
+  {
+   "id": "r3-pos-cspnonce",
+   "gt": "vulnerable",
+   "path": "/cspnonce",
+   "param": "q"
+  },
+  {
+   "id": "r3-pos-upload",
+   "gt": "vulnerable",
+   "path": "/upload",
+   "param": "file",
+   "method": "POST",
+   "upload_field": "file"
+  },
+  {
+   "id": "r3-pos-stored",
+   "gt": "vulnerable",
+   "path": "/comments",
+   "param": "body",
+   "method": "POST",
+   "stored_inject": "/comment",
+   "stored_view": "/comments",
+   "stored_param": "body",
+   "engines": [
+    "sync"
+   ]
+  },
+  {
+   "id": "r3-pos-so2",
+   "gt": "vulnerable",
+   "path": "/public/profile/u1337",
+   "param": "website",
+   "method": "POST",
+   "engines": [
+    "sync"
+   ],
+   "auth": true,
+   "second_order_inject": "/profile/update",
+   "second_order_view": "/public/profile/u1337",
+   "second_order_param": "website"
+  },
+  {
+   "id": "r3-pos-auth-q",
+   "gt": "vulnerable",
+   "path": "/admin/report",
+   "param": "name",
+   "auth": true
+  },
+  {
+   "id": "r3-neg-escaped",
+   "gt": "safe",
+   "path": "/safe",
+   "param": "q"
+  },
+  {
+   "id": "r3-neg-scare",
+   "gt": "safe",
+   "path": "/archive",
+   "param": "blob"
+  },
+  {
+   "id": "r3-neg-cspstrict",
+   "gt": "safe",
+   "path": "/cspstrict",
+   "param": "q"
+  },
+  {
+   "id": "r3-neg-static",
+   "gt": "safe",
+   "path": "/",
+   "param": "q"
+  },
+  {
+   "id": "r3-neg-unauth",
+   "gt": "safe",
+   "path": "/admin/report",
+   "param": "name"
+  },
+  {
+   "id": "r3-neg-json-echo",
+   "gt": "low",
+   "path": "/api/echo",
+   "param": "msg",
+   "method": "POST",
+   "json_body": {
+    "msg": "probe"
+   }
+  }
+ ]
+}

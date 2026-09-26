@@ -1,0 +1,334 @@
+{
+ "rows": [
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-q-raw",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.7
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-multictx",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.9
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-rcdata",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.8
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-attr",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 3.0
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-path",
+   "verdict": "TP",
+   "findings": 11,
+   "error": "",
+   "elapsed": 3.9
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-header",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.3
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-cookie",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.9
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-b64",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.9
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-jwt",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.7
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-dom",
+   "verdict": "TP",
+   "findings": 4,
+   "error": "",
+   "elapsed": 8.7
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-cspnonce",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "timeout after 90s",
+   "elapsed": 509.2
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-upload",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 3.0
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-stored",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.8
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-so2",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.8
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-pos-auth-q",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.7
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-escaped",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 3.0
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-scare",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 9.9
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-cspstrict",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 3.6
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-static",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 1.7
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-unauth",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 2.2
+  },
+  {
+   "engine": "sync",
+   "case_id": "r3-neg-json-echo",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 2.8
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-q-raw",
+   "verdict": "TP",
+   "findings": 2,
+   "error": "",
+   "elapsed": 1.5
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-multictx",
+   "verdict": "TP",
+   "findings": 2,
+   "error": "",
+   "elapsed": 1.7
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-rcdata",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.7
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-attr",
+   "verdict": "TP",
+   "findings": 2,
+   "error": "",
+   "elapsed": 1.5
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-path",
+   "verdict": "TP",
+   "findings": 11,
+   "error": "",
+   "elapsed": 2.7
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-header",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.3
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-cookie",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.8
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-b64",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.7
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-jwt",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.6
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-dom",
+   "verdict": "TP",
+   "findings": 4,
+   "error": "",
+   "elapsed": 7.2
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-cspnonce",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 37.9
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-upload",
+   "verdict": "TP",
+   "findings": 1,
+   "error": "",
+   "elapsed": 1.6
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-stored",
+   "verdict": "SKIP"
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-so2",
+   "verdict": "SKIP"
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-pos-auth-q",
+   "verdict": "TP",
+   "findings": 2,
+   "error": "",
+   "elapsed": 1.6
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-escaped",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 1.6
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-scare",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 7.9
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-cspstrict",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 1.6
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-static",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 1.3
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-unauth",
+   "verdict": "TN",
+   "findings": 0,
+   "error": "",
+   "elapsed": 1.4
+  },
+  {
+   "engine": "async",
+   "case_id": "r3-neg-json-echo",
+   "verdict": "TP",
+   "findings": 2,
+   "error": "",
+   "elapsed": 1.7
+  }
+ ]
+}
