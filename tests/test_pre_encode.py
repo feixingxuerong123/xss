@@ -77,7 +77,10 @@ class TestEncodePayload:
         enc = pe.encode_payload(v, "json_b64", marked)
         obj = json.loads(pe._b64decode(enc))
         assert obj["xssentinel"] == marked
-        assert obj["redirect"] == "http://x"
+        # Phase 178c: blind injection REPLACES every existing string field
+        # too -- an endpoint that echoes only specific keys (a redirect
+        # target, a profile name) never renders our injected field.
+        assert obj["redirect"] == marked
 
     def test_jwt_keeps_header_and_signature(self):
         sig = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV"
@@ -89,7 +92,10 @@ class TestEncodePayload:
         assert pe._b64decode(h).decode() == '{"alg":"HS256"}'
         obj = json.loads(pe._b64decode(p))
         assert obj["xssentinel"] == marked
-        assert obj["sub"] == "admin"
+        # Phase 178c: existing claims are covered as well -- the app
+        # renders whichever claim IT reads (Range3 /jwtview renders only
+        # "name": 0 findings under the inject-field-only shape).
+        assert obj["sub"] == marked
 
     def test_non_dict_json_returns_none(self):
         v = b64('[1,2,3]')

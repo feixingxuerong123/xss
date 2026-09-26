@@ -550,7 +550,20 @@ class AsyncScanner:
         except Exception:
             return
         if marker not in text:
-            return
+            # Phase 178c (sync parity): a container param whose endpoint
+            # echoes only the DECODED value never reflects a plain marker
+            # probe -- try the pre-encode pipeline from the ORIGINAL value
+            # before giving up (Range3 /gob64: 0 probes, silent FN).
+            orig_value0 = (data.get(param) if is_body
+                           else params.get(param)) or ""
+            enc0 = (pre_mod.detect_structure(orig_value0)
+                    if orig_value0 else "none")
+            if enc0 != "none":
+                async for f in self._try_pre_encoded_async(
+                        session, url, method, param, params, data, is_body,
+                        orig_value0, enc0, "html_element", marker):
+                    yield f
+                return
 
         # Classify context (CPU-bound) -- run in thread.
         # `ctx.classify` never existed: this call raised AttributeError on every
@@ -1205,7 +1218,16 @@ class AsyncScanner:
             v = await asyncio.to_thread(verifier.verify_semantic,
                                         text, marker,
                                         response_headers=resp_headers)
-            if v["confirmed"] and verifier.payload_survived(text, enc):
+            # Phase 178c: NO payload_survived here (sync parity -- sync's
+            # _try_pre_encoded never had one).  The container-wrapped form
+            # can never appear verbatim in a decode-echo response, and
+            # _survival_candidates cannot see inside a JWT's middle
+            # segment, so this check silently killed EVERY jwt container
+            # confirmation (Range3 measured: encode fires, verify
+            # confirms, gate rejects, 0 findings).  Filter rewrites are
+            # still caught: the sandbox inside verify_semantic calls a
+            # mangled script inert.
+            if v["confirmed"]:
                 idx = text.find(marker)
                 yield Finding(
                     url=url, method=method, param=param,

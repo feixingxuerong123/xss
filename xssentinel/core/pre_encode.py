@@ -96,8 +96,14 @@ def detect_structure(value: str) -> str:
             return "json_b64"
     except Exception:
         pass
-    # Plain base64 only when the decoded text looks structured.
-    if _has_structure_char(t1):
+    # Plain base64 when the decoded text is printable.  The old rule also
+    # demanded a STRUCTURAL (non-alnum) character, which missed the most
+    # common real container: an app base64-carrying a plain word
+    # (username, redirect target, theme).  Range3 /gob64 measured: value
+    # "eHNzZW50aW5lbA==" -> "xssentinel", detection "none", 0 probes.  A
+    # wrong guess here costs a few wrapped probes, not a finding -- the
+    # wrapped payloads still have to execute to confirm.
+    if _has_structure_char(t1) or len(t1) >= 6:
         return "b64"
     return "none"
 
@@ -119,6 +125,15 @@ def encode_payload(value: str, struct: str, payload: str) -> str | None:
             obj = json.loads(_b64decode(value))
             if not isinstance(obj, dict):
                 return None
+            # Phase 178c: blind injection must cover the fields the app
+            # ALREADY renders -- adding only INJECT_FIELD misses any
+            # endpoint that echoes specific keys (Range3 measured a JWT
+            # endpoint rendering only the "name" claim: 0 findings).
+            # Execution still has to be verified, so coverage here costs
+            # nothing but the one probe.
+            for k in obj:
+                if isinstance(obj[k], str):
+                    obj[k] = payload
             obj[INJECT_FIELD] = payload
             return _b64encode(json.dumps(obj).encode(), urlsafe)
         if struct == "jwt":
@@ -129,6 +144,11 @@ def encode_payload(value: str, struct: str, payload: str) -> str | None:
                 obj = {}
             if not isinstance(obj, dict):
                 obj = {}
+            # Phase 178c: same all-fields coverage as json_b64 -- the app
+            # renders whichever claim IT cares about, not our field.
+            for k in obj:
+                if isinstance(obj[k], str):
+                    obj[k] = payload
             obj[INJECT_FIELD] = payload
             p2 = _b64encode(json.dumps(obj).encode(), urlsafe=True)
             return f"{h}.{p2}.{s}"  # keep the original signature segment

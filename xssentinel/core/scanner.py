@@ -564,6 +564,22 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                 _log.debug(f"    request failed: {e}")
             return
         if marker not in resp.text:
+            # Phase 178c: a container param whose endpoint echoes only the
+            # DECODED value shows nothing for a plain marker probe -- and
+            # this early return ran before the pre-encode pipeline ever
+            # saw the parameter.  Range3 /gob64 measured: base64 param,
+            # decode-then-echo, 0 probes, silent FN.  Detect the container
+            # from the ORIGINAL value and try wrapped payloads first.
+            orig_value0 = (data.get(param) if is_body
+                           else params.get(param)) or ""
+            enc0 = (pre_mod.detect_structure(orig_value0)
+                    if orig_value0 else "none")
+            if enc0 != "none" and self._try_pre_encoded(
+                    req, url, method, params, data, param, is_body,
+                    orig_value0, enc0, "html_element"):
+                self.coverage.record_param(url, param, in_body=is_body,
+                                           method=method, confirmed=True)
+                self.coverage.record_finding(url, method)
             return  # not reflected -> skip
         # Phase 177: classify EVERY reflection point of the marker, not
         # just the first.  A parameter echoed in a nav highlight AND inside
