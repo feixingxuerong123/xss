@@ -15,6 +15,7 @@ to make the PoC actually fire.
 """
 from __future__ import annotations
 
+import shlex
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse, quote
 
 # Canonical proof-of-execution payload used for DOM PoC pages (clearly shows
@@ -112,8 +113,20 @@ def build_poc(finding, csrf_fields: dict | None = None,
     path_like = param in ("(path)", "(error_path)")
     if hdr_m or ck_m or path_like:
         if hdr_m:
-            hdr = f"{hdr_m.group(1)}: {_enc(poc_payload)}"
+            # Phase 178b: send the payload RAW.  The scanner put it on the
+            # wire un-encoded (transport_layers: headers={header: payload})
+            # and header_xss.build_poc_curl ships it literally too; the old
+            # _enc() replayed a value that never existed on the wire, and a
+            # raw-reflecting target echoed percent-encoding -- no
+            # executable markup, no reproduction.  The CORS branch below
+            # states the same principle for the same reason.  Shell safety
+            # comes from shlex-quoting the whole -H argument, not from
+            # mangling the value.
+            hdr = f"{hdr_m.group(1)}: {poc_payload}"
         elif ck_m:
+            # Cookie values DO ride the wire percent-encoded
+            # (cookie_xss sends through _cookie_encode_value), so the
+            # encoded replay matches what the scanner actually sent.
             hdr = f"Cookie: {ck_m.group(1)}={_enc(poc_payload)}"
         else:
             # path/error-path carriers already embed the payload in the
@@ -125,7 +138,7 @@ def build_poc(finding, csrf_fields: dict | None = None,
         poc["url"] = url_poc
         cookie_arg = ""
         poc["curl"] = (f"curl -i '{url_poc}'"
-                       + (f" -H '{hdr}'" if hdr else "") + hdr_args)
+                       + (f" -H {shlex.quote(hdr)}" if hdr else "") + hdr_args)
         poc["html"] = (
             f"<html><body>\n<!-- Non-query carrier ({'header' if hdr_m else 'cookie' if ck_m else 'path'}): "
             f"replay with the curl command. -->\n"
