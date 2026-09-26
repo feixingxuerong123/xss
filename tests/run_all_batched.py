@@ -28,6 +28,11 @@ PER_FILE_TIMEOUT = 540        # seconds
 # it gets its own, larger budget instead of being trimmed down.
 PER_FILE_TIMEOUT_OVERRIDES = {
     "test_benchmark_fp.py": 1800,
+    # Measured 2026-09-26: 11 passed in 3112s on this host -- the budget
+    # accounting tests are legitimately slow on the degraded loopback,
+    # not wedged.  The old 540s ceiling burned 2 retries and recorded the
+    # file "unverified" every gate; a green gate needs its real budget.
+    "test_async_budget.py": 3600,
 }
 RETRIES = 1
 
