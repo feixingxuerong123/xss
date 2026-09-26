@@ -166,9 +166,9 @@ def _scan_cookie_xss(scanner, req, url: str) -> None:
     try:
         for cookie_name in cookie_mod.candidate_cookies()[:5]:  # top 5 cookies
             token = "xsck_" + secrets.token_hex(3)
-            payload = f"<svg/onload=alert('{token}')>"
+            marker_payload = f"<svg/onload=alert('{token}')>"
             try:
-                resp = req.get(url, headers={"Cookie": f"{cookie_name}={payload}"})
+                resp = req.get(url, headers={"Cookie": f"{cookie_name}={marker_payload}"})
                 scanner._bump()
                 scanner.coverage.record_request(url, "GET")
             except Exception:
@@ -177,29 +177,52 @@ def _scan_cookie_xss(scanner, req, url: str) -> None:
             result = cookie_mod.analyze_response(text, token)
             if not result["reflected"]:
                 continue
-            from .. import verifier
-            v = verifier.verify_semantic(text, token,
-                                         response_headers=dict(resp.headers))
-            if not v["confirmed"]:
+            # Phase 178c: a reflected cookie name earns the FULL payload
+            # list, not the single svg shape.  Cookie values routinely
+            # land inside JS strings (theme/lang/ui prefs), where markup
+            # shapes are inert -- the sandbox correctly calls the mangled
+            # block a syntax error -- and the one shape that works there
+            # (`';alert(TOK);//`) was never sent.  Range3 /mypage:
+            # reflected on every probe, 0 findings.
+            from .. import verifier as _verifier
+            for shape in cookie_mod.cookie_payloads():
+                if "alert(1)" not in shape:
+                    continue
+                payload = shape.replace("alert(1)", f"alert('{token}')")
+                try:
+                    resp = req.get(url, headers={"Cookie": f"{cookie_name}={payload}"})
+                    scanner._bump()
+                    scanner.coverage.record_request(url, "GET")
+                except Exception:
+                    continue
+                text = resp.text or ""
+                if token not in text:
+                    continue
+                v = _verifier.verify_semantic(
+                    text, token, response_headers=dict(resp.headers))
+                if not v["confirmed"]:
+                    continue
+                curl_poc = cookie_mod.build_poc_curl(url, cookie_name, payload)
+                html_poc = cookie_mod.build_poc_html(url, cookie_name, payload)
+                scanner._add(_make_finding(
+                    url=url, method="GET", param=f"(cookie:{cookie_name})",
+                    payload=payload,
+                    context=v.get("context") or result.get("context", "html_element"),
+                    severity="high",
+                    ftype="cookie_xss",
+                    evidence=(
+                        f"payload reflected from cookie {cookie_name}: {v['detail']}"
+                    ),
+                    poc_curl=curl_poc,
+                    poc_html=html_poc,
+                    cookie=cookie_name,
+                ))
+                scanner.coverage.record_finding(url, "GET")
+                if scanner.verbose:
+                    print(f"    [+] Cookie XSS via {cookie_name}")
+                break
+            else:
                 continue
-            curl_poc = cookie_mod.build_poc_curl(url, cookie_name, payload)
-            html_poc = cookie_mod.build_poc_html(url, cookie_name, payload)
-            scanner._add(_make_finding(
-                url=url, method="GET", param=f"(cookie:{cookie_name})",
-                payload=payload,
-                context=result.get("context", "html_element"),
-                severity="high",
-                ftype="cookie_xss",
-                evidence=(
-                    f"payload reflected from cookie {cookie_name}: {v['detail']}"
-                ),
-                poc_curl=curl_poc,
-                poc_html=html_poc,
-                cookie=cookie_name,
-            ))
-            scanner.coverage.record_finding(url, "GET")
-            if scanner.verbose:
-                print(f"    [+] Cookie XSS via {cookie_name}")
             break  # one cookie finding per URL is enough
     except Exception as e:
         if scanner.verbose:
