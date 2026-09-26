@@ -501,6 +501,11 @@ class SpaCrawler:
             if key in seen_ep or key in seen:
                 continue
             seen.add(key)
+            # Phase 178b: write the key back to the SHARED set -- it used
+            # to live only in this call's local `seen`, so the same
+            # fetch() endpoint harvested on a second crawl page
+            # registered (and got probed) again.
+            seen_ep.add(key)
             # XHR endpoints are typically POST JSON or GET with query.
             # We probe them as standard GET/POST endpoints; the scanner's
             # JSONP/JSON param miner layers will detect content-type
