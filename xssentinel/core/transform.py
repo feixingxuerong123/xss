@@ -146,9 +146,15 @@ def t_interleave_nulls(s: str) -> str:
 def t_utf7(s: str) -> str:
     """UTF-7 encode angle brackets / quotes / parens. Old parsers that treat a
     page as UTF-7 (often via a reflected charset) decode this back to XSS."""
+    # Phase 178b: entries verified against the utf_7 codec.  The old hand
+    # table mis-encoded 4 of 9 characters -- "'" as +ACY- (which DECODES to
+    # "&"), "(" as +ADs- (";"), ")" as +AD0- ("=") and "/" as +AFw- ("\") --
+    # so every variant built from those characters decoded to a different
+    # payload than the one that was tested.  Each entry is "+" + modified
+    # base64 of the UTF-16BE unit + "-", e.g. "'" (U+0027) -> +ACc-.
     table = {
-        "<": "+ADw-", ">": "+AD4-", "'": "+ACY-", '"': "+ACI-",
-        "(": "+ADs-", ")": "+AD0-", "&": "+ACY-", "/": "+AFw-",
+        "<": "+ADw-", ">": "+AD4-", "'": "+ACc-", '"': "+ACI-",
+        "(": "+ACg-", ")": "+ACk-", "&": "+ACY-", "/": "+AC8-",
         "\\": "+AFw-",
     }
     out = []
