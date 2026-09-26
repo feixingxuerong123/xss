@@ -142,10 +142,15 @@ class TestAsyncRequestLayers:
 
             # Part 2: the async wiring itself touches L8_request (spy on
             # run_request_layers; the shim is passed as the first arg).
+            # Phase 176u moved the touch to AFTER the layer call (a touch
+            # recorded before it is a lie an entry-time failure can tell),
+            # so the spy captures the shim itself and the assertion runs
+            # once wiring() has completed -- mid-call, touched is
+            # deliberately still empty of L8_request.
             captured = {}
 
             def spy(scanner, *a, **kw):
-                captured["touched"] = list(scanner.coverage.touched)
+                captured["shim"] = scanner
                 captured["args"] = a
 
             async def wiring():
@@ -157,8 +162,9 @@ class TestAsyncRequestLayers:
             with _mock.patch.object(advanced_layers, "run_request_layers",
                                     spy):
                 asyncio.run(wiring())
-            assert "L8_request" in {t[1] for t in captured["touched"]}, \
-                captured["touched"]
+            assert "L8_request" in \
+                {t[1] for t in captured["shim"].coverage.touched}, \
+                captured["shim"].coverage.touched
             # The real sync Requester is passed through (not None).
             assert captured["args"][0] is req, "shim got no sync Requester"
         finally:
