@@ -52,6 +52,19 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       已补进主循环(escaped 跳过,不破 27-1 收敛预算)。
       **async 192 例 TP108/FP0/TN74/FN0,f1=1.000**(`benchmark_20260925_asyncfix.json`),
       此前最好 0.9455;红队 15/15(阳性现在断言 type/severity/confidence)
+- [x] **178b 测试优化六批 + Range3 第三方意见靶场**:敌意输入套件打进交付层与判定层
+      (report 8%→83%、param_miner 12%→81%、spa_crawler 8%→45%、poc 9%→73%、
+      transform 0→95%),抓到并修复 6 个真缺陷:markdown 单元格注入 + 围栏击穿、
+      header 载荷交付 PoC 编码错位、XHR 去重泄漏、**UTF-7 表 4/9 条目编码错误**、
+      L8 spy 测试契约过时;async 错误分类学(预算/熔断传播 vs 传输错误降级)首次成测试。
+- [x] **178c Range3(range3/)**:SQLite 持久化 + 登录会话 + 混合内容类型的"应用"靶场,
+      ground truth 从服务器行为独立撰写,runner 双引擎评分。首轮 sync TP6/FN9 →
+      暴露并修复 6 个扫描器缺陷(cookie 单形状、解码回显容器到不了预编码、
+      容器检测结构字符过严、JWT 盲注漏已渲染字段、**async 缺 content-type 降置信
+      (真 FP)**、async pre-encode payload_survived 错杀 JWT)。终局双引擎零 FP 零 FN
+      (sync 16TP, async 14TP + 2 SKIP sync-only)。runner 四条教训固化注释:
+      参数须写入起始 URL、连字符路由、stored 标志要全 URL、CLI 解析 -u query
+      不做百分号解码。
 
 ## 环境配置
 
