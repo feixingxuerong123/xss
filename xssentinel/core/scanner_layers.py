@@ -14,6 +14,16 @@ from . import payloads
 from . import verifier
 from . import transform
 from . import context as ctx
+
+
+def _poly_non_html(resp) -> bool:
+    try:
+        ctype = (getattr(resp, "headers", None) or {}).get("Content-Type", "")
+        ctype = (ctype or "").lower()
+    except Exception:
+        return False
+    return bool(ctype) and not any(
+        t in ctype for t in ("text/html", "application/xhtml", "image/svg"))
 from . import csp as csp_mod
 from . import cors_check as cors_mod
 from . import xs_leaks as xsleak_mod
@@ -668,7 +678,11 @@ class AdvancedLayerMixin:
                         url=url, method=method, param=param,
                         payload=poly,
                         context=v.get("context") or "html_element",
-                        severity="medium",   # polyglot = unconfirmed which context
+                        # Phase 32 parity: a polyglot reflected into a non-HTML
+                        # response cannot execute in a browser tab -- record it
+                        # at low severity so severity-driven consumers do not
+                        # triage it like a live sink.
+                        severity=("low" if _poly_non_html(resp) else "medium"),
                         type="polyglot_reflection",
                         evidence_class=EVIDENCE_MODEL,
                         evidence=f"polyglot ({kind}) token '{msg}' reflected: "

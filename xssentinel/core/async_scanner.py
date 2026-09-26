@@ -57,6 +57,24 @@ from . import xs_leaks as xsleak_mod   # Phase 54: sync XS-Leaks audit parity
 # _throttle() raises them, and the generic ``except Exception`` handlers that
 # surround every probe used to swallow them (see _probe_param).
 from .budget import BudgetExhausted, CircuitOpen
+
+
+def _non_html_confidence(resp_headers) -> str:
+    """Phase 32 parity (scanner._record): markup reflected into a non-HTML
+    response cannot execute in a browser tab -- keep the finding, drop the
+    confidence.  The sync engine has applied this since Phase 32; the async
+    main loop reported high/high on JSON endpoints (Range3 /api/echo FP).
+    """
+    try:
+        hdrs = resp_headers or {}
+        ctype = (hdrs.get("Content-Type")
+                 or hdrs.get("content-type") or "").lower()
+    except Exception:
+        ctype = ""
+    if ctype and not any(t in ctype for t in (
+            "text/html", "application/xhtml", "image/svg")):
+        return "low"
+    return "high"
 from .findings import _DEFAULT_TRANSFORMS
 from . import transform as transform_mod
 from .logger import get_logger
@@ -773,7 +791,7 @@ class AsyncScanner:
                         evidence=text[max(0, text.find(marker)-30):
                                       text.find(marker)+len(marker)+30],
                         type="reflected",
-                        confidence="high",
+                        confidence=_non_html_confidence(resp_headers),
                         transform=tchain,
                         # Phase 164 (sync parity, scanner._record): record
                         # WHERE the payload rode so the PoC replays the same
@@ -848,7 +866,7 @@ class AsyncScanner:
                                 evidence=text[max(0, idx - 30):
                                               idx + len(marker) + 30],
                                 type="reflected",
-                                confidence="high",
+                                confidence=_non_html_confidence(resp_headers),
                                 transform=tchain,
                                 param_in="body" if is_body else "query",
                                 evidence_class=EVIDENCE_MODEL,
@@ -898,7 +916,7 @@ class AsyncScanner:
                         severity="high",
                         evidence=text[max(0, idx - 30):idx + len(marker) + 30],
                         type="reflected",
-                        confidence="high",
+                        confidence=_non_html_confidence(resp_headers),
                         transform=["position_shift"],
                         # Phase 164: the shift re-fires the parameter into the
                         # OTHER location, so the carrier here is the FLIPPED
@@ -962,7 +980,7 @@ class AsyncScanner:
                             evidence=text[max(0, idx - 30):
                                           idx + len(marker) + 30],
                             type="reflected",
-                            confidence="high",
+                            confidence=_non_html_confidence(resp_headers),
                             transform=tchain,
                             param_in="body" if is_body else "query",
                             evidence_class=EVIDENCE_MODEL,
@@ -1041,7 +1059,7 @@ class AsyncScanner:
                                 evidence=_ntext[max(0, _idx - 30):
                                                 _idx + len(_ntok) + 30],
                                 type="reflected",
-                                confidence="high",
+                                confidence=_non_html_confidence(resp_headers),
                                 transform=["csp_nonce"],
                                 param_in="body" if is_body else "query",
                                 evidence_class=EVIDENCE_MODEL,
@@ -1196,7 +1214,7 @@ class AsyncScanner:
                     severity="high",
                     evidence=text[max(0, idx - 30):idx + len(marker) + 30],
                     type="reflected",
-                    confidence="high",
+                    confidence=_non_html_confidence(resp_headers),
                     transform=[f"pre_encode:{struct}"],
                     param_in="body" if is_body else "query",
                     evidence_class=EVIDENCE_MODEL,
