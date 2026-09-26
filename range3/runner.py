@@ -180,6 +180,13 @@ def extra_args(case: dict, cookie: str, base: str) -> list:
         extra += ["-m", "POST",
                   "--data", json.dumps(case["json_body"]),
                   "--json"]
+    if case.get("headless"):
+        # charset/charset-declaration cases need a REAL browser: semantic
+        # verification sees inert text where the browser decodes markup.
+        extra += ["--headless"]
+    if case.get("scenarios"):
+        extra += ["--scenarios",
+                  str(Path(__file__).resolve().parent / Path(case["scenarios"]).name)]
     return extra
 
 

@@ -139,6 +139,45 @@ class Handler(BaseHTTPRequestHandler):
     def _h_get_search(self, qs, form):
         return _page(f"<p>results for <b>{qs.get('q', '')}</b>:</p><ul></ul>")
 
+    # -- DVWA-style graduated defenses (honest ground truth) -----------
+    # MEDIUM: strip <script> ONCE, non-recursively -> <sscriptcript>
+    # reassembles after the strip.
+    def _h_get_xss_medium(self, qs, form):
+        import re as _re
+        # One pass over opening tags only -- the classic non-recursive strip.
+        term = _re.sub(r"(?i)<script>", "", qs.get("q", ""))
+        return _page(f"<p>medium: {term}</p>")
+
+    # HIGH: strip ANY tag carrying s-c-r-i-p-t interleaved (DVWA high
+    # shape), leave every other tag raw -> <svg/onload> survives.
+    def _h_get_xss_high(self, qs, form):
+        import re as _re
+        term = _re.sub(r"(?i)<(.*)s(.*)c(.*)r(.*)i(.*)p(.*)t", "",
+                       qs.get("q", ""))
+        return _page(f"<p>high: {term}</p>")
+
+    # IMPOSSIBLE: context-aware output encoding -- safe by construction.
+    def _h_get_xss_impossible(self, qs, form):
+        import html as _html
+        term = _html.escape(qs.get("q", ""), quote=True)
+        return _page(f"<p>impossible: {term}</p>")
+
+    # VULN (legacy charset): the page declares UTF-7 and reflects RAW --
+    # a browser decodes the reflected +ADw-script+AD4- back to markup.
+    # Semantic-only verification sees inert text; only a real browser
+    # (headless) can confirm, so the manifest marks it headless-only.
+    def _h_get_legacy(self, qs, form):
+        # parse_qs decodes '+' as a SPACE, which would destroy the UTF-7
+        # escape sequences (+ADw-...).  Take the raw query with unquote
+        # (NOT unquote_plus): a UTF-7 payload must survive byte-exact.
+        from urllib.parse import unquote as _unquote
+        raw_q = _unquote(urlparse(self.path).query)
+        term = raw_q[2:] if raw_q.startswith("q=") else raw_q
+        return 200, {"Content-Type": "text/html; charset=UTF-7"}, (
+            "<html><head><title>Range3 legacy</title></head><body>"
+            f"<p>legacy archive: {term}</p>"
+            "</body></html>").encode("utf-8")
+
     # VULN: MULTI-REFLECTION -- the marker lands in a nav comment first
     # and in a live script string second.
     def _h_get_find(self, qs, form):
@@ -174,6 +213,14 @@ class Handler(BaseHTTPRequestHandler):
             if part.strip().startswith("theme="):
                 theme = part.split("=", 1)[1]
         return _page(f"<script>var theme = '{theme}';</script>")
+
+    # Contact page: the scenario DSL's entry point (message param).
+    def _h_get_contact(self, qs, form):
+        msg = qs.get("message", "")
+        return _page(f"<h2>contact</h2><p>draft: {msg}</p>"
+                     '<form method="POST" action="/comment">'
+                     '<input name="author"><textarea name="message">'
+                     "</textarea><button>send</button></form>")
 
     # SAFE: JSON content type -- the reflection is real but inert.
     def _h_post_api_echo(self, qs, form):

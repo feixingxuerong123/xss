@@ -118,6 +118,43 @@
    "auth": true
   },
   {
+   "id": "r3-pos-xss-medium",
+   "gt": "vulnerable",
+   "path": "/xss/medium",
+   "param": "q",
+   "note": "non-recursive <script> strip -> <sscriptcript> reassembles"
+  },
+  {
+   "id": "r3-pos-xss-high",
+   "gt": "vulnerable",
+   "path": "/xss/high",
+   "param": "q",
+   "note": "interleaved-script strip only -> svg/onload survives"
+  },
+  {
+   "id": "r3-neg-xss-impossible",
+   "gt": "safe",
+   "path": "/xss/impossible",
+   "param": "q",
+   "note": "context-aware encoding, safe by construction"
+  },
+  {
+   "id": "r3-pos-utf7",
+   "gt": "vulnerable",
+   "path": "/legacy",
+   "param": "q",
+   "headless": true,
+   "note": "charset=UTF-7 + raw echo; only a real browser can confirm"
+  },
+  {
+   "id": "r3-pos-scenario-msg",
+   "gt": "vulnerable",
+   "path": "/contact",
+   "param": "message",
+   "scenarios": "range3/scenarios.json",
+   "note": "declarative two-step stored flow via the scenario DSL"
+  },
+  {
    "id": "r3-neg-escaped",
    "gt": "safe",
    "path": "/safe",

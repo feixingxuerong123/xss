@@ -1,0 +1,16 @@
+{
+  "_meta": {"note": "Range3 scenario: contact/message stored flow through the moderation feed."},
+  "scenarios": [
+    {
+      "id": "r3-message-stored",
+      "title": "Stored XSS via message field (POST comment -> GET feed)",
+      "match": {"param_names": ["message"]},
+      "steps": [
+        {"name": "inject", "method": "POST", "path": "/comment",
+         "payload": "<script>alert('{token}')</script>"},
+        {"name": "check", "method": "GET", "path": "/comments",
+         "verify": true}
+      ]
+    }
+  ]
+}
