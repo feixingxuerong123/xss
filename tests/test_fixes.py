@@ -30,13 +30,29 @@ FAIL = 0
 
 
 def check(name, cond, detail=""):
+    """Assert on the caller's behalf -- and ACTUALLY FAIL when cond is false.
+
+    Phase 179: this used to only print "[!] FAIL" and bump a counter, so under
+    pytest every test in this file was green no matter what.  Verified by
+    sabotaging the verifier.mark expectation: pytest reported "7 passed" while
+    the captured output carried a FAIL line.  The eight regressions this file
+    exists to guard (single blind injection, stored GET, interactsh token
+    matching, mark(alert(...)), headless, payloads thread-safety, crawl deque,
+    waf_name locking) had no real protection at all.
+
+    Printing is kept so ``python tests/test_fixes.py`` still reads as a report;
+    that entry point catches AssertionError per test so one bad case does not
+    mask the rest.
+    """
     global PASS, FAIL
     if cond:
         PASS += 1
         print(f"[+] PASS: {name}")
-    else:
-        FAIL += 1
-        print(f"[!] FAIL: {name} {detail}")
+        return True
+    FAIL += 1
+    msg = f"{name}{(': ' + detail) if detail else ''}"
+    print(f"[!] FAIL: {msg}")
+    raise AssertionError(msg)
 
 
 # --- Fix 4: verifier.mark handles all alert(...) variants -------------------
@@ -223,18 +239,21 @@ def test_verify_headless_no_playwright():
 
 if __name__ == "__main__":
     print("=== Targeted fix tests ===\n")
-    test_mark_alert_variants()
-    print()
-    test_interactsh_token_poll()
-    print()
-    test_blind_single_injection()
-    print()
-    test_stored_get_method()
-    print()
-    test_payloads_thread_safety()
-    print()
-    test_crawl_skips_start_url()
-    print()
-    test_verify_headless_no_playwright()
+    for _t in (
+        test_mark_alert_variants,
+        test_interactsh_token_poll,
+        test_blind_single_injection,
+        test_stored_get_method,
+        test_payloads_thread_safety,
+        test_crawl_skips_start_url,
+        test_verify_headless_no_playwright,
+    ):
+        # check() now raises, so keep the report-style batch run: catch per
+        # test and continue, otherwise the first failure hides the rest.
+        try:
+            _t()
+        except AssertionError:
+            pass
+        print()
     print(f"\n[RESULT] {PASS} passed, {FAIL} failed")
     sys.exit(0 if FAIL == 0 else 1)
