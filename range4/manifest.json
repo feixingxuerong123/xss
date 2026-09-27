@@ -1,0 +1,14 @@
+{
+ "range": "range4",
+ "note": "REAL-framework SPA range: React 18 dangerouslySetInnerHTML / Vue 3 v-html against auto-escaping text-node twins. Vendor bundles are pinned upstream releases served locally. All sinks are client-side: headless confirmation required.",
+ "cases": [
+  {"id": "r4-pos-react-dsi",  "gt": "vulnerable", "path": "/react",      "param": "search", "headless": true,
+   "note": "config line -> React dangerouslySetInnerHTML (no escaping by design)"},
+  {"id": "r4-neg-react-text", "gt": "safe",       "path": "/react-safe", "param": "search", "headless": true,
+   "note": "React text node: auto-escaped by the framework, safe by construction"},
+  {"id": "r4-pos-vue-vhtml",  "gt": "vulnerable", "path": "/vue",        "param": "msg",    "headless": true,
+   "note": "config line -> Vue v-html (no escaping by design)"},
+  {"id": "r4-neg-vue-vtext",  "gt": "safe",       "path": "/vue-safe",   "param": "msg",    "headless": true,
+   "note": "v-text: interpolation is escaped, safe by construction"}
+ ]
+}
