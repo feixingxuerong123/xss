@@ -44,6 +44,8 @@ sys.path.insert(0, str(ROOT))
 
 PORT = 8891
 
+HIGH_MED = ("high", "medium", "critical")
+
 _STORE: list = []
 
 SCARY = """<!doctype html><html><head><title>About</title></head><body>
@@ -162,7 +164,8 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def _scan(base: str, path: str, extra: tuple = ()) -> list[dict]:
+def _scan(base: str, path: str, extra: tuple = (),
+          min_severity: tuple = HIGH_MED) -> list[dict]:
     """Run the real CLI against one endpoint and return its findings."""
     fd, out = tempfile.mkstemp(suffix=".json", prefix="redteam_")
     os.close(fd)
@@ -174,7 +177,11 @@ def _scan(base: str, path: str, extra: tuple = ()) -> list[dict]:
             cwd=str(ROOT), timeout=240,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
-            return json.load(open(out, encoding="utf-8")).get("findings", [])
+            findings = json.load(open(out, encoding="utf-8")).get("findings", [])
+            if min_severity is None:
+                return findings
+            return [f for f in findings
+                    if f.get("severity") in min_severity]
         except Exception:
             return []
     finally:
@@ -191,11 +198,23 @@ class TestIndependentTarget(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-        cls._srv = srv
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-        time.sleep(0.8)
-        cls.base = f"http://127.0.0.1:{PORT}"
+        # This host's security software intermittently refuses specific
+        # loopback ports (WinError 10013) -- probe candidates, trust a
+        # port only after the fixture answers (Phase 176s lesson).
+        last_err = None
+        for port in (PORT, PORT + 1, PORT + 2, PORT + 7):
+            try:
+                srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+            except OSError as e:
+                last_err = e
+                continue
+            cls._srv = srv
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            time.sleep(0.8)
+            cls.base = f"http://127.0.0.1:{port}"
+            break
+        else:
+            raise last_err
 
     @classmethod
     def tearDownClass(cls):
@@ -307,10 +326,14 @@ class TestIndependentTarget(unittest.TestCase):
         comment; this asserts it, including that the detail line names the
         content type.  It does NOT assert exploitability.
         """
-        got = _scan(self.base, "/api/echo-json?msg=probe")
+        # Phase 179: severity drops WITH confidence -- a severity-high
+        # finding on a non-HTML response triaged like a live sink in every
+        # severity-only consumer (benchmark FP gate, SARIF error level).
+        got = _scan(self.base, "/api/echo-json?msg=probe", min_severity=None)
         self.assertTrue(got, "the reflection should still be recorded")
         for f in got:
             self.assertEqual(f.get("confidence"), "low")
+            self.assertEqual(f.get("severity"), "low")
             self.assertIn("application/json", f.get("detail") or "")
 
 

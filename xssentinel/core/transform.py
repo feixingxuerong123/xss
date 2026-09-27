@@ -211,6 +211,30 @@ def t_duplicate_attribute(s: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Parser-soundness matrix (measured 2026-09-26, sandbox.judge over four
+# reflection contexts; see AGENTS.md Phase 179).  Kept as a DESIGN DOCUMENT,
+# deliberately NOT wired as a gate:
+#
+#   inert in all four contexts : html_entity_{decimal,hex,named},
+#       html5_entities, fullwidth, interleave_nulls, js_unicode,
+#       css_unicode   -- the HTML tokenizer never re-classifies character
+#       references or fullwidth/NUL/escape forms as markup, so these only
+#       pay off against DOUBLE-DECODE targets (WAF or app decodes once more)
+#       or charset games; js/css_unicode decode only inside the JS engine.
+#   shape-dependent            : tab_break / newline_break -- dead when they
+#       split `<tag`, live when they split between attributes (payload-shape
+#       dependent, not context-dependent).
+#   token-encoding artifacts   : fromcharcode / js_unicode move the TOKEN
+#       into an encoded form the sandbox cannot see, but the browser's JS
+#       engine decodes it -- "inert" here does not mean dead.
+#   charset-purpose            : utf7 exists FOR charset-decoding targets
+#       (range3 /legacy confirmed end-to-end through headless Chromium);
+#       meaningless everywhere else, priceless there.
+#
+# A context gate would save a handful of budget-capped, token-guarded
+# variants but risks false negatives on exactly the exotic targets these
+# families exist for -- so the registry stays ungated.
+# ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
 

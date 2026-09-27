@@ -1364,7 +1364,14 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             ctype = ""
         if ctype and not any(t in ctype for t in (
                 "text/html", "application/xhtml", "image/svg")):
+            # Phase 179 (user decision): severity drops WITH confidence.
+            # A reflection in a non-HTML response cannot execute in a
+            # browser tab; carrying it at high severity meant every
+            # severity-only consumer (benchmark FP gate, SARIF error
+            # level, report highlighting) treated it like a live sink.
+            # The finding is kept -- severity AND confidence read low.
             confidence = "low"
+            severity = "low"
             detail = (detail + " (non-HTML content-type '%s')"
                       % ctype.split(";")[0].strip())
         evidence, confidence, detail = _grade_evidence(headless, confidence,
