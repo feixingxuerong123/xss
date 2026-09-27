@@ -21,6 +21,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from . import payloads, transform
+from .budget import BudgetExhausted
 from . import context as ctx
 from . import waf as wafmod
 from . import verifier
@@ -1431,7 +1432,11 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         Raises BudgetExhausted, which the API worker maps to CANCELLED
         (with the findings gathered so far) when the flag is set.
         """
-        if self.cancel_event is not None and self.cancel_event.is_set():
+        # getattr, not self.cancel_event: test helpers build Scanner via
+        # __new__ and set attributes by hand -- a bare instance must skip
+        # cancellation, not crash on the missing attribute.
+        ev = getattr(self, "cancel_event", None)
+        if ev is not None and ev.is_set():
             raise BudgetExhausted("scan cancelled by operator")
 
     def _bump(self):

@@ -754,6 +754,13 @@ def _default_config_path() -> str | None:
                        DEFAULT_CONFIG_NAME)
     if os.path.isfile(pkg):
         return pkg
+    # Phase 180: the real config is gitignored (it carries keys); on a
+    # clean checkout only the tracked example exists.  Point discovery at
+    # it so --ai-report still resolves: the placeholder keys fail their
+    # probes and the section degrades to the deterministic template.
+    pkg_example = pkg.replace(".json", ".example.json")
+    if os.path.isfile(pkg_example):
+        return pkg_example
     for home_name in (".xssentinel/llm_providers.json",):
         p = os.path.join(os.path.expanduser("~"), *home_name.split("/"))
         if os.path.isfile(p):
