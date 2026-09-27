@@ -65,6 +65,14 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       (sync 16TP, async 14TP + 2 SKIP sync-only)。runner 四条教训固化注释:
       参数须写入起始 URL、连字符路由、stored 标志要全 URL、CLI 解析 -u query
       不做百分号解码。
+- [x] **179 决策两项 + 环境两谜案**:JSON 反射 severity 连 confidence 一起降
+      (severity-only 消费者不再误判;红队契约更新);变形上下文门控经沙箱
+      23×4 实测后**决定不门控**,矩阵落盘 transform.py 设计文档。环境侧查明
+      **Windows 保留端口段 8810-9109 吞掉全部惯用端口**(netsh excludedportrange),
+      全项目默认端口迁 18xxx 段;三 fixture 服务器启用 HTTP/1.1 keep-alive
+      (HTTP/1.0 每请求一条连接 → TIME_WAIT 风暴 → 临时端口耗尽)。遗留:
+      test_benchmark 进程内 connect 挂起超 settimeout,见
+      dev/WEDGE_test_benchmark_20260927.md。
 
 ## 环境配置
 
