@@ -53,7 +53,7 @@ from benchmark.runner import evaluate_case  # noqa: E402
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "benchmark/results/batch_full.json"
 BATCH = int(sys.argv[2]) if len(sys.argv) > 2 else 6
-PORT = int(sys.argv[3]) if len(sys.argv) > 3 else 8877
+PORT = int(sys.argv[3]) if len(sys.argv) > 3 else 18777
 ENGINE = sys.argv[4] if len(sys.argv) > 4 else "sync"
 if ENGINE not in ("sync", "async"):
     sys.exit(f"engine must be sync or async, got {ENGINE!r}")

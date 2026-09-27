@@ -59,7 +59,10 @@ from tests import vuln_server
 
 
 BASE = "http://127.0.0.1:8899"
-BENCH_PORT = 8899
+# 8899 sits inside the Windows dynamic-reservation kill zone (netsh
+# excludedportrange: 8810-9109 on this host as of 2026-09-27) -- binds
+# fail with WinError 10013 there.  18899 is outside every observed range.
+BENCH_PORT = 18899
 
 # A representative subset of endpoints that exercises every detection
 # layer without being so large the benchmark takes minutes.  Each entry:

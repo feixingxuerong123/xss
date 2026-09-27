@@ -5,7 +5,7 @@ Starts the benchmark server, invokes XSSentinel CLI against every manifest case,
 parses JSON reports, and computes TP/FP/TN/FN metrics.
 
 Usage:
-    python benchmark/runner.py [--port 8877] [--concurrency 1] [--timeout 60]
+    python benchmark/runner.py [--port 18777] [--concurrency 1] [--timeout 60]
     python benchmark/runner.py --quick   # subset for fast iteration
 """
 from __future__ import annotations

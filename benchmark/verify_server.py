@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from server import run_server, load_routes, MODES
 
-PORT = 8877
+PORT = 18777
 
 def main():
     routes = load_routes()

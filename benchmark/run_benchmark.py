@@ -28,8 +28,8 @@ sys.path.insert(0, _ROOT)
 def main():
     parser = argparse.ArgumentParser(
         description="XSSentinel Accuracy Benchmark")
-    parser.add_argument("--port", type=int, default=8877,
-                        help="Benchmark server port (default: 8877)")
+    parser.add_argument("--port", type=int, default=18777,
+                        help="Benchmark server port (default: 18777)")
     parser.add_argument("--quick", action="store_true",
                         help="Quick mode: only run first 10 cases")
     parser.add_argument("--compare", action="store_true",

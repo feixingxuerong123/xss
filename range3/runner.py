@@ -87,7 +87,7 @@ def _invoke_scanner(url: str, timeout: int = 60, max_payloads: int = 10,
 LOGIN = {"user": "admin", "pass": "r3-pass"}
 
 
-def start_range(preferred: int = 8902) -> tuple[int, float]:
+def start_range(preferred: int = 18702) -> tuple[int, float]:
     """Bind the range and only trust it after a real probe answers."""
     from http.server import ThreadingHTTPServer
     last_err = None

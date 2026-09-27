@@ -6,7 +6,7 @@ Each endpoint's rendering is determined by the "mode" field in manifest.json.
 Used exclusively by the benchmark runner to evaluate scanner accuracy.
 
 Usage:
-    python benchmark/server.py [--port 8877]
+    python benchmark/server.py [--port 18777]
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ import urllib.request               # Phase 124: resolve unfurled resources
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _MANIFEST_PATH = os.path.join(_HERE, "manifest.json")
-DEFAULT_PORT = 8877
+DEFAULT_PORT = 18777
 
 
 # ---------------------------------------------------------------------------
