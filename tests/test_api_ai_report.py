@@ -519,8 +519,12 @@ class TestReportEndpointAiSection:
 
         monkeypatch.delenv(lp.ENV_CONFIG, raising=False)
         resolved = lp._default_config_path()
-        assert resolved.endswith(os.path.join("data", "llm_providers.json"))
-        assert os.path.isfile(resolved)
+        assert resolved and os.path.isfile(resolved)
+        # Dev machines carry the gitignored real config; clean checkouts
+        # only have the shipped example -- both are legitimate outcomes.
+        assert os.path.basename(resolved) in ("llm_providers.json",
+                                              "llm_providers.example.json")
+        lp.LLMPool.from_file(resolved)   # whichever it is, it must load
 
     def test_ai_flag_values_are_lenient(self, api_server_ai):
         job = _completed_job(api_server_ai)

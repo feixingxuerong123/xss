@@ -237,7 +237,7 @@ class TestIndependentTarget(unittest.TestCase):
         "path": {"path_xss"},
         "header": {"header_xss"},
         "cookie": {"header_xss", "cookie_xss"},
-        "dom": {"dom_dynamic"},
+        "dom": {"dom_dynamic", "trusted_types_taint_flow"},
         "template": {"reflected"},
         "double": {"reflected"},
         "post": {"reflected"},

@@ -238,10 +238,12 @@ def test_extract_text_tolerates_broken_shapes():
 
 
 def test_mask_key_never_leaks_the_key():
-    k = "$sk-exc...ROTATED-ROTATE-ON-GITHUB"
+    # Synthetic fixture only: this test used to carry a REAL production
+    # key's shape, which is exactly how keys leak into test files.
+    k = "sk-synthetic1234567890abcdef"
     m = mask_key(k)
     assert k not in m
-    assert m.startswith("sk-exc") and m.endswith("WMkN")
+    assert m == "sk-syn***cdef"
     assert mask_key("short") == "***"
     assert mask_key("") == "***"
 
@@ -750,7 +752,7 @@ def test_shipped_default_pool_config_is_valid():
     from xssentinel.core import llm_pool as _lp
     shipped = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(_lp.__file__))),
-        "data", "llm_providers.json")
+        "data", "llm_providers.example.json")
     pool = LLMPool.from_file(shipped)
     assert len(pool.candidates) >= 5
     ids = {c.provider_id for c in pool.candidates}
