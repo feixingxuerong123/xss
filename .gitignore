@@ -64,3 +64,6 @@ benchmark/results/regression_logs/
 /_*
 /dev/attic/*
 !/dev/attic/README.md
+
+# LLM provider config carries API keys -- template is tracked instead
+xssentinel/data/llm_providers.json

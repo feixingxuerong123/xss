@@ -51,9 +51,9 @@
       "label": "SenseNova (token.sensenova.cn)",
       "base_url": "https://token.sensenova.cn/v1",
       "keys": [
-        "$sk-exc...ROTATED-ROTATE-ON-GITHUB",
-        "$sk-28n...ROTATED-ROTATE-ON-GITHUB",
-        "$sk-yqb...ROTATED-ROTATE-ON-GITHUB"
+        "sk-PLACEHOLDER-ROTATE-ME",
+        "sk-PLACEHOLDER-ROTATE-ME",
+        "sk-PLACEHOLDER-ROTATE-ME"
       ],
       "models": [
         "deepseek-v4-flash",
@@ -98,7 +98,7 @@
       "label": "OpenRouter (openrouter.ai)",
       "base_url": "https://openrouter.ai/api/v1",
       "keys": [
-        "$sk-or-...ROTATED-ROTATE-ON-GITHUB"
+        "sk-PLACEHOLDER-ROTATE-ME"
       ],
       "models": [
         "z-ai/glm-5.3-flash"
