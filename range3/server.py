@@ -70,6 +70,12 @@ def _json(body: dict, status: int = 200):
 
 
 class Handler(BaseHTTPRequestHandler):
+    # HTTP/1.1 keep-alive: without it every scan request
+    # leaves a TIME_WAIT client socket, and a multi-thousand-
+    # request benchmark run exhausts Windows ephemeral ports
+    # (connects then stall with zero CPU).  Responses all set
+    # Content-Length, which HTTP/1.1 requires.
+    protocol_version = "HTTP/1.1"
     server_version = "Range3/1.0"
 
     # -- request plumbing ------------------------------------------------

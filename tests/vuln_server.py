@@ -1493,6 +1493,12 @@ def _svg_safe_page(q: str):
 
 
 class H(BaseHTTPRequestHandler):
+    # HTTP/1.1 keep-alive: without it every scan request
+    # leaves a TIME_WAIT client socket, and a multi-thousand-
+    # request benchmark run exhausts Windows ephemeral ports
+    # (connects then stall with zero CPU).  Responses all set
+    # Content-Length, which HTTP/1.1 requires.
+    protocol_version = "HTTP/1.1"
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(parsed.query)

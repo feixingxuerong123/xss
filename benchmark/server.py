@@ -2304,6 +2304,12 @@ def _register_viewer(routes: dict, case: dict, key: str,
 # ---------------------------------------------------------------------------
 
 class BenchmarkHandler(BaseHTTPRequestHandler):
+    # HTTP/1.1 keep-alive: without it every scan request
+    # leaves a TIME_WAIT client socket, and a multi-thousand-
+    # request benchmark run exhausts Windows ephemeral ports
+    # (connects then stall with zero CPU).  Responses all set
+    # Content-Length, which HTTP/1.1 requires.
+    protocol_version = "HTTP/1.1"
     routes: dict[str, dict] = {}
 
     # HTTPServer accepts one connection at a time, and a client that is killed
