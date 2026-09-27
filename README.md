@@ -51,6 +51,23 @@ XSSentinel 的目标是**在开源/自研工具中做到检测维度最全、架
 
 ---
 
+## Range #3 —— 第三方意见应用靶场
+
+`range3/` 是一个刻意与 benchmark 异形的**应用**靶场:SQLite 持久化、登录会话与
+401 门、混合内容类型(HTML/JSON/纯文本/UTF-7 旧字符集)、多反射点页面、RCDATA、
+cookie/header 载体回显、base64/JWT 容器解码回显、存储型与二阶流、认证后反射、
+CSP strict/nonce、DVWA 式分级防御(medium/high/impossible)。ground truth 从
+**服务器行为**独立撰写;runner 驱动真实 CLI(双引擎)评分。
+
+```bash
+python range3/runner.py --engine both      # 全量 26 例,sync+async 各跑一轮
+python range3/server.py 8902               # 单独起靶场(app 模式)
+```
+
+评分采用"服务器行为 = 真值":vulnerable/safe/low(JSON 反射必须保留但降置信)。
+首轮即暴露 6 个扫描器缺陷(全部已修,见 AGENTS.md 178c);当前基线
+**sync TP20/FP0/FN0,async TP17/FP0/FN0(2 SKIP 为 sync-only 载体)**。
+
 ## 检测架构（6 层）
 
 ```
