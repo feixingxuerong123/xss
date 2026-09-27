@@ -52,6 +52,21 @@ jobs:
       - name: Range #2 accuracy drill (must be 100% / 100%)
         run: python tests/run_range2.py
 
+      # Range #4: real React 18 / Vue 3 bundles (vendored), client-side
+      # sinks only -- the framework escapes or it does not.  Ground truth
+      # is authored from framework semantics, and the -safe twins are
+      # proven first by dev/_r4_construct_probe.py (no browser): the
+      # attacker string must not appear in server HTML at all.
+      - name: Range #4 SPA drill (real framework sinks, 100%/100% required)
+        run: python range4/runner.py --engine both --out range4/results_ci.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: range4-results
+          path: range4/results_ci.json
+          if-no-files-found: ignore
+
   benchmark-full:
     # Full 192-case drill on demand (slower, ~15 min of pure scanning).
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'

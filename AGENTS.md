@@ -74,6 +74,22 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       test_benchmark 进程内 connect 挂起超 settimeout,见
       dev/WEDGE_test_benchmark_20260927.md。
 
+- [x] **180 Range4 真实框架 SPA 靶场(range4/)**: React 18 `dangerouslySetInnerHTML`
+      / Vue 3 `v-html` 对上自动转义的文本节点双胞胎, vendor bundle 是 vendored 进仓库
+      的上游发布版。**构造效度先做**: `dev/_r4_construct_probe.py` 在无浏览器前提下证明
+      `-safe` 双胞胎的服务端 HTML **不含** attacker 字符串 —— 首版靶场就栽在这里:对照页
+      也把参数反射进服务端 JS config line,而那本身是 script-string sink,于是四例全
+      confirmed、"safe" 被量成 FP,**错的是靶场不是扫描器**。
+      终局**双引擎 8/8 对**(sync / async 各 TP2 FP0 TN2 FN0);runner 现在落盘
+      `range4/results.json` 且带门禁语义(FN/FP/ERROR ⇒ exit 1),已挂进 CI 的 tests job。
+      顺带挖出的**新缺口**:**async 模式静默忽略 `--headless`** —— AsyncScanner 根本没有
+      verify_headless 接线(sync 在 `Scanner._record` 里逐 finding 确认),于是 async 的
+      反射型 finding 全是 high/high 却**没有浏览器证据**:本轮 sync 12/12 confirmed,
+      async 仅 1/23(且那 1 条是 DOM 层硬编码的 `confirmed=True`)。已先做诚实化:
+      `--headless` 进 sync-only 警告列表(两条 async 路径都加)。
+- [ ] 待决策:async 要不要补 headless 确认(方案 A 只警告 + 标注 evidence_class;
+      方案 B 用 `asyncio.to_thread` 接上,带去重与并发上限)
+
 ## 环境配置
 
 - 依赖: requirements.txt;测试: `python tests/run_all_batched.py --quiet`(2026-09-25 实测

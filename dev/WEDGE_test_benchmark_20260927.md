@@ -33,3 +33,17 @@ settimeout(10) 的 connect 不可能挂 600 秒——除非:
   正确性独立成立:响应都带 Content-Length);
 * 本机安全软件今日行为:SYN 黑洞(每次 connect 吃满 10 秒)、部分端口
   10013 拒绝、间歇 10053/10054 重置——与健康窗口交替出现。
+
+## 同一家族的第二种形态(2026-09-28,Range4 首轮实测)
+
+sync 引擎跑 `r4-neg-vue-vtext`(一个本该 9 秒的用例)耗时 **5080.2s**,
+runner 的 per-case `timeout=180` 触发 `subprocess.TimeoutExpired` 把它杀了,
+但 **JSON 报告已经落盘** ⇒ `score()` 照常给出 TN,判定有效,只是慢了 84 分钟。
+
+形态差异:上一篇是 **connect 阶段**卡死(零 CPU);这一次是**扫描已完成、
+进程收尾不退出**——报告写出来了,进程没回到 exit。
+
+对 runner 的启示:**
+`subprocess.run(timeout=N)` 超时 ≠ 这次用例失败。**报告存在就以报告为准,
+把 `err` 单独记下来**(range4/runner.py 已经这么做了:`verdict` 只在
+`err and report is None` 时才判 ERROR)。否则会把环境挂起误记成检测回归。。

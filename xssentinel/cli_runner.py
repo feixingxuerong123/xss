@@ -530,8 +530,13 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint,
                     auth_state=None):
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
+    # Phase 180 finding: --headless belongs in this list too.  AsyncScanner
+    # has no verify_headless wiring at all (sync runs it per finding from
+    # Scanner._record), so in --async mode every reflected finding was
+    # reported high/high with NO browser confirmation -- silently.  Warn
+    # instead of letting the absence look like a result.
     for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "stored_dom", "second_order_inject"):
+                  "stored_dom", "second_order_inject", "headless"):
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)
@@ -837,8 +842,13 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
 
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
+    # Phase 180 finding: --headless belongs in this list too.  AsyncScanner
+    # has no verify_headless wiring at all (sync runs it per finding from
+    # Scanner._record), so in --async mode every reflected finding was
+    # reported high/high with NO browser confirmation -- silently.  Warn
+    # instead of letting the absence look like a result.
     for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "stored_dom", "second_order_inject"):
+                  "stored_dom", "second_order_inject", "headless"):
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)

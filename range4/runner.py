@@ -83,6 +83,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", default="both", choices=["sync", "async", "both"])
     ap.add_argument("--timeout", type=int, default=180)
+    ap.add_argument("--out", default=str(Path(__file__).parent / "results.json"),
+                    help="where to land the scored rows (retained products)")
     args = ap.parse_args()
 
     started = threading.Event()
@@ -103,6 +105,7 @@ def main() -> int:
                           .read_text(encoding="utf-8"))
     engines = ["sync", "async"] if args.engine == "both" else [args.engine]
     all_rows = []
+    summary: dict[str, dict[str, int]] = {}
     for eng in engines:
         print(f"\n=== engine={eng} ===")
         counts = {"TP": 0, "FP": 0, "TN": 0, "FN": 0, "ERROR": 0}
@@ -114,13 +117,57 @@ def main() -> int:
             verdict = "ERROR" if (err and report is None) else score(report, case)
             counts[verdict] += 1
             n = len((report or {}).get("findings", []))
+            top = ""
+            detail = []
+            for f in (report or {}).get("findings", []):
+                hl = f.get("headless") or {}
+                detail.append({"type": f.get("type"),
+                               "severity": f.get("severity"),
+                               "context": f.get("context"),
+                               "headless_outcome": hl.get("outcome")})
+            if detail:
+                top = (f"{detail[0]['type']}/{detail[0]['severity']}/"
+                       f"{detail[0]['context']}/{detail[0]['headless_outcome']}")
+            # Evidence has to outlive the run: a "TP" that was never
+            # browser-confirmed is a weaker claim than one that fired.
+            confirmed = sum(1 for d in detail if d["headless_outcome"] == "fired")
             mark = "" if verdict in ("TP", "TN") else f"   <-- {verdict} {err[:60]!r}"
             print(f"  [{eng:5}] {case['id']:20} {verdict:5} "
                   f"findings={n:2} {elapsed:5.1f}s{mark}")
+            if top:
+                print(f"          top: {top}  browser-confirmed={confirmed}")
             all_rows.append({"engine": eng, "case_id": case["id"],
-                             "verdict": verdict, "findings": n})
+                             "verdict": verdict, "findings": n,
+                             "confirmed": confirmed, "elapsed_s": round(elapsed, 1),
+                             "findings_detail": detail, "error": err[:200]})
         print(f"  => TP{counts['TP']} FP{counts['FP']} TN{counts['TN']} "
               f"FN{counts['FN']} ERR{counts['ERROR']}")
+        summary[eng] = counts
+
+    # Retained product: the numbers have to survive the terminal scrollback.
+    payload = {
+        "meta": {"range": "range4", "generated": time.strftime("%Y-%m-%d %H:%M:%S"),
+                 "engines": engines, "max_payloads": 8, "max_transforms": 4,
+                 "per_case_timeout": args.timeout,
+                 "construct_probe": "dev/_r4_construct_probe.py (server_reflect "
+                                    "must be False for -safe cases)"},
+        "counts": summary,
+        "rows": all_rows,
+    }
+    Path(args.out).write_text(json.dumps(payload, ensure_ascii=False, indent=2),
+                              encoding="utf-8")
+    print(f"\n[*] written -> {args.out}")
+
+    # Same standard as the Range2 drill (tests/run_range2.py): this is a
+    # gate, not a report.  100%/100% or the job fails.
+    bad = [(r["engine"], r["case_id"], r["verdict"], r["error"])
+           for r in all_rows if r["verdict"] in ("FN", "FP", "ERROR")]
+    if bad:
+        print("\n[!] RANGE4 GATE FAILED (TP/TN required on every case):")
+        for eng, cid, verdict, err in bad:
+            print(f"    - [{eng}] {cid}: {verdict} {err[:120]}")
+        return 1
+    print("[*] Range4 gate: every case scored as ground truth requires")
     return 0
 
 
