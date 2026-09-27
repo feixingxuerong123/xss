@@ -257,6 +257,12 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         # JSON APIs -- the majority of modern POST endpoints -- could not
         # be tested at all (pentest audit P0).
         self.json_body: dict | None = None
+        # Phase 180: cooperative cancellation.  jobs.py sets this to the
+        # Job's _cancel_requested event; _check_cancel() raises at every
+        # request boundary.  (Phase 129's comment promised this wiring --
+        # it was never implemented, so cancel only took effect when the
+        # scan ENDED; a dying target delayed cancellation by minutes.)
+        self.cancel_event: threading.Event | None = None
         # Phase 46: request budget (pentest-readiness).  A shared Budget
         # object is attached to the requester so every worker clone spends
         # against the same caps; BudgetExhausted stops scan_target
@@ -548,6 +554,7 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             }
         except Exception:
             pass
+        self._check_cancel()
         # Phase 20-3: record L1 reflection probe for this param.
         self.coverage.touch_layer(url, "L1_reflected", method,
                                   detail=f"probing param '{param}'")
@@ -562,6 +569,10 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         except Exception as e:
             if self.verbose:
                 _log.debug(f"    request failed: {e}")
+            # Phase 180: a run of FAILING requests (a dying target -- the
+            # #1 cancel trigger) must not outflank the cancel checkpoint,
+            # which otherwise only exists on the success path (_bump).
+            self._check_cancel()
             return
         if marker not in resp.text:
             # Phase 178c: a container param whose endpoint echoes only the
@@ -727,6 +738,7 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
         for base in ([] if confirmed else bases):
             if tried >= effective_max:
                 break
+            self._check_cancel()
             tried += 1
             # Phase 20-3: record the payload class being dispatched.
             pc_name = base.get("context", context) if isinstance(base, dict) else context
@@ -1412,6 +1424,15 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             self.findings.append(finding)
         if self._progress:
             self._progress.on_finding(finding.data)
+
+    def _check_cancel(self):
+        """Abort cooperatively when the operator cancelled the scan.
+
+        Raises BudgetExhausted, which the API worker maps to CANCELLED
+        (with the findings gathered so far) when the flag is set.
+        """
+        if self.cancel_event is not None and self.cancel_event.is_set():
+            raise BudgetExhausted("scan cancelled by operator")
 
     def _bump(self):
         with self._lock:

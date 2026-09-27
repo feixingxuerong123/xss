@@ -190,6 +190,7 @@ def _scan_worker(job: Job) -> None:
     HTTP handler can serialise them straight from the request JSON.
     """
     from xssentinel.core.scanner import Scanner
+    from xssentinel.core.budget import BudgetExhausted
     from urllib.parse import urlparse
 
     opt = job.options
@@ -223,6 +224,9 @@ def _scan_worker(job: Job) -> None:
             custom_payloads=opt.get("custom_payloads", []) or [],
             crawl_engine=opt.get("crawl_engine", "auto"),
         )
+        # Phase 180: wire the cooperative cancel flag into the Scanner --
+        # the Phase 129 wiring that the comment promised but never landed.
+        scanner.cancel_event = job._cancel_requested
         scanner.scan_target(
             base_url,
             method=job.method,
@@ -298,7 +302,41 @@ def _scan_worker(job: Job) -> None:
                 waf_name=getattr(scanner, "waf_name", None),
                 coverage_summary=cov_summary,
             )
+    except BudgetExhausted as e:
+        if job._cancel_requested.is_set():
+            # Phase 180: cooperative cancellation -- publish the findings
+            # gathered so far.  mark_completed checks the set flag itself
+            # and reports CANCELLED, not COMPLETED.
+            findings = [f.to_dict() if hasattr(f, "to_dict") else f
+                        for f in scanner.findings]
+            _publish = job.options.get("_publish_fn")
+            if _publish is not None:
+                _publish(
+                    findings=findings,
+                    requests_made=getattr(scanner, "requests_made", 0),
+                    waf_name=getattr(scanner, "waf_name", None),
+                    coverage_summary=None,
+                )
+            return
+        raise
     except Exception as e:
+        # Phase 180: the flag is the source of truth.  Intermediate broad
+        # handlers (crawl per-endpoint, _scan_param failure paths) swallow
+        # the BudgetExhausted abort, so whatever exception surfaces here,
+        # a set cancel flag means the operator asked for this stop:
+        # publish the findings gathered so far as CANCELLED, not FAILED.
+        if job._cancel_requested.is_set():
+            findings = [f.to_dict() if hasattr(f, "to_dict") else f
+                        for f in scanner.findings]
+            _publish = job.options.get("_publish_fn")
+            if _publish is not None:
+                _publish(
+                    findings=findings,
+                    requests_made=getattr(scanner, "requests_made", 0),
+                    waf_name=getattr(scanner, "waf_name", None),
+                    coverage_summary=None,
+                )
+            return
         # Publish the failure.  Same closure pattern.
         _fail = job.options.get("_fail_fn")
         if _fail is not None:
