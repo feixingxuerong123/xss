@@ -11,6 +11,18 @@ dynamic = ["version"]
 description = "Comprehensive, multi-layer XSS detection framework (reflected + context-aware + WAF-evasion + DOM taint + optional headless confirmation)"
 readme = "README.md"
 license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
 requires-python = ">=3.9"
 dependencies = ["requests>=2.28", "beautifulsoup4>=4.11", "lxml>=4.9"]
 

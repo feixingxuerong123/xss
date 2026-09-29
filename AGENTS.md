@@ -123,6 +123,13 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       安装 + `xssentinel --help` 入口点 + SARIF 版本 1.0.0 + `--self-test`
       端到端烟测全过。遗留决策:LICENSE 选 MIT 是默认值,若需 Apache-2.0/
       专有许可请替换文件与 pyproject 字段。
+      **续(同日)**:补齐 CONTRIBUTING / CHANGELOG / SECURITY 三件套
+      (SECURITY 的举报联系方式留待仓库归属者填写);pyproject 补 classifiers。
+      **lint 基线决定不清理**:全仓库 ruff 实际 212 条(此前只查过改动文件
+      得 12 条),其中 scanner*.py 的大量 F401"未用导入"是 Mixin 运行时引用
+      的故意导入、E402 多为 sys.path 垫片——盲目 --fix 会让扫描器核心运行时
+      NameError,零功能收益换核心风险,记账为有意基线。
+
 ## 环境配置
 
 - 依赖: requirements.txt;测试: `python tests/run_all_batched.py --quiet`(2026-09-25 实测
