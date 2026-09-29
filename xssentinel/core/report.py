@@ -1339,7 +1339,14 @@ def write_poc_dir(findings: list, target: str, meta: dict,
     skipped = 0
 
     for f in findings:
-        data = f.get("data", f) if isinstance(f, dict) else {}
+        # Canonical accessor: the CLI passes Finding objects (whose payload
+        # dict lives on .data), tests and the API pass plain dicts.  This
+        # used to special-case dicts only -- isinstance(f, dict) is False
+        # for a Finding, so EVERY CLI-driven --poc-dir run silently wrote
+        # an INDEX.md with zero artifacts while the same call in tests
+        # passed.  Caught by the CLI e2e matrix (Phase 183).
+        data = f.data if hasattr(f, "data") else (f if isinstance(f, dict)
+                                                  else {})
         poc = data.get("poc") or {}
         html = poc.get("html") or ""
         curl = poc.get("curl") or ""

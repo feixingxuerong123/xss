@@ -334,6 +334,34 @@ class TestNucleiHelpers:
         b = report._matcher_skeleton("<svg/onload=alert('xssm_cc00')>")
         assert a == b
 
+    def test_write_poc_dir_accepts_finding_objects_and_dicts(self, tmp_path):
+        # Phase 183 CLI-matrix catch: --poc-dir was handed Finding OBJECTS
+        # by the CLI but the writer only unpacked plain dicts, so every
+        # real run silently produced an INDEX.md with zero artifacts.
+        # Both shapes must land the .html/.sh artifacts + the index row.
+        import tempfile
+
+        from xssentinel.core.findings import Finding
+
+        def _poc_data():
+            return {"type": "reflected", "url": "http://t/s", "param": "q",
+                    "severity": "high", "poc_verified": True,
+                    "poc": {"curl": "curl 'http://t/s?q=1'",
+                            "html": "<html><body>x</body></html>"}}
+
+        for label, payload in (("dicts", [_poc_data()]),
+                               ("findings", [Finding(**_poc_data())])):
+            out = tmp_path / label
+            written = report.write_poc_dir(payload, "http://t/s",
+                                           {"generated": "g"}, str(out))
+            names = sorted(os.path.basename(w) for w in written)
+            assert "INDEX.md" in names, (label, names)
+            assert any(n.endswith(".html") for n in names), (label, names)
+            assert any(n.endswith(".sh") for n in names), (label, names)
+            idx = (out / "INDEX.md").read_text(encoding="utf-8")
+            assert "with PoC: 1" in idx, (label, idx)
+            assert "[`reflected.html`](reflected.html)" in idx, (label, idx)
+
     def test_slug_is_safe(self):
         assert report._nuclei_slug("upload_xss") == "upload-xss"
         assert report._nuclei_slug("Template_SSTI_Vue!!") == "template-ssti-vue"

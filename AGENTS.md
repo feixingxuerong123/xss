@@ -108,6 +108,13 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       开销 <1us,CI 负载下量到 1.1us;2345 passed / 1 failed,与本改动无关)
       —— 两处计时断言改为行为等价 + 10ms/1ms 容差(契约不变:足额 pacing、
       不超间隔、非半程),2345 例中的其余全部绿。
+      **再续:CLI e2e 矩阵(dev/_cli_probe/cli_matrix.py,16 项全过)抓到一个
+      真缺陷并修复**:CLI 端 `--poc-dir` 自 Phase 139 起产出永远只有 INDEX.md
+      ——`write_poc_dir` 只解包 dict 形态 finding(`isinstance(f, dict)`),
+      而 CLI 传的是 Finding 对象 → 全部落空 `{}` → 每个真实扫描的 12 个
+      finding 全被当"无 PoC"跳过(dict 入参的单测看不见这条路径)。修复改用
+      全库通行访问器 `f.data if hasattr(f, "data") else f`,新增双形态回归测试
+      (test_report.py);矩阵实测 INDEX 正确列出 reflected-10.html/.sh 等工件。
 - [x] **181 前端 UI 统一重做(report_theme.py)**:四个 HTML 交付物(主报告 /
       verify-fix / diff / benchmark)原本各持一份手写 CSS 拷贝,现统一接入
       `xssentinel/core/report_theme.py` 单一设计系统:明暗双主题(令牌化,
