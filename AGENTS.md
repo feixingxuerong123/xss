@@ -87,8 +87,23 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       反射型 finding 全是 high/high 却**没有浏览器证据**:本轮 sync 12/12 confirmed,
       async 仅 1/23(且那 1 条是 DOM 层硬编码的 `confirmed=True`)。已先做诚实化:
       `--headless` 进 sync-only 警告列表(两条 async 路径都加)。
-- [ ] 待决策:async 要不要补 headless 确认(方案 A 只警告 + 标注 evidence_class;
-      方案 B 用 `asyncio.to_thread` 接上,带去重与并发上限)
+- [x] **183 async --headless 接线(待决策项落地方案 B,用户拍板)**:`AsyncScanner.scan`
+      重命名为 `_scan_raw`,新外层 `scan()` 拦截全部 finding 走真无头确认——
+      专用 `ThreadPoolExecutor(max_workers=headless_concurrency)` 经
+      `run_in_executor` 调 `verifier.verify_headless`(Playwright sync API 线程绑定:
+      **executor 宽度 = 浏览器实例上限**,cap=1 全程共用一个 Chromium;worker 线程
+      无运行中事件循环,恰好满足 get_shared_browser 的启动前提)。去重键 = 精确重放
+      三元组 (url, param, payload);token 从 payload 的 alert 参数现场提取
+      (mark() 的语义 = 对话框消息即 token,三形态正则 + marker 兜底,**提取失败诚实
+      跳过**——不可归因的重放只该保持未验证,不该冒 browser-refuted 的险)。跳过规则
+      与 sync 对齐:OOB 已确认 / 已带浏览器证据 / 占位审计载荷 / JSON 载体(param_in
+      =body 且 json_body 非空);评级复用同一 `_grade_evidence`,双引擎证据词表一致;
+      验证异常降级为 errored 不杀扫描。CLI 两条 async 路径的 sync-only 警告收敛为
+      `_ASYNC_SYNC_ONLY_FLAGS`,`--headless` 毕业。**实测 range4 双引擎**:async
+      browser-confirmed 从 180 时的 1/23 → **23/23 与 23/23**(两阳性用例),
+      门禁 TP2/FP0/TN2/FN0 双引擎对齐 exit 0。新测试
+      `tests/test_async_headless_verify.py` 19 例(无浏览器无网络,fake _scan_raw +
+      录制型 fake verifier);存量 async 套件 88 例零回归。
 - [x] **181 前端 UI 统一重做(report_theme.py)**:四个 HTML 交付物(主报告 /
       verify-fix / diff / benchmark)原本各持一份手写 CSS 拷贝,现统一接入
       `xssentinel/core/report_theme.py` 单一设计系统:明暗双主题(令牌化,

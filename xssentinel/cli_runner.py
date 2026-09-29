@@ -526,17 +526,20 @@ def _stealth_proxy_pool(args):
         return None
 
 
+# Phase 85: sync-only features async mode warns about instead of silently
+# ignoring.  --headless graduated OUT of this list in Phase 183 (option B):
+# AsyncScanner now wires the same verifier.verify_headless the sync engine
+# uses, wrapped at the outermost scan generator with a dedicated thread pool
+# and replay-tuple dedup -- see AsyncScanner.scan.
+_ASYNC_SYNC_ONLY_FLAGS = ("fuzz", "bav", "scenarios", "stored_inject",
+                          "stored_dom", "second_order_inject")
+
+
 def _run_async_scan(args, url: str, oob, progress, checkpoint,
                     auth_state=None):
     # Phase 85: async mode does not implement these sync-only features;
     # warn instead of silently ignoring them.
-    # Phase 180 finding: --headless belongs in this list too.  AsyncScanner
-    # has no verify_headless wiring at all (sync runs it per finding from
-    # Scanner._record), so in --async mode every reflected finding was
-    # reported high/high with NO browser confirmation -- silently.  Warn
-    # instead of letting the absence look like a result.
-    for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "stored_dom", "second_order_inject", "headless"):
+    for _flag in _ASYNC_SYNC_ONLY_FLAGS:
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)
@@ -646,6 +649,10 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint,
         auth_headers=(auth_state or (None, None, None))[0],
         auth_cookies=(auth_state or (None, None, None))[1],
         auth_local_storage=(auth_state or (None, None, None))[2],
+        # Phase 183 (option B): async now honors --headless -- the finding
+        # stream is wrapped with real browser confirmations (deduped,
+        # bounded by headless_concurrency).
+        use_headless=getattr(args, "headless", False),
     )
 
     # Blind/OOB: pending injections are batch-collected at the end of
@@ -807,6 +814,10 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
         auth_headers=(auth_state or (None, None, None))[0],
         auth_cookies=(auth_state or (None, None, None))[1],
         auth_local_storage=(auth_state or (None, None, None))[2],
+        # Phase 183 (option B): async now honors --headless -- the finding
+        # stream is wrapped with real browser confirmations (deduped,
+        # bounded by headless_concurrency).
+        use_headless=getattr(args, "headless", False),
     )
 
     # Pre-parse each URL into (base_url, method, params, data) so the
@@ -841,14 +852,9 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
     requests_before: dict[str, int] = {}
 
     # Phase 85: async mode does not implement these sync-only features;
-    # warn instead of silently ignoring them.
-    # Phase 180 finding: --headless belongs in this list too.  AsyncScanner
-    # has no verify_headless wiring at all (sync runs it per finding from
-    # Scanner._record), so in --async mode every reflected finding was
-    # reported high/high with NO browser confirmation -- silently.  Warn
-    # instead of letting the absence look like a result.
-    for _flag in ("fuzz", "bav", "scenarios", "stored_inject",
-                  "stored_dom", "second_order_inject", "headless"):
+    # warn instead of silently ignoring them (--headless left the list in
+    # Phase 183, see AsyncScanner.scan).
+    for _flag in _ASYNC_SYNC_ONLY_FLAGS:
         if getattr(args, _flag, None):
             print(f"[!] --{_flag.replace('_', '-')} is sync-only and is "
                   "ignored in --async mode", file=sys.stderr)

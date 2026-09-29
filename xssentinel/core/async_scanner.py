@@ -33,7 +33,8 @@ from urllib.parse import urlparse, urljoin, urlencode
 
 from .scanner import Finding, json_leaf_paths, _set_json_leaf
 from .findings import (EVIDENCE_BROWSER_EXECUTED, EVIDENCE_MODEL,
-                       EVIDENCE_NO_BROWSER, EVIDENCE_OOB)
+                       EVIDENCE_NO_BROWSER, EVIDENCE_OOB,
+                       _grade_evidence)
 from .scanner_layers import AdvancedLayerMixin
 from .scanner_crawl import CrawlMixin
 from .requester import JsonBody, CountingRequester
@@ -127,7 +128,16 @@ class AsyncScanner:
                  upload_fields: list[str] | None = None,
                  auth_headers: dict | None = None,
                  auth_cookies: list | None = None,
-                 auth_local_storage: dict | None = None):
+                 auth_local_storage: dict | None = None,
+                 use_headless: bool = False,
+                 headless_concurrency: int = 1):
+        # Phase 183 (option B): headless confirmation wiring.  The pool
+        # itself is created lazily on first verification (see _verify_pool)
+        # so __new__-built test scanners and non-headless scans never pay
+        # for it.  headless_concurrency bounds BOTH in-flight replays and
+        # total Chromium instances (one per pool worker thread).
+        self.use_headless = bool(use_headless)
+        self.headless_concurrency = max(1, int(headless_concurrency or 1))
         self.max_concurrent = max_concurrent
         self.per_host_delay = per_host_delay
         # Phase 93: default jitter 0.0 (was 0.1).  Unlike the sync engine,
@@ -259,6 +269,156 @@ class AsyncScanner:
     async def scan(self, url: str, method: str = "GET",
                    params: dict | None = None,
                    data: dict | None = None) -> AsyncIterator[Finding]:
+        """Scan a single URL asynchronously. Yields Finding objects.
+
+        Phase 183 (decision: option B): ``--headless`` now works in async
+        mode.  The layer stack is wrapped here -- at the OUTERMOST
+        generator -- so every finding passes through the same blocking
+        browser confirmation the sync engine runs per finding from
+        ``Scanner._record``, without touching the 15+ yield sites.
+
+        The replay runs on a DEDICATED loop-free thread pool
+        (``_headless_pool``), not the default executor: Playwright's sync
+        API is thread-bound (``dom_engine.get_shared_browser`` keeps one
+        Chromium per thread and refuses to start under a running loop), so
+        the pool's ``max_workers`` IS the concurrency cap -- at most that
+        many browser instances exist, one shared per worker thread, for
+        the whole scan.  Replays are deduped on the exact replay tuple
+        (url, param, payload): a confirmation is a request, and identical
+        replays are identical evidence.
+        """
+        if not getattr(self, "use_headless", False):
+            async for f in self._scan_raw(url, method, params, data):
+                yield f
+            return
+        try:
+            seen: set = set()
+            async for f in self._scan_raw(url, method, params, data):
+                yield await self._headless_verify_finding(f, seen)
+        finally:
+            # The pool outlives individual findings; release the worker
+            # threads (and with them, their thread-bound Chromiums) once
+            # the scan generator is closed -- whether it ran to completion
+            # or the consumer stopped early (GeneratorExit propagates
+            # through here the same way).
+            self.shutdown_headless()
+
+    def _verify_headers(self) -> dict:
+        """Identity the headless replay should carry: the same base +
+        auth headers the probes rode, so an authed reflection is confirmed
+        against the authed page, not bounced by a login wall."""
+        h = dict(getattr(self, "headers", None) or {})
+        h.update(dict(getattr(self, "auth_headers", None) or {}))
+        return h
+
+    def _verify_pool(self):
+        """Lazily create the dedicated verification executor.  getattr
+        guards throughout: tests build this scanner with ``__new__`` to
+        skip ``__init__``, so every knob must survive that shape."""
+        pool = getattr(self, "_headless_pool", None)
+        if pool is None:
+            import concurrent.futures
+            cap = max(1, int(getattr(self, "headless_concurrency", 1) or 1))
+            pool = concurrent.futures.ThreadPoolExecutor(
+                max_workers=cap, thread_name_prefix="xss-headless")
+            self._headless_pool = pool
+        return pool
+
+    def shutdown_headless(self) -> None:
+        """Release the verification executor (idempotent).  With the worker
+        threads gone, their thread-bound Chromiums become collectable; the
+        process-wide registry in dom_engine still closes stragglers atexit."""
+        pool = getattr(self, "_headless_pool", None)
+        if pool is not None:
+            pool.shutdown(wait=False)
+            self._headless_pool = None
+
+    @staticmethod
+    def _probe_token(payload: str) -> str | None:
+        """The unique marker a fired dialog must carry for confirmation.
+
+        ``verifier.mark`` rewrites the payload's alert() argument to the
+        marker, so when the payload executes, the dialog message IS that
+        argument -- extract it from the (possibly transformed) payload
+        instead of threading a token through every yield site.  Order
+        mirrors mark()'s stamp shapes: plain alert('..'), the paren-free
+        alert`..`, and the concat stamp window['ale'+'rt']('..').  No match
+        means the replay cannot be ATTRIBUTED to this probe -- return None
+        so the caller skips verification rather than risk a false
+        browser-refuted grade on an unattributable dialog.
+        """
+        import re as _re
+        m = (_re.search(r"alert\(\s*['\"]([^'\"]{2,})['\"]\s*\)", payload)
+             or _re.search(r"alert`\s*([^`]{2,})\s*`", payload)
+             or _re.search(r"rt\]\(\s*['\"]([^'\"]{2,})['\"]\s*\)", payload))
+        if m:
+            return m.group(1)
+        # Fallback: a marker-token run anywhere in the payload (hex-suffixed
+        # stems like xssp_q_2813 / xssentinel_async_q_2813 / xssup_field_...).
+        m = _re.search(r"[A-Za-z_]*xss[A-Za-z0-9_]*?[0-9a-f]{4,}", payload)
+        return m.group(0) if m else None
+
+    async def _headless_verify_finding(self, f: Finding, seen: set):
+        """Browser-confirm one finding, or return it untouched when a dialog
+        replay cannot prove anything new.  Re-grades confidence/evidence
+        through the SAME ``_grade_evidence`` the sync engine uses, so the
+        two engines state identical evidence vocabulary."""
+        d = f.data
+        if d.get("headless") is not None:
+            return f            # already carries browser evidence (e.g. the
+                                # DOM-dynamic layer's real-browser verdict)
+        if d.get("evidence_class") == EVIDENCE_OOB:
+            return f            # OOB callback hit: no dialog to check, and
+                                # the report already renders the stronger line
+        url = d.get("url")
+        if not url:
+            return f
+        payload = d.get("payload") or ""
+        if payload.startswith("(") and payload.endswith(")"):
+            return f            # placeholder audit observation, not a
+                                # runnable replay (same guard as the
+                                # nuclei exporter's Phase 85 rule)
+        token = self._probe_token(payload)
+        if not token:
+            return f            # unattributable replay: verifying could
+                                # only produce an unproven "not-fired"
+        is_body = d.get("param_in") == "body"
+        if is_body and getattr(self, "json_body", None) is not None:
+            return f            # JSON carrier: the form-body replay would
+                                # confirm the wrong content type (sync's
+                                # Phase 46 skip rule, mirrored)
+        key = (url, d.get("param"), payload)
+        if key in seen:
+            return f            # dedup: identical replay, identical evidence
+        seen.add(key)
+        param = d.get("param") or ""
+        loop = asyncio.get_running_loop()
+        try:
+            result = await loop.run_in_executor(
+                self._verify_pool(),
+                lambda: verifier.verify_headless(
+                    url, d.get("method") or "GET",
+                    params=None if is_body else {param: payload},
+                    data={param: payload} if is_body else None,
+                    headers=self._verify_headers(),
+                    token=token))
+        except Exception as e:
+            _log.warning("headless verification failed for %s: %s",
+                         url, e, exc_info=getattr(self, "verbose", False))
+            result = {"available": False, "confirmed": False,
+                      "outcome": "errored",
+                      "detail": f"async headless verify error: {e}"}
+        _cls, _conf, _det = _grade_evidence(
+            result, d.get("confidence"), d.get("detail") or "")
+        d["headless"] = result
+        d["evidence_class"] = _cls
+        d["confidence"] = _conf
+        d["detail"] = _det
+        return f
+
+    async def _scan_raw(self, url: str, method: str = "GET",
+                        params: dict | None = None,
+                        data: dict | None = None) -> AsyncIterator[Finding]:
         """Scan a single URL asynchronously. Yields Finding objects.
 
         Raises RuntimeError if aiohttp is not installed.
