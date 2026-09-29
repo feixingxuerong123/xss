@@ -11,7 +11,9 @@
 ### Added
 
 - **双流水线引擎**:sync(线程池)与 async(aiohttp)两条扫描管线,192 例
-  精度矩阵双引擎对齐(async f1=1.000,TP108/FP0/FN0)。
+  精度矩阵双引擎对齐(async f1=1.000,TP108/FP0/FN0);`--headless` 真无头
+  确认双引擎同等可用(async 走专用线程池 + 重放三元组去重,range4 实测
+  browser-confirmed 23/23)。
 - **九层检测体系**:反射探测、WAF 自适应绕过(23+ 变形家族 REGISTRY)、
   DOM 静态污点 + JS AST 数据流、存储型(注入→展示页)、盲打 OOB
   (自托管监听器 / interactsh)、无头浏览器真实执行确认、模板 SSTI、
