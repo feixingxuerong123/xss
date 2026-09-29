@@ -349,8 +349,11 @@ class TestNucleiHelpers:
                     "poc": {"curl": "curl 'http://t/s?q=1'",
                             "html": "<html><body>x</body></html>"}}
 
+        # Third caller shape: {"data": {...}} wrappers (test_poc_dir's
+        # to_dict-mimicking fixture) must keep working too.
         for label, payload in (("dicts", [_poc_data()]),
-                               ("findings", [Finding(**_poc_data())])):
+                               ("findings", [Finding(**_poc_data())]),
+                               ("wrapped", [{"data": _poc_data()}])):
             out = tmp_path / label
             written = report.write_poc_dir(payload, "http://t/s",
                                            {"generated": "g"}, str(out))

@@ -1339,14 +1339,21 @@ def write_poc_dir(findings: list, target: str, meta: dict,
     skipped = 0
 
     for f in findings:
-        # Canonical accessor: the CLI passes Finding objects (whose payload
-        # dict lives on .data), tests and the API pass plain dicts.  This
-        # used to special-case dicts only -- isinstance(f, dict) is False
-        # for a Finding, so EVERY CLI-driven --poc-dir run silently wrote
-        # an INDEX.md with zero artifacts while the same call in tests
-        # passed.  Caught by the CLI e2e matrix (Phase 183).
-        data = f.data if hasattr(f, "data") else (f if isinstance(f, dict)
-                                                  else {})
+        # Canonical accessor across the THREE caller shapes in the wild:
+        # Finding objects (.data -- what the CLI passes), {"data": {...}}
+        # wrappers (what tests build to mimic to_dict() output), and plain
+        # finding dicts.  History: dict-only unpacking meant every real
+        # CLI --poc-dir run silently wrote an INDEX.md with zero artifacts
+        # (Phase 139 -> 183); the first fix over-corrected and broke the
+        # nested-dict shape.  Caught both times by tests + the CLI matrix.
+        if hasattr(f, "data"):
+            data = f.data
+        elif isinstance(f, dict):
+            data = f.get("data", f)
+        else:
+            data = {}
+        if not isinstance(data, dict):
+            data = {}
         poc = data.get("poc") or {}
         html = poc.get("html") or ""
         curl = poc.get("curl") or ""
