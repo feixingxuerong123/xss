@@ -104,6 +104,10 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       门禁 TP2/FP0/TN2/FN0 双引擎对齐 exit 0。新测试
       `tests/test_async_headless_verify.py` 19 例(无浏览器无网络,fake _scan_raw +
       录制型 fake verifier);存量 async 套件 88 例零回归。
+      续:首推 CI 唯一红点是 `test_stealth` 的墙钟 flake(断言两次 acquire 间
+      开销 <1us,CI 负载下量到 1.1us;2345 passed / 1 failed,与本改动无关)
+      —— 两处计时断言改为行为等价 + 10ms/1ms 容差(契约不变:足额 pacing、
+      不超间隔、非半程),2345 例中的其余全部绿。
 - [x] **181 前端 UI 统一重做(report_theme.py)**:四个 HTML 交付物(主报告 /
       verify-fix / diff / benchmark)原本各持一份手写 CSS 拷贝,现统一接入
       `xssentinel/core/report_theme.py` 单一设计系统:明暗双主题(令牌化,

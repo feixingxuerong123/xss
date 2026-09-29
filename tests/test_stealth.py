@@ -64,7 +64,16 @@ class TestJitter:
         rl.acquire()                    # primes _last, no sleep
         rl.acquire()                    # back-to-back -> sleep 0.1
         assert len(slept) == 1          # first call doesn't sleep
-        assert abs(slept[0] - 0.1) < 1e-6
+        # slept[0] is the REMAINING interval: full 0.1s minus only the
+        # microsecond-scale overhead of the previous acquire() call.  The
+        # original <1e-6 tolerance asserted sub-microsecond call speed and
+        # flaked on loaded CI runners (measured 1.1us overhead -> red).
+        # The contract is "paces the full interval, never more, never a
+        # fraction of it": overhead budget 10ms is 4 orders of magnitude
+        # looser than the flake point and still fails any real pacing bug
+        # (half-interval, double-interval, no sleep at all).
+        assert 0 < slept[0] <= 0.1
+        assert 0.1 - slept[0] < 0.01, slept
 
     def test_rate_limiter_sleep_is_jittered(self, monkeypatch):
         slept = []
@@ -74,8 +83,11 @@ class TestJitter:
         for _ in range(12):
             rl.acquire()
         assert len(slept) == 12
-        # interval 0.1s +/-50% -> sleeps inside [0.05, 0.15]
-        assert all(0.05 <= s <= 0.15 for s in slept), slept
+        # interval 0.1s +/-50% -> sleeps inside [0.05, 0.15].  The bounds
+        # carry 1ms slack: wait itself is 0.1 minus call overhead, so the
+        # exact 0.05 lower bound is reachable as 0.0499999... on a slow
+        # call (same flake family as the fixed-interval test above).
+        assert all(0.049 <= s <= 0.151 for s in slept), slept
         assert len({round(s, 6) for s in slept}) > 1  # not metronomic
 
     def test_requester_propagates_jitter(self):
