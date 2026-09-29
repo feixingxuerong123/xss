@@ -143,8 +143,15 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
                  xsleak_audit: bool = False,
                  auth_headers: dict | None = None,
                  auth_cookies: list | None = None,
-                 auth_local_storage: dict | None = None):
+                 auth_local_storage: dict | None = None,
+                 skip_params: set | None = None):
         self.req = requester or Requester()
+        # Phase 184: parameters the operator asked to skip entirely
+        # (--skip-param).  Applied to the L1 probe loop AND hidden-param
+        # mining; deliberately NOT to scenario matching (an operator who
+        # named a stored-XSS scenario for a param overrides the skip).
+        self.skip_params = {str(p).strip().lower()
+                            for p in (skip_params or ()) if str(p).strip()}
         self.use_headless = use_headless
         self.max_transforms = max_transforms
         self.max_payloads = max_payloads
@@ -425,6 +432,12 @@ class Scanner(StoredBlindMixin, AdvancedLayerMixin, CrawlMixin):
             param_items = [(p, False) for p in params] + \
                           [(path, True)
                            for path in json_leaf_paths(self.json_body)]
+        # Phase 184: operator --skip-param.  Case-insensitive; getattr for
+        # __new__-built scanners (tests skip __init__).
+        _skip = getattr(self, "skip_params", None) or set()
+        if _skip:
+            param_items = [(p, b) for p, b in param_items
+                           if str(p).lower() not in _skip]
         # L1/L2/L5 over each reflected parameter (parallel when threads>1).
         if self.threads > 1 and len(param_items) > 1:
             with ThreadPoolExecutor(max_workers=self.threads) as ex:

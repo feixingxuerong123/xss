@@ -133,6 +133,15 @@ def build_parser():
                             " form/JSON bodies built from schemas, apiKey/"
                             " bearer security added as headers; pairs with"
                             " -o DIR.")
+    g_tgt.add_argument("--sitemap", default=None, metavar="URL_OR_FILE",
+                       help="Import scan targets from a sitemap (Phase 184,"
+                            " DalFox parity): sitemap index (children"
+                            " fetched recursively, capped), urlset, or"
+                            " plain-text sitemap.txt.  Accepts an http(s)"
+                            " URL or a local file.  <loc> entries outside"
+                            " the sitemap's own host follow the HAR scope"
+                            " rules (dropped unless --allow-host /"
+                            " --allow-any-host); pairs with -o DIR.")
     # Phase 176l: authorization scope for IMPORTED targets.  A browser HAR
     # carries the site's CDN / analytics / SSO / ad domains next to the app, and
     # those are other people's systems.  Payloads must never reach them just
@@ -344,6 +353,14 @@ def build_parser():
     g_det.add_argument("--dom-engine", dest="dom_engine",
                        choices=["auto", "playwright", "static"], default="auto",
                        help="DOM-XSS engine mode")
+    g_det.add_argument("--skip-param", default=None, metavar="A,B,C",
+                       help="Comma-separated parameter names to skip"
+                            " entirely (case-insensitive; DalFox parity):"
+                            " not probed by L1/L2 and excluded from"
+                            " hidden-param mining.  Mining additionally"
+                            " skips common tracking params (utm_*, gclid,"
+                            " fbclid, ...) by default -- declared page"
+                            " params are always probed regardless.")
     g_det.add_argument("--scan-policy", choices=["quick", "normal", "deep"],
                        default="normal",
                        help="Scan policy preset (ZAP-style): quick=fast "
@@ -895,6 +912,36 @@ def main(argv=None):
             _log.error("OpenAPI import failed: %s", e)
             return 2
         src_label = f"OpenAPI {args.openapi}"
+    elif getattr(args, "sitemap", None):
+        from .core.sitemap_import import sitemap_to_urls
+        try:
+            urls = sitemap_to_urls(args.sitemap, timeout=args.timeout)
+        except Exception as e:
+            _log.error("Sitemap import failed: %s", e)
+            return 2
+        if not urls:
+            _log.error("Sitemap %s expanded to zero URLs.", args.sitemap)
+            return 2
+        # Phase 176l parity: <loc> hosts the operator did not name are not
+        # authorizations.  Reuse the HAR/OpenAPI partition so --allow-host /
+        # --allow-any-host behave identically across imports.
+        from .core import scoping as _scoping
+        patterns = _scoping.baseline_hosts([args.sitemap],
+                                           getattr(args, "allow_host", []))
+        if not getattr(args, "allow_any_host", False):
+            wrapped, dropped = _scoping.partition_by_scope(
+                [{"url": u} for u in urls], patterns)
+            if dropped:
+                hosts = sorted({d.get("host") or "?" for d in dropped})
+                print("\n[!] %d sitemap URL(s) are OUTSIDE the sitemap's "
+                      "host and were not imported. Hosts: " % len(dropped)
+                      + ", ".join(hosts[:12]), file=sys.stderr)
+            urls = [t["url"] for t in wrapped]
+            if not urls:
+                _log.error("Every sitemap URL was out of scope; nothing to"
+                           " scan. Re-run with --allow-host.")
+                return 2
+        print(f"[*] Sitemap {args.sitemap}: {len(urls)} URL(s) imported")
     if spec_targets:
         urls = [t["url"] for t in spec_targets]
         print(f"[*] {src_label}: {len(spec_targets)} endpoint(s) imported")
@@ -902,7 +949,7 @@ def main(argv=None):
     if not urls:
         ap.print_help()
         print("\n[!] No target specified. Use -u URL, --batch FILE, "
-              "--batch-stdin, --har FILE or --openapi FILE.",
+              "--batch-stdin, --har FILE, --openapi FILE or --sitemap.",
               file=sys.stderr)
         return 2
 

@@ -1,5 +1,9 @@
 # XSSentinel — 综合型 XSS 检测框架
 
+![CI](https://github.com/feixingxuerong123/xss/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+
 > 一款**多层级、可扩展**的 XSS 检测工具：反射点上下文感知注入 + WAF 自适应绕过 + DOM 污点分析 +（可选）无头浏览器真实验证。
 
 ---
@@ -230,6 +234,21 @@ python -m xssentinel --har capture.har -o reports/ -f json
 # 每个 path+operation = 一个端点（含浏览器从未访问的路由）；路径模板
 # {id} 解析为样本 URL，body 由 schema 构建，apiKey/bearer 转为请求头
 python -m xssentinel --openapi openapi.json -o reports/ -f json
+```
+
+**站点地图导入（Phase 184，DalFox 同款）**——sitemap index / urlset / 纯文本
+sitemap.txt 都吃，`<loc>` 越域 URL 按 HAR 同款 scope 规则丢弃：
+
+```bash
+python -m xssentinel --sitemap https://target.com/sitemap.xml -o reports/ -f json
+```
+
+**跳过指定参数（`--skip-param`）**——命中的参数 L1/L2 不再探测、隐藏参数
+挖矿也不再为其花费预算（挖矿默认额外跳过 utm_* / gclid / fbclid 等追踪
+噪声；页面**已声明**的参数不受默认噪声表影响，仍会被主探针覆盖）：
+
+```bash
+python -m xssentinel -u "https://target.com/p?a=1&b=2" --skip-param "b,debug"
 ```
 
 三个批量源（`--batch` / `--batch-stdin` / `--har` / `--openapi`）与 `-u` 互斥，报告均按目标

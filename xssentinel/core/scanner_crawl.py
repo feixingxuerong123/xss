@@ -118,6 +118,8 @@ class CrawlMixin:
                 mode="auto",
                 extra_candidates=extra,
                 bav=bav,
+                # Phase 184: tracking-noise + operator --skip-param list.
+                skip_params=getattr(self, "skip_params", None),
             )
         except Exception as e:
             if layer_guard.is_wiring_error(e):

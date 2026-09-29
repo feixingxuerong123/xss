@@ -130,13 +130,19 @@ class AsyncScanner:
                  auth_cookies: list | None = None,
                  auth_local_storage: dict | None = None,
                  use_headless: bool = False,
-                 headless_concurrency: int = 1):
+                 headless_concurrency: int = 1,
+                 skip_params: set | None = None):
         # Phase 183 (option B): headless confirmation wiring.  The pool
         # itself is created lazily on first verification (see _verify_pool)
         # so __new__-built test scanners and non-headless scans never pay
         # for it.  headless_concurrency bounds BOTH in-flight replays and
         # total Chromium instances (one per pool worker thread).
         self.use_headless = bool(use_headless)
+        # Phase 184: parity with the sync engine's --skip-param handling
+        # (probe-loop filter in _probe_params + mining via the shared
+        # scanner_crawl hook).
+        self.skip_params = {str(p).strip().lower()
+                            for p in (skip_params or ()) if str(p).strip()}
         self.headless_concurrency = max(1, int(headless_concurrency or 1))
         self.max_concurrent = max_concurrent
         self.per_host_delay = per_host_delay
@@ -653,6 +659,12 @@ class AsyncScanner:
         else:
             param_items = [(p, False) for p in params] + \
                           [(p, True) for p in data]
+        # Phase 184: operator --skip-param (getattr for __new__-built
+        # scanners).
+        _skip = getattr(self, "skip_params", None) or set()
+        if _skip:
+            param_items = [(p, b) for p, b in param_items
+                           if str(p).lower() not in _skip]
         # Phase 43 fix: _probe_param returns async GENERATORS, which
         # asyncio.as_completed() rejects (not awaitables) -- the whole L1
         # layer silently produced nothing under scan().  Drain via tasks.

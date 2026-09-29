@@ -87,6 +87,22 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       反射型 finding 全是 high/high 却**没有浏览器证据**:本轮 sync 12/12 confirmed,
       async 仅 1/23(且那 1 条是 DOM 层硬编码的 `confirmed=True`)。已先做诚实化:
       `--headless` 进 sync-only 警告列表(两条 async 路径都加)。
+- [x] **184 同类对比吸收(DalFox / Arjun / ZAP 调研 → 两项落地)**:全盘对比
+      2025-26 活跃同类(DalFox 的 skip-param/sitemap/pipe、Arjun 的响应稳定性
+      与无反射参数发现、ZAP 的规则级策略)后,按"真实差距 × 架构契合 × 可
+      离线测试 × 不动判定语义"落地两项:① `--sitemap URL_OR_FILE` 输入面
+      (core/sitemap_import.py:sitemap index 递归抓子图(上限 20)、urlset、
+      纯文本 sitemap.txt(非 URL 行过滤,HTML 错误页不会变成垃圾目标),
+      `<loc>` 越域 URL 复用 HAR 同款 scope 分区(--allow-host/any 语义一致),
+      单文件 8MB 上限);② `--skip-param A,B,C`(双引擎 L1 探针循环跳过 +
+      scanner_crawl 单钩子同时覆盖双引擎挖矿;内置 38 条追踪噪声表
+      (utm_*/gclid/fbclid/…)只在挖矿候选过滤生效——页面已声明参数仍被
+      主探针覆盖,**结构上不可能造成 FN**)。Arjun 式无反射参数线索核查:
+      mine_params 本就带 length_delta 差分且调用方有 fuzzer 差分 triage,
+      不重建。测试:tests/test_sitemap_input.py(fetch 注入为主 + 一条真
+      HTTP 回环路径,死子图容错)+ tests/test_skip_params.py(双引擎探针
+      过滤/挖矿过滤/CLI 解析)共 11 例;回归批 68 例全过;benchmark quick
+      FP0/FN0;新文件 ruff 零债务。README 徽章 + 输入族用法文档同步。
 - [x] **183 async --headless 接线(待决策项落地方案 B,用户拍板)**:`AsyncScanner.scan`
       重命名为 `_scan_raw`,新外层 `scan()` 拦截全部 finding 走真无头确认——
       专用 `ThreadPoolExecutor(max_workers=headless_concurrency)` 经

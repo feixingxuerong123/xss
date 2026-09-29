@@ -121,6 +121,27 @@ CANDIDATE_PARAMS: list[str] = [
 # README advertises.
 CANDIDATE_PARAMS = list(dict.fromkeys(CANDIDATE_PARAMS))
 
+# Tracking / analytics parameters (Phase 184, absorbed from DalFox --skip
+# and the noise lists every commercial DAST ships).  These names exist to
+# move attribution data; a reflection in them is essentially never a sink,
+# and every probe spent on them is one taken from the real attack surface.
+# Applied ONLY to hidden-parameter MINING candidates -- the page's own
+# declared params (URL / form) are still probed by the main L1 loop, so
+# this list can never create a false negative, only save budget.
+NOISE_PARAMS = frozenset({
+    # Google Analytics / Ads
+    "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+    "utm_id", "gclid", "gbraid", "wbraid", "dclid", "gad_source",
+    # Meta / Facebook
+    "fbclid", "fb_action_ids", "fb_action_types", "mc_eid", "mc_cid",
+    # other ad / attribution networks
+    "msclkid", "twclid", "ttclid", "yclid", "li_fat_id", "igshid",
+    "ref_src", "igsh", "si",
+    # session/analytics SDK litter
+    "_ga", "_gl", "_gac", "ga_pid", "vero_id", "wickedid", "hsa_cam",
+    "epik", "pp", "s_kwcid", "ranmid", "raneid", "ran.site_id",
+})
+
 
 def candidate_list() -> list[str]:
     """Return a copy of the candidate parameter list."""
@@ -162,7 +183,8 @@ def mine_params(requester, url: str, method: str = "GET",
                 verbose: bool = False,
                 mode: str = "auto",
                 extra_candidates: list[str] | None = None,
-                bav: bool = False) -> list[dict]:
+                bav: bool = False,
+                skip_params: Iterable[str] | None = None) -> list[dict]:
     """Probe a URL for hidden parameters.
 
     Args:
@@ -216,10 +238,14 @@ def mine_params(requester, url: str, method: str = "GET",
 
     # 3) Probe each candidate.
     found = []
+    # Phase 184: tracking-noise + operator skip list.  Case-insensitive:
+    # some sites emit UTM_Source variants.
+    _skip = NOISE_PARAMS | {str(p).lower() for p in (skip_params or ())}
     candidates = [p for p in (merged_candidates(extra_candidates)
                               if extra_candidates else CANDIDATE_PARAMS)
                   if p not in existing_params
-                  and p not in existing_data][:max_params]
+                  and p not in existing_data
+                  and p.lower() not in _skip][:max_params]
 
     # Phase 78: mirror-page protection (DalFox-style sentinel probe).
     # A page that reflects EVERYTHING makes every candidate score
