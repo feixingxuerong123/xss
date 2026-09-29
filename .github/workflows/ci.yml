@@ -79,7 +79,7 @@ jobs:
           python-version: "3.11"
       - run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,async]"
       - name: Full benchmark
         run: python -m benchmark.runner
       - uses: actions/upload-artifact@v4
@@ -102,7 +102,7 @@ jobs:
           python-version: "3.11"
       - run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,async]"
       - name: Full file-by-file test gate
         run: python tests/run_all_batched.py --quiet
       - name: Upload failure evidence

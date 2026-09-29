@@ -20,6 +20,16 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 _RESULTS_DIR = _HERE / "results"
 
+# Standalone script -> make the repo root importable so the shared report
+# theme (one design system for every XSSentinel HTML deliverable) resolves
+# no matter the caller's cwd.
+_REPO_ROOT = _HERE.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from xssentinel.core.report_theme import (BRAND_SVG, base_css, interactive_js,  # noqa: E402
+                                          theme_boot_script, theme_toggle_button)
+
 
 # ---------------------------------------------------------------------------
 # Metrics helpers
@@ -161,43 +171,41 @@ def generate_html(data: dict) -> str:
         verdict = "POOR"
         verdict_class = "fail"
 
+    # Benchmark-specific chrome on top of the shared theme: a centered
+    # document layout, metric cards, bordered tables, FP/FN row tints.
+    _extra_css = """
+ body{max-width:1100px;margin:0 auto;padding:0 16px}
+ header{margin:0 -16px;padding:22px 16px 20px;border-bottom:3px solid var(--accent)}
+ .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:14px;margin:18px 0}
+ .metric-card{background:var(--surface);border:1px solid var(--border);
+              border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+ .metric-card .value{font-size:1.9rem;font-weight:700;color:var(--accent);
+                     font-variant-numeric:tabular-nums}
+ .metric-card .label{font-size:.85rem;color:var(--text-muted);margin-top:.3rem}
+ table{margin:1rem 0}
+ th,td{border:1px solid var(--border)}
+ tr.fp td{background:var(--sev-med-weak)}
+ tr.fn td{background:var(--sev-crit-weak)}
+ .detail{font-family:ui-monospace,Consolas,Menlo,monospace;font-size:.8rem;word-break:break-all}
+ footer{margin-top:2.5rem;border-top:1px solid var(--border);padding-top:14px}
+ @media print{header{margin:0;padding:0 0 12px}}
+"""
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XSSentinel Benchmark Report</title>
-<style>
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-         margin: 2rem auto; max-width: 1100px; padding: 0 1rem; color: #1a1a2e; }}
-  h1 {{ border-bottom: 3px solid #0f3460; padding-bottom: .5rem; }}
-  h2 {{ color: #16213e; margin-top: 2rem; }}
-  .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-              gap: 1rem; margin: 1.5rem 0; }}
-  .metric-card {{ background: #f8f9fa; border-radius: 8px; padding: 1rem;
-                  text-align: center; border: 1px solid #e9ecef; }}
-  .metric-card .value {{ font-size: 1.8rem; font-weight: 700; color: #0f3460; }}
-  .metric-card .label {{ font-size: .85rem; color: #6c757d; margin-top: .3rem; }}
-  table {{ border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .9rem; }}
-  th, td {{ border: 1px solid #dee2e6; padding: .5rem .75rem; text-align: left; }}
-  th {{ background: #0f3460; color: white; }}
-  tr:nth-child(even) {{ background: #f8f9fa; }}
-  tr.fp {{ background: #fff3cd; }}
-  tr.fn {{ background: #f8d7da; }}
-  .verdict {{ display: inline-block; padding: .3rem 1rem; border-radius: 4px;
-              font-weight: 700; font-size: 1.1rem; }}
-  .verdict.pass {{ background: #d4edda; color: #155724; }}
-  .verdict.warn {{ background: #fff3cd; color: #856404; }}
-  .verdict.fail {{ background: #f8d7da; color: #721c24; }}
-  .detail {{ font-family: monospace; font-size: .8rem; word-break: break-all; }}
-  footer {{ margin-top: 3rem; color: #6c757d; font-size: .8rem;
-            border-top: 1px solid #dee2e6; padding-top: 1rem; }}
-</style>
+{theme_boot_script()}
+<style>{base_css(_extra_css)}</style>
 </head>
 <body>
-<h1>XSSentinel Accuracy Benchmark Report</h1>
-<p>Generated: {timestamp} &nbsp;|&nbsp; Cases: {total_cases} &nbsp;|&nbsp;
-   Duration: {total_time:.1f}s</p>
-<p>Quality Verdict: <span class="verdict {verdict_class}">{verdict}</span></p>
+<header><h1>{BRAND_SVG}XSSentinel Accuracy Benchmark Report</h1>
+<div class="head-tools">{theme_toggle_button()}</div>
+<div class="meta">Generated: {timestamp} · Cases: {total_cases} · Duration: {total_time:.1f}s</div>
+</header>
+<p style="margin-top:14px">Quality Verdict: <span class="verdict {verdict_class}">{verdict}</span></p>
 
 <div class="metrics">
   <div class="metric-card"><div class="value">{_pct(recall)}</div><div class="label">Recall (Detection Rate)</div></div>
@@ -233,6 +241,7 @@ def generate_html(data: dict) -> str:
 XSSentinel Benchmark Suite v1.0 — Independent accuracy evaluation.<br>
 Metrics: Recall = TP/(TP+FN), Precision = TP/(TP+FP), FPR = FP/(FP+TN), F1 = 2·P·R/(P+R)
 </footer>
+{interactive_js()}
 </body></html>"""
     return html
 
@@ -268,21 +277,25 @@ def generate_comparison_html(tool_results: list[dict]) -> str:
             f"{err_cell}<td>{comp_txt}</td>"
             f"<td>{t:.1f}s</td></tr>\n")
 
+    _extra_css = """
+ body{max-width:900px;margin:0 auto;padding:24px 16px}
+ table{margin:1.25rem 0}
+ th,td{border:1px solid var(--border);text-align:center}
+ th{color:var(--text-muted)}
+ footer{margin-top:2.5rem;border-top:1px solid var(--border);padding-top:14px}
+"""
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XSS Tool Comparison</title>
-<style>
-  body {{ font-family: sans-serif; margin: 2rem auto; max-width: 900px; }}
-  table {{ border-collapse: collapse; width: 100%; }}
-  th, td {{ border: 1px solid #ccc; padding: .6rem; text-align: center; }}
-  th {{ background: #0f3460; color: white; }}
-  tr:nth-child(even) {{ background: #f8f9fa; }}
-</style>
+{theme_boot_script()}
+<style>{base_css(_extra_css)}</style>
 </head>
 <body>
 <h1>XSS Scanner Comparison</h1>
+<div class="head-tools">{theme_toggle_button()}</div>
 <p>Same benchmark suite, same conditions. ERR = runs that did not complete
 (timeout/crash); they are excluded from Recall/FPR. Completed = cases scored.</p>
 <table>
@@ -290,6 +303,7 @@ def generate_comparison_html(tool_results: list[dict]) -> str:
 <th>ERR</th><th>Completed</th><th>Time</th></tr>
 {rows}</table>
 <footer>Generated {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</footer>
+{interactive_js()}
 </body></html>"""
     return html
 

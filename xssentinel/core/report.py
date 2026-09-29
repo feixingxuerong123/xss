@@ -8,6 +8,8 @@ from datetime import datetime
 
 from .findings import EVIDENCE_OOB
 from .logger import get_logger
+from .report_theme import (BRAND_SVG, base_css, interactive_js,
+                           theme_boot_script, theme_toggle_button)
 
 _log = get_logger("report")
 
@@ -35,19 +37,32 @@ def _safe_url(url: str) -> str:
     return ""
 
 
+def _tool_version() -> str:
+    """Package version for the SARIF driver block.  Lazy import: the package
+    ``__init__`` imports the scanner, which (transitively) reaches this
+    module -- a module-level import here would be circular.  Same pattern
+    as ``api.server._version_info``."""
+    try:
+        from xssentinel import __version__
+    except Exception:
+        return "0.0.0"
+    return __version__
+
+
 def build_html(findings: list, target: str, meta: dict) -> str:
     # Egress status, stated once at the top of the human deliverable.  A reader
     # who sees only "0 findings" cannot tell a hardened target from one that was
     # never reached, and that distinction is the whole point of the counters in
-    # `Requester._send`.
+    # `Requester._send`.  Rendered as a standalone banner (not buried in the
+    # header meta line) so a degraded scan is the FIRST thing on the page.
     _st = scan_status(meta)
     _att, _fail = meta.get("requests_attempted"), meta.get("requests_failed")
-    status_banner = (
+    status_banners = (
         "" if _st in ("completed", "unknown") else
-        f'<br><b>SCAN INCOMPLETE ({_st}): '
+        f'<div class="banner banner-crit"><b>SCAN INCOMPLETE ({_esc(_st)}): '
         f'{_fail if _fail is not None else "?"} of '
         f'{_att if _att is not None else "?"} requests never received a response. '
-        'Zero findings in this report is not evidence of absence.</b>')
+        'Zero findings in this report is not evidence of absence.</b></div>')
     # A bounded read is a DIFFERENT blind spot from a missing response, and it
     # used to be invisible here: `responses_truncated` had exactly one consumer
     # in the whole codebase -- the JSON at `build_json` -- so a report handed to
@@ -58,10 +73,10 @@ def build_html(findings: list, target: str, meta: dict) -> str:
     # is unrelated (it shortens the request body we send, not what we read back).
     _trunc = meta.get("responses_truncated")
     if _trunc:
-        status_banner += (
-            f'<br><b>BOUNDED READ: {_trunc} response(s) exceeded '
+        status_banners += (
+            f'<div class="banner"><b>BOUNDED READ: {_trunc} response(s) exceeded '
             '--max-response-bytes, so only their leading bytes were examined. '
-            'A reflection past that point was not testable in this run.</b>')
+            'A reflection past that point was not testable in this run.</b></div>')
     # Phase 20-3: coverage section (when a coverage tracker is supplied).
     coverage_section = ""
     cov = meta.get("coverage")
@@ -79,6 +94,14 @@ def build_html(findings: list, target: str, meta: dict) -> str:
     except Exception as e:
         _log.debug("compliance module unavailable: %s", e)
         comp_mod = None
+    # Sorting weights, baked into cells as data-val so the client sort stays
+    # a dumb numeric/text compare: severity ranks worst-first, confidence
+    # ranks most-certain-first, headless ranks strongest-evidence-first.
+    _SEV_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    _CONF_RANK = {"certain": 0, "high": 1, "firm": 2, "medium": 3,
+                  "low": 4, "info": 5}
+    _HEAD_RANK = {"browser executed": 0, "browser did NOT reproduce": 1,
+                  "browser errored": 2, "no browser check": 3}
     rows = []
     for i, f in enumerate(findings, 1):
         d = f.data if hasattr(f, "data") else f
@@ -104,6 +127,15 @@ def build_html(findings: list, target: str, meta: dict) -> str:
         if d.get("evidence_class") == EVIDENCE_OOB:
             hstatus = "executed out-of-band (callback hit, no dialog check)"
         poc = d.get("poc") or {}
+        # One stable DOM id per copyable artifact: the shared interactive JS
+        # copies by id, so no report data ever flows through the script.
+        _copy_p = f'f{i}-payload' if d.get("payload") else ""
+        payload_cell = ""
+        if _copy_p:
+            payload_cell = (
+                f'<code id="{_copy_p}">{_esc(d.get("payload"))}</code>'
+                f'<button class="copybtn" type="button" data-copy="{_copy_p}">'
+                f'copy</button>')
         poc_curl = _esc(poc.get("curl", ""))
         poc_html = _esc(poc.get("html", ""))
         # Phase 23-2: only render http(s) URLs as clickable links.  A
@@ -119,7 +151,10 @@ def build_html(findings: list, target: str, meta: dict) -> str:
             # Non-http(s) scheme: display as escaped text, NOT a link.
             poc_cell += f'<code>{_esc(raw_poc_url)}</code><br>'
         if poc_curl:
-            poc_cell += f'<code>{poc_curl}</code>'
+            _copy_c = f'f{i}-curl'
+            poc_cell += (f'<code id="{_copy_c}">{poc_curl}</code>'
+                         f'<button class="copybtn" type="button" '
+                         f'data-copy="{_copy_c}">copy</button>')
         if poc_html:
             poc_cell += (f'<details><summary>HTML PoC</summary>'
                          f'<pre>{poc_html}</pre></details>')
@@ -172,8 +207,7 @@ def build_html(findings: list, target: str, meta: dict) -> str:
         elif _pv is False:
             _bits.append("PoC replay: DID NOT replay (treat as unproven)")
         if _bits:
-            sev_cell += ('<div class="evid" style="margin-top:4px;font-size:11px;'
-                         'color:#5b6473">' + "<br>".join(_bits) + "</div>")
+            sev_cell += '<div class="evid">' + "<br>".join(_bits) + "</div>"
         shot_html = ""
         shot = (headless or {}).get("screenshot_b64")
         if headless and headless.get("confirmed") and shot:
@@ -181,20 +215,23 @@ def build_html(findings: list, target: str, meta: dict) -> str:
                          f'(headless confirmation)</summary>'
                          f'<img src="data:image/png;base64,{shot}" '
                          f'alt="execution screenshot" style="max-width:320px;'
-                         f'border:1px solid #eef0f4;border-radius:4px"></details>')
+                         f'border:1px solid var(--border);border-radius:4px"></details>')
+        # data-sev / data-type drive the toolbar filters; the per-cell
+        # data-val weights drive column sorting.  With JS disabled the rows
+        # render identically -- the attributes are inert metadata.
         rows.append(f"""
-        <tr class="{hclass}">
+        <tr class="{hclass}" data-sev="{_esc(sev)}" data-type="{_esc(d.get('type'))}">
           <td>{i}</td>
           <td>{_esc(d.get('type'))}</td>
           <td>{_esc(d.get('url'))}</td>
           <td>{_esc(d.get('method'))}</td>
           <td>{_esc(d.get('param'))}</td>
           <td>{_esc(d.get('context'))}</td>
-          <td><code>{_esc(d.get('payload'))}</code></td>
+          <td>{payload_cell or '&mdash;'}</td>
           <td>{_esc(','.join(d.get('transform') or []))}</td>
-          <td>{sev_cell}</td>
-          <td>{_esc(d.get('confidence'))}</td>
-          <td>{_esc(hstatus)}</td>
+          <td class="sev-cell" data-val="{_SEV_RANK.get(sev, 9)}">{sev_cell}</td>
+          <td data-val="{_CONF_RANK.get(str(d.get('confidence', '')), 9)}">{_esc(d.get('confidence'))}</td>
+          <td data-val="{_HEAD_RANK.get(hstatus, 9)}">{_esc(hstatus)}</td>
           <td>{_esc(d.get('detail'))}{compliance_badges}{shot_html}</td>
           <td class="poc">{poc_cell}</td>
         </tr>""")
@@ -207,6 +244,49 @@ def build_html(findings: list, target: str, meta: dict) -> str:
         s = d.get("severity")
         if s in counts:
             counts[s] += 1
+    total = len(findings)
+
+    # Triage chrome -- severity chips + type select + text search + sort.
+    # Progressive enhancement only: rendered when there is something to
+    # triage, inert without JS, and absent from the zero-findings shell so
+    # a clean report stays a quiet one.
+    toolbar_html = ""
+    sevbar_html = ""
+    if total:
+        _types = sorted({(f.data if hasattr(f, "data") else f).get("type", "?")
+                         for f in findings})
+        type_options = "".join(
+            f'<option value="{_esc(t)}">{_esc(t)}</option>' for t in _types)
+        chips = "".join(
+            f'<button class="chip" type="button" data-sev="{s}" '
+            f'aria-pressed="true"><i aria-hidden="true"></i>{label}&nbsp;'
+            f'<b>{counts[s]}</b></button>'
+            for s, label in (("critical", "Critical"), ("high", "High"),
+                             ("medium", "Medium"), ("low", "Low")))
+        toolbar_html = f"""
+<div class="toolbar" role="group" aria-label="Findings filters">
+  <div class="chips">{chips}</div>
+  <select id="typeFilter" aria-label="Filter by finding type">
+    <option value="">All types ({total})</option>{type_options}
+  </select>
+  <input id="searchBox" type="search" placeholder="Filter by text: URL, payload, detail..." aria-label="Search findings">
+  <button id="resetFilters" class="btn" type="button">Reset</button>
+  <span id="visCount" class="viscount" aria-live="polite"></span>
+</div>"""
+        # One stacked bar, four segments -- the shape of the risk in a
+        # single glance before any table row is read.
+        segments = "".join(
+            f'<span class="sb-{k}" style="width:{counts[k] / total * 100:.2f}%"></span>'
+            for k in ("critical", "high", "medium", "low") if counts[k])
+        legend = "".join(
+            f'<span><i class="sb-{k}"></i>{label} {counts[k]}</span>'
+            for k, label in (("critical", "Critical"), ("high", "High"),
+                             ("medium", "Medium"), ("low", "Low"))
+            if counts[k])
+        sevbar_html = (f'<div class="sevbar-wrap">'
+                       f'<div class="sevbar" role="img" '
+                       f'aria-label="Severity distribution">{segments}</div>'
+                       f'<div class="sevbar-legend">{legend}</div></div>')
 
     # Compliance summary table (Phase 14b).
     compliance_section = ""
@@ -243,118 +323,39 @@ def build_html(findings: list, target: str, meta: dict) -> str:
 
     return f"""<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XSSentinel Report</title>
-<style>
- body{{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#1f2430}}
- header{{background:#1f2430;color:#fff;padding:20px 28px}}
- header h1{{margin:0;font-size:20px}}
- .meta{{color:#9aa3b2;font-size:13px;margin-top:4px}}
- .summary{{display:flex;gap:14px;padding:18px 28px}}
- .card{{background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);min-width:120px}}
- .card .n{{font-size:26px;font-weight:700}}
- .card.high .n{{color:#e5484d}} .card.crit .n{{color:#b91c1c}} .card.med .n{{color:#f5a623}} .card.low .n{{color:#3b82f6}}
- table{{width:96%;margin:0 auto 30px;border-collapse:collapse;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
- th,td{{padding:9px 10px;border-bottom:1px solid #eef0f4;font-size:12px;text-align:left;vertical-align:top}}
- th{{background:#f0f2f7;position:sticky;top:0}}
- code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
- .sev-crit{{border-left:4px solid #b91c1c}}
- .sev-high{{border-left:4px solid #e5484d}}
- .sev-med{{border-left:4px solid #f5a623}}
- .sev-low{{border-left:4px solid #3b82f6}}
- .poc code{{display:block;white-space:pre-wrap;word-break:break-all;margin-bottom:4px;background:#f3f4f8;padding:2px 4px;border-radius:4px}}
- .poc details{{margin-top:4px}}
- .poc summary{{cursor:pointer;color:#3b82f6;font-size:11px}}
- .poc pre{{background:#1f2430;color:#e6e6e6;padding:6px;border-radius:4px;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto;font-size:11px}}
- .comp-badges{{margin-top:4px}}
- .badge{{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:#eef0f4;color:#5b6473;margin-right:3px}}
- .cvss{{margin-top:3px;font-size:11px}}
- .cvss b{{color:#b91c1c}}
- .cvss code{{font-size:10px}}
- .shot summary{{cursor:pointer;color:#3b82f6;font-size:11px;margin-top:4px}}
- .shot img{{margin-top:4px}}
- .compliance-section{{padding:0 28px 24px}}
- .compliance-section h2{{font-size:16px;margin:0 0 10px}}
- .compliance{{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);border-radius:8px;overflow:hidden;font-size:12px}}
- .compliance th,.compliance td{{padding:6px 10px;border-bottom:1px solid #eef0f4;text-align:left}}
- .compliance th{{background:#f0f2f7}}
- .remediation{{padding:0 28px 24px}}
- .remediation h2{{font-size:16px;margin:0 0 10px}}
- .advice-block{{background:#fff;border-radius:8px;padding:14px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #3b82f6}}
- .advice-block h4{{margin:0 0 6px;font-size:14px}}
- .advice-count{{color:#9aa3b2;font-size:12px;font-weight:normal}}
- .advice-headline{{margin:4px 0 8px;font-size:13px}}
- .advice-block p{{font-size:12px;color:#3a4150;margin:6px 0}}
- .advice-block details{{margin:6px 0}}
- .advice-block summary{{cursor:pointer;color:#3b82f6;font-size:11px}}
- .advice-block pre{{background:#1f2430;color:#e6e6e6;padding:8px;border-radius:4px;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow:auto;font-size:11px}}
- .advice-block code{{background:transparent;padding:0;color:inherit}}
- .also-consider{{margin:6px 0 0;padding-left:18px;font-size:12px;color:#3a4150}}
- .also-consider li{{margin:2px 0}}
- .coverage{{padding:0 28px 24px}}
- .coverage h2{{font-size:16px;margin:0 0 10px}}
- .coverage h3{{font-size:13px;margin:14px 0 6px;color:#3a4150}}
- .cov-overview{{display:flex;gap:18px;align-items:center;margin-bottom:14px;background:#fff;padding:14px 18px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
- .cov-overall{{text-align:center;min-width:120px}}
- .cov-overall-label{{font-size:11px;color:#9aa3b2;margin-bottom:2px}}
- .cov-overall-score{{font-size:28px;font-weight:700}}
- .cov-stats{{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#3a4150}}
- .cov-stats span{{background:#f3f4f8;padding:3px 8px;border-radius:4px}}
- .cov-layer-table,.cov-ep-table,.param-table{{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);border-radius:8px;overflow:hidden;font-size:12px;margin-bottom:14px}}
- .cov-layer-table th,.cov-layer-table td,.cov-ep-table th,.cov-ep-table td,.param-table th,.param-table td{{padding:6px 10px;border-bottom:1px solid #eef0f4;text-align:left}}
- .cov-layer-table th,.cov-ep-table th,.param-table th{{background:#f0f2f7}}
- .phase-row td{{background:#fafbfc;font-size:11px;color:#5b6473}}
- .cov-bar{{display:inline-block;width:80px;height:8px;background:#eef0f4;border-radius:4px;vertical-align:middle;margin-right:6px;overflow:hidden}}
- .cov-fill{{height:100%;border-radius:4px}}
- .cov-fill.cov-high{{background:#3bb968}}
- .cov-fill.cov-med{{background:#f5a623}}
- .cov-fill.cov-low{{background:#e5484d}}
- .cov-pct{{font-size:11px;color:#5b6473}}
- .cov-overall-score.cov-high{{color:#3bb968}}
- .cov-overall-score.cov-med{{color:#f5a623}}
- .cov-overall-score.cov-low{{color:#e5484d}}
- .badge-crawled{{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:#dbeafe;color:#1e40af;margin-left:4px}}
- .param-loc{{display:inline-block;padding:0 4px;border-radius:3px;font-size:10px;background:#eef0f4;color:#5b6473;margin-left:4px}}
- .refl-yes{{color:#3bb968;font-weight:600}}
- .refl-no{{color:#9aa3b2}}
- .conf-yes{{color:#e5484d;font-weight:600;font-size:10px}}
- .param-detail{{margin-bottom:10px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
- .param-detail summary{{cursor:pointer;padding:8px 14px;font-size:12px;color:#3b82f6}}
- .param-detail .param-table{{margin:0;border-radius:0;box-shadow:none}}
- .cov-help{{font-size:11px;color:#9aa3b2;margin-top:10px;padding:10px;background:#fafbfc;border-radius:6px;line-height:1.5}}
- .ai-report{{padding:0 28px 24px}}
- .ai-report h2{{font-size:16px;margin:0 0 10px}}
- .ai-report h3{{font-size:14px;margin:16px 0 6px}}
- .ai-report h4{{font-size:13px;margin:12px 0 5px}}
- .ai-report p{{font-size:13px;color:#3a4150;line-height:1.65;margin:8px 0}}
- .ai-report ul,.ai-report ol{{font-size:13px;color:#3a4150;padding-left:22px;margin:8px 0}}
- .ai-report li{{margin:3px 0}}
- .ai-report blockquote{{margin:8px 0;padding:8px 12px;background:#f0f2f7;border-left:3px solid #9aa3b2;color:#5b6473;font-size:12px}}
- .ai-report code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
- .ai-report table.ai-table{{width:100%;margin:10px 0;box-shadow:none;border-radius:8px;overflow:hidden}}
- .ai-report table.ai-table td{{padding:6px 10px;border-bottom:1px solid #eef0f4;font-size:12px;background:#fff}}
- .ai-report.degraded{{border-left:4px solid #f5a623}}
- .muted{{color:#9aa3b2;font-size:12px;padding:8px 0}}
- footer{{padding:14px 28px;color:#9aa3b2;font-size:12px}}
-</style></head>
+{theme_boot_script()}
+<style>{base_css()}</style>
+</head>
 <body>
-<header><h1>XSSentinel — XSS Detection Report</h1>
-<div class="meta">Target: {_esc(target)} · Generated: {_esc(meta.get('generated'))} · Requests: {_esc(meta.get('requests'))} · WAF: {_esc(meta.get('waf') or 'none detected')} · Status: {_esc(_st)}{status_banner}</div>
+<header><h1>{BRAND_SVG}XSSentinel &mdash; XSS Detection Report</h1>
+<div class="head-tools">{theme_toggle_button()}</div>
+<div class="meta">Target: {_esc(target)} · Generated: {_esc(meta.get('generated'))} · Requests: {_esc(meta.get('requests'))} · WAF: {_esc(meta.get('waf') or 'none detected')} · Status: {_esc(_st)}</div>
 </header>
+{status_banners}
 <div class="summary">
-  <div class="card crit"><div class="n">{counts['critical']}</div><div>Critical</div></div>
-  <div class="card high"><div class="n">{counts['high']}</div><div>High</div></div>
-  <div class="card med"><div class="n">{counts['medium']}</div><div>Medium</div></div>
-  <div class="card low"><div class="n">{counts['low']}</div><div>Low</div></div>
+  <div class="card crit"><div class="n">{counts['critical']}</div><div class="lbl">Critical</div></div>
+  <div class="card high"><div class="n">{counts['high']}</div><div class="lbl">High</div></div>
+  <div class="card med"><div class="n">{counts['medium']}</div><div class="lbl">Medium</div></div>
+  <div class="card low"><div class="n">{counts['low']}</div><div class="lbl">Low</div></div>
 </div>
+{sevbar_html}
 {ai_section}
 {compliance_section}
+{toolbar_html}
+<div class="table-wrap">
 <table>
-<tr><th>#</th><th>Type</th><th>URL</th><th>Method</th><th>Param</th><th>Context</th><th>Payload</th><th>Transform</th><th>Severity</th><th>Confidence</th><th>Headless</th><th>Detail</th><th>PoC</th></tr>
+<thead><tr><th data-key="#">#</th><th data-key="type">Type</th><th data-key="url">URL</th><th data-key="method">Method</th><th data-key="param">Param</th><th data-key="context">Context</th><th data-key="payload">Payload</th><th data-key="transform">Transform</th><th data-key="severity">Severity</th><th data-key="confidence">Confidence</th><th data-key="headless">Headless</th><th data-key="detail">Detail</th><th>PoC</th></tr></thead>
+<tbody>
 {rows_html}
+</tbody>
 </table>
+</div>
 {remediation_section}
 {coverage_section}
 <footer>Generated by XSSentinel. Use only on systems you are authorized to test.</footer>
+{interactive_js()}
 </body></html>"""
 
 
@@ -589,7 +590,10 @@ def build_sarif(findings: list, target: str, meta: dict) -> str:
                 "driver": {
                     "name": "XSSentinel",
                     "informationUri": "https://xssentinel.local",
-                    "version": "1.0",
+                    # Package version, not a hand-copied literal -- the SARIF
+                    # consumer keys tool.version for regression triage, and a
+                    # stale constant there quietly mislabels every export.
+                    "version": _tool_version(),
                     "rules": rules,
                 }
             },

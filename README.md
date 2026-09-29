@@ -10,6 +10,10 @@
 
 XSSentinel 的目标是**在开源/自研工具中做到检测维度最全、架构最干净、最易扩展**：它把通常被单点工具割裂的能力整合进一个流水线，并且每一层都可单独替换/增强。它在以下方面优于常见的单技术 XSS 脚本：
 
+<details>
+<summary><b>展开完整能力清单（36 项，含实现出处与标定历史）</b></summary>
+
+
 - **6 层检测流水线**：反射 → WAF 绕过 → DOM 污点 → 存储型 → 盲打(OOB) → 无头确认，覆盖大多数工具只做其中 1–2 项的盲区。
 - **上下文感知**：先判断输入反射在 HTML 元素 / 属性 / 脚本字符串 / 事件处理器 / `javascript:` URI / SVG / MathML / CDATA / 模板 `{{}}` / meta-refresh / HTML 注释等 **20+ 种上下文**，再选对应 payload。
 - **反射画像驱动（Phase 31）**：反射确认后自动发一枚"三明治探针"（DalFox 式），识别哪些特殊字符被过滤/编码，按需把最可能命中的 payload 与 WAF 绕过变形排到队首（ZAP 式字符反馈闭环），预算利用率更高——benchmark 上同等精度下总耗时下降约 10%。
@@ -46,6 +50,8 @@ XSSentinel 的目标是**在开源/自研工具中做到检测维度最全、架
 - **OpenAPI/Swagger 导入（Phase 89 P1）**：`--openapi spec.json` —— 文档化的 API 契约（OpenAPI 3.x / Swagger 2.0）直接作为扫描入口：每个 path+operation 展开为端点（含浏览器从未访问过的路由），路径模板 `{id}` 按 example/schema 链解析为样本 URL，form/JSON body 由 schema 构建，apiKey/bearer 安全声明转为请求头。与 HAR 互补：HAR 覆盖"实际流量"，OpenAPI 覆盖"声明面"。
 - **抗劣化分批基准跑（Phase 44，Phase 91 扩参）**：`benchmark/run_benchmark_batched.py [out.json] [batch] [port] [sync|async] [max_payloads] [max_transforms] [timeout]` —— `run_benchmark.py` 在单进程内跑完 98 用例，遇到会间歇掐 loopback 的安全软件（WinError 10053/10054）时必然卡在中途（实测 7 次 0 完成）；分批版按小批（默认 6）评估、**每批落盘**、支持中断续跑与失败重试。位置参数 4-7 可选（默认 sync/10/6/45），传 `sync 14 12 90` 即复现标定口径；续跑时预算变了会丢弃旧结果。**Windows 本机跑完整矩阵请用这个入口**（默认预算 6–7 分钟全矩阵，14/12/90 口径 sync 约 12 分钟、async 约 25 分钟）。
 - **多格式报告 + 并发**：HTML / JSON / CSV / **SARIF(2.1.0) / JUnit / Markdown** 六格式，SARIF 可直接接入 CI / 缺陷平台（如 GitHub code scanning、Defender、Jira）；多线程端点/参数并发扫描。
+
+</details>
 
 **只用于你被授权测试的系统。**
 

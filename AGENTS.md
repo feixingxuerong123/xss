@@ -89,7 +89,40 @@ XSS 漏洞自动化扫描器:双流水线架构(scanner Mixin 化 + advanced_lay
       `--headless` 进 sync-only 警告列表(两条 async 路径都加)。
 - [ ] 待决策:async 要不要补 headless 确认(方案 A 只警告 + 标注 evidence_class;
       方案 B 用 `asyncio.to_thread` 接上,带去重与并发上限)
+- [x] **181 前端 UI 统一重做(report_theme.py)**:四个 HTML 交付物(主报告 /
+      verify-fix / diff / benchmark)原本各持一份手写 CSS 拷贝,现统一接入
+      `xssentinel/core/report_theme.py` 单一设计系统:明暗双主题(令牌化,
+      `<head>` 内联 boot 脚本防闪白,无 JS 时回退 `prefers-color-scheme`)、
+      零外部依赖(离线/file:// 可开)。主报告新增:严重度筹码 + 类型下拉 +
+      文本搜索三重筛选、全列点击排序(severity/confidence/headless 按
+      data-val 权重)、payload/curl 一键复制、严重度分布条、SCAN INCOMPLETE /
+      BOUNDED READ 升级为独立告警条、表格容器内吸顶表头、响应式 + 打印样式
+      (打印自动展开全部 `<details>`)。**JS 全静态零数据插值**,报告自身的
+      XSS 契约(`href="javascript:` 禁现、载荷转义)原样保住;coverage.py 的
+      两处亮色硬编码内联样式改 `.cov-warn` 主题类(暗色下不再消失)。
+      报告相关 9 个测试文件 270 例全过(唯一断言更新:
+      test_ai_report 的 `<h1>XSSentinel` 字面量 → 匹配带品牌 SVG 的新 h1);
+      明暗双主题截图与筛选/排序/复制/切主题交互经 Playwright 实测,
+      样张在 `dev/_ui_probe/`。
 
+- [x] **182 交付就绪化(delivery-readiness pass)**:全维度评估后修掉的交付阻断项
+      与质量问题 —— ① **LICENSE(MIT)落地** + pyproject `license` 字段(此前
+      无许可证 = 法务硬阻断);② **版本单一源**:pyproject 改 `dynamic =
+      ["version"]` 从 `xssentinel.__version__` 解析(静态字面量,构建不触发
+      导入),SARIF driver 的硬编码 `"1.0"` 改 `_tool_version()` 惰性导入
+      (此前导出的 SARIF 工具版本永久脱节);③ **fresh-clone 可复现**:
+      report_theme.py / mxss_verify.py 正式入库(此前 mxss_verify 靠本地
+      info/exclude 游离于版本控制),.git/info/exclude 里的 `.workbuddy/`、
+      `benchmark/results/*_log.txt`、`/_*` 全部升入共享 .gitignore,dev/ 下
+      沿用 `_ 前缀不入库` 约定(`/dev/_*`);④ **仓库根减负**:两份中文过程
+      报告(288KB+32KB)git mv 进 `docs/archive/`;⑤ **CI**:benchmark-full 与
+      nightly-gate 补 `.[async]` extra(全量矩阵含 async 引擎,`. [dev]` 单装
+      会在新 runner 上缺 aiohttp);⑥ **依赖漂移**:esprima pyproject 侧对齐
+      `>=4.0`;⑦ README 开头 36 条特性墙折叠进 `<details>`,落地页恢复
+      "定位→安装→快速开始" 阅读动线。验证:干净 venv(独立 pip)editable
+      安装 + `xssentinel --help` 入口点 + SARIF 版本 1.0.0 + `--self-test`
+      端到端烟测全过。遗留决策:LICENSE 选 MIT 是默认值,若需 Apache-2.0/
+      专有许可请替换文件与 pyproject 字段。
 ## 环境配置
 
 - 依赖: requirements.txt;测试: `python tests/run_all_batched.py --quiet`(2026-09-25 实测

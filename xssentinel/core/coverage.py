@@ -561,13 +561,15 @@ class CoverageTracker:
         # endpoint answered and no layer actually completed.
         noresp = t.get("endpoints_no_response") or []
         failed_layers = {k: v for k, v in s["layer_failed"].items() if v}
+        # .cov-warn lives in the shared report theme (report_theme.py) so the
+        # warning tracks the light/dark tokens instead of a hardcoded
+        # light-only background that dissolves against the dark palette.
         warn_html = ""
         if noresp:
             shown = ", ".join(f"<code>{_html.escape(x)}</code>"
                               for x in noresp[:8])
             warn_html += (
-                '<div style="border-left:4px solid #f5a623;padding:8px 12px;'
-                'margin:10px 0;background:#fff8ec">'
+                '<div class="cov-warn">'
                 f'<strong>No response from {len(noresp)} endpoint(s):</strong> '
                 f'{shown}{" &hellip;" if len(noresp) > 8 else ""}'
                 ' &mdash; the percentages below were recorded without a single '
@@ -575,8 +577,7 @@ class CoverageTracker:
                 'not clean.</div>')
         if failed_layers:
             warn_html += (
-                '<div style="border-left:4px solid #f5a623;padding:8px 12px;'
-                'margin:10px 0;background:#fff8ec">'
+                '<div class="cov-warn">'
                 '<strong>Layers that reported failure:</strong> '
                 + ", ".join(f"{_html.escape(k)}&times;{v}"
                             for k, v in sorted(failed_layers.items()))

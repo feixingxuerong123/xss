@@ -495,6 +495,8 @@ def build_html(results: list[dict], source_report: str,
     is byte-for-byte the pre-Phase-176 output.
     """
     import html as _html
+    from .report_theme import (BRAND_SVG, base_css, interactive_js,
+                               theme_boot_script, theme_toggle_button)
     s = summarize(results)
 
     # Phase 176: the AI narrative section (already escaped inside report_ai).
@@ -531,62 +533,50 @@ def build_html(results: list[dict], source_report: str,
     rows_html = "\n".join(rows) if rows else \
         '<tr><td colspan="10">No findings to verify.</td></tr>'
     tgt = target or "(from report)"
+    # Verify-specific chrome on top of the shared theme: status accents as
+    # inset row markers + pill badges (same visual language as the main
+    # report's severity accents).
+    _extra_css = """
+ .st-fixed td:first-child{box-shadow:inset 3px 0 0 var(--sev-ok)}
+ .st-vuln td:first-child{box-shadow:inset 3px 0 0 var(--sev-high)}
+ .st-err td:first-child{box-shadow:inset 3px 0 0 var(--sev-med)}
+ .st-skip td:first-child{box-shadow:inset 3px 0 0 var(--border-strong)}
+ .status-badge{display:inline-block;padding:2px 10px;border-radius:999px;
+       font-size:11px;font-weight:600;color:#fff;letter-spacing:.3px}
+ .status-badge.st-fixed{background:var(--sev-ok)}
+ .status-badge.st-vuln{background:var(--sev-high)}
+ .status-badge.st-err{background:var(--sev-med)}
+ .status-badge.st-skip{background:var(--text-faint)}
+"""
     return f"""<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XSSentinel Verify-Fix Report</title>
-<style>
- body{{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#1f2430}}
- header{{background:#1f2430;color:#fff;padding:20px 28px}}
- header h1{{margin:0;font-size:20px}}
- .meta{{color:#9aa3b2;font-size:13px;margin-top:4px}}
- .summary{{display:flex;gap:14px;padding:18px 28px;flex-wrap:wrap}}
- .card{{background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);min-width:120px}}
- .card .n{{font-size:26px;font-weight:700}}
- .card.fixed .n{{color:#3bb968}} .card.vuln .n{{color:#e5484d}}
- .card.err .n{{color:#f5a623}} .card.skip .n{{color:#9aa3b2}}
- table{{width:96%;margin:0 auto 30px;border-collapse:collapse;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
- th,td{{padding:9px 10px;border-bottom:1px solid #eef0f4;font-size:12px;text-align:left;vertical-align:top}}
- th{{background:#f0f2f7;position:sticky;top:0}}
- code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
- .st-fixed{{border-left:4px solid #3bb968}}
- .st-vuln{{border-left:4px solid #e5484d}}
- .st-err{{border-left:4px solid #f5a623}}
- .st-skip{{border-left:4px solid #9aa3b2}}
- .status-badge{{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#fff}}
- .status-badge.st-fixed{{background:#3bb968}}
- .status-badge.st-vuln{{background:#e5484d}}
- .status-badge.st-err{{background:#f5a623}}
- .status-badge.st-skip{{background:#9aa3b2}}
- .ai-report{{padding:0 28px 24px}}
- .ai-report h2{{font-size:16px;margin:0 0 10px}}
- .ai-report h3{{font-size:14px;margin:16px 0 6px}}
- .ai-report h4{{font-size:13px;margin:12px 0 5px}}
- .ai-report p{{font-size:13px;color:#3a4150;line-height:1.65;margin:8px 0}}
- .ai-report ul,.ai-report ol{{font-size:13px;color:#3a4150;padding-left:22px;margin:8px 0}}
- .ai-report li{{margin:3px 0}}
- .ai-report blockquote{{margin:8px 0;padding:8px 12px;background:#f0f2f7;border-left:3px solid #9aa3b2;color:#5b6473;font-size:12px}}
- .ai-report code{{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
- .ai-report table.ai-table{{width:100%;margin:10px 0;box-shadow:none;border-radius:8px;overflow:hidden}}
- .ai-report table.ai-table td{{padding:6px 10px;border-bottom:1px solid #eef0f4;font-size:12px;background:#fff}}
- .ai-report.degraded{{border-left:4px solid #f5a623}}
- footer{{padding:14px 28px;color:#9aa3b2;font-size:12px}}
-</style></head>
+{theme_boot_script()}
+<style>{base_css(_extra_css)}</style>
+</head>
 <body>
-<header><h1>XSSentinel — Verify-Fix Report</h1>
+<header><h1>{BRAND_SVG}XSSentinel &mdash; Verify-Fix Report</h1>
+<div class="head-tools">{theme_toggle_button()}</div>
 <div class="meta">Source: {_html.escape(source_report)} · Target: {_html.escape(tgt)} · Generated: {s['generated']}</div>
 </header>
 <div class="summary">
-  <div class="card fixed"><div class="n">{c['fixed']}</div><div>Fixed</div></div>
-  <div class="card vuln"><div class="n">{c['still_vuln']}</div><div>Still Vulnerable</div></div>
-  <div class="card err"><div class="n">{c['error']}</div><div>Error</div></div>
-  <div class="card skip"><div class="n">{c['skipped']}</div><div>Skipped</div></div>
+  <div class="card fixed"><div class="n">{c['fixed']}</div><div class="lbl">Fixed</div></div>
+  <div class="card vuln"><div class="n">{c['still_vuln']}</div><div class="lbl">Still Vulnerable</div></div>
+  <div class="card err"><div class="n">{c['error']}</div><div class="lbl">Error</div></div>
+  <div class="card skip"><div class="n">{c['skipped']}</div><div class="lbl">Skipped</div></div>
 </div>
 {ai_section}
+<div class="table-wrap">
 <table>
-<tr><th>#</th><th>Status</th><th>Type</th><th>URL</th><th>Method</th><th>Param</th><th>Payload</th><th>Severity</th><th>Detail</th><th>Checked At</th></tr>
+<thead><tr><th>#</th><th>Status</th><th>Type</th><th>URL</th><th>Method</th><th>Param</th><th>Payload</th><th>Severity</th><th>Detail</th><th>Checked At</th></tr></thead>
+<tbody>
 {rows_html}
+</tbody>
 </table>
+</div>
 <footer>Generated by XSSentinel verify-fix. Replays original payloads to confirm remediation.</footer>
+{interactive_js()}
 </body></html>"""
 
 

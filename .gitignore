@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+build/
+dist/
 .venv/
 venv/
 
@@ -67,3 +69,14 @@ benchmark/results/regression_logs/
 
 # LLM provider config carries API keys -- template is tracked instead
 xssentinel/data/llm_providers.json
+
+# dev/ 沿用根目录约定:_ 前缀 = 探针/日志/产物,不入库。
+# (已追踪的 dev/_r4_construct_probe.py 等不受影响;CI 仍可引用。)
+/dev/_*
+
+# 跑分产物里的机器相关/证据日志,不入库(历史追踪文件不受影响)
+benchmark/results/*_log.txt
+benchmark/results/INVALID_*
+
+# 本地 AI 工具状态(此前只写在 .git/info/exclude,换机即失效,现共享化)
+.workbuddy/

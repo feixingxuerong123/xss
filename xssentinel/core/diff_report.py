@@ -197,65 +197,57 @@ def diff_report_html(baseline: list[dict],
     ci_verdict = "PASS" if (s["new"] == 0 and s["regressed"] == 0) else "FAIL"
     ci_class = "pass" if ci_verdict == "PASS" else "fail"
 
+    # Diff-specific chrome on top of the shared theme: regressed row
+    # highlight + dashed empty-state panel.
+    from .report_theme import (BRAND_SVG, base_css, interactive_js,
+                               theme_boot_script, theme_toggle_button)
+    _extra_css = """
+ .regressed-detail td{background:var(--sev-med-weak)}
+ .empty{padding:22px;text-align:center;color:var(--text-faint);
+        background:var(--surface);border:1px dashed var(--border-strong);
+        border-radius:10px;font-size:13px}
+ .table-wrap{max-height:none}
+"""
     return f"""<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>XSSentinel Diff Report — {target or 'scan'}</title>
-<style>
- body {{font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f6f7fb;color:#1f2430}}
- header {{background:#1f2430;color:#fff;padding:20px 28px}}
- header h1 {{margin:0;font-size:20px}}
- .meta {{color:#9aa3b2;font-size:13px;margin-top:4px}}
- .verdict {{display:inline-block;padding:6px 14px;border-radius:6px;font-weight:700;font-size:14px;margin-left:12px}}
- .verdict.pass {{background:#3bb273;color:#fff}}
- .verdict.fail {{background:#e5484d;color:#fff}}
- .summary {{display:flex;gap:14px;padding:18px 28px;flex-wrap:wrap}}
- .card {{background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);min-width:120px}}
- .card .n {{font-size:26px;font-weight:700}}
- .card.new .n {{color:#e5484d}}
- .card.fixed .n {{color:#3bb273}}
- .card.regressed .n {{color:#f5a623}}
- .card.unchanged .n {{color:#9aa3b2}}
- section {{padding:0 28px 24px}}
- section h2 {{font-size:16px;margin:0 0 10px}}
- table {{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);border-radius:8px;overflow:hidden}}
- th,td {{padding:9px 10px;border-bottom:1px solid #eef0f4;font-size:12px;text-align:left;vertical-align:top}}
- th {{background:#f0f2f7}}
- code {{background:#f3f4f8;padding:2px 4px;border-radius:4px;word-break:break-all}}
- .regressed-detail {{background:#fff8e1}}
- .empty {{padding:20px;text-align:center;color:#9aa3b2}}
- footer {{padding:14px 28px;color:#9aa3b2;font-size:12px}}
-</style></head>
+{theme_boot_script()}
+<style>{base_css(_extra_css)}</style>
+</head>
 <body>
 <header>
-  <h1>XSSentinel Diff Report
+  <h1>{BRAND_SVG}XSSentinel &mdash; Diff Report
     <span class="verdict {ci_class}">CI: {ci_verdict}</span>
   </h1>
+  <div class="head-tools">{theme_toggle_button()}</div>
   <div class="meta">Target: {_esc(target)} · Baseline: {_esc(baseline_label)} → Current: {_esc(current_label)}</div>
 </header>
 <div class="summary">
-  <div class="card new"><div class="n">{s['new']}</div><div>New</div></div>
-  <div class="card regressed"><div class="n">{s['regressed']}</div><div>Regressed</div></div>
-  <div class="card fixed"><div class="n">{s['fixed']}</div><div>Fixed</div></div>
-  <div class="card unchanged"><div class="n">{s['unchanged']}</div><div>Unchanged</div></div>
+  <div class="card new"><div class="n">{s['new']}</div><div class="lbl">New</div></div>
+  <div class="card regressed"><div class="n">{s['regressed']}</div><div class="lbl">Regressed</div></div>
+  <div class="card fixed"><div class="n">{s['fixed']}</div><div class="lbl">Fixed</div></div>
+  <div class="card unchanged"><div class="n">{s['unchanged']}</div><div class="lbl">Unchanged</div></div>
 </div>
 
 <section>
   <h2>New Findings ({s['new']})</h2>
-  {'<table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + new_rows + '</tbody></table>' if new_rows else '<div class="empty">No new findings — no new XSS issues introduced since the baseline.</div>'}
+  {'<div class="table-wrap"><table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + new_rows + '</tbody></table></div>' if new_rows else '<div class="empty">No new findings — no new XSS issues introduced since the baseline.</div>'}
 </section>
 
 <section>
   <h2>Regressed Findings ({s['regressed']})</h2>
-  {'<table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + reg_rows + '</tbody></table>' if reg_rows else '<div class="empty">No regressions — no existing issue got worse.</div>'}
+  {'<div class="table-wrap"><table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + reg_rows + '</tbody></table></div>' if reg_rows else '<div class="empty">No regressions — no existing issue got worse.</div>'}
 </section>
 
 <section>
   <h2>Fixed Findings ({s['fixed']})</h2>
-  {'<table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + fixed_rows + '</tbody></table>' if fixed_rows else '<div class="empty">No fixes — no baseline issue was resolved in this run.</div>'}
+  {'<div class="table-wrap"><table><thead><tr><th>Type</th><th>URL</th><th>Param</th><th>Context</th><th>Severity</th><th>Payload</th></tr></thead><tbody>' + fixed_rows + '</tbody></table></div>' if fixed_rows else '<div class="empty">No fixes — no baseline issue was resolved in this run.</div>'}
 </section>
 
 <footer>Generated by XSSentinel Diff Report. CI verdict is PASS only when
 both new and regressed counts are zero.</footer>
+{interactive_js()}
 </body></html>"""
 
 

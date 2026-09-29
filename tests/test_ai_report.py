@@ -549,7 +549,9 @@ def test_html_report_without_ai_meta_is_unchanged():
     # The stylesheet always defines .ai-report; what must be absent is the
     # rendered section itself.
     assert '<section class="ai-report' not in base
-    assert "<h1>XSSentinel" in base
+    # The h1 opens with the inline brand SVG, then the report title (the
+    # shared report_theme header used by every HTML deliverable).
+    assert "<h1>" in base and "XSSentinel &mdash; XSS Detection Report" in base
 
 
 def test_markdown_report_includes_the_ai_section_before_the_table():

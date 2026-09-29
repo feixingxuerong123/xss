@@ -4,9 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xssentinel"
-version = "1.0.0"
+# Single source of truth is xssentinel/__init__.py; setuptools resolves the
+# attr statically (plain literal assignment), so building never imports the
+# package (and never pulls its dependencies).
+dynamic = ["version"]
 description = "Comprehensive, multi-layer XSS detection framework (reflected + context-aware + WAF-evasion + DOM taint + optional headless confirmation)"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.9"
 dependencies = ["requests>=2.28", "beautifulsoup4>=4.11", "lxml>=4.9"]
 
@@ -14,7 +18,7 @@ dependencies = ["requests>=2.28", "beautifulsoup4>=4.11", "lxml>=4.9"]
 async = ["aiohttp>=3.9"]
 headless = ["playwright>=1.40"]
 api = ["flask>=2.0"]
-ast = ["esprima>=3.0"]  # Phase 43: JS AST data-flow channel (regex fallback when absent)
+ast = ["esprima>=4.0"]  # Phase 43: JS AST data-flow channel (regex fallback when absent)
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -35,6 +39,12 @@ xssentinel = "xssentinel.__main__:main"
 
 [tool.setuptools]
 packages = ["xssentinel", "xssentinel.core", "xssentinel.core.layers", "xssentinel.api"]
+
+[tool.setuptools.dynamic]
+# Where the dynamic version above resolves from.  A plain literal assignment
+# means setuptools reads it via AST -- the package (and its deps) is never
+# imported at build time.
+version = { attr = "xssentinel.__version__" }
 
 [tool.setuptools.package-data]
 xssentinel = ["data/*.json"]
